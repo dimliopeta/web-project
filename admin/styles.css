@@ -1,0 +1,32 @@
+@font-face {
+    font-family: Montserrat;
+    src: url(Montserrat-VariableFont_wght.ttf);
+  }
+  
+body {
+    background-image: url("maybeloginbackground.png");
+    background-repeat: no-repeat;
+    background-position: right top;
+    background-size: cover;
+}
+div{
+    text-align: center;
+    background-color: white;
+    opacity: 0.8;
+    padding: 50px;
+    margin: 20px;
+}
+h1 {
+    font-family: Montserrat;
+    text-align: center;
+}
+p{
+    font-family: Montserrat;
+}
+input[type=text] {
+    font-family: Montserrat;
+}
+label {
+    font-family: Montserrat;
+    font-weight: bold;
+}
