@@ -9,12 +9,17 @@ body {
     background-position: right top;
     background-size: cover;
 }
-div{
+
+.box{
+    position:relative;
+    left:42%;
     text-align: center;
     background-color: white;
     opacity: 0.8;
-    padding: 50px;
-    margin: 20px;
+    width: 200px;
+    height: 100px;
+    padding: 10px;
+    margin: 10px;
 }
 h1 {
     font-family: Montserrat;
