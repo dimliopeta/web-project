@@ -55,11 +55,6 @@ app.post('/newthesis', (req, res) => {
 
     const { title, summary } = req.body;
 
-    // Έλεγχος αν τα πεδία είναι κενά
-    if (!title || !summary) {
-        return res.status(400).json({ success: false, message: 'Τίτλος και περιγραφή απαιτούνται' });
-    }
-
     const query = `INSERT INTO THESIS (title, summary) VALUES (?, ?);`;
 
     db.query(query, [title, summary], (err, result) => {

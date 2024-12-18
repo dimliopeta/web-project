@@ -1,3 +1,4 @@
+
 document.getElementById('thesisForm').addEventListener('submit', function (e) {
     e.preventDefault(); // Αποτροπή της παραδοσιακής υποβολής φόρμας
 
@@ -48,7 +49,7 @@ function loadTheses() {
                 thesesList.innerHTML = ''; // Καθαρίζουμε το υπάρχον περιεχόμενο
 
                 data.theses.forEach((thesis, index) => {
-                    let status = ""; // Δηλώνουμε τη μεταβλητή status εκτός του switch
+                    let status = ""; // Δημιουργούμε τη μεταβλητή status εκτός του switch
 
                     switch (thesis.status) {
                         case 'active':
