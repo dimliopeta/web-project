@@ -10,12 +10,12 @@ CREATE TABLE `Students` (
     `street` VARCHAR(100) NULL,
     `number` VARCHAR(10) NULL,
     `city` VARCHAR(50) NULL,
-    `postal_code` VARCHAR(10) NULL,
+    `postcode` VARCHAR(10) NULL,
     `father_name` VARCHAR(50) NULL,
-    `landline_phone` VARCHAR(20) NULL,
-    `mobile_phone` VARCHAR(20) NULL,
-    `email` VARCHAR(100) NULL UNIQUE, 
-    `password` VARCHAR(8) NULL
+    `landline_telephone` VARCHAR(20) NULL,
+    `mobile_telephone` VARCHAR(20) NULL,
+    `email` VARCHAR(100) NULL UNIQUE,
+    `password` VARCHAR(20) NULL
 );
 
 CREATE TABLE `Professors`(
@@ -24,11 +24,11 @@ CREATE TABLE `Professors`(
     `surname` VARCHAR(50) NULL,
     `email` VARCHAR(100) NULL UNIQUE,
     `topic` VARCHAR(200) NULL,
-    `landline_phone` VARCHAR(20) NULL,
-    `mobile_phone` VARCHAR(20) NULL,
+    `landline` VARCHAR(20) NULL,
+    `mobile` VARCHAR(20) NULL,
     `department` VARCHAR(100) NULL,
     `university` VARCHAR(100) NULL,
-    `password` VARCHAR(8) NULL
+    `password` VARCHAR(20) NULL
 );
 
 CREATE TABLE `Thesis`(
