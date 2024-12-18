@@ -15,7 +15,10 @@ db.query('SELECT 1', (err, results) => {
 });
 
 app.use(express.static('public'));
+app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
+
 
 // Login endpoint
 app.post('/login', (req, res) => {
@@ -44,5 +47,45 @@ app.post('/login', (req, res) => {
         }
     });
 });
+
+//new thesis endpoint
+app.post('/newthesis', (req, res) => {
+    console.log('Request received:', req.headers);
+    console.log('Body raw:', req.body);
+
+    const { title, summary } = req.body;
+
+    // Έλεγχος αν τα πεδία είναι κενά
+    if (!title || !summary) {
+        return res.status(400).json({ success: false, message: 'Τίτλος και περιγραφή απαιτούνται' });
+    }
+
+    const query = `INSERT INTO THESIS (title, summary) VALUES (?, ?);`;
+
+    db.query(query, [title, summary], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την αποθήκευση της διπλωματικής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+
+        console.log('Thesis created successfully!');
+        return res.status(200).json({ success: true, message: 'Η διπλωματική δημιουργήθηκε επιτυχώς!' });
+    });
+});
+
+app.get('/theses', (req, res) => {
+    const query = `SELECT * FROM THESIS;`;
+
+    db.query(query, (err, results) => { // Αφαιρούμε τις παραμέτρους
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+
+        res.status(200).json({ success: true, theses: results }); // Χρήση του σωστού results
+    });
+});
+
+
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

@@ -1,43 +1,78 @@
-// Διαχείριση φόρμας Δημιουργίας Νέου Θέματος
-const createThesisForm = document.getElementById('createThesisForm');
+document.getElementById('thesisForm').addEventListener('submit', function (e) {
+    e.preventDefault(); // Αποτροπή της παραδοσιακής υποβολής φόρμας
 
-createThesisForm.addEventListener('submit', function (event) {
-    event.preventDefault(); // Αποτρέπουμε το προεπιλεγμένο refresh της σελίδας
+    const title = document.getElementById('title').value;
+    const summary = document.getElementById('summary').value;
 
-    // Παίρνουμε τις τιμές των πεδίων
-    const title = document.getElementById('thesisTitle').value;
-    const description = document.getElementById('thesisDescription').value;
+    // Δημιουργία ενός AJAX request με Fetch API
+    fetch('/newthesis', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json' // Ορίζουμε το περιεχόμενο ως JSON
+        },
+        body: JSON.stringify({
+            title: title,
+            summary: summary
+        })
+    })
+    .then(response => response.json()) // Μετατροπή της απάντησης σε JSON
+    .then(data => {
+        if (data.success) {
+            console.log('Success:', data);
+            alert(data.message); // Εμφάνιση μηνύματος επιτυχίας
+            
+            // Καθαρίζουμε τη φόρμα
+            document.getElementById('title').value = '';
+            document.getElementById('summary').value = '';
 
-    // Εμφανίζουμε ένα alert
-    alert(`Νέο Θέμα Δημιουργήθηκε:\nΤίτλος: ${title}\nΠεριγραφή: ${description}`);
-
-    // Προσθέτουμε δυναμικά το θέμα στη λίστα
-    const list = document.querySelector('#theses ul');
-    const newListItem = document.createElement('li');
-    newListItem.className = 'list-group-item';
-    newListItem.textContent = `${title} - ${description}`;
-    list.appendChild(newListItem);
-
-    // Καθαρίζουμε τη φόρμα
-    createThesisForm.reset();
-});
-
-// Δυναμική Εναλλαγή Περιεχομένου (Tabs από Sidebar)
-const navLinks = document.querySelectorAll('.nav-link');
-
-navLinks.forEach(link => {
-    link.addEventListener('click', function (event) {
-        event.preventDefault(); // Αποτρέπουμε τη μετάβαση σε νέα σελίδα
-
-        // Κρύβουμε όλα τα sections
-        const sections = document.querySelectorAll('.main-content > div');
-        sections.forEach(section => section.style.display = 'none');
-
-        // Εμφανίζουμε μόνο το αντίστοιχο section
-        const sectionId = this.getAttribute('data-section');
-        document.getElementById(sectionId).style.display = 'block';
+            // Επαναφόρτωση της λίστας διπλωματικών
+            loadTheses();
+        } else {
+            alert('Σφάλμα: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Σφάλμα: Κάτι πήγε στραβά!');
     });
 });
 
-// Προεπιλεγμένο section: Πίνακας Ελέγχου
-document.getElementById('dashboard').style.display = 'block';
+
+// Συνάρτηση για φόρτωση των διπλωματικών
+function loadTheses() {
+    fetch('/theses')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const thesesList = document.querySelector('#theses ul');
+                thesesList.innerHTML = ''; // Καθαρίζουμε το υπάρχον περιεχόμενο
+
+                data.theses.forEach((thesis, index) => {
+                    let status = ""; // Δηλώνουμε τη μεταβλητή status εκτός του switch
+
+                    switch (thesis.status) {
+                        case 'active':
+                            status = "Ενεργή";
+                            break; 
+                        case 'to-be-reviewed':
+                            status = "Υπό Εξέταση";
+                            break; 
+                        case 'completed':
+                            status = "Περατωμένη";
+                            break;
+                        default:
+                            status = "Υπό Ανάθεση";
+                    }
+
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+                    listItem.textContent = `Διπλωματική ${index + 1}: ${thesis.title} - ${thesis.summary} - Κατάσταση: ${status}`;
+                    thesesList.appendChild(listItem);
+                });
+            }
+        })
+        .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
+}
+
+
+document.addEventListener('DOMContentLoaded', loadTheses);
