@@ -31,3 +31,8 @@ CREATE TABLE `Professors`(
     `password` VARCHAR(8) NULL
 );
 
+CREATE TABLE `Thesis`(
+    `title` VARCHAR(200) NULL,
+    `summary` TEXT NULL,
+    `status` ENUM('assigned','active','to-be-reviewed','completed') DEFAULT 'assigned' 
+);
