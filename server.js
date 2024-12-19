@@ -4,6 +4,7 @@ const path = require('path');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
 
 
 const app = express();
@@ -145,17 +146,45 @@ app.post('/api/theses/new', authenticateJWT, (req, res) => {
 
 
 // Προστατευμένα routes για καθηγητές και φοιτητές
-    // Teacher Page
+    // Σελίδα για καθηγητές
 app.get('/teacher', authenticateJWT, authorizeRole('professor'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'teacher.html'));
 });
 
-    // Student Page
+    // Σελίδα για φοιτητές
 app.get('/student', authenticateJWT, authorizeRole('student'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'student.html'));
 });
 
+/*
+// Endpoint για την ανάρτηση PDF αρχείων με χρήση multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Αποθήκευση στο φάκελο uploads
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname)); // Unique filename
+    }
+});
 
+// Φίλτρο για την ανάρτηση μόνο PDF αρχείων και όχι άλλων τύπων
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+        cb(null, true); // Αποδοχή
+    } else {
+        cb(new Error('Only PDF files are allowed'), false); // Άρνηση
+    }
+};
 
+// Initialize multer
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // Max file size: 5MB
+    }
+});
+*/
 // Εκκίνηση του server
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
