@@ -37,7 +37,7 @@ function insertData() {
                     professor.mobile,
                     professor.department,
                     professor.university,
-                    professor.password
+                    'defaultpassword' // Προσωρινός κωδικός
                 ], (insertErr) => {
                     if (insertErr) {
                         console.error('Error inserting professor:', insertErr);

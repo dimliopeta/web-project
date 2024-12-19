@@ -3,10 +3,13 @@ const db = require('./config');
 const path = require('path');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+
 
 const app = express();
 const PORT = 3000;
 const SECRET_KEY = 'your-secret-key';
+
 
 // Έλεγχος σύνδεσης με τη βάση δεδομένων
 db.query('SELECT 1', (err, results) => {
@@ -18,23 +21,28 @@ db.query('SELECT 1', (err, results) => {
     }
 });
 
-// Middleware για στατικά αρχεία και σώμα αιτήματος
+
+// Ορισμός του index file και των public αρχειων
 app.use(express.static('public', {
-    index: 'index.html' // Ορισμός του index για το static
+index: 'index.html' // Ορισμός του index για το static
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // Middleware για έλεγχο JWT
+app.use(cookieParser());
 const authenticateJWT = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1]; // Παίρνει το token από το header
+    const token = req.cookies?.token ||  req.headers.authorization?.split(' ')[1]; // Παίρνει το token από το header ή απο το cookie. Στη περιπτωση μας, απο το cookie. 
 
     if (!token) {
+        console.log('No token found.');
         return res.status(401).send('Access denied');
     }
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) {
+            console.log('Token not verified.');
             return res.status(403).send('Invalid token');
         }
 
@@ -43,7 +51,16 @@ const authenticateJWT = (req, res, next) => {
     });
 };
 
-// Login endpoint
+const authorizeRole = (requiredRole) => {
+    return (req, res, next) => {
+        if (req.user.role !== requiredRole) {
+            return res.status(403).send('Access denied');
+        }
+        next();
+    };
+};
+
+
 // Login endpoint
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -90,6 +107,7 @@ app.post('/login', (req, res) => {
     });
 });
 
+
 // Προστατευμένα endpoints για διπλωματικές
 app.get('/api/theses', authenticateJWT, (req, res) => {
     console.log(`User ID: ${req.user.userId}, Role: ${req.user.role}`);
@@ -125,20 +143,19 @@ app.post('/api/theses/new', authenticateJWT, (req, res) => {
     });
 });
 
+
 // Προστατευμένα routes για καθηγητές και φοιτητές
-app.get('/teacher', authenticateJWT, (req, res) => {
-    if (req.user.role !== 'professor') {
-        return res.status(403).send('Access denied');
-    }
-    res.sendFile(path.join(__dirname, 'public', 'teacher.html'));
+    // Teacher Page
+app.get('/teacher', authenticateJWT, authorizeRole('professor'), (req, res) => {
+    res.sendFile(path.join(__dirname, 'protected_views', 'teacher.html'));
 });
 
-app.get('/student', authenticateJWT, (req, res) => {
-    if (req.user.role !== 'student') {
-        return res.status(403).send('Access denied');
-    }
-    res.sendFile(path.join(__dirname, 'public', 'student.html'));
+    // Student Page
+app.get('/student', authenticateJWT, authorizeRole('student'), (req, res) => {
+    res.sendFile(path.join(__dirname, 'protected_views', 'student.html'));
 });
+
+
 
 // Εκκίνηση του server
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
