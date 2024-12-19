@@ -32,7 +32,12 @@ CREATE TABLE `Professors`(
 );
 
 CREATE TABLE `Thesis`(
+    `theme_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `teacher_id` INT NULL,
     `title` VARCHAR(200) NULL,
     `summary` TEXT NULL,
     `status` ENUM('assigned','active','to-be-reviewed','completed') DEFAULT 'assigned' 
 );
+
+ALTER TABLE
+    `Thesis` ADD CONSTRAINT `thesis_teacher_id_foreign` FOREIGN KEY(`teacher_id`) REFERENCES `Professors`(`id`);

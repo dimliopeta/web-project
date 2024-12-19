@@ -72,9 +72,9 @@ app.post('/login', (req, res) => {
 
     const query = `
         SELECT * FROM (
-            SELECT email, password, 'student' AS role FROM students
+            SELECT id, email, password, 'student' AS role FROM students
             UNION ALL
-            SELECT email, password, 'professor' AS role FROM professors
+            SELECT id, email, password, 'professor' AS role FROM professors
         ) AS users
         WHERE email = ? AND password = ?;
     `;
@@ -88,7 +88,7 @@ app.post('/login', (req, res) => {
         if (results.length > 0) {
             const user = results[0];
             const token = jwt.sign(
-                { userId: user.email, role: user.role },
+                { userId: user.id, role: user.role },
                 SECRET_KEY,
                 { expiresIn: '1h' } // Το token λήγει σε 1 ώρα
             );
@@ -111,10 +111,10 @@ app.post('/login', (req, res) => {
 
 // Προστατευμένα endpoints για διπλωματικές
 app.get('/api/theses', authenticateJWT, (req, res) => {
-    console.log(`User ID: ${req.user.userId}, Role: ${req.user.role}`);
-    const query = `SELECT * FROM THESIS;`;
+    const professorId = req.user.userId;
+    const query = `SELECT * FROM THESIS WHERE teacher_id = ?;`;
 
-    db.query(query, (err, results) => {
+    db.query(query, [professorId], (err, results) => {
         if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
@@ -126,12 +126,13 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
 
 app.post('/api/theses/new', authenticateJWT, (req, res) => {
     const { title, summary } = req.body;
+    const professorId = req.user.userId;
 
     if (!title || !summary) {
         return res.status(400).json({ success: false, message: 'Title and summary are required' });
     }
 
-    const query = `INSERT INTO THESIS (title, summary) VALUES (?, ?);`;
+    const query = `INSERT INTO THESIS (teacher_id, title, summary) VALUES (?, ?, ?);`;
 
     db.query(query, [title, summary], (err, result) => {
         if (err) {
