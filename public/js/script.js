@@ -39,6 +39,7 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
     });
 });
 
+
 // Συνάρτηση για φόρτωση των διπλωματικών
 function loadTheses() {
     const token = localStorage.getItem('token'); // Ανάκτηση του token από το localStorage

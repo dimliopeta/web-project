@@ -134,7 +134,7 @@ app.post('/api/theses/new', authenticateJWT, (req, res) => {
 
     const query = `INSERT INTO THESIS (teacher_id, title, summary) VALUES (?, ?, ?);`;
 
-    db.query(query, [title, summary], (err, result) => {
+    db.query(query, [professorId, title, summary], (err, result) => {
         if (err) {
             console.error('Σφάλμα κατά την αποθήκευση της διπλωματικής:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
@@ -157,7 +157,7 @@ app.get('/student', authenticateJWT, authorizeRole('student'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'student.html'));
 });
 
-/*
+
 // Endpoint για την ανάρτηση PDF αρχείων με χρήση multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -178,14 +178,33 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Initialize multer
+// Αρχικοποίηση multer
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024 // Max file size: 5MB
+        fileSize: 25 * 1024 * 1024 // Μέγιστο μέγεθος αρχείου: 25MB
     }
 });
-*/
+
+//Endpoint ανάρτησης
+app.post('/upload', upload.single('pdf'), (req, res) => {
+    // Check if a file was uploaded
+    if (!req.file) {
+        return res.status(400).send('No file uploaded or invalid file type');
+    }
+
+    // Respond with success message and file information
+    res.status(200).json({
+        message: 'File uploaded successfully!',
+        file: {
+            filename: req.file.filename,
+            path: req.file.path
+        }
+    });
+});
+
+
+
 // Εκκίνηση του server
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
