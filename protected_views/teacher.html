@@ -95,31 +95,38 @@
             <ul class="list-group mt-3"></ul>
         </div>
 
-        <!-- Modal for Create Thesis -->
-        <div class="modal fade" id="createThesisModal" tabindex="-1" aria-labelledby="createThesisModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createThesisModalLabel">Δημιουργία Νέου Θέματος</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+ 
+<!-- Modal for Create Thesis -->
+<div class="modal fade" id="createThesisModal" tabindex="-1" aria-labelledby="createThesisModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createThesisModalLabel">Δημιουργία Νέου Θέματος</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="thesisForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Τίτλος</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
                     </div>
-                    <div class="modal-body">
-                        <form id="thesisForm">
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Τίτλος</label>
-                                <input type="text" class="form-control" id="title" name="title" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="summary" class="form-label">Περιγραφή</label>
-                                <textarea class="form-control" id="summary" name="summary" rows="3" required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Υποβολή</button>
-                        </form>
-                                                
+                    <div class="mb-3">
+                        <label for="summary" class="form-label">Περιγραφή</label>
+                        <textarea class="form-control" id="summary" name="summary" rows="3" required></textarea>
                     </div>
-                </div>
+                    <div class="mb-3 d-flex align-items-center">
+                        <div class="me-3">
+                            <label for="pdf" class="form-label visually-hidden">Επισύναψη Αρχείου PDF</label>
+                            <input type="file" class="form-control" id="pdf" name="pdf" accept="application/pdf">
+                        </div>
+                        <span class="text-muted">Επισύναψη Αρχείου PDF</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Υποβολή</button>
+                </form>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Statistics -->
         <div id="stats" class="mb-4 pt-4">
@@ -128,19 +135,23 @@
         </div>
     </div>
 
-
-    <div class="container mt-5">
-        <h2 class="mb-4">Upload PDF File</h2>
-        <form id="uploadForm" method="POST" action="/upload" enctype="multipart/form-data">
+<!--Upload-->
+<div class="container mt-5">
+    <h2 class="mb-4">Upload PDF File</h2>
+    <form id="uploadForm" method="POST" action="/upload" enctype="multipart/form-data">
+        <div class="mb-3 d-flex align-items-center">
             <!-- File Input -->
-            <div class="mb-3">
+            <div class="me-3">
                 <label for="inputPDFFile" class="form-label">Select a PDF file</label>
                 <input type="file" class="form-control" id="inputPDFFile" name="pdf" accept="application/pdf" required>
             </div>
             <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
+
+
       
 
     <!-- Bootstrap JS -->

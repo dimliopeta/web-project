@@ -211,14 +211,19 @@ app.post('/logout', authenticateJWT, (req, res) => {
 
 
 
+
 // Endpoint για την ανάρτηση PDF αρχείων με χρήση multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/'); // Αποθήκευση στο φάκελο uploads
     },
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname)); // Unique filename
+        // Ensure user is authenticated and has a name
+        const professorId = req.user?.userId || 'Unknown-User'; // Use 'Unknown-User' if not found
+        const randomNumber = Math.round(Math.random() * 1E9); // Generate a random number
+        const fileName = `${professorId} - ${randomNumber}.pdf`; // Format the filename
+
+        cb(null, fileName); // Save the file with the formatted name
     }
 });
 
@@ -241,13 +246,11 @@ const upload = multer({
 });
 
 //Endpoint ανάρτησης
-app.post('/upload', upload.single('pdf'), (req, res) => {
-    // Check if a file was uploaded
+app.post('/upload', authenticateJWT, upload.single('pdf'), (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded or invalid file type');
     }
 
-    // Respond with success message and file information
     res.status(200).json({
         message: 'File uploaded successfully!',
         file: {

@@ -36,7 +36,7 @@ CREATE TABLE `Thesis`(
     `teacher_id` INT NULL,
     `title` VARCHAR(200) NULL,
     `summary` TEXT NULL,
-    `status` ENUM('assigned','active','to-be-reviewed','completed') DEFAULT 'assigned' 
+    `status` ENUM('assigned','active','to-be-reviewed','completed') DEFAULT 'assigned', 
 	`pdf_path` VARCHAR(200) NULL
 );
 
