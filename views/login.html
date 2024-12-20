@@ -13,7 +13,6 @@
 </head>
 <body>
     <!--- navbar --->
-    <!--- navbar --->
     <nav class="navbar navbar-expand-lg navbar-light bg-light ms-2">
         <a class="navbar-brand" href="index.html">
             <img src="images/DemIcon.png" alt="Democritus" width="30" height="30"> Democritus
@@ -63,6 +62,18 @@
         </div>
         </section>
     </div>
+    <script>
+        // Ελέγχει αν ο χρήστης έχει ήδη συνδεθεί
+        fetch('/api/check-auth', { credentials: 'include' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isAuthenticated) {
+                    // Ανακατεύθυνση αν είναι συνδεδεμένος
+                    window.location.href = data.role === 'professor' ? '/teacher' : '/student';
+                }
+            })
+            .catch(err => console.error('Authentication check failed:', err));
+    </script>
     
 
 

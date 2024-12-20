@@ -61,23 +61,47 @@ const authorizeRole = (requiredRole) => {
     };
 };
 
+app.get('/api/check-auth', (req, res) => {
+    const token = req.cookies?.token;
+
+    if (!token) {
+        return res.json({ isAuthenticated: false });
+    }
+
+    jwt.verify(token, SECRET_KEY, (err, user) => {
+        if (err) {
+            return res.json({ isAuthenticated: false });
+        }
+        res.json({ isAuthenticated: true, role: user.role });
+    });
+});
+
+
+
 // Route για το /login και /login.html
+
 app.get('/login', (req, res) => {
     const token = req.cookies?.token;
 
     if (token) {
-        // Αν υπάρχει token, επαληθεύουμε
         jwt.verify(token, SECRET_KEY, (err, user) => {
             if (!err && user) {
-                // Αν ο χρήστης είναι έγκυρος, ανακατεύθυνση στη σελίδα του
+                // Αν ο χρήστης είναι έγκυρος, ανακατεύθυνση
                 return res.redirect(user.role === 'professor' ? '/teacher' : '/student');
             }
+            // Αν το token είναι μη έγκυρο, συνεχίζουμε
+            res.setHeader('Cache-Control', 'no-store'); 
+            res.setHeader('Pragma', 'no-cache');
+            return res.sendFile(path.join(__dirname, 'views', 'login.html'));
         });
+    } else {
+        // Αν δεν υπάρχει token, εμφανίζουμε το login.html
+        res.setHeader('Cache-Control', 'no-store'); 
+        res.setHeader('Pragma', 'no-cache');
+        return res.sendFile(path.join(__dirname, 'views', 'login.html'));
     }
-
-    // Αν δεν υπάρχει token ή είναι μη έγκυρο, εμφανίζουμε το login.html
-    res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
+
 
 
 
