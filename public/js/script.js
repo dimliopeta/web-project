@@ -3,19 +3,22 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
 
     const title = document.getElementById('title').value;
     const summary = document.getElementById('summary').value;
+    const pdf = document.getElementById('pdf').files[0]; // Get the file object, not the file path
     const token = localStorage.getItem('token'); // Ανάκτηση του token από το localStorage
+
+    // Create a new FormData object to send the form data and the file
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('summary', summary);
+    formData.append('pdf', pdf); // Attach the file
 
     // Δημιουργία ενός AJAX request με Fetch API
     fetch('/api/theses/new', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json', // Ορίζουμε το περιεχόμενο ως JSON
             'Authorization': `Bearer ${token}` // Προσθήκη του token στο header
         },
-        body: JSON.stringify({
-            title: title,
-            summary: summary
-        })
+        body: formData // Send the FormData as the request body
     })
     .then(response => response.json()) // Μετατροπή της απάντησης σε JSON
     .then(data => {
@@ -26,6 +29,8 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
             // Καθαρίζουμε τη φόρμα
             document.getElementById('title').value = '';
             document.getElementById('summary').value = '';
+            document.getElementById('pdf').value = '';
+
 
             // Επαναφόρτωση της λίστας διπλωματικών
             loadTheses();

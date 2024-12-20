@@ -153,41 +153,7 @@ app.post('/login', (req, res) => {
 });
 
 
-// Προστατευμένα endpoints για διπλωματικές
-app.get('/api/theses', authenticateJWT, (req, res) => {
-    const professorId = req.user.userId;
-    const query = `SELECT * FROM THESIS WHERE teacher_id = ?;`;
 
-    db.query(query, [professorId], (err, results) => {
-        if (err) {
-            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
-        }
-
-        res.status(200).json({ success: true, theses: results });
-    });
-});
-
-app.post('/api/theses/new', authenticateJWT, (req, res) => {
-    const { title, summary } = req.body;
-    const professorId = req.user.userId;
-
-    if (!title || !summary) {
-        return res.status(400).json({ success: false, message: 'Title and summary are required' });
-    }
-
-    const query = `INSERT INTO THESIS (teacher_id, title, summary) VALUES (?, ?, ?);`;
-
-    db.query(query, [professorId, title, summary], (err, result) => {
-        if (err) {
-            console.error('Σφάλμα κατά την αποθήκευση της διπλωματικής:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
-        }
-
-        console.log('Thesis created successfully!');
-        return res.status(201).json({ success: true, message: 'Η διπλωματική δημιουργήθηκε επιτυχώς!' });
-    });
-});
 
 
 // Προστατευμένα routes για καθηγητές και φοιτητές
@@ -215,38 +181,32 @@ app.post('/logout', authenticateJWT, (req, res) => {
 // Endpoint για την ανάρτηση PDF αρχείων με χρήση multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Αποθήκευση στο φάκελο uploads
+        cb(null,'theses_pdf'); // Correct path
     },
     filename: (req, file, cb) => {
         // Ensure user is authenticated and has a name
         const professorId = req.user?.userId || 'Unknown-User'; // Use 'Unknown-User' if not found
-        const randomNumber = Math.round(Math.random() * 1E9); // Generate a random number
-        const fileName = `${professorId} - ${randomNumber}.pdf`; // Format the filename
-
+        const originalName = file.originalname.replace(/\s+/g, '_'); // Replace spaces with underscores for a clean filename
+        const fileName = `${professorId} - ${originalName}.pdf`; // Format the filename
         cb(null, fileName); // Save the file with the formatted name
     }
 });
 
-// Φίλτρο για την ανάρτηση μόνο PDF αρχείων και όχι άλλων τύπων
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') {
-        cb(null, true); // Αποδοχή
-    } else {
-        cb(new Error('Only PDF files are allowed'), false); // Άρνηση
-    }
-};
-
-// Αρχικοποίηση multer
+// Φίλτρο για την ανάρτηση μόνο PDF αρχείων και όχι άλλων τύπων και αρχικοποίηση multer
 const upload = multer({
     storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 25 * 1024 * 1024 // Μέγιστο μέγεθος αρχείου: 25MB
-    }
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF files are allowed'), false);
+        }
+    },
+    limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
 });
 
 //Endpoint ανάρτησης
-app.post('/upload', authenticateJWT, upload.single('pdf'), (req, res) => {
+app.post('/theses_pdf', authenticateJWT, upload.single('pdf'), (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded or invalid file type');
     }
@@ -257,6 +217,51 @@ app.post('/upload', authenticateJWT, upload.single('pdf'), (req, res) => {
             filename: req.file.filename,
             path: req.file.path
         }
+    });
+});
+
+
+
+// Προστατευμένα endpoints για διπλωματικές
+app.get('/api/theses', authenticateJWT, (req, res) => {
+    const professorId = req.user.userId;
+    const query = `SELECT * FROM THESIS WHERE teacher_id = ?;`;
+
+    db.query(query, [professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+
+        res.status(200).json({ success: true, theses: results });
+    });
+});
+
+app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) => {
+    const { title, summary } = req.body;
+    const professorId = req.user.userId;
+    const file = req.file;
+
+    if (!title || !summary) {
+        return res.status(400).json({ success: false, message: 'Title and summary are required' });
+    }
+    const filePath = req.file ? req.file.path : null; // Save the file path if uploaded
+
+    const query = `INSERT INTO THESIS (teacher_id, title, summary, pdf_path) VALUES (?, ?, ?, ?);`;
+    db.query(query, [professorId, title, summary, filePath], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την αποθήκευση της διπλωματικής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+
+        console.log('Thesis created successfully!');
+        if (file) {
+            console.log("PDF uploaded:", file);  // Log when a PDF file is uploaded
+        } else {
+            console.log("Theses created without pdf"); // Log if no PDF is uploaded
+        }
+    
+        return res.status(201).json({ success: true, message: 'Η διπλωματική δημιουργήθηκε επιτυχώς!' });
     });
 });
 
