@@ -61,6 +61,26 @@ const authorizeRole = (requiredRole) => {
     };
 };
 
+// Route για το /login και /login.html
+app.get('/login', (req, res) => {
+    const token = req.cookies?.token;
+
+    if (token) {
+        // Αν υπάρχει token, επαληθεύουμε
+        jwt.verify(token, SECRET_KEY, (err, user) => {
+            if (!err && user) {
+                // Αν ο χρήστης είναι έγκυρος, ανακατεύθυνση στη σελίδα του
+                return res.redirect(user.role === 'professor' ? '/teacher' : '/student');
+            }
+        });
+    }
+
+    // Αν δεν υπάρχει token ή είναι μη έγκυρο, εμφανίζουμε το login.html
+    res.sendFile(path.join(__dirname, 'views', 'login.html'));
+});
+
+
+
 
 // Login endpoint
 app.post('/login', (req, res) => {
@@ -156,6 +176,15 @@ app.get('/teacher', authenticateJWT, authorizeRole('professor'), (req, res) => {
 app.get('/student', authenticateJWT, authorizeRole('student'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'student.html'));
 });
+
+// Logout endpoint
+app.post('/logout', authenticateJWT, (req, res) => {
+    // Καθαρισμός του cookie που περιέχει το JWT
+    res.clearCookie('token', { httpOnly: true });
+    // Ανακατεύθυνση στο index
+    res.redirect('/');
+});
+
 
 
 // Endpoint για την ανάρτηση PDF αρχείων με χρήση multer
