@@ -5,7 +5,7 @@ const fs = require('fs');
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'Tyropita4576',
+    password: '1234',
     database: 'project_db'
 });
 
@@ -85,7 +85,39 @@ function insertData() {
             }
         });
     });
-    console.log(`Database up-to-date!`);
+
+    data.theses.forEach(thesis => {
+        const query = `SELECT * FROM THESES WHERE theme_id=?;`;
+        db.query(query, [thesis.theme_id], (err, results) => {
+            if (err) {
+                console.error('Error checking for duplicate theses: ', err);
+                return;
+            }
+            // Αν δεν υπάρχει, προσθήκη της διπλωματικής
+            if (results.length === 0) {
+                const insertQuery = `
+                    INSERT INTO theses (theme_id, teacher_id, title, summary, status, pdf_path)
+                    VALUES (?, ?, ?, ?, ?, ?);
+                `;
+                db.query(insertQuery, [
+                    thesis.theme_id,
+                    thesis.teacher_id,
+                    thesis.title,
+                    thesis.summary,
+                    thesis.status,
+                    thesis.pdf_path
+                ], (insertErr) => {
+                    if (insertErr) {
+                        console.error('Error inserting thesis:', insertErr);
+                    } else {
+                        console.log(`Thesis ${thesis.theme_id} added successfully.`);
+                    }
+                });
+            }
+        });
+
+        console.log(`Database up-to-date!`);
+    });
 }
 
 
@@ -93,4 +125,4 @@ function insertData() {
 insertData();
 
 
-module.exports = db;
+    module.exports = db;

@@ -225,7 +225,7 @@ app.post('/theses_pdf', authenticateJWT, upload.single('pdf'), (req, res) => {
 // Προστατευμένα endpoints για διπλωματικές
 app.get('/api/theses', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
-    const query = `SELECT * FROM THESIS WHERE teacher_id = ?;`;
+    const query = `SELECT * FROM THESES WHERE teacher_id = ?;`;
 
     db.query(query, [professorId], (err, results) => {
         if (err) {
@@ -247,7 +247,7 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
     }
     const filePath = req.file ? req.file.path : null; // Save the file path if uploaded
 
-    const query = `INSERT INTO THESIS (teacher_id, title, summary, pdf_path) VALUES (?, ?, ?, ?);`;
+    const query = `INSERT INTO THESES (teacher_id, title, summary, pdf_path) VALUES (?, ?, ?, ?);`;
     db.query(query, [professorId, title, summary, filePath], (err, result) => {
         if (err) {
             console.error('Σφάλμα κατά την αποθήκευση της διπλωματικής:', err);
