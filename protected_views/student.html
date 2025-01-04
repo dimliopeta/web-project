@@ -49,7 +49,7 @@
 
 
     <!--- navbar --->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top nav-item dropdown">
         <a class="navbar-brand px-3 fs-4" href="student.html">
             <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
         </a>
@@ -63,14 +63,14 @@
                 <a class="nav-item nav-link" href="#profile">Επεξεργασία Προφίλ</a>
                 <a class="nav-item nav-link" href="#configure">Διαχείριση Διπλωματικής</a>
             </div>
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Ρυθμίσεις
+
+            <button class="nav-item dropdown btn btn-outline-secondary ms-auto mx-4">
+                <a class="nav-link dropdown-toggle " href="#" role="button" data-bs-toggle="dropdown">Ρυθμίσεις</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Προφίλ</a></li>
+                    <li><a class="dropdown-item" id="logout-btn">Έξοδος</a></li>
+                </ul>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#">Προφίλ</a></li>
-                <li><a class="dropdown-item" id="logout-btn">Έξοδος</a></li>
-            </ul>
         </div>
     </nav>
 
@@ -80,20 +80,12 @@
         <div id="dashboard" class="content-section" style="display:block;">
             <!-- Header -->
             <div class="header">
-                <h2>Επισκόπηση διπλωματικής!</h2>
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    Ρυθμίσεις
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#">Προφίλ</a></li>
-                    <li><a class="dropdown-item" id="logout-btn">Έξοδος</a></li>
-                </ul>
+                <h2>Πίνακας ελέγχου</h2>
             </div>
 
 
             <div id="dashboard-content" class="mb-4 pt-4">
-                <h3 class="text-muted">Καλωσήρθες!</h1>
+                <h3 class="text-muted">Επισκόπηση διπλωματικής!</h1>
 
                     <div class="row">
                         <div class="card text-center">
@@ -107,13 +99,128 @@
                                 <a href="#" class="btn btn-primary">Διαχείρηση</a>
                             </div>
                             <div class="card-footer text-muted">
-                                Ημερομηνία έναρξης: 2 days ago
+                                Ημερομηνία έναρξης: thesis_date
+                                <a href="#" class="btn btn-outline-secondary btn-sm float-end">PDF</a>
                             </div>
                         </div>
                     </div>
             </div>
         </div>
+
+        <!-- Profile page -->
         <div id="profile" class="content-section" style="display:none;">...</div>
+        <!-- Header -->
+        <div>
+            <h2>Προφιλ</h2>
+        </div>
+        <div style="background-color: #eee;">
+            <div class="container py-5">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                                <h5 class="my-3">student_name</h5>
+                                <p class="text-muted mb-1">student_id</p>
+                                <p class="text-muted mb-4">student_year</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-12 text-center">
+                                        <h3> Στοιχεία επικοινωνίας</h3>
+                                    </div>
+                                </div>
+
+                                <div class="row pt-4">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Email</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0">student_mail</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Κινητό τηλέφωνο</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0">student_tel_mob</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Σταθερό τηλέφωνο</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0">student_tel_land</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Διεύθυνση</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0">student_address</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Πόλη</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0">student_city</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">T.K.</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0">student_tk</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">Αλλαγή</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+
+
+
+        <!-- Configure Thesis page -->
         <div id="configure" class="content-section" style="display:none;">...</div>
 
         <!-- Bootstrap JS -->
