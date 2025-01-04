@@ -31,7 +31,7 @@ CREATE TABLE `Professors`(
     `password` VARCHAR(20) NULL
 );
 
-CREATE TABLE `Thesis`(
+CREATE TABLE `Theses`(
     `theme_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `teacher_id` INT NULL,
     `title` VARCHAR(200) NULL,
@@ -41,4 +41,4 @@ CREATE TABLE `Thesis`(
 );
 
 ALTER TABLE
-    `Thesis` ADD CONSTRAINT `thesis_teacher_id_foreign` FOREIGN KEY(`teacher_id`) REFERENCES `Professors`(`id`);
+    `Theses` ADD CONSTRAINT `thesis_teacher_id_foreign` FOREIGN KEY(`teacher_id`) REFERENCES `Professors`(`id`);
