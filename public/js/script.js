@@ -32,18 +32,37 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 document.querySelector('#assign input[type="search"]').addEventListener('input', function () {
-    const filter = this.value.toLowerCase();
-    const studentList = document.querySelectorAll('#student-list .list-group-item');
+    const filter = this.value.trim(); // Παίρνουμε την τιμή που πληκτρολογήθηκε
 
-    studentList.forEach(student => {
-        const text = student.textContent.toLowerCase();
-        if (text.includes(filter)) {
-            student.style.display = ''; // Εμφάνιση αν ταιριάζει
-        } else {
-            student.style.display = 'none'; // Απόκρυψη αν δεν ταιριάζει
-        }
-    });
+    if (filter.length === 0) {
+        // Αν το πεδίο είναι άδειο, εμφανίζουμε ξανά όλα τα στοιχεία
+        document.querySelectorAll('#student-list .list-group-item').forEach(student => {
+            student.style.display = '';
+        });
+        return;
+    }
+
+    // Κλήση στο backend για δυναμική αναζήτηση
+    fetch(`/api/student-search?input=${encodeURIComponent(filter)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const studentList = document.getElementById('student-list');
+                studentList.innerHTML = ''; // Καθαρίζουμε τη λίστα
+
+                data.students.forEach(student => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+                    listItem.textContent = `Φοιτητής: ${student.NAME} ${student.SURNAME}`;
+                    studentList.appendChild(listItem);
+                });
+            } else {
+                console.error('Σφάλμα:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
 });
+
 
 document.getElementById('thesisForm').addEventListener('submit', function (e) {
     e.preventDefault(); // Αποτροπή της παραδοσιακής υποβολής φόρμας

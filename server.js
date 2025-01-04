@@ -220,17 +220,21 @@ app.post('/theses_pdf', authenticateJWT, upload.single('pdf'), (req, res) => {
     });
 });
 
-app.get('/api/student-search', authenticateJWT,(req,res) =>{
-    const query = `SELECT NAME, SURNAME FROM STUDENTS WHERE NAME = ? OR SURNAME = ?`;
-    db.query(query, input, (err, results) =>{
-        if (err){
+app.get('/api/student-search', authenticateJWT, (req, res) => {
+    const { input } = req.query; // Λήψη του input από το query string
+    const query = `SELECT NAME, SURNAME FROM STUDENTS WHERE NAME LIKE ? OR SURNAME LIKE ?`;
+    const searchInput = `%${input}%`; // Δημιουργία του pattern για το LIKE
+
+    db.query(query, [searchInput, searchInput], (err, results) => {
+        if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των φοιτητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
         }
 
-        res.status(200).json({ success: true, theses: results});
+        res.status(200).json({ success: true, students: results });
     });
 });
+
 
 // Προστατευμένα endpoints για διπλωματικές
 app.get('/api/theses', authenticateJWT, (req, res) => {
