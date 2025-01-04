@@ -34,12 +34,12 @@ window.addEventListener('DOMContentLoaded', () => {
 document.querySelector('#assign input[type="search"]').addEventListener('input', function () {
     const filter = this.value.trim(); // Παίρνουμε την τιμή που πληκτρολογήθηκε
 
+    const studentList = document.getElementById('student-list');
+
     if (filter.length === 0) {
-        // Αν το πεδίο είναι άδειο, εμφανίζουμε ξανά όλα τα στοιχεία
-        document.querySelectorAll('#student-list .list-group-item').forEach(student => {
-            student.style.display = '';
-        });
-        return;
+        // Αν το πεδίο είναι άδειο, καθαρίζουμε τη λίστα
+        studentList.innerHTML = ''; // Καθαρισμός λίστας
+        return; // Σταματάμε την εκτέλεση
     }
 
     // Κλήση στο backend για δυναμική αναζήτηση
@@ -47,13 +47,13 @@ document.querySelector('#assign input[type="search"]').addEventListener('input',
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const studentList = document.getElementById('student-list');
                 studentList.innerHTML = ''; // Καθαρίζουμε τη λίστα
 
                 data.students.forEach(student => {
                     const listItem = document.createElement('li');
                     listItem.className = 'list-group-item';
                     listItem.textContent = `Φοιτητής: ${student.NAME} ${student.SURNAME}`;
+                    listItem.dataset.studentId = student.id; // Βάζουμε το ID του φοιτητή στο data attribute
                     studentList.appendChild(listItem);
                 });
             } else {
@@ -62,6 +62,90 @@ document.querySelector('#assign input[type="search"]').addEventListener('input',
         })
         .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
 });
+
+
+// Event delegation για τη λίστα φοιτητών
+document.getElementById('student-list').addEventListener('click', function (e) {
+    // Ελέγχουμε αν το κλικ έγινε σε στοιχείο της λίστας
+    const clickedItem = e.target.closest('.list-group-item');
+    if (!clickedItem) return; // Αν δεν έγινε κλικ σε στοιχείο, δεν κάνουμε τίποτα
+
+    // Παίρνουμε τα δεδομένα από το στοιχείο που κλικάραμε
+    const studentName = clickedItem.textContent.trim();
+    const studentId = clickedItem.dataset.studentId; // Υποθέτουμε ότι κάθε στοιχείο έχει `data-student-id`
+
+    // Ενημερώνουμε το modal με τα δεδομένα του φοιτητή
+    document.getElementById('studentNameInput').value = studentName.replace('Φοιτητής: ', ''); // Εμφάνιση του ονόματος
+    document.getElementById('assignThesisButton').dataset.studentId = studentId; // Αποθήκευση του ID στο κουμπί
+
+    // Εμφάνιση modal
+    const modal = new bootstrap.Modal(document.getElementById('assignStudentModal'));
+    modal.show();
+});
+
+document.getElementById('changeStudentButton').addEventListener('click', function () {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('assignStudentModal')); // Παίρνουμε την τρέχουσα instance του modal
+    modal.hide(); // Κλείνουμε το modal
+});
+
+
+// Αναζήτηση διπλωματικών
+document.getElementById('thesisSearchInput').addEventListener('input', function () {
+    const query = this.value.trim();
+
+    fetch(`/api/theses-search?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            const thesisList = document.getElementById('thesisList');
+            thesisList.innerHTML = ''; // Καθαρισμός λίστας
+
+            data.theses.forEach(thesis => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.textContent = thesis.title;
+                listItem.dataset.thesisId = thesis.theme_id;
+                thesisList.appendChild(listItem);
+
+                listItem.addEventListener('click', function () {
+                    document.querySelectorAll('#thesisList .list-group-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+        })
+        .catch(err => console.error('Σφάλμα:', err));
+});
+
+// Ανάθεση διπλωματικής
+document.getElementById('assignThesisButton').addEventListener('click', function () {
+    const studentId = this.dataset.studentId;
+    const thesisId = document.querySelector('#thesisList .list-group-item.active')?.dataset.thesisId;
+
+    if (!thesisId) {
+        alert('Επιλέξτε διπλωματική για ανάθεση.');
+        return;
+    }
+
+    fetch('/api/assign-thesis', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ studentId, thesisId }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Η ανάθεση ολοκληρώθηκε επιτυχώς!');
+                $('#assignStudentModal').modal('hide'); // Κλείσιμο modal
+            } else {
+                alert('Σφάλμα: ' + data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα:', err));
+});
+
 
 
 document.getElementById('thesisForm').addEventListener('submit', function (e) {

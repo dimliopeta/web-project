@@ -22,7 +22,6 @@ function insertData() {
                 console.error('Error checking for duplicate professors: ', err);
                 return;
             }
-            // Αν δεν υπάρχει, προσθήκη του καθηγητή
             if (results.length === 0) {
                 const insertQuery = `
                     INSERT INTO professors (name, surname, email, topic, landline, mobile, department, university, password)
@@ -86,6 +85,7 @@ function insertData() {
         });
     });
 
+    // Εισαγωγή διπλωματικών
     data.theses.forEach(thesis => {
         const query = `SELECT * FROM THESES WHERE theme_id=?;`;
         db.query(query, [thesis.theme_id], (err, results) => {
@@ -93,19 +93,19 @@ function insertData() {
                 console.error('Error checking for duplicate theses: ', err);
                 return;
             }
-            // Αν δεν υπάρχει, προσθήκη της διπλωματικής
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO theses (theme_id, teacher_id, title, summary, status, pdf_path)
-                    VALUES (?, ?, ?, ?, ?, ?);
+                    INSERT INTO theses (theme_id, teacher_id, student_id, title, summary, status, pdf_path)
+                    VALUES (?, ?, ?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
                     thesis.theme_id,
                     thesis.teacher_id,
+                    thesis.student_id || null, // Χρησιμοποίησε NULL αν το student_id είναι κενό
                     thesis.title,
                     thesis.summary,
                     thesis.status,
-                    thesis.pdf_path
+                    thesis.pdf_path || null // Χρησιμοποίησε NULL αν το pdf_path είναι κενό
                 ], (insertErr) => {
                     if (insertErr) {
                         console.error('Error inserting thesis:', insertErr);
@@ -115,10 +115,11 @@ function insertData() {
                 });
             }
         });
-
-        console.log(`Database up-to-date!`);
     });
+
+    console.log(`Database up-to-date!`);
 }
+
 
 
 // Κλήση της συνάρτησης για εισαγωγή δεδομένων

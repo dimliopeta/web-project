@@ -34,11 +34,14 @@ CREATE TABLE `Professors`(
 CREATE TABLE `Theses`(
     `theme_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `teacher_id` INT NULL,
+	`student_id` INT NULL,
     `title` VARCHAR(200) NULL,
     `summary` TEXT NULL,
-    `status` ENUM('assigned','active','to-be-reviewed','completed') DEFAULT 'assigned', 
+    `status` ENUM('unassigned','active','to-be-reviewed','completed') DEFAULT 'unassigned', 
 	`pdf_path` VARCHAR(200) NULL
 );
 
 ALTER TABLE
     `Theses` ADD CONSTRAINT `thesis_teacher_id_foreign` FOREIGN KEY(`teacher_id`) REFERENCES `Professors`(`id`);
+ALTER TABLE
+    `Theses` ADD CONSTRAINT `thesis_student_id_foreign` FOREIGN KEY(`student_id`) REFERENCES `Students`(`id`);

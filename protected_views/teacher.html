@@ -170,12 +170,49 @@
                 <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
                     aria-describedby="search-addon" id="search-student" name="search-student" />
                 <span class="input-group-text border-0" id="search-addon">
-                    <img src="https://img.icons8.com/ios7/600/search.png" alt="Search" style="width: 20px; height: 20px;" />
+                    <img src="https://img.icons8.com/ios7/600/search.png" alt="Search"
+                        style="width: 20px; height: 20px;" />
                 </span>
             </div>
 
             <ul id="student-list" class="list-group">
             </ul>
+            <div class="modal fade" id="assignStudentModal" tabindex="-1" aria-labelledby="assignStudentModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="assignStudentModalLabel">Ανάθεση Διπλωματικής</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Input για τον φοιτητή -->
+                            <div class="mb-3">
+                                <label for="studentNameInput" class="form-label">Φοιτητής</label>
+                                <input type="text" class="form-control" id="studentNameInput" readonly>
+                            </div>
+                            <button class="btn btn-primary mb-3" id="changeStudentButton">Αλλαγή Επιλεγμένου
+                                Φοιτητή</button>
+
+                            <!-- Search bar για διπλωματικές -->
+                            <div class="input-group mb-3">
+                                <input type="search" class="form-control" id="thesisSearchInput"
+                                    placeholder="Αναζήτηση Θέματος" aria-label="Search">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+
+                            <!-- Λίστα διπλωματικών -->
+                            <ul id="thesisList" class="list-group">
+                                <!-- Οι διπλωματικές θα φορτώνονται δυναμικά -->
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Κλείσιμο</button>
+                            <button type="button" class="btn btn-success" id="assignThesisButton">Ανάθεση</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="list" class="content-section" style="display:none;">...</div>
         <div id="invitations" class="content-section" style="display:none;">...</div>

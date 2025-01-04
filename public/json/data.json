@@ -1183,37 +1183,47 @@
       {
         "theme_id":"1",
         "teacher_id":"1",
+        "student_id":"",
         "title":"Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks",
         "summary":"Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks is very important so we have to do it.",
-        "status":"assigned"
+        "status":"unassigned",
+        "pdf_path":""
       },
       {
         "theme_id":"2",
         "teacher_id":"1",
+        "student_id":"",
         "title":"The Role of Normal Software Behavior in Ensuring System Reliability and Security",
         "summary":"The Role of Normal Software Behavior in Ensuring System Reliability and Security is enormous so we have to study it.",
-        "status":"assigned"
+        "status":"unassigned",
+        "pdf_path":""
       },
       {
         "theme_id":"3",
         "teacher_id":"1",
+        "student_id":"",
         "title":"Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design",
         "summary":"Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design is can be great so we have to do it.",
-        "status":"active"
+        "status":"active",
+        "pdf_path":""
       },
       {
         "theme_id":"4",
         "teacher_id":"1",
+        "student_id":"",
         "title":"Understanding the Importance of Normal Data Processing in Machine Learning Algorithms",
         "summary":"Understanding the Importance of Normal Data Processing in Machine Learning Algorithms can really help with computers so we have to understand it.",
-        "status":"to-be-reviewed"
+        "status":"to-be-reviewed",
+        "pdf_path":""
       },
       {
         "theme_id":"5",
         "teacher_id":"1",
+        "student_id":"",
         "title":"Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science",
         "summary":"Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science is a great idea, so it's time we investigated.",
-        "status":"completed"
+        "status":"completed",
+        "pdf_path":""
       }
     
     ]
