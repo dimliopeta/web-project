@@ -220,7 +220,17 @@ app.post('/theses_pdf', authenticateJWT, upload.single('pdf'), (req, res) => {
     });
 });
 
+app.get('/api/student-search', authenticateJWT,(req,res) =>{
+    const query = `SELECT NAME, SURNAME FROM STUDENTS WHERE NAME = ? OR SURNAME = ?`;
+    db.query(query, input, (err, results) =>{
+        if (err){
+            console.error('Σφάλμα κατά την ανάκτηση των φοιτητών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
 
+        res.status(200).json({ success: true, theses: results});
+    });
+});
 
 // Προστατευμένα endpoints για διπλωματικές
 app.get('/api/theses', authenticateJWT, (req, res) => {

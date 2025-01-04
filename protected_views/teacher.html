@@ -34,7 +34,10 @@
             /* Προσαρμόζει τη γραμματοσειρά δυναμικά */
         }
 
-
+        body {
+            padding-top: 70px;
+            /* Προσαρμόζεται στο ύψος του navbar */
+        }
 
         .navbar-nav .nav-link.active {
             font-weight: bold;
@@ -160,16 +163,24 @@
         </div>
 
         <div id="theses" class="content-section" style="display:none;">
-            <!-- Assign to student nav-->
+        </div>
+        <!-- Assign to student nav-->
         <div id="assign" class="content-section" style="display:none;">
             <div class="input-group rounded">
                 <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
-                    aria-describedby="search-addon" />
+                    aria-describedby="search-addon" id="search-student" name="search-student" />
                 <span class="input-group-text border-0" id="search-addon">
-                    <i class="fas fa-search"></i>
+                    <img src="https://img.icons8.com/ios7/600/search.png" alt="Search" style="width: 20px; height: 20px;" />
                 </span>
             </div>
-        </div>
+
+            <ul id="student-list" class="list-group">
+                <!-- Παραδείγματα φοιτητών -->
+                <li class="list-group-item">Φοιτητής 1: Δημήτρης Παπαδόπουλος</li>
+                <li class="list-group-item">Φοιτητής 2: Μαρία Ιωάννου</li>
+                <li class="list-group-item">Φοιτητής 3: Γιώργος Αντωνίου</li>
+                <li class="list-group-item">Φοιτητής 4: Ελένη Παπαγεωργίου</li>
+            </ul>
         </div>
         <div id="list" class="content-section" style="display:none;">...</div>
         <div id="invitations" class="content-section" style="display:none;">...</div>

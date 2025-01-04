@@ -31,6 +31,19 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+document.querySelector('#assign input[type="search"]').addEventListener('input', function () {
+    const filter = this.value.toLowerCase();
+    const studentList = document.querySelectorAll('#student-list .list-group-item');
+
+    studentList.forEach(student => {
+        const text = student.textContent.toLowerCase();
+        if (text.includes(filter)) {
+            student.style.display = ''; // Εμφάνιση αν ταιριάζει
+        } else {
+            student.style.display = 'none'; // Απόκρυψη αν δεν ταιριάζει
+        }
+    });
+});
 
 document.getElementById('thesisForm').addEventListener('submit', function (e) {
     e.preventDefault(); // Αποτροπή της παραδοσιακής υποβολής φόρμας
