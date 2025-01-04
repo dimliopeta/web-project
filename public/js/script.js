@@ -1,3 +1,37 @@
+// Event listener για το navbar
+document.querySelectorAll('.nav-link').forEach(tab => {
+    tab.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        // Απόκρυψη όλων των sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+        });
+
+        // Εμφάνιση του ενεργού section
+        const targetId = this.getAttribute('href').substring(1); // Παίρνουμε το ID από το href (π.χ., #dashboard)
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+        }
+
+        // Ενημέρωση του active class στα tabs
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        this.classList.add('active');
+    });
+});
+
+// Εμφάνιση του dashboard κατά την αρχική φόρτωση
+window.addEventListener('DOMContentLoaded', () => {
+    const defaultTab = document.querySelector('a[href="#dashboard"]');
+    if (defaultTab) {
+        defaultTab.click();
+    }
+});
+
+
 document.getElementById('thesisForm').addEventListener('submit', function (e) {
     e.preventDefault(); // Αποτροπή της παραδοσιακής υποβολής φόρμας
 
@@ -20,28 +54,28 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
         },
         body: formData // Send the FormData as the request body
     })
-    .then(response => response.json()) // Μετατροπή της απάντησης σε JSON
-    .then(data => {
-        if (data.success) {
-            console.log('Success:', data);
-            alert(data.message); // Εμφάνιση μηνύματος επιτυχίας
+        .then(response => response.json()) // Μετατροπή της απάντησης σε JSON
+        .then(data => {
+            if (data.success) {
+                console.log('Success:', data);
+                alert(data.message); // Εμφάνιση μηνύματος επιτυχίας
 
-            // Καθαρίζουμε τη φόρμα
-            document.getElementById('title').value = '';
-            document.getElementById('summary').value = '';
-            document.getElementById('pdf').value = '';
+                // Καθαρίζουμε τη φόρμα
+                document.getElementById('title').value = '';
+                document.getElementById('summary').value = '';
+                document.getElementById('pdf').value = '';
 
 
-            // Επαναφόρτωση της λίστας διπλωματικών
-            loadTheses();
-        } else {
-            alert('Σφάλμα: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Σφάλμα: Κάτι πήγε στραβά!');
-    });
+                // Επαναφόρτωση της λίστας διπλωματικών
+                loadTheses();
+            } else {
+                alert('Σφάλμα: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Σφάλμα: Κάτι πήγε στραβά!');
+        });
 });
 
 
@@ -54,37 +88,37 @@ function loadTheses() {
             'Authorization': `Bearer ${token}` // Προσθήκη του token στο header
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const thesesList = document.querySelector('#theses ul');
-            thesesList.innerHTML = ''; // Καθαρίζουμε το υπάρχον περιεχόμενο
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const thesesList = document.querySelector('#theses ul');
+                thesesList.innerHTML = ''; // Καθαρίζουμε το υπάρχον περιεχόμενο
 
-            data.theses.forEach((thesis, index) => {
-                let status = ""; // Δημιουργούμε τη μεταβλητή status εκτός του switch
+                data.theses.forEach((thesis, index) => {
+                    let status = ""; // Δημιουργούμε τη μεταβλητή status εκτός του switch
 
-                switch (thesis.status) {
-                    case 'active':
-                        status = "Ενεργή";
-                        break; 
-                    case 'to-be-reviewed':
-                        status = "Υπό Εξέταση";
-                        break; 
-                    case 'completed':
-                        status = "Περατωμένη";
-                        break;
-                    default:
-                        status = "Υπό Ανάθεση";
-                }
+                    switch (thesis.status) {
+                        case 'active':
+                            status = "Ενεργή";
+                            break;
+                        case 'to-be-reviewed':
+                            status = "Υπό Εξέταση";
+                            break;
+                        case 'completed':
+                            status = "Περατωμένη";
+                            break;
+                        default:
+                            status = "Υπό Ανάθεση";
+                    }
 
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item';
-                listItem.textContent = `Διπλωματική ${index + 1}: ${thesis.title} - ${thesis.summary} - Κατάσταση: ${status}`;
-                thesesList.appendChild(listItem);
-            });
-        }
-    })
-    .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+                    listItem.textContent = `Διπλωματική ${index + 1}: ${thesis.title} - ${thesis.summary} - Κατάσταση: ${status}`;
+                    thesesList.appendChild(listItem);
+                });
+            }
+        })
+        .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
 
 document.getElementById('logout-btn').addEventListener('click', (event) => {
@@ -93,14 +127,14 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
         method: 'POST',
         credentials: 'include' // Περιλαμβάνει cookies
     })
-    .then(response => {
-        if (response.ok) {
-            window.location.href = '/'; // Ανακατεύθυνση στο index
-        } else {
-            alert('Logout failed');
-        }
-    })
-    .catch(err => console.error('Error:', err));
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/'; // Ανακατεύθυνση στο index
+            } else {
+                alert('Logout failed');
+            }
+        })
+        .catch(err => console.error('Error:', err));
 });
 
 

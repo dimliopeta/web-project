@@ -6,18 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Πίνακας Ελέγχου Καθηγητή</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="icon" href="images/DemBrowserIcon.png" type="image/x-icon">
 
     <style>
-
         .main-content {
             margin-left: 50px;
             margin-right: 50px;
-            
+
         }
+
         .header {
-            
+
             padding-top: 80px;
             border-bottom: 1px solid #ddd;
             display: flex;
@@ -25,38 +26,49 @@
             align-items: center;
         }
 
+        .navbar-nav .nav-link {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: calc(1rem + 0.2vw);
+            /* Προσαρμόζει τη γραμματοσειρά δυναμικά */
+        }
+
+       
+
+        .navbar-nav .nav-link.active {
+            font-weight: bold;
+            color: #0d6efd;
+            /* Χρώμα για το ενεργό tab */
+            border-bottom: 2px solid #0d6efd;
+            /* Γραμμή στο κάτω μέρος */
+        }
     </style>
 </head>
 
 <body>
-    
-    
-        <!--- navbar --->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
-            <a class="navbar-brand px-3 fs-4" href="teacher.html">
-                <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
-              </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav" aria-controls="mainnav" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainnav">
-              <div class="navbar-nav fs-5">
+
+
+    <!--- navbar --->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
+        <a class="navbar-brand px-3 fs-4" href="teacher.html">
+            <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav"
+            aria-controls="mainnav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainnav">
+            <div class="navbar-nav fs-5">
                 <a class="nav-item nav-link" href="#dashboard">Πίνακας Ελέγχου</a>
-                <a class="nav-item nav-link" href="#theses">Θέματα Διπλωματικών</a>
+                <a class="nav-item nav-link" href="#theses-section">Θέματα Διπλωματικών</a>
                 <a class="nav-item nav-link" href="#assign">Ανάθεση σε Φοιτητή</a>
                 <a class="nav-item nav-link" href="#list">Λίστα Διπλωματικών</a>
                 <a class="nav-item nav-link" href="#invitations">Προσκλήσεις Τριμελών</a>
                 <a class="nav-item nav-link" href="#stats">Στατιστικά</a>
-              </div>
             </div>
-          </nav>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Header -->
-        <div class="header">
-            <h2>Πίνακας Ελέγχου</h2>
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 Ρυθμίσεις
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -64,80 +76,101 @@
                 <li><a class="dropdown-item" id="logout-btn">Έξοδος</a></li>
             </ul>
         </div>
+    </nav>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="mb-4 pt-4">
-            <h3 class="text-muted">Καλωσήρθατε!</h3>
-            <div class="row">
-                <div class="col-md-6 pt-1">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Ενεργές Διπλωματικές</h5>
-                            <p>Πλήθος: 5</p>
+    <div class="main-content">
+        <!-- DashBoard -->
+        <div id="dashboard" class="content-section" style="display:block;">
+            <!-- Header -->
+            <div class="header">
+                <h2>Πίνακας Ελέγχου</h2>
+            </div>
+            <div id="dashboard-content" class="mb-4 pt-4">
+                <h3 class="text-muted">Καλωσήρθατε!</h3>
+                <div class="row">
+                    <div class="col-md-6 pt-1">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Ενεργές Διπλωματικές</h5>
+                                <p>Πλήθος: 5</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 pt-1">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Πρόσφατες Ενημερώσεις</h5>
+                                <p>2 νέες προσκλήσεις.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 pt-1">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Πρόσφατες Ενημερώσεις</h5>
-                            <p>2 νέες προσκλήσεις.</p>
+                <!-- Theses -->
+                <div id="theses" class="mb-4 pt-4">
+                    <h3>Θέματα Διπλωματικών</h3>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createThesisModal">Νέο
+                        Θέμα</button>
+                    <ul class="list-group mt-3"></ul>
+                </div>
+
+
+                <!-- Modal for Create Thesis -->
+                <div class="modal fade" id="createThesisModal" tabindex="-1" aria-labelledby="createThesisModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createThesisModalLabel">Δημιουργία Νέου Θέματος</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="thesisForm" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Τίτλος</label>
+                                        <input type="text" class="form-control" id="title" name="title" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="summary" class="form-label">Περιγραφή</label>
+                                        <textarea class="form-control" id="summary" name="summary" rows="3"
+                                            required></textarea>
+                                    </div>
+                                    <div class="mb-3 d-flex align-items-center">
+                                        <div class="me-3">
+                                            <label for="pdf" class="form-label visually-hidden">Επισύναψη Αρχείου
+                                                PDF</label>
+                                            <input type="file" class="form-control" id="pdf" name="pdf"
+                                                accept="application/pdf">
+                                        </div>
+                                        <span class="text-muted">Επισύναψη Αρχείου PDF</span>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Υποβολή</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Theses -->
-        <div id="theses" class="mb-4 pt-4">
-            <h3>Θέματα Διπλωματικών</h3>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createThesisModal">Νέο Θέμα</button>
-            <ul class="list-group mt-3"></ul>
-        </div>
+                <!-- Statistics -->
+                <div id="stats" class="mb-4 pt-4">
+                    <h3>Στατιστικά</h3>
+                    <p>Υπό κατασκευή...</p>
+                </div>
+            </div>
 
- 
-<!-- Modal for Create Thesis -->
-<div class="modal fade" id="createThesisModal" tabindex="-1" aria-labelledby="createThesisModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createThesisModalLabel">Δημιουργία Νέου Θέματος</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="thesisForm" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Τίτλος</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="summary" class="form-label">Περιγραφή</label>
-                        <textarea class="form-control" id="summary" name="summary" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3 d-flex align-items-center">
-                        <div class="me-3">
-                            <label for="pdf" class="form-label visually-hidden">Επισύναψη Αρχείου PDF</label>
-                            <input type="file" class="form-control" id="pdf" name="pdf" accept="application/pdf">
-                        </div>
-                        <span class="text-muted">Επισύναψη Αρχείου PDF</span>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Υποβολή</button>
-                </form>
-            </div>
         </div>
+        <div id="theses" class="content-section" style="display:none;">...</div>
+        <div id="assign" class="content-section" style="display:none;">...</div>
+        <div id="list" class="content-section" style="display:none;">...</div>
+        <div id="invitations" class="content-section" style="display:none;">...</div>
+        <div id="stats" class="content-section" style="display:none;">...</div>
     </div>
-</div>
 
-        <!-- Statistics -->
-        <div id="stats" class="mb-4 pt-4">
-            <h3>Στατιστικά</h3>
-            <p>Υπό κατασκευή...</p>
-        </div>
-    </div>
 
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/script.js"></script> 
+    <script src="/js/script.js"></script>
 </body>
+
 </html>
