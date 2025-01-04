@@ -289,19 +289,25 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
     });
 });
 
-//unassigned thesis
-app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
+app.get('/api/theses-search', authenticateJWT, (req, res) => {
+    const { query } = req.query;
+
+    if (!query) {
+        return res.status(400).json({ success: false, message: 'Missing query parameter.' });
+    }
+
     const professorId = req.user.userId;
 
-    const query = `
+    const sql = `
         SELECT theme_id, title
         FROM THESES
-        WHERE teacher_id = ? AND status = 'unassigned';
+        WHERE teacher_id = ? AND status = 'unassigned' AND title LIKE ?;
     `;
+    const searchInput = `%${query}%`;
 
-    db.query(query, [professorId], (err, results) => {
+    db.query(sql, [professorId, searchInput], (err, results) => {
         if (err) {
-            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
+            console.error('Σφάλμα κατά την αναζήτηση διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
@@ -310,12 +316,11 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
 });
 
 
-//Ανάθεση διπλωματικής σε φοιτητή
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     const { thesisId, studentId } = req.body;
 
     if (!thesisId || !studentId) {
-        return res.status(400).json({ success: false, message: 'Thesis ID and Student ID are required.' });
+        return res.status(400).json({ success: false, message: 'Απαιτείται Thesis ID και Student ID.' });
     }
 
     const query = `
@@ -337,6 +342,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε επιτυχώς!' });
     });
 });
+
 
 
 // Εκκίνηση του server

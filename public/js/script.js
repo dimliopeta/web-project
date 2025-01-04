@@ -64,24 +64,47 @@ document.querySelector('#assign input[type="search"]').addEventListener('input',
 });
 
 
-// Event delegation για τη λίστα φοιτητών
-document.getElementById('student-list').addEventListener('click', function (e) {
-    // Ελέγχουμε αν το κλικ έγινε σε στοιχείο της λίστας
-    const clickedItem = e.target.closest('.list-group-item');
-    if (!clickedItem) return; // Αν δεν έγινε κλικ σε στοιχείο, δεν κάνουμε τίποτα
+document.querySelector('#assign input[type="search"]').addEventListener('input', function () {
+    const filter = this.value.trim(); // Παίρνουμε την τιμή που πληκτρολογήθηκε
+    const studentList = document.getElementById('student-list');
 
-    // Παίρνουμε τα δεδομένα από το στοιχείο που κλικάραμε
-    const studentName = clickedItem.textContent.trim();
-    const studentId = clickedItem.dataset.studentId; // Υποθέτουμε ότι κάθε στοιχείο έχει `data-student-id`
+    if (filter.length === 0) {
+        studentList.innerHTML = ''; // Καθαρισμός λίστας αν το πεδίο είναι κενό
+        return;
+    }
 
-    // Ενημερώνουμε το modal με τα δεδομένα του φοιτητή
-    document.getElementById('studentNameInput').value = studentName.replace('Φοιτητής: ', ''); // Εμφάνιση του ονόματος
-    document.getElementById('assignThesisButton').dataset.studentId = studentId; // Αποθήκευση του ID στο κουμπί
+    // Κλήση στο backend για δυναμική αναζήτηση
+    fetch(`/api/student-search?input=${encodeURIComponent(filter)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                studentList.innerHTML = ''; // Καθαρισμός λίστας
 
-    // Εμφάνιση modal
-    const modal = new bootstrap.Modal(document.getElementById('assignStudentModal'));
-    modal.show();
+                // Δημιουργία στοιχείων λίστας
+                data.students.forEach(student => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item list-group-item-action'; // Προσθήκη κλάσης για clickability
+                    listItem.textContent = `${student.NAME} ${student.SURNAME}`;
+                    listItem.dataset.studentId = student.ID; // Αποθήκευση ID στο dataset
+                    studentList.appendChild(listItem);
+
+                    // Προσθήκη event listener για click
+                    listItem.addEventListener('click', function () {
+                        document.getElementById('studentNameInput').value = `${student.NAME} ${student.SURNAME}`;
+                        document.getElementById('assignThesisButton').dataset.studentId = student.ID; // Αποθήκευση ID στο κουμπί
+
+                        // Εμφάνιση modal χρησιμοποιώντας Bootstrap Modal
+                        const assignModal = new bootstrap.Modal(document.getElementById('assignStudentModal'));
+                        assignModal.show();
+                    });
+                });
+            } else {
+                console.error('Σφάλμα:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
 });
+
 
 document.getElementById('changeStudentButton').addEventListener('click', function () {
     const modal = bootstrap.Modal.getInstance(document.getElementById('assignStudentModal')); // Παίρνουμε την τρέχουσα instance του modal
@@ -93,52 +116,67 @@ document.getElementById('changeStudentButton').addEventListener('click', functio
 document.getElementById('thesisSearchInput').addEventListener('input', function () {
     const query = this.value.trim();
 
+    // Αν το input είναι άδειο, καθαρίζουμε τη λίστα
+    if (!query) {
+        document.getElementById('thesisList').innerHTML = '';
+        return;
+    }
+
     fetch(`/api/theses-search?query=${encodeURIComponent(query)}`)
         .then(response => response.json())
         .then(data => {
             const thesisList = document.getElementById('thesisList');
             thesisList.innerHTML = ''; // Καθαρισμός λίστας
 
-            data.theses.forEach(thesis => {
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item';
-                listItem.textContent = thesis.title;
-                listItem.dataset.thesisId = thesis.theme_id;
-                thesisList.appendChild(listItem);
+            if (data.success) {
+                data.theses.forEach(thesis => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+                    listItem.textContent = thesis.title;
+                    listItem.dataset.thesisId = thesis.theme_id;
 
-                listItem.addEventListener('click', function () {
-                    document.querySelectorAll('#thesisList .list-group-item').forEach(item => {
-                        item.classList.remove('active');
+                    thesisList.appendChild(listItem);
+
+                    // Event για να γίνεται highlight
+                    listItem.addEventListener('click', function () {
+                        document.querySelectorAll('#thesisList .list-group-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+                        this.classList.add('active');
                     });
-                    this.classList.add('active');
                 });
-            });
+            } else {
+                const noResults = document.createElement('li');
+                noResults.className = 'list-group-item text-muted';
+                noResults.textContent = 'Δεν βρέθηκαν θέματα.';
+                thesisList.appendChild(noResults);
+            }
         })
         .catch(err => console.error('Σφάλμα:', err));
 });
 
 // Ανάθεση διπλωματικής
 document.getElementById('assignThesisButton').addEventListener('click', function () {
-    const studentId = this.dataset.studentId;
-    const thesisId = document.querySelector('#thesisList .list-group-item.active')?.dataset.thesisId;
+    const studentId = this.dataset.studentId; // Παίρνουμε το ID του φοιτητή από το dataset
+    const thesisId = document.querySelector('#thesisList .list-group-item.active')?.dataset.thesisId; // Παίρνουμε το ID της διπλωματικής
 
-    if (!thesisId) {
-        alert('Επιλέξτε διπλωματική για ανάθεση.');
+    if (!studentId || !thesisId) {
+        alert('Παρακαλώ επιλέξτε φοιτητή και διπλωματική.');
         return;
     }
 
-    fetch('/api/assign-thesis', {
+    fetch('/api/theses/assign', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ studentId, thesisId }),
+        body: JSON.stringify({ studentId, thesisId }), // Στέλνουμε τα δεδομένα στο backend
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('Η ανάθεση ολοκληρώθηκε επιτυχώς!');
-                $('#assignStudentModal').modal('hide'); // Κλείσιμο modal
+                $('#assignStudentModal').modal('hide'); // Κλείσιμο του modal
             } else {
                 alert('Σφάλμα: ' + data.message);
             }
