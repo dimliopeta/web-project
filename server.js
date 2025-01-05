@@ -249,19 +249,29 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
 
 //Εύρεση φοιτητή από καθηγητή
 app.get('/api/student-search', authenticateJWT, (req, res) => {
-    const { input } = req.query; // Λήψη του input από το query string
-    const query = `SELECT NAME, SURNAME FROM STUDENTS WHERE NAME LIKE ? OR SURNAME LIKE ?`;
-    const searchInput = `%${input}%`; // Δημιουργία του pattern για το LIKE
+    const { input } = req.query;
 
-    db.query(query, [searchInput, searchInput], (err, results) => {
+    if (!input) {
+        return res.status(400).json({ success: false, message: 'Το πεδίο αναζήτησης είναι κενό.' });
+    }
+
+    const query = `
+        SELECT id, name, surname
+        FROM students
+        WHERE id LIKE ? OR name LIKE ? OR surname LIKE ?
+    `;
+    const searchInput = `%${input}%`;
+
+    db.query(query, [searchInput, searchInput, searchInput], (err, results) => {
         if (err) {
-            console.error('Σφάλμα κατά την ανάκτηση των φοιτητών:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+            console.error('Σφάλμα κατά την αναζήτηση φοιτητών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
         res.status(200).json({ success: true, students: results });
     });
 });
+
 
 
 // Ανάκτηση διπλωματικ΄ών καθηγητή
@@ -312,10 +322,13 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
 
 
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
-    const { thesisId, studentId } = req.body;
+    // Μετατροπή των τιμών σε αριθμούς
+    const studentId = parseInt(req.body.studentId, 10);
+    const thesisId = parseInt(req.body.thesisId, 10);
 
-    if (!thesisId || !studentId) {
-        return res.status(400).json({ success: false, message: 'Απαιτείται Thesis ID και Student ID.' });
+    // Έλεγχος αν οι τιμές είναι έγκυρες
+    if (isNaN(studentId) || isNaN(thesisId)) {
+        return res.status(400).json({ success: false, message: 'Μη έγκυρα δεδομένα. Παρακαλώ δοκιμάστε ξανά.' });
     }
 
     const query = `
@@ -337,6 +350,8 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε επιτυχώς!' });
     });
 });
+
+
 
 
 

@@ -33,27 +33,36 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Αναζήτηση Φοιτητών
 document.querySelector('#search-student').addEventListener('input', function () {
-    const filter = this.value.trim(); // Παίρνουμε την τιμή που πληκτρολογήθηκε
+    const filter = this.value.trim();
     const studentList = document.getElementById('student-list');
 
     if (filter.length === 0) {
-        studentList.innerHTML = ''; // Καθαρισμός λίστας αν το πεδίο είναι κενό
+        studentList.innerHTML = '';
         return;
     }
 
-    // Κλήση στο backend για δυναμική αναζήτηση
+    // Κλήση στο backend
     fetch(`/api/student-search?input=${encodeURIComponent(filter)}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                studentList.innerHTML = ''; // Καθαρισμός λίστας
+                studentList.innerHTML = ''; // Καθαρίζουμε τη λίστα
 
-                // Δημιουργία στοιχείων λίστας
                 data.students.forEach(student => {
                     const listItem = document.createElement('li');
-                    listItem.className = 'list-group-item list-group-item-action'; // Προσθήκη κλάσης για clickability
-                    listItem.textContent = `${student.NAME} ${student.SURNAME}`;
-                    listItem.dataset.studentId = student.ID; // Αποθήκευση ID στο dataset
+                    listItem.className = 'list-group-item list-group-item-action';
+                    listItem.textContent = `ID: ${student.id} - ${student.name} ${student.surname}`;
+                    listItem.dataset.studentId = student.id;
+
+                    // Προσθήκη listener για επιλογή φοιτητή
+                    listItem.addEventListener('click', function () {
+                        document.getElementById('studentNameInput').value = `${student.name} ${student.surname} (ID: ${student.id})`;
+                        document.getElementById('assignThesisButton').dataset.studentId = student.id;
+
+                        // Απόκρυψη της λίστας φοιτητών
+                        document.getElementById('studentListWrapper').style.display = 'none';
+                    });
+
                     studentList.appendChild(listItem);
                 });
             } else {
@@ -63,9 +72,10 @@ document.querySelector('#search-student').addEventListener('input', function () 
         .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
 });
 
+
 // Επιλογή Φοιτητή από τη Λίστα
 document.querySelector('#student-list').addEventListener('click', function (event) {
-    const selectedStudent = event.target;
+    const selectedStudent = event.target; // Παίρνουμε το στοιχείο που επιλέχθηκε
     if (selectedStudent.tagName === 'LI') {
         const studentId = selectedStudent.dataset.studentId;
         const studentName = selectedStudent.textContent;
@@ -75,16 +85,23 @@ document.querySelector('#student-list').addEventListener('click', function (even
         document.getElementById('assignThesisButton').dataset.studentId = studentId;
 
         // Απόκρυψη λίστας φοιτητών
-        document.getElementById('student-list').innerHTML = '';
+        document.getElementById('studentListWrapper').style.display = 'none';
     }
 });
 
 // Αλλαγή Επιλεγμένου Φοιτητή
+// Εμφάνιση λίστας φοιτητών όταν πατάει το κουμπί "Αλλαγή Επιλεγμένου Φοιτητή"
 document.getElementById('changeStudentButton').addEventListener('click', function () {
-    // Επαναφορά αναζήτησης φοιτητών
+    // Εμφανίζουμε ξανά το studentListWrapper
+    document.getElementById('studentListWrapper').style.display = 'block';
+
+    // Επαναφέρουμε το search-student και τη λίστα φοιτητών
+    document.getElementById('search-student').value = ''; // Καθαρισμός του input αναζήτησης
+    document.getElementById('student-list').innerHTML = ''; // Καθαρισμός της λίστας φοιτητών
+
+    // Καθαρίζουμε επίσης το επιλεγμένο όνομα φοιτητή και το ID
     document.getElementById('studentNameInput').value = '';
     delete document.getElementById('assignThesisButton').dataset.studentId;
-    document.getElementById('search-student').focus(); // Focus στο input αναζήτησης
 });
 
 // Φόρτωση Διπλωματικών
@@ -136,6 +153,9 @@ document.getElementById('assignThesisButton').addEventListener('click', function
 
     const thesisId = selectedThesis.value;
 
+    console.log('Sending Student ID:', studentId);
+    console.log('Sending Thesis ID:', thesisId);
+
     fetch('/api/theses/assign', {
         method: 'POST',
         headers: {
@@ -147,9 +167,6 @@ document.getElementById('assignThesisButton').addEventListener('click', function
         .then(data => {
             if (data.success) {
                 alert('Η ανάθεση ολοκληρώθηκε επιτυχώς!');
-                document.getElementById('studentNameInput').value = '';
-                document.getElementById('thesisList').innerHTML = '';
-                delete document.getElementById('assignThesisButton').dataset.studentId;
             } else {
                 alert('Σφάλμα: ' + data.message);
             }

@@ -46,6 +46,27 @@
             border-bottom: 2px solid #0d6efd;
             /* Γραμμή στο κάτω μέρος */
         }
+
+        #studentListWrapper {
+            padding-bottom: 15px;
+        }
+
+        #student-list {
+            max-height: 200px;
+            /* Ορίζουμε ένα μέγιστο ύψος */
+            overflow-y: auto;
+            /* Ενεργοποιούμε το scroll */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #studentNameInput {
+            margin-top: 10px;
+        }
+
+        #changeStudentButton {
+            margin-top: 10px;
+        }
     </style>
 </head>
 
@@ -170,20 +191,20 @@
 
             <!-- Κεντρικό layout -->
             <div class="container">
-                <div class="row g-4">
+                <div class="row">
                     <!-- Φοιτητής -->
                     <div class="col-md-6">
                         <div class="border p-3 rounded">
                             <h5 class="text-primary">Φοιτητής</h5>
-                            <div class="input-group mb-3">
-                                <input type="search" class="form-control" placeholder="Αναζήτηση Φοιτητή"
-                                    aria-label="Search" id="search-student" name="search-student">
-                                <span class="input-group-text">
-                                    <img src="https://img.icons8.com/ios7/600/search.png" alt="Search"
-                                        style="width: 20px; height: 20px;">
-                                </span>
+                            <div id="studentListWrapper">
+                                <div class="input-group mb-3">
+                                    <input type="search" class="form-control" placeholder="Αναζήτηση Φοιτητή" aria-label="Search" id="search-student" name="search-student">
+                                    <span class="input-group-text">
+                                        <img src="https://img.icons8.com/ios7/600/search.png" alt="Search" style="width: 20px; height: 20px;">
+                                    </span>
+                                </div>
+                                <ul id="student-list" class="list-group mb-3"></ul>
                             </div>
-                            <ul id="student-list" class="list-group mb-3"></ul>
                             <label for="studentNameInput" class="form-label">Επιλεγμένος Φοιτητής</label>
                             <input type="text" class="form-control" id="studentNameInput" readonly>
                             <button class="btn btn-secondary mt-3 w-100" id="changeStudentButton">Αλλαγή Επιλεγμένου
