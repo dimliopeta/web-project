@@ -50,7 +50,7 @@
 
     <!--- navbar --->
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top nav-item dropdown">
-        <a class="navbar-brand px-3 fs-4" href="student.html">
+        <a class="navbar-brand px-3 fs-4" href="student">
             <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav"
@@ -61,15 +61,10 @@
             <div class="navbar-nav fs-5">
                 <a class="nav-item nav-link" href="#dashboard">Επισκόπιση Θέματος</a>
                 <a class="nav-item nav-link" href="#configure_thesis">Διαχείριση Διπλωματικής</a>
+                <a class="nav-item nav-link" href="#student_profile">Προφίλ</a>
             </div>
 
-            <button class="nav-item dropdown btn btn-outline-secondary ms-auto mx-4">
-                <a class="dropdown-toggle " href="#" role="button" data-bs-toggle="dropdown">Ρυθμίσεις</a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Προφίλ</a></li>
-                    <li><a class="dropdown-item" id="logout-btn">Έξοδος</a></li>
-                </ul>
-            </button>
+            <button type="button" class="nav-item btn btn-outline-secondary ms-auto mx-4" id="logout-btn">Έξοδος</button>
         </div>
     </nav>
 
@@ -77,13 +72,10 @@
     <div class="main-content">
         <!------ DashBoard ------>
         <div id="dashboard" class="content-section" style="display:block;">
-            <!-- Header -->
-            <div class="header">
-                <h2>Πίνακας ελέγχου</h2>
-            </div>
+
 
             <!-- Thesis view body -->
-            <h2 class="text-center">Επισκόπηση θέματος Διπλωματικής Εργασίας</h2>
+            <h2 class="text-center mt-5 pt-5">Επισκόπηση θέματος Διπλωματικής Εργασίας</h2>
             <div class="col-lg-8 mx-auto">
                 <div class="card text-center">
 
@@ -117,7 +109,7 @@
         <!------- Profile page ------->
         <div id="student_profile" class="content-section" style="display:none;">
             <div>
-                <h2 class="text-center">Προφιλ</h2>
+                <h2 class="text-center mt-5 pt-5">Προφιλ</h2>
             </div>
 
             <!-- Cards & Body -->
@@ -232,7 +224,7 @@
 
         <!------- Configure Thesis page ------->
         <div id="configure_thesis" class="content-section" style="display:none;">
-            <h2 class="text-center pt-5 pb-2">Διαχείρηση διπλωματικής</h2>
+            <h2 class="text-center mt-5 pt-5 pb-2">Διαχείρηση διπλωματικής</h2>
 
             <div class="col-lg-8 mx-auto">
                 <div class="card text-center">
