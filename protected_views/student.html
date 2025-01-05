@@ -83,11 +83,11 @@
                 <h2>Πίνακας ελέγχου</h2>
             </div>
 
-             <!-- Thesis view body -->
+            <!-- Thesis view body -->
             <div id="dashboard-content" class="mb-4 pt-4">
                 <h3 class="text-muted">Επισκόπηση διπλωματικής!</h1>
 
-                    <div class="row">
+                    <div class="col-sm-8 row mx-auto">
                         <div class="card text-center">
                             <div class="card-header">
                                 <h4>Διπλωματική</h4>
@@ -224,58 +224,125 @@
         <div id="configure" class="content-section" style="display:none;">...</div>
 
         <h3 class="text-muted pt-5 pb-2">Διαχείρηση διπλωματικής!</h1>
+            <!----- Υπό Ανάθεση ----->
+            <div class="col-sm-8 row mx-auto">
+                <div class="card text-center">
+                    <div class="card-header">
+                        <h4>Διπλωματική</h4>
+                        <p> Κατάσταση: Υπό Ανάθεση</p>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">thesis_title</h5>
+                        <p class="card-text">thesis_summary.</p>
+                        <hr>
+                        <h4 class="py-1">Τριμελής επιτροπή:</h4>
 
-                    <div class="col-sm-8 row mx-auto">
-                        <div class="card text-center">
-                            <div class="card-header">
-                                <h4>Διπλωματική</h4>
-                                <div> Κατάσταση: Υπό Ανάθεση</div>
+                        <div class="row">
+                            <div class="col-sm-5 text-end">
+                                <p class="my-2">Επιβλέπων / 1o μέλος Τριμελούς Επιτροπής:</p>
                             </div>
-                            <div class="card-body">
-                                <h5 class="card-title">thesis_title</h5>
-                                <p class="card-text">thesis_summary.</p>
-                                <hr>
-                                <h4 class="py-1">Τριμελής επιτροπή:</h4>
+                            <div class="col-sm-5">
+                                <p class="my-2 text-start">epivlepomn_name</p>
+                            </div>
+                            <div class="col-sm-2">
+                            </div>
+                            <hr>
 
-                                <div class="row">
-                                    <div class="col-sm-5 text-end">
-                                        <p class="my-2">Επιβλέπων / 1o μέλος Τριμελούς Επιτροπής:</p>
-                                    </div>
-                                    <div class="col-sm-5">
-                                        <p class="my-2 text-start">epivlepomn_name</p>
-                                    </div>
-                                    <div class="col-sm-2">
-                                    </div>
-                                    <hr>
+                            <div class="col-sm-5 text-end">
+                                <p class="my-2">2o μέλος Τριμελούς Επιτροπής:</p>
+                            </div>
+                            <div class="col-sm-5">
+                                <p class="my-2 text-start">trimeles_2</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button"
+                                    class="btn btn-outline-secondary btn-sm float-start">Ορισμός</button>
+                            </div>
+                            <hr>
 
-                                    <div class="col-sm-5 text-end">
-                                        <p class="my-2">2o μέλος Τριμελούς Επιτροπής:</p>
-                                    </div>
-                                    <div class="col-sm-5">
-                                        <p class="my-2 text-start">trimeles_2</p>
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm float-start">Ορισμός</button>
-                                    </div>
-                                    <hr>
+                            <div class="col-sm-5 text-end">
+                                <p class="mt-2 mb-0"> 3ο μέλος Τριμελούς Επιτροπής:</p>
+                            </div>
+                            <div class="col-sm-5">
+                                <p class="mt-2 mb-0 text-start">trimeles3</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button"
+                                    class="btn btn-outline-secondary btn-sm float-start">Ορισμός</button>
+                            </div>
 
-                                    <div class="col-sm-5 text-end">
-                                        <p class="my-2"> 3ο μέλος Τριμελούς Επιτροπής:</p>
-                                    </div>
-                                    <div class="col-sm-5">
-                                        <p class="my-2 text-start">trimeles3</p>
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm float-start">Ορισμός</button>
-                                    </div>
-                        
-                                </div>
-                                <hr>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+
+
+            <!----- Περατωμένη ----->
+            <div class="col-sm-8 row mx-auto">
+                <div class="card text-center">
+                    <div class="card-header">
+                        <h4>Διπλωματική</h4>
+                        <p> Κατάσταση: Περατωμένη</p>
+                        <a href="#" class="btn btn-primary mt-2">Διαχείρηση</a>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">thesis_title</h5>
+                        <p class="card-text">thesis_summary.</p>
+                        <hr>
+
+                        <h6 class="card-title">Επιβλέπων: teacher_id</h6>
+                        <div class="pt-2">Τριμελής:</div>
+                        <p class="card-title">committee1 - committee2 - committee3</p>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-sm-4 text-end">
+                                <p>Ημερομηνία έναρξης: thesis_date_start</p>
+                            </div>
+                            <div class="col-sm-5 text-center">
+                                <p>Ημερομηνία ολοκλήρωσης: thesis_date_end</p>
+                            </div>
+                            <div class="col-sm-3 text-start">
+                                <p>Διάρκεια περάτωσης: thesis_duration</p>
                             </div>
                         </div>
+                        <hr>
+
+                        <div class="row">
+                            <h4 class="text-center pb-1">Αλλαγές κατάστασης</h4>
+                            <div>
+                                <p>allag1</p>
+                            </div>
+                            <div>
+                                <p>allag2</p>
+                            </div>
+                            <div>
+                                <p>allag3</p>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="row">
+                            <h4 class="pb-1 text-center">Αρχεία</h4>
+                            <div class="col-sm-6 text-end">
+                                <p>Πρακτικό εξέτασης:</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <button type="button"
+                                    class="btn btn-secondary btn-sm float-start">PDF</button>
+                            </div>
+                        </div>
+                        <hr>
+
                     </div>
+                </div>
             </div>
-        </div>
+
+
+            <!----- Υπό Εξέταση ----->
+    </div>
+    </div>
 
 
 
@@ -284,9 +351,9 @@
 
 
 
-        <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="/js/student.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/student.js"></script>
 </body>
 
 </html>
