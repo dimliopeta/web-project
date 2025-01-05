@@ -1,5 +1,5 @@
 // Event listener για το navbar
-document.querySelectorAll('.nav-link').forEach(tab => {
+document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
 
@@ -9,7 +9,9 @@ document.querySelectorAll('.nav-link').forEach(tab => {
         });
 
         // Εμφάνιση του ενεργού section
-        const targetId = this.getAttribute('href').substring(1);
+        const targetId = this.getAttribute('href')
+        ? this.getAttribute('href').substring(1)
+        : this.getAttribute('data-target');
         const targetSection = document.getElementById(targetId);
         if (targetSection) {
             targetSection.style.display = 'block';
@@ -18,7 +20,7 @@ document.querySelectorAll('.nav-link').forEach(tab => {
         }
 
         // Ενημέρωση του active class στα tabs
-        document.querySelectorAll('.nav-link').forEach(link => {
+        document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
             link.classList.remove('active');
         });
         this.classList.add('active');
