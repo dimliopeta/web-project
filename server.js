@@ -320,7 +320,7 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
 });
 
 
-
+//Ανάθεση σε φοιτητή 
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     // Μετατροπή των τιμών σε αριθμούς
     const studentId = parseInt(req.body.studentId, 10);
@@ -348,6 +348,79 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
         }
 
         res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε επιτυχώς!' });
+    });
+});
+
+
+//Επεξεργασία Διπλωματικ΄ής
+app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => {
+    const thesisId = req.params.id;
+    const { title, summary } = req.body;
+    const file = req.file;
+    const professorId = req.user.userId;
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesis ID.' });
+    }
+
+    if (!title && !summary && !file) {
+        return res.status(400).json({ success: false, message: 'No changes provided.' });
+    }
+
+    // Εύρεση των υπαρχόντων δεδομένων
+    const getThesisQuery = `
+        SELECT title, summary, pdf_path
+        FROM THESES
+        WHERE theme_id = ? AND teacher_id = ?;
+    `;
+    db.query(getThesisQuery, [thesisId, professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση της διπλωματικής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Η διπλωματική δεν βρέθηκε.' });
+        }
+
+        const oldData = results[0];
+        const updatedData = {
+            title: title || oldData.title,
+            summary: summary || oldData.summary,
+            pdf_path: file ? file.path : oldData.pdf_path,
+        };
+
+        // Έλεγχος αν υπάρχει κάποια αλλαγή
+        if (
+            updatedData.title === oldData.title &&
+            updatedData.summary === oldData.summary &&
+            updatedData.pdf_path === oldData.pdf_path
+        ) {
+            return res.status(400).json({ success: false, message: 'No changes detected.' });
+        }
+
+        // Διαγραφή του παλιού αρχείου PDF αν έχει ανέβει νέο
+        if (file && oldData.pdf_path) {
+            const fs = require('fs');
+            fs.unlink(oldData.pdf_path, (err) => {
+                if (err) console.error('Σφάλμα κατά τη διαγραφή του παλιού αρχείου:', err);
+            });
+        }
+
+        // Ενημέρωση των δεδομένων στη βάση
+        const updateQuery = `
+            UPDATE THESES
+            SET title = ?, summary = ?, pdf_path = ?
+            WHERE theme_id = ? AND teacher_id = ?;
+        `;
+        db.query(updateQuery, [updatedData.title, updatedData.summary, updatedData.pdf_path, thesisId, professorId], (err) => {
+            if (err) {
+                console.error('Σφάλμα κατά την ενημέρωση της διπλωματικής:', err);
+                return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+            }
+
+            res.status(200).json({ success: true, message: 'Η διπλωματική ενημερώθηκε επιτυχώς!' });
+        });
     });
 });
 

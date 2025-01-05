@@ -163,6 +163,74 @@ function loadUnassignedTheses() {
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
 
+function showEditSection(thesis) {
+    const editSection = document.getElementById('edit-section');
+
+    if (!editSection) {
+        console.error('Το edit-section δεν βρέθηκε στο DOM.');
+        return;
+    }
+
+    // Ενημέρωση των πεδίων του κουτιού επεξεργασίας
+    document.getElementById('editTitle').value = thesis.title || '';
+    document.getElementById('editSummary').value = thesis.summary || '';
+
+    // Ορισμός του ID της διπλωματικής στο dataset της φόρμας
+    const editForm = document.getElementById('editThesisForm');
+    editForm.dataset.id = thesis.theme_id; // theme_id από το αντικείμενο thesis
+
+    // Εμφάνιση του κουτιού επεξεργασίας
+    editSection.classList.remove('d-none');
+    editSection.scrollIntoView({ behavior: 'smooth' }); // Εστίαση στο edit-section
+}
+
+
+document.getElementById('editThesisForm').addEventListener('submit', function (e) {
+    e.preventDefault(); // Αποτροπή ανανέωσης σελίδας
+
+    const thesisId = this.dataset.id; // Λήψη του ID από το dataset
+    if (!thesisId) {
+        alert('Δεν βρέθηκε το ID της διπλωματικής.');
+        return;
+    }
+
+    const title = document.getElementById('editTitle').value;
+    const summary = document.getElementById('editSummary').value;
+    const pdf = document.getElementById('editPdf').files[0];
+
+    if (!title && !summary && !pdf) {
+        alert('Δεν έχετε κάνει καμία αλλαγή.');
+        return;
+    }
+
+    const formData = new FormData();
+    if (title) formData.append('title', title);
+    if (summary) formData.append('summary', summary);
+    if (pdf) formData.append('pdf', pdf);
+
+    fetch(`/api/theses/${thesisId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Η διπλωματική ενημερώθηκε επιτυχώς!');
+                loadUnassignedTheses(); // Επαναφόρτωση δεδομένων
+            } else {
+                alert(`Σφάλμα: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα:', error);
+            alert('Κάτι πήγε στραβά κατά την αποθήκευση!');
+        });
+});
+
+
 
 // Ανάθεση Διπλωματικής
 document.getElementById('assignThesisButton').addEventListener('click', function () {
@@ -235,7 +303,7 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
 
 
                 // Επαναφόρτωση της λίστας διπλωματικών
-                loadTheses();
+                loadUnassignedTheses();
             } else {
                 alert('Σφάλμα: ' + data.message);
             }
