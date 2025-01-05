@@ -227,6 +227,26 @@ app.post('/theses_pdf', authenticateJWT, upload.single('pdf'), (req, res) => {
     });
 });
 
+app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
+    const professorId = req.user.userId;
+
+    const query = `
+        SELECT theme_id, title
+        FROM THESES
+        WHERE teacher_id = ? AND status = 'unassigned';
+    `;
+
+    db.query(query, [professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        res.status(200).json({ success: true, theses: results });
+    });
+});
+
+
 //Εύρεση φοιτητή από καθηγητή
 app.get('/api/student-search', authenticateJWT, (req, res) => {
     const { input } = req.query; // Λήψη του input από το query string
@@ -289,31 +309,6 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
     });
 });
 
-app.get('/api/theses-search', authenticateJWT, (req, res) => {
-    const { query } = req.query;
-
-    if (!query) {
-        return res.status(400).json({ success: false, message: 'Missing query parameter.' });
-    }
-
-    const professorId = req.user.userId;
-
-    const sql = `
-        SELECT theme_id, title
-        FROM THESES
-        WHERE teacher_id = ? AND status = 'unassigned' AND title LIKE ?;
-    `;
-    const searchInput = `%${query}%`;
-
-    db.query(sql, [professorId, searchInput], (err, results) => {
-        if (err) {
-            console.error('Σφάλμα κατά την αναζήτηση διπλωματικών:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
-        }
-
-        res.status(200).json({ success: true, theses: results });
-    });
-});
 
 
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {

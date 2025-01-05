@@ -166,54 +166,53 @@
         </div>
         <!-- Assign to student nav-->
         <div id="assign" class="content-section" style="display:none;">
-            <div class="input-group rounded">
-                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
-                    aria-describedby="search-addon" id="search-student" name="search-student" />
-                <span class="input-group-text border-0" id="search-addon">
-                    <img src="https://img.icons8.com/ios7/600/search.png" alt="Search"
-                        style="width: 20px; height: 20px;" />
-                </span>
-            </div>
+            <h3 class="text-center mb-4">Ανάθεση Θέματος Διπλωματικής σε φοιτητή</h3>
 
-            <ul id="student-list" class="list-group">
-            </ul>
-            <div class="modal fade" id="assignStudentModal" tabindex="-1" aria-labelledby="assignStudentModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="assignStudentModalLabel">Ανάθεση Διπλωματικής</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Input για τον φοιτητή -->
-                            <div class="mb-3">
-                                <label for="studentNameInput" class="form-label">Φοιτητής</label>
-                                <input type="text" class="form-control" id="studentNameInput" readonly>
-                            </div>
-                            <button class="btn btn-primary mb-3" id="changeStudentButton">Αλλαγή Επιλεγμένου
-                                Φοιτητή</button>
-
-                            <!-- Search bar για διπλωματικές -->
+            <!-- Κεντρικό layout -->
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Φοιτητής -->
+                    <div class="col-md-6">
+                        <div class="border p-3 rounded">
+                            <h5 class="text-primary">Φοιτητής</h5>
                             <div class="input-group mb-3">
-                                <input type="search" class="form-control" id="thesisSearchInput"
-                                    placeholder="Αναζήτηση Θέματος" aria-label="Search">
-                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="search" class="form-control" placeholder="Αναζήτηση Φοιτητή"
+                                    aria-label="Search" id="search-student" name="search-student">
+                                <span class="input-group-text">
+                                    <img src="https://img.icons8.com/ios7/600/search.png" alt="Search"
+                                        style="width: 20px; height: 20px;">
+                                </span>
                             </div>
+                            <ul id="student-list" class="list-group mb-3"></ul>
+                            <label for="studentNameInput" class="form-label">Επιλεγμένος Φοιτητής</label>
+                            <input type="text" class="form-control" id="studentNameInput" readonly>
+                            <button class="btn btn-secondary mt-3 w-100" id="changeStudentButton">Αλλαγή Επιλεγμένου
+                                Φοιτητή</button>
+                        </div>
+                    </div>
 
-                            <!-- Λίστα διπλωματικών -->
-                            <ul id="thesisList" class="list-group">
-                                <!-- Οι διπλωματικές θα φορτώνονται δυναμικά -->
-                            </ul>
+                    <!-- Διπλωματικές -->
+                    <div class="col-md-6">
+                        <div class="border p-3 rounded">
+                            <h5 class="text-primary">Θέματα Διπλωματικών</h5>
+                            <form id="thesisForm">
+                                <div id="thesisList" class="form-check"></div>
+                            </form>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Κλείσιμο</button>
-                            <button type="button" class="btn btn-success" id="assignThesisButton">Ανάθεση</button>
-                        </div>
+                    </div>
+                </div>
+
+                <!-- Κουμπί ανάθεσης -->
+                <div class="row mt-4">
+                    <div class="col text-center">
+                        <button class="btn btn-primary btn-lg" id="assignThesisButton">Ανάθεση Διπλωματικής</button>
                     </div>
                 </div>
             </div>
         </div>
+
+
+
         <div id="list" class="content-section" style="display:none;">...</div>
         <div id="invitations" class="content-section" style="display:none;">...</div>
         <div id="stats" class="content-section" style="display:none;">...</div>

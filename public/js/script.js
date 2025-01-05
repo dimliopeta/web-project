@@ -31,40 +31,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-document.querySelector('#assign input[type="search"]').addEventListener('input', function () {
-    const filter = this.value.trim(); // Παίρνουμε την τιμή που πληκτρολογήθηκε
-
-    const studentList = document.getElementById('student-list');
-
-    if (filter.length === 0) {
-        // Αν το πεδίο είναι άδειο, καθαρίζουμε τη λίστα
-        studentList.innerHTML = ''; // Καθαρισμός λίστας
-        return; // Σταματάμε την εκτέλεση
-    }
-
-    // Κλήση στο backend για δυναμική αναζήτηση
-    fetch(`/api/student-search?input=${encodeURIComponent(filter)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                studentList.innerHTML = ''; // Καθαρίζουμε τη λίστα
-
-                data.students.forEach(student => {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'list-group-item';
-                    listItem.textContent = `Φοιτητής: ${student.NAME} ${student.SURNAME}`;
-                    listItem.dataset.studentId = student.id; // Βάζουμε το ID του φοιτητή στο data attribute
-                    studentList.appendChild(listItem);
-                });
-            } else {
-                console.error('Σφάλμα:', data.message);
-            }
-        })
-        .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
-});
-
-
-document.querySelector('#assign input[type="search"]').addEventListener('input', function () {
+// Αναζήτηση Φοιτητών
+document.querySelector('#search-student').addEventListener('input', function () {
     const filter = this.value.trim(); // Παίρνουμε την τιμή που πληκτρολογήθηκε
     const studentList = document.getElementById('student-list');
 
@@ -87,16 +55,6 @@ document.querySelector('#assign input[type="search"]').addEventListener('input',
                     listItem.textContent = `${student.NAME} ${student.SURNAME}`;
                     listItem.dataset.studentId = student.ID; // Αποθήκευση ID στο dataset
                     studentList.appendChild(listItem);
-
-                    // Προσθήκη event listener για click
-                    listItem.addEventListener('click', function () {
-                        document.getElementById('studentNameInput').value = `${student.NAME} ${student.SURNAME}`;
-                        document.getElementById('assignThesisButton').dataset.studentId = student.ID; // Αποθήκευση ID στο κουμπί
-
-                        // Εμφάνιση modal χρησιμοποιώντας Bootstrap Modal
-                        const assignModal = new bootstrap.Modal(document.getElementById('assignStudentModal'));
-                        assignModal.show();
-                    });
                 });
             } else {
                 console.error('Σφάλμα:', data.message);
@@ -105,84 +63,100 @@ document.querySelector('#assign input[type="search"]').addEventListener('input',
         .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
 });
 
+// Επιλογή Φοιτητή από τη Λίστα
+document.querySelector('#student-list').addEventListener('click', function (event) {
+    const selectedStudent = event.target;
+    if (selectedStudent.tagName === 'LI') {
+        const studentId = selectedStudent.dataset.studentId;
+        const studentName = selectedStudent.textContent;
 
-document.getElementById('changeStudentButton').addEventListener('click', function () {
-    const modal = bootstrap.Modal.getInstance(document.getElementById('assignStudentModal')); // Παίρνουμε την τρέχουσα instance του modal
-    modal.hide(); // Κλείνουμε το modal
+        // Εμφάνιση του επιλεγμένου φοιτητή
+        document.getElementById('studentNameInput').value = studentName;
+        document.getElementById('assignThesisButton').dataset.studentId = studentId;
+
+        // Απόκρυψη λίστας φοιτητών
+        document.getElementById('student-list').innerHTML = '';
+    }
 });
 
+// Αλλαγή Επιλεγμένου Φοιτητή
+document.getElementById('changeStudentButton').addEventListener('click', function () {
+    // Επαναφορά αναζήτησης φοιτητών
+    document.getElementById('studentNameInput').value = '';
+    delete document.getElementById('assignThesisButton').dataset.studentId;
+    document.getElementById('search-student').focus(); // Focus στο input αναζήτησης
+});
 
-// Αναζήτηση διπλωματικών
-document.getElementById('thesisSearchInput').addEventListener('input', function () {
-    const query = this.value.trim();
-
-    // Αν το input είναι άδειο, καθαρίζουμε τη λίστα
-    if (!query) {
-        document.getElementById('thesisList').innerHTML = '';
-        return;
-    }
-
-    fetch(`/api/theses-search?query=${encodeURIComponent(query)}`)
+// Φόρτωση Διπλωματικών
+function loadUnassignedTheses() {
+    fetch('/api/theses/unassigned')
         .then(response => response.json())
         .then(data => {
-            const thesisList = document.getElementById('thesisList');
-            thesisList.innerHTML = ''; // Καθαρισμός λίστας
-
             if (data.success) {
+                const thesisList = document.getElementById('thesisList');
+                thesisList.innerHTML = ''; // Καθαρισμός υπάρχουσας λίστας
+
                 data.theses.forEach(thesis => {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'list-group-item';
-                    listItem.textContent = thesis.title;
-                    listItem.dataset.thesisId = thesis.theme_id;
+                    const radioItem = document.createElement('div');
+                    radioItem.className = 'form-check';
 
-                    thesisList.appendChild(listItem);
+                    const radioInput = document.createElement('input');
+                    radioInput.className = 'form-check-input';
+                    radioInput.type = 'radio';
+                    radioInput.name = 'thesisRadio';
+                    radioInput.id = `thesis-${thesis.theme_id}`;
+                    radioInput.value = thesis.theme_id;
 
-                    // Event για να γίνεται highlight
-                    listItem.addEventListener('click', function () {
-                        document.querySelectorAll('#thesisList .list-group-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        this.classList.add('active');
-                    });
+                    const radioLabel = document.createElement('label');
+                    radioLabel.className = 'form-check-label';
+                    radioLabel.htmlFor = `thesis-${thesis.theme_id}`;
+                    radioLabel.textContent = thesis.title;
+
+                    radioItem.appendChild(radioInput);
+                    radioItem.appendChild(radioLabel);
+
+                    thesisList.appendChild(radioItem);
                 });
             } else {
-                const noResults = document.createElement('li');
-                noResults.className = 'list-group-item text-muted';
-                noResults.textContent = 'Δεν βρέθηκαν θέματα.';
-                thesisList.appendChild(noResults);
+                console.error('Σφάλμα:', data.message);
             }
         })
-        .catch(err => console.error('Σφάλμα:', err));
-});
+        .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
+}
 
-// Ανάθεση διπλωματικής
+// Ανάθεση Διπλωματικής
 document.getElementById('assignThesisButton').addEventListener('click', function () {
-    const studentId = this.dataset.studentId; // Παίρνουμε το ID του φοιτητή από το dataset
-    const thesisId = document.querySelector('#thesisList .list-group-item.active')?.dataset.thesisId; // Παίρνουμε το ID της διπλωματικής
+    const studentId = this.dataset.studentId;
+    const selectedThesis = document.querySelector('input[name="thesisRadio"]:checked');
 
-    if (!studentId || !thesisId) {
+    if (!studentId || !selectedThesis) {
         alert('Παρακαλώ επιλέξτε φοιτητή και διπλωματική.');
         return;
     }
+
+    const thesisId = selectedThesis.value;
 
     fetch('/api/theses/assign', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ studentId, thesisId }), // Στέλνουμε τα δεδομένα στο backend
+        body: JSON.stringify({ studentId, thesisId }),
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('Η ανάθεση ολοκληρώθηκε επιτυχώς!');
-                $('#assignStudentModal').modal('hide'); // Κλείσιμο του modal
+                document.getElementById('studentNameInput').value = '';
+                document.getElementById('thesisList').innerHTML = '';
+                delete document.getElementById('assignThesisButton').dataset.studentId;
             } else {
                 alert('Σφάλμα: ' + data.message);
             }
         })
         .catch(err => console.error('Σφάλμα:', err));
 });
+
 
 
 
@@ -292,4 +266,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 });
 
 
-document.addEventListener('DOMContentLoaded', loadTheses);
+document.addEventListener('DOMContentLoaded', function () {
+    loadTheses(); 
+    loadUnassignedTheses(); 
+});
