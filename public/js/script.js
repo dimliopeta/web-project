@@ -9,10 +9,19 @@ document.querySelectorAll('.nav-link').forEach(tab => {
         });
 
         // Εμφάνιση του ενεργού section
-        const targetId = this.getAttribute('href').substring(1); // Παίρνουμε το ID από το href (π.χ., #dashboard)
+        const targetId = this.getAttribute('href').substring(1);
         const targetSection = document.getElementById(targetId);
         if (targetSection) {
             targetSection.style.display = 'block';
+
+            // Φόρτωση δεδομένων ανάλογα με το section
+            if (targetId === 'theses-section') {
+                loadUnassignedTheses();
+            } else if (targetId === 'list') {
+                loadTheses();
+            } else if (targetId === 'assign') {
+                loadUnassignedTheses();
+            }
         }
 
         // Ενημέρωση του active class στα tabs
@@ -22,6 +31,7 @@ document.querySelectorAll('.nav-link').forEach(tab => {
         this.classList.add('active');
     });
 });
+
 
 // Εμφάνιση του dashboard κατά την αρχική φόρτωση
 window.addEventListener('DOMContentLoaded', () => {
@@ -110,27 +120,39 @@ function loadUnassignedTheses() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Φόρτωση στο "Θέματα Διπλωματικών"
+                const thesesTableBody = document.querySelector('#theses-section table tbody');
+                thesesTableBody.innerHTML = '';
+
+                data.theses.forEach(thesis => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${thesis.title}</td>
+                        <td>${thesis.theme_id}</td>
+                        <td>Υπό Ανάθεση</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" data-id="${thesis.theme_id}">Επεξεργασία</button>
+                        </td>
+                    `;
+
+                    const editButton = row.querySelector('button');
+                    editButton.addEventListener('click', () => showEditSection(thesis));
+
+                    thesesTableBody.appendChild(row);
+                });
+
+                // Φόρτωση στο "Ανάθεση σε Φοιτητή"
                 const thesisList = document.getElementById('thesisList');
-                thesisList.innerHTML = ''; // Καθαρισμός υπάρχουσας λίστας
+                thesisList.innerHTML = '';
 
                 data.theses.forEach(thesis => {
                     const radioItem = document.createElement('div');
                     radioItem.className = 'form-check';
 
-                    const radioInput = document.createElement('input');
-                    radioInput.className = 'form-check-input';
-                    radioInput.type = 'radio';
-                    radioInput.name = 'thesisRadio';
-                    radioInput.id = `thesis-${thesis.theme_id}`;
-                    radioInput.value = thesis.theme_id;
-
-                    const radioLabel = document.createElement('label');
-                    radioLabel.className = 'form-check-label';
-                    radioLabel.htmlFor = `thesis-${thesis.theme_id}`;
-                    radioLabel.textContent = thesis.title;
-
-                    radioItem.appendChild(radioInput);
-                    radioItem.appendChild(radioLabel);
+                    radioItem.innerHTML = `
+                        <input class="form-check-input" type="radio" name="thesisRadio" id="thesis-${thesis.theme_id}" value="${thesis.theme_id}">
+                        <label class="form-check-label" for="thesis-${thesis.theme_id}">${thesis.title}</label>
+                    `;
 
                     thesisList.appendChild(radioItem);
                 });
@@ -140,6 +162,7 @@ function loadUnassignedTheses() {
         })
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
+
 
 // Ανάθεση Διπλωματικής
 document.getElementById('assignThesisButton').addEventListener('click', function () {
@@ -226,45 +249,54 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
 
 // Συνάρτηση για φόρτωση των διπλωματικών
 function loadTheses() {
-    const token = localStorage.getItem('token'); // Ανάκτηση του token από το localStorage
+    const token = localStorage.getItem('token');
 
     fetch('/api/theses', {
         headers: {
-            'Authorization': `Bearer ${token}` // Προσθήκη του token στο header
+            'Authorization': `Bearer ${token}`
         }
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const thesesList = document.querySelector('#theses ul');
-                thesesList.innerHTML = ''; // Καθαρίζουμε το υπάρχον περιεχόμενο
+                const thesesTableBody = document.querySelector('#list table tbody');
+                thesesTableBody.innerHTML = '';
 
-                data.theses.forEach((thesis, index) => {
-                    let status = ""; // Δημιουργούμε τη μεταβλητή status εκτός του switch
+                data.theses.forEach(thesis => {
+                    const row = document.createElement('tr');
 
+                    let status;
                     switch (thesis.status) {
                         case 'active':
-                            status = "Ενεργή";
+                            status = 'Ενεργή';
                             break;
                         case 'to-be-reviewed':
-                            status = "Υπό Εξέταση";
+                            status = 'Υπό Εξέταση';
                             break;
                         case 'completed':
-                            status = "Περατωμένη";
+                            status = 'Περατωμένη';
                             break;
                         default:
-                            status = "Υπό Ανάθεση";
+                            status = 'Υπό Ανάθεση';
                     }
 
-                    const listItem = document.createElement('li');
-                    listItem.className = 'list-group-item';
-                    listItem.textContent = `Διπλωματική ${index + 1}: ${thesis.title} - ${thesis.summary} - Κατάσταση: ${status}`;
-                    thesesList.appendChild(listItem);
+                    row.innerHTML = `
+                        <td>${thesis.title}</td>
+                        <td>${thesis.theme_id}</td>
+                        <td>${thesis.role || 'Καθηγητής'}</td>
+                        <td>${status}</td>
+                    `;
+
+                    thesesTableBody.appendChild(row);
                 });
+            } else {
+                console.error('Σφάλμα:', data.message);
             }
         })
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
+
+
 
 document.getElementById('logout-btn').addEventListener('click', (event) => {
     event.preventDefault(); // Αποφυγή της προεπιλεγμένης συμπεριφοράς του link

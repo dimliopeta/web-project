@@ -75,7 +75,7 @@
 
     <!--- navbar --->
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
-        <a class="navbar-brand px-3 fs-4" href="teacher.html">
+        <a class="navbar-brand px-3 fs-4" href="teacher">
             <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav"
@@ -129,51 +129,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Theses -->
-                <div id="theses" class="mb-4 pt-4">
-                    <h3>Θέματα Διπλωματικών</h3>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createThesisModal">Νέο
-                        Θέμα</button>
-                    <ul class="list-group mt-3"></ul>
-                </div>
 
-
-                <!-- Modal for Create Thesis -->
-                <div class="modal fade" id="createThesisModal" tabindex="-1" aria-labelledby="createThesisModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="createThesisModalLabel">Δημιουργία Νέου Θέματος</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="thesisForm" enctype="multipart/form-data">
-                                    <div class="mb-3">
-                                        <label for="title" class="form-label">Τίτλος</label>
-                                        <input type="text" class="form-control" id="title" name="title" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="summary" class="form-label">Περιγραφή</label>
-                                        <textarea class="form-control" id="summary" name="summary" rows="3"
-                                            required></textarea>
-                                    </div>
-                                    <div class="mb-3 d-flex align-items-center">
-                                        <div class="me-3">
-                                            <label for="pdf" class="form-label visually-hidden">Επισύναψη Αρχείου
-                                                PDF</label>
-                                            <input type="file" class="form-control" id="pdf" name="pdf"
-                                                accept="application/pdf">
-                                        </div>
-                                        <span class="text-muted">Επισύναψη Αρχείου PDF</span>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Υποβολή</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Statistics -->
                 <div id="stats" class="mb-4 pt-4">
@@ -183,8 +139,107 @@
             </div>
         </div>
 
-        <div id="theses" class="content-section" style="display:none;">
+
+
+        <!-- Θέματα Διπλωματικών -->
+        <div id="theses-section" class="content-section" style="display:none;">
+
+            <h3 class="text-center mb-4">Θέματα Διπλωματικών</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="border p-3 rounded">
+
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createThesisModal">Νέο
+                            Θέμα</button>
+                        <ul class="list-group mt-3"></ul>
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Τίτλος</th>
+                                    <th scope="col">Id</th>
+                                    <th scope="col">Κατάσταση</th>
+                                    <th scope="col">Επεξεργασία</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+
+
+
+                        <!-- Modal for Create Thesis -->
+                        <div class="modal fade" id="createThesisModal" tabindex="-1"
+                            aria-labelledby="createThesisModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="createThesisModalLabel">Δημιουργία Νέου Θέματος</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="thesisForm" enctype="multipart/form-data">
+                                            <div class="mb-3">
+                                                <label for="title" class="form-label">Τίτλος</label>
+                                                <input type="text" class="form-control" id="title" name="title"
+                                                    required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="summary" class="form-label">Περιγραφή</label>
+                                                <textarea class="form-control" id="summary" name="summary" rows="3"
+                                                    required></textarea>
+                                            </div>
+                                            <div class="mb-3 d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <label for="pdf" class="form-label visually-hidden">Επισύναψη
+                                                        Αρχείου
+                                                        PDF</label>
+                                                    <input type="file" class="form-control" id="pdf" name="pdf"
+                                                        accept="application/pdf">
+                                                </div>
+                                                <span class="text-muted">Επισύναψη Αρχείου PDF</span>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Υποβολή</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="edit-section" class="col-md-6 d-none">
+                    <div class="border p-3 rounded">
+                        <h5 class="text-primary">Επεξεργασία</h5>
+                        <form id="editThesisForm">
+                            <div class="mb-3">
+                                <label for="editTitle" class="form-label">Τίτλος</label>
+                                <input type="text" class="form-control" id="editTitle" name="editTitle" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editSummary" class="form-label">Περιγραφή</label>
+                                <textarea class="form-control" id="editSummary" name="editSummary" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3 d-flex align-items-center">
+                                <div class="me-3">
+                                    <label for="editPdf" class="form-label visually-hidden">Επισύναψη Αρχείου PDF</label>
+                                    <input type="file" class="form-control" id="editPdf" name="editPdf" accept="application/pdf">
+                                </div>
+                                <span class="text-muted">Επισύναψη Αρχείου PDF</span>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Αποθήκευση Αλλαγών</button>
+                        </form>
+                    </div>
+                </div>
+                
+            </div>
         </div>
+
+
+
+
+
         <!-- Assign to student nav-->
         <div id="assign" class="content-section" style="display:none;">
             <h3 class="text-center mb-4">Ανάθεση Θέματος Διπλωματικής σε Φοιτητή</h3>
@@ -198,9 +253,11 @@
                             <h5 class="text-primary">Φοιτητής</h5>
                             <div id="studentListWrapper">
                                 <div class="input-group mb-3">
-                                    <input type="search" class="form-control" placeholder="Αναζήτηση Φοιτητή" aria-label="Search" id="search-student" name="search-student">
+                                    <input type="search" class="form-control" placeholder="Αναζήτηση Φοιτητή"
+                                        aria-label="Search" id="search-student" name="search-student">
                                     <span class="input-group-text">
-                                        <img src="https://img.icons8.com/ios7/600/search.png" alt="Search" style="width: 20px; height: 20px;">
+                                        <img src="https://img.icons8.com/ios7/600/search.png" alt="Search"
+                                            style="width: 20px; height: 20px;">
                                     </span>
                                 </div>
                                 <ul id="student-list" class="list-group mb-3"></ul>
@@ -233,8 +290,77 @@
         </div>
 
 
+        <!-- Λίστα Διπλωματικών -->
+        <div id="list" class="content-section" style="display:none;">
+            <h3 class="text-center mb-4">Λίστα Διπλωματικών</h3>
 
-        <div id="list" class="content-section" style="display:none;">...</div>
+            <!-- Κεντρικό layout -->
+            <div class="container">
+                <div class="row">
+                    <!-- Λίστα Διπλωματικών -->
+                    <div class="col-md-6">
+                        <div class="border p-3 rounded">
+                            <div class="btn-group">
+                                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Φιλτράρισμα
+                                </button>
+                                <div class="dropdown-menu">
+                                    <p>Κατάσταση Διπλωματικής</p>
+                                    <a class="dropdown-item" href="#">Υπό Ανάθεση</a>
+                                    <a class="dropdown-item" href="#">Υπό Εξέταση</a>
+                                    <a class="dropdown-item" href="#">Περατωμένες</a>
+                                    <a class="dropdown-item" href="#">Ακυρωμένες</a>
+                                    <div class="dropdown-divider"></div>
+                                    <p>Ρόλος</p>
+                                    <a class="dropdown-item" href="#">Επιβλέπων</a>
+                                    <a class="dropdown-item" href="#">Μέλος Τριμελούς</a>
+
+                                </div>
+                            </div>
+
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Τίτλος</th>
+                                        <th scope="col">Id</th>
+                                        <th scope="col">Ρόλος</th>
+                                        <th scope="col">Κατάσταση</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">1</th>
+                                        <td>Mark</td>
+                                        <td>Otto</td>
+                                        <td>@mdo</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2</th>
+                                        <td>Jacob</td>
+                                        <td>Thornton</td>
+                                        <td>@fat</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">3</th>
+                                        <td colspan="2">Larry the Bird</td>
+                                        <td>@twitter</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Διπλωματικές -->
+                    <div class="col-md-6">
+                        <div class="border p-3 rounded">
+                            <h5 class="text-primary">Βασικές Πληροφορίες</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="invitations" class="content-section" style="display:none;">...</div>
         <div id="stats" class="content-section" style="display:none;">...</div>
     </div>
