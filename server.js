@@ -352,7 +352,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
 });
 
 
-//Επεξεργασία Διπλωματικ΄ής
+//Επεξεργασία Διπλωματικής
 app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => {
     const thesisId = req.params.id;
     const { title, summary } = req.body;
@@ -425,11 +425,12 @@ app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => 
 });
 
 // API to fetch student data by ID
-app.get('/api/student/:id', (req, res) => {
-    const studentId = req.params.id;
-    const query = `SELECT * FROM students WHERE student_number = ?`;
+app.get('/api/student', authenticateJWT, (req, res) => {
+    const userId = req.user.userId; // Extract user ID from the JWT
 
-    db.query(query, [studentId], (err, results) => {
+    const query = `SELECT * FROM students WHERE id = ?`;
+
+    db.query(query, [userId], (err, results) => {
         if (err) {
             console.error('Error fetching student data:', err);
             return res.status(500).json({ error: 'Database error' });
@@ -437,9 +438,13 @@ app.get('/api/student/:id', (req, res) => {
         if (results.length === 0) {
             return res.status(404).json({ error: 'Student not found' });
         }
+
+        // Send the student data as a response
         res.json(results[0]);
     });
 });
+
+
 
 
 

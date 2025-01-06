@@ -1,4 +1,4 @@
-// Event listener για το navbar
+//---------------Event listener for the navbar---------------
 document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
@@ -28,17 +28,8 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
 });
 
 
-// Εμφάνιση του dashboard κατά την αρχική φόρτωση
-window.addEventListener('DOMContentLoaded', () => {
-    const defaultTab = document.querySelector('a[href="#dashboard"]');
-    if (defaultTab) {
-        defaultTab.click();
-    }
-});
 
-
-
-
+//---------------Logout Function---------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
     event.preventDefault(); // Αποφυγή της προεπιλεγμένης συμπεριφοράς του link
     fetch('/logout', {
@@ -59,38 +50,56 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 
 
 
+//---------------Load Profile Function---------------
+function loadStudentProfile() {
+    const token = localStorage.getItem('token');
 
-async function loadStudentData(studentId) {
-    try {
-        // Fetch student data from the backend API
-        const response = await fetch(`/api/student/${studentId}`);
+    // Fetch student data from the backend API
+    fetch('/api/student', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`, // Send token in Authorization header
+        }
+    })
+    .then(response => {
         if (!response.ok) {
             throw new Error('Failed to fetch student data');
         }
-        const student = await response.json();
-
+        return response.json(); // Parse the response as JSON
+    })
+    .then(data => {
         // Update the profile page with fetched data
+        const student = data;
+
+        // Profile details
         document.querySelector('#student_profile h5').textContent = student.name;
         document.querySelector('#student_profile .text-muted.mb-1').textContent = student.student_number;
 
-        // Update contact information
+        // Contact information
         document.querySelector('#student_profile [data-field="email"]').textContent = student.email;
         document.querySelector('#student_profile [data-field="mobile_telephone"]').textContent = student.mobile_telephone;
         document.querySelector('#student_profile [data-field="landline_telephone"]').textContent = student.landline_telephone;
         document.querySelector('#student_profile [data-field="street"]').textContent = student.street;
-        document.querySelector('#student_profile [data-field="street_number"]').textContent = student.street_number;
+        document.querySelector('#student_profile [data-field="number"]').textContent = student.number;
         document.querySelector('#student_profile [data-field="city"]').textContent = student.city;
         document.querySelector('#student_profile [data-field="postcode"]').textContent = student.postcode;
-    } catch (error) {
+
+    })
+    .catch(error => {
         console.error('Error loading student data:', error);
-    }
+    });
 }
 
-// Call the function with a sample student ID (replace "12345" with actual ID)
+//------ Load the student profile after DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const studentId = ''; // Replace with dynamically fetched ID if available
-    loadStudentData(studentId);
+    loadStudentProfile();
 });
 
+//---------------Show the dashboard as main page after DOM is loaded---------------
+window.addEventListener('DOMContentLoaded', () => {
+    const defaultTab = document.querySelector('a[href="#dashboard"]');
+    if (defaultTab) {
+        defaultTab.click();
+    }
+});
 
-document.addEventListener('DOMContentLoaded', loadTheses);
