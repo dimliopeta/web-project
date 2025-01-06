@@ -10,8 +10,8 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
 
         // Εμφάνιση του ενεργού section
         const targetId = this.getAttribute('href')
-        ? this.getAttribute('href').substring(1)
-        : this.getAttribute('data-target');
+            ? this.getAttribute('href').substring(1)
+            : this.getAttribute('data-target');
         const targetSection = document.getElementById(targetId);
         if (targetSection) {
             targetSection.style.display = 'block';
@@ -24,6 +24,19 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
             } else if (targetId === 'assign') {
                 loadUnassignedTheses();
             }
+        }
+
+        // Απόκρυψη του παραθύρου επεξεργασίας
+        const editSection = document.getElementById('edit-section');
+        if (editSection && !editSection.classList.contains('d-none')) {
+            editSection.classList.add('d-none'); // Απόκρυψη
+        }
+
+        // Επαναφορά του μεγέθους του `themes-compartment`
+        const themesCompartment = document.getElementById('themes-compartment');
+        if (themesCompartment) {
+            themesCompartment.classList.remove('col-md-6');
+            themesCompartment.classList.add('col-lg-8', 'mx-auto'); // Επαναφορά
         }
 
         // Ενημέρωση του active class στα tabs
@@ -167,70 +180,55 @@ function loadUnassignedTheses() {
 
 function showEditSection(thesis) {
     const editSection = document.getElementById('edit-section');
+    const themesCompartment = document.getElementById('themes-compartment');
 
-    if (!editSection) {
-        console.error('Το edit-section δεν βρέθηκε στο DOM.');
+    if (!editSection || !themesCompartment) {
+        console.error('Το edit-section ή το themes-compartment δεν βρέθηκε στο DOM.');
         return;
     }
 
     // Ενημέρωση των πεδίων του κουτιού επεξεργασίας
-    document.getElementById('editTitle').value = thesis.title || '';
-    document.getElementById('editSummary').value = thesis.summary || '';
+    const editTitle = document.getElementById('editTitle');
+    const editSummary = document.getElementById('editSummary');
+
+    // Ενημέρωση placeholder για τίτλο και περιγραφή
+    editTitle.value = ''; // Κενό πεδίο για αλλαγή
+    editSummary.value = ''; // Κενό πεδίο για αλλαγή
+    editTitle.placeholder = thesis.title || 'Δεν υπάρχει τίτλος';
+    editSummary.placeholder = thesis.summary && thesis.summary.trim() !== ''
+        ? thesis.summary
+        : 'Δεν υπάρχει περιγραφή';
 
     // Ορισμός του ID της διπλωματικής στο dataset της φόρμας
     const editForm = document.getElementById('editThesisForm');
     editForm.dataset.id = thesis.theme_id; // theme_id από το αντικείμενο thesis
 
-    // Εμφάνιση του κουτιού επεξεργασίας
+    // Αλλαγή διατάξεων
+    themesCompartment.classList.remove('col-lg-8', 'mx-auto');
+    themesCompartment.classList.add('col-md-6');
     editSection.classList.remove('d-none');
-    editSection.scrollIntoView({ behavior: 'smooth' }); // Εστίαση στο edit-section
+
+    // Εστίαση στο edit-section
+    editSection.scrollIntoView({ behavior: 'smooth' });
 }
 
+function showInfoSection(thesis) {
+    const infoSection = document.getElementById('info-compartment');
+    const thesesCompartment = document.getElementById('theses-compartment');
 
-document.getElementById('editThesisForm').addEventListener('submit', function (e) {
-    e.preventDefault(); // Αποτροπή ανανέωσης σελίδας
-
-    const thesisId = this.dataset.id; // Λήψη του ID από το dataset
-    if (!thesisId) {
-        alert('Δεν βρέθηκε το ID της διπλωματικής.');
+    if (!infoSection || !thesesCompartment) {
+        console.error('Το edit-section ή το themes-compartment δεν βρέθηκε στο DOM.');
         return;
     }
 
-    const title = document.getElementById('editTitle').value;
-    const summary = document.getElementById('editSummary').value;
-    const pdf = document.getElementById('editPdf').files[0];
+    // Αλλαγή διατάξεων
+    thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
+    thesesCompartment.classList.add('col-md-6');
+    infoSection.classList.remove('d-none');
 
-    if (!title && !summary && !pdf) {
-        alert('Δεν έχετε κάνει καμία αλλαγή.');
-        return;
-    }
-
-    const formData = new FormData();
-    if (title) formData.append('title', title);
-    if (summary) formData.append('summary', summary);
-    if (pdf) formData.append('pdf', pdf);
-
-    fetch(`/api/theses/${thesisId}`, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: formData,
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Η διπλωματική ενημερώθηκε επιτυχώς!');
-                loadUnassignedTheses(); // Επαναφόρτωση δεδομένων
-            } else {
-                alert(`Σφάλμα: ${data.message}`);
-            }
-        })
-        .catch(error => {
-            console.error('Σφάλμα:', error);
-            alert('Κάτι πήγε στραβά κατά την αποθήκευση!');
-        });
-});
+    // Εστίαση στο edit-section
+    infoSection.scrollIntoView({ behavior: 'smooth' });
+}
 
 
 
@@ -329,7 +327,7 @@ function loadTheses() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const thesesTableBody = document.querySelector('#list table tbody');
+                const thesesTableBody = document.querySelector('#theses tbody');
                 thesesTableBody.innerHTML = '';
 
                 data.theses.forEach(thesis => {
@@ -356,6 +354,10 @@ function loadTheses() {
                         <td>${thesis.role || 'Καθηγητής'}</td>
                         <td>${status}</td>
                     `;
+                    row.addEventListener('click', (event) => {
+                        showInfoSection();
+                    });
+
 
                     thesesTableBody.appendChild(row);
                 });
@@ -365,6 +367,7 @@ function loadTheses() {
         })
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
+
 
 
 
@@ -386,6 +389,6 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    loadTheses(); 
-    loadUnassignedTheses(); 
+    loadTheses();
+    loadUnassignedTheses();
 });
