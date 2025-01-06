@@ -10,7 +10,7 @@ const db = mysql.createConnection({
 });
 
 // Μετατρέπουμε τα JSON objects σε Javascript objects και τα αποθηκεύουμε στο data
-const data = JSON.parse(fs.readFileSync('./public/json/data.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync('./provided_data/data.json', 'utf8'));
 
 // Εισαγωγή δεδομένων στη βάση
 function insertData() {
