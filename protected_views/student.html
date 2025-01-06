@@ -75,7 +75,7 @@
 
 
             <!-- Thesis view body -->
-            <h2 class="text-center mt-5 pt-5">Επισκόπηση θέματος Διπλωματικής Εργασίας</h2>
+            <h2 class="text-center mt-5 pt-5 mb-3">Επισκόπηση θέματος Διπλωματικής Εργασίας</h2>
             <div class="col-lg-8 mx-auto">
                 <div class="card text-center">
 
@@ -123,9 +123,8 @@
                                 <div class="card-body text-center">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
                                         alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
-                                    <h5 class="my-3">student_name</h5>
-                                    <p class="text-muted mb-1">student_id</p>
-                                    <p class="text-muted mb-4">student_year</p>
+                                    <h5 class="my-3" >student_name</h5>
+                                    <p class="text-muted mb-1" data-field="id">student_id</p>
                                 </div>
                             </div>
                         </div>
@@ -146,7 +145,7 @@
                                             <p class="mb-0">Email</p>
                                         </div>
                                         <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_mail</p>
+                                            <p class="text-muted mb-0" data-field="email">student_mail</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
                                             <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
@@ -158,7 +157,7 @@
                                             <p class="mb-0">Κινητό τηλέφωνο</p>
                                         </div>
                                         <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_tel_mob</p>
+                                            <p class="text-muted mb-0" data-field="mobile_telephone">student_tel_mob</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
                                             <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
@@ -170,7 +169,7 @@
                                             <p class="mb-0">Σταθερό τηλέφωνο</p>
                                         </div>
                                         <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_tel_land</p>
+                                            <p class="text-muted mb-0" data-field="landline_telephone">student_tel_land</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
                                             <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
@@ -179,10 +178,22 @@
                                     <hr>
                                     <div class="row">
                                         <div class="col-sm-3">
-                                            <p class="mb-0">Διεύθυνση</p>
+                                            <p class="mb-0">Οδός</p>
                                         </div>
                                         <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_address</p>
+                                            <p class="text-muted mb-0" data-field="street">student_street</p>
+                                        </div>
+                                        <div class="col-sm-2 text-center">
+                                            <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <p class="mb-0">Αριθμός</p>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <p class="text-muted mb-0" data-field="street_number">student_street_number</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
                                             <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
@@ -194,7 +205,7 @@
                                             <p class="mb-0">Πόλη</p>
                                         </div>
                                         <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_city</p>
+                                            <p class="text-muted mb-0" data-field="city">student_city</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
                                             <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
@@ -206,7 +217,7 @@
                                             <p class="mb-0">T.K.</p>
                                         </div>
                                         <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_tk</p>
+                                            <p class="text-muted mb-0 " data-field="postcode">student_postcode</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
                                             <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>

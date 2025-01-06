@@ -274,7 +274,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
 
 
 
-// Ανάκτηση διπλωματικ΄ών καθηγητή
+// Ανάκτηση διπλωματικών καθηγητή
 app.get('/api/theses', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
     const query = `SELECT * FROM THESES WHERE teacher_id = ?;`;
@@ -424,7 +424,22 @@ app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => 
     });
 });
 
+// API to fetch student data by ID
+app.get('/api/student/:id', (req, res) => {
+    const studentId = req.params.id;
+    const query = `SELECT * FROM students WHERE student_number = ?`;
 
+    db.query(query, [studentId], (err, results) => {
+        if (err) {
+            console.error('Error fetching student data:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+        res.json(results[0]);
+    });
+});
 
 
 
