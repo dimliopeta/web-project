@@ -34,11 +34,6 @@
             /* Προσαρμόζει τη γραμματοσειρά δυναμικά */
         }
 
-        body {
-            padding-top: 70px;
-            /* Προσαρμόζεται στο ύψος του navbar */
-        }
-
         .navbar-nav .nav-link.active {
             font-weight: bold;
             color: #0d6efd;
@@ -84,7 +79,6 @@
         </button>
         <div class="collapse navbar-collapse" id="mainnav">
             <div class="navbar-nav fs-5">
-                <a class="nav-item nav-link" href="#dashboard">Πίνακας Ελέγχου</a>
                 <a class="nav-item nav-link" href="#theses-section">Θέματα Διπλωματικών</a>
                 <a class="nav-item nav-link" href="#assign">Ανάθεση σε Φοιτητή</a>
                 <a class="nav-item nav-link" href="#list">Λίστα Διπλωματικών</a>
@@ -105,7 +99,7 @@
             <div class="header">
                 <h2>Πίνακας Ελέγχου</h2>
             </div>
-            <div id="dashboard-content" class="mb-4 pt-4">
+            <div id="dashboard-content" class="mt-5 pt-5 pb-3">
                 <h3 class="text-muted">Καλωσήρθατε!</h3>
                 <div class="row">
                     <div class="col-md-6 pt-1">
@@ -140,7 +134,7 @@
         <!-- Θέματα Διπλωματικών -->
         <div id="theses-section" class="content-section" style="display:none;">
 
-            <h3 class="text-center mb-4">Θέματα Διπλωματικών</h3>
+            <h3 class="text-center mt-5 pt-5 pb-3">Θέματα Διπλωματικών</h3>
             <div class="row">
                 <div id="themes-compartment" class="col-lg-8 mx-auto">
                     <div class="border p-3 rounded">
@@ -241,7 +235,7 @@
 
         <!-- Assign to student nav-->
         <div id="assign" class="content-section" style="display:none;">
-            <h3 class="text-center mb-4">Ανάθεση Θέματος Διπλωματικής σε Φοιτητή</h3>
+            <h3 class="text-center mt-5 pt-5 pb-3">Ανάθεση Θέματος Διπλωματικής σε Φοιτητή</h3>
 
             <!-- Κεντρικό layout -->
             <div class="container">
@@ -291,7 +285,7 @@
 
         <!-- Λίστα Διπλωματικών -->
         <div id="list" class="content-section" style="display:none;">
-            <h3 class="text-center mb-4">Λίστα Διπλωματικών</h3>
+            <h3 class="text-center mt-5 pt-5 pb-3">Λίστα Διπλωματικών</h3>
 
             <!-- Κεντρικό layout -->
             <div class="container">
@@ -343,15 +337,16 @@
         </div>
 
         <div id="invitations" class="content-section" style="display:none;">
-            <h3 class="text-center mb-4">Προσκλήσεις Τριμελών</h3>
+            <h3 class="text-center mt-5 pt-5 pb-3">Προσκλήσεις Τριμελών</h3>
 
             <!-- Κεντρικό layout -->
-            <div class="container">
-                <div class="row">
-                    <div class="card w-50">
+            <div class="col-lg-6 float-start">
+                    <div class="card">
+
                         <div class="card-header">
                             Ημερομηνία λήψης της πρόσκλησης
                         </div>
+                        
                         <div class="card-body">
                             <h5 class="card-title">Τίτλος Διπλωματικής</h5>
                             <h6 class="card-subtitle mb-2 text-muted">Αποστολέας</h6>
@@ -361,7 +356,7 @@
                             <button class="btn btn-sm btn-outline-danger">Απόρριψη</button>
                         </div>
                     </div>
-                </div>
+                
             </div>
 
         </div>
