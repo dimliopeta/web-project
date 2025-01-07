@@ -445,7 +445,40 @@ app.get('/api/student', authenticateJWT, (req, res) => {
 });
 
 
+//-----------API to update student contact data after button press-----------
+app.post('/api/updateProfile', authenticateJWT, (req, res) => {
+    const userId = req.user.userId; // ID του χρήστη από το JWT
+    const updates = req.body; // Τα δεδομένα που στέλνει ο client
 
+    if (updates.email && !/\S+@\S+\.\S+/.test(updates.email)) {
+        return res.status(400).json({ success: false, message: 'Invalid email format.' });
+    }
+    if (updates.mobile_telephone && !/^\d{10}$/.test(updates.mobile_telephone)) {
+        return res.status(400).json({ success: false, message: 'Invalid mobile phone number.' });
+    }
+
+    // Δημιουργία SQL query για δυναμική ενημέρωση
+    const fields = Object.keys(updates).map((field) => `${field} = ?`).join(', ');
+    const values = Object.values(updates);
+
+    // Προσθήκη του ID του χρήστη στις παραμέτρους
+    values.push(userId);
+
+    const query = `UPDATE students SET ${fields} WHERE id = ?`;
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ενημέρωση του προφίλ:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Ο χρήστης δεν βρέθηκε.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Το προφίλ ενημερώθηκε επιτυχώς!' });
+    });
+});
 
 
 // Εκκίνηση του server
