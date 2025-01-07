@@ -363,7 +363,7 @@ function loadTheses() {
                     row.innerHTML = `
                         <td>${thesis.title}</td>
                         <td>${thesis.theme_id}</td>
-                        <td>${thesis.role || 'Καθηγητής'}</td>
+                        <td>${thesis.role || 'Επιβλέπων'}</td>
                         <td>${status}</td>
                     `;
                     row.addEventListener('click', (event) => {
@@ -434,7 +434,7 @@ function applyFilter(filterValue) {
                         row.innerHTML = `
                             <td>${thesis.title}</td>
                             <td>${thesis.theme_id}</td>
-                            <td>${thesis.role || 'Καθηγητής'}</td>
+                            <td>${thesis.role || 'Επιβλέπων'}</td>
                             <td>${status}</td>
                         `;
                         row.addEventListener('click', (event) => {

@@ -231,7 +231,7 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
 
     const query = `
-        SELECT theme_id, title
+        SELECT theme_id, title, summary
         FROM THESES
         WHERE teacher_id = ? AND status = 'unassigned';
     `;
