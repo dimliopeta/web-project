@@ -34,7 +34,7 @@ CREATE TABLE `Professors`(
 );
 
 CREATE TABLE `Theses`(
-    `theme_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `thesis_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `professor_id` INT NULL,
 	`student_id` INT NULL,
     `title` VARCHAR(200) NULL,

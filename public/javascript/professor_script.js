@@ -155,10 +155,10 @@ function loadUnassignedTheses() {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${thesis.title}</td>
-                        <td>${thesis.theme_id}</td>
+                        <td>${thesis.thesis_id}</td>
                         <td>Υπό Ανάθεση</td>
                         <td>
-                            <button class="btn btn-sm btn-primary" data-id="${thesis.theme_id}">Επεξεργασία</button>
+                            <button class="btn btn-sm btn-primary" data-id="${thesis.thesis_id}">Επεξεργασία</button>
                         </td>
                     `;
 
@@ -177,8 +177,8 @@ function loadUnassignedTheses() {
                     radioItem.className = 'form-check';
 
                     radioItem.innerHTML = `
-                        <input class="form-check-input" type="radio" name="thesisRadio" id="thesis-${thesis.theme_id}" value="${thesis.theme_id}">
-                        <label class="form-check-label" for="thesis-${thesis.theme_id}">${thesis.title}</label>
+                        <input class="form-check-input" type="radio" name="thesisRadio" id="thesis-${thesis.thesis_id}" value="${thesis.thesis_id}">
+                        <label class="form-check-label" for="thesis-${thesis.thesis_id}">${thesis.title}</label>
                     `;
 
                     thesisList.appendChild(radioItem);
@@ -213,7 +213,7 @@ function showEditSection(thesis) {
 
     // Ορισμός του ID της διπλωματικής στο dataset της φόρμας
     const editForm = document.getElementById('editThesisForm');
-    editForm.dataset.id = thesis.theme_id; // theme_id από το αντικείμενο thesis
+    editForm.dataset.id = thesis.thesis_id; // thesis_id από το αντικείμενο thesis
 
     // Αλλαγή διατάξεων
     themesCompartment.classList.remove('col-lg-8', 'mx-auto');
@@ -362,7 +362,7 @@ function loadTheses() {
 
                     row.innerHTML = `
                         <td>${thesis.title}</td>
-                        <td>${thesis.theme_id}</td>
+                        <td>${thesis.thesis_id}</td>
                         <td>${thesis.role || 'Επιβλέπων'}</td>
                         <td>${status}</td>
                     `;
@@ -433,7 +433,7 @@ function applyFilter(filterValue) {
 
                         row.innerHTML = `
                             <td>${thesis.title}</td>
-                            <td>${thesis.theme_id}</td>
+                            <td>${thesis.thesis_id}</td>
                             <td>${thesis.role || 'Επιβλέπων'}</td>
                             <td>${status}</td>
                         `;

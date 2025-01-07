@@ -231,7 +231,7 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
 
     const query = `
-        SELECT theme_id, title, summary
+        SELECT thesis_id, title, summary
         FROM THESES
         WHERE professor_id = ? AND status = 'unassigned';
     `;
@@ -334,7 +334,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     const query = `
         UPDATE THESES
         SET student_id = ?, status = 'active'
-        WHERE theme_id = ? AND status = 'unassigned';
+        WHERE thesis_id = ? AND status = 'unassigned';
     `;
 
     db.query(query, [studentId, thesisId], (err, result) => {
@@ -371,7 +371,7 @@ app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => 
     const getThesisQuery = `
         SELECT title, summary, pdf_path
         FROM THESES
-        WHERE theme_id = ? AND professor_id = ?;
+        WHERE thesis_id = ? AND professor_id = ?;
     `;
     db.query(getThesisQuery, [thesisId, professorId], (err, results) => {
         if (err) {
@@ -411,7 +411,7 @@ app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => 
         const updateQuery = `
             UPDATE THESES
             SET title = ?, summary = ?, pdf_path = ?
-            WHERE theme_id = ? AND professor_id = ?;
+            WHERE thesis_id = ? AND professor_id = ?;
         `;
         db.query(updateQuery, [updatedData.title, updatedData.summary, updatedData.pdf_path, thesisId, professorId], (err) => {
             if (err) {

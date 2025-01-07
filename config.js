@@ -88,19 +88,19 @@ function insertData() {
 
     // Εισαγωγή διπλωματικών
     data.theses.forEach(thesis => {
-        const query = `SELECT * FROM THESES WHERE theme_id=?;`;
-        db.query(query, [thesis.theme_id], (err, results) => {
+        const query = `SELECT * FROM THESES WHERE thesis_id=?;`;
+        db.query(query, [thesis.thesis_id], (err, results) => {
             if (err) {
                 console.error('Error checking for duplicate theses: ', err);
                 return;
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO theses (theme_id, professor_id, student_id, title, summary, status, pdf_path)
+                    INSERT INTO theses (thesis_id, professor_id, student_id, title, summary, status, pdf_path)
                     VALUES (?, ?, ?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
-                    thesis.theme_id,
+                    thesis.thesis_id,
                     thesis.professor_id,
                     thesis.student_id || null, // Χρησιμοποίησε NULL αν το student_id είναι κενό
                     thesis.title,
@@ -111,7 +111,7 @@ function insertData() {
                     if (insertErr) {
                         console.error('Error inserting thesis:', insertErr);
                     } else {
-                        console.log(`Thesis ${thesis.theme_id} added successfully.`);
+                        console.log(`Thesis ${thesis.thesis_id} added successfully.`);
                     }
                 });
             }
