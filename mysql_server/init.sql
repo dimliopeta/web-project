@@ -17,7 +17,6 @@ CREATE TABLE `Students` (
     `email` VARCHAR(100) NULL UNIQUE,
     `contact_email` VARCHAR(100) NULL,
     `password` VARCHAR(20) NULL,
-    `thesis_id` VARCHAR(10) NULL
 );
 
 CREATE TABLE `Professors`(
@@ -40,7 +39,12 @@ CREATE TABLE `Theses`(
     `title` VARCHAR(200) NULL,
     `summary` TEXT NULL,
     `status` ENUM('unassigned','active','to-be-reviewed','completed') DEFAULT 'unassigned', 
-	`pdf_path` VARCHAR(200) NULL
+	`pdf_path` VARCHAR(200) NULL,
+	`start_date` TIMESTAMP,
+	`exam_date` TIMESTAMP,
+	`end_date` TIMESTAMP,
+	`nimertis_link` VARCHAR(200) NULL,
+	`attachments_id` INT NULL
 );
 
 ALTER TABLE

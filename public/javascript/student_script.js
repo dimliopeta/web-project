@@ -130,9 +130,9 @@ function loadStudentThesis() {
                 //document.querySelector('#dashboard [data-field="thesis_exam_report"]').textContent = thesis.thesis_exam_report;
                 //document.querySelector('#dashboard [data-field="thesis_uploaded_file"]').textContent = thesis.thesis_uploaded_file;
                 //document.querySelector('#dashboard [data-field="thesis_uploaded_link"]').textContent = thesis.thesis_uploaded_link; 
-                
 
-                
+
+
 
                 // Handle PDF button (if applicable)
                 const pdfButton = document.querySelector('#dashboard .btn-outline-primary');
@@ -165,8 +165,11 @@ document.querySelector('#student_profile').addEventListener('click', function (e
         if (button.textContent === 'Αλλαγή') {
             // Switch to edit mode
             const currentValue = field.textContent;
-            field.innerHTML = `<input type="text" class="form-control" value="${currentValue}">`;
+            field.innerHTML = `<input type="text" class="p-1 form-control" value="${currentValue}">`;
             button.textContent = 'Αποθήκευση';
+            // Change button appearance to green
+            button.classList.remove('btn-outline-primary');
+            button.classList.add('btn-success');
         } else {
             // Switch to view mode and save data
             const input = field.querySelector('input');
@@ -175,6 +178,9 @@ document.querySelector('#student_profile').addEventListener('click', function (e
             // Update the field display
             field.textContent = newValue;
             button.textContent = 'Αλλαγή';
+                        // Revert button appearance to grey
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-outline-primary');
 
             // Save the updated data to the backend
             const token = localStorage.getItem('token'); // Get the JWT token
