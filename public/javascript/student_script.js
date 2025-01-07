@@ -93,52 +93,45 @@ function loadStudentProfile() {
 
 //---------------Load Thesis Function---------------
 function loadStudentThesis() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
 
+    // Fetch thesis data from the backend API
     fetch('/api/theses', {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${token}` // Add token to authorization header
         }
     })
         .then(response => {
-            console.log("ok1"); // check if this is null
             if (!response.ok) {
                 throw new Error('Failed to fetch thesis data');
             }
             return response.json(); // Parse the response as JSON
         })
         .then(data => {
-            console.log("ok2"); // check if this is null
-            console.log(data); // Log the response to see its structure
-            console.log("ok3"); // check if this is null
-            if (data.success) {
-                console.log("ok4"); // check if this is null
-                const thesis = data;
-                console.log("ok after data"); // check if this is null
-                console.log(data); // check if this is null
-
-                // Update the dashboard with thesis details
-                console.log(document.querySelector('#dashboard [data-field="status"]')); // check if this is null
-                document.querySelector('#dashboard [data-field="thesis_status"]').textContent = thesis.status;
-               // document.querySelector('#dashboard [data-field="thesis_title"]').textContent = thesis.title;
-              //  document.querySelector('#dashboard [data-field="thesis_summary"]').textContent = thesis.summary;
-              //  document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
-              //  document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
-               // document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
-               // document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
-              //  document.querySelector('#dashboard [data-field="thesis_end_date"]').textContent = thesis.end_date;
-              //  document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
-              //  document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.thesis_nimertis_link;
-
+            if (data.success && data.theses.length > 0) {
+                // If thesis data exists, populate the dashboard with the thesis info
+                const thesis = data.theses[0]; // Assuming one thesis per student
+                document.querySelector('#dashboard [data-field="status"]').textContent = thesis.status || 'No status available';
+                document.querySelector('#dashboard [data-field="thesis_title"]').textContent = thesis.title || 'No title available';
+                document.querySelector('#dashboard [data-field="thesis_summary"]').textContent = thesis.summary || 'No summary available';
+                //  document.querySelector('#dashboard [data-field="thesis_summary"]').textContent = thesis.summary;
+                //  document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
+                //  document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
+                // document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
+                // document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
+                //  document.querySelector('#dashboard [data-field="thesis_end_date"]').textContent = thesis.end_date;
+                //  document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
+                //  document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.thesis_nimertis_link;
             } else {
-                console.error('Error:', data.message);
+                console.error('No thesis found for this student');
             }
         })
         .catch(error => {
             console.error('Error loading thesis data:', error);
         });
 }
+
 
 //---------------Event Listener for clicks on the edit buttons in Student Profile---------------
 document.querySelector('#student_profile').addEventListener('click', function (event) {
