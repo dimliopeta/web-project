@@ -32,6 +32,18 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
             editSection.classList.add('d-none'); // Απόκρυψη
         }
 
+        const infoSection = document.getElementById('info-compartment');
+        if (infoSection && !infoSection.classList.contains('d-none')) {
+            infoSection.classList.add('d-none'); // Απόκρυψη
+        }
+
+        const thesesCompartment = document.getElementById('theses-compartment');
+        if (thesesCompartment) {
+            thesesCompartment.classList.remove('col-md-6');
+            thesesCompartment.classList.add('col-lg-8', 'mx-auto'); // Επαναφορά
+        }
+
+
         // Επαναφορά του μεγέθους του `themes-compartment`
         const themesCompartment = document.getElementById('themes-compartment');
         if (themesCompartment) {
@@ -344,7 +356,7 @@ function loadTheses() {
                         case 'completed':
                             status = 'Περατωμένη';
                             break;
-                        default:
+                        case 'unassigned':
                             status = 'Υπό Ανάθεση';
                     }
 
@@ -368,6 +380,75 @@ function loadTheses() {
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
 
+document.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', event => {
+        event.preventDefault(); // Αποφυγή default συμπεριφοράς του link
+        const filterValue = event.target.getAttribute('data-filter');
+        applyFilter(filterValue);
+    });
+});
+
+function applyFilter(filterValue) {
+    const token = localStorage.getItem('token');
+
+    fetch('/api/theses', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const thesesTableBody = document.querySelector('#theses tbody');
+                thesesTableBody.innerHTML = '';
+
+                data.theses
+                    .filter(thesis => {
+                        if (['to-be-reviewed', 'active', 'completed', 'canceled', 'unassigned'].includes(filterValue)) {
+                            return thesis.status === filterValue;
+                        } else if (filterValue === 'teacher') {
+                            return thesis.role === 'teacher';
+                        } else if (filterValue === 'committee-member') {
+                            return thesis.role === 'committee-member';
+                        }
+                        return true; // Default: εμφάνιση όλων
+                    })
+                    .forEach(thesis => {
+                        const row = document.createElement('tr');
+
+                        let status;
+                        switch (thesis.status) {
+                            case 'active':
+                                status = 'Ενεργή';
+                                break;
+                            case 'to-be-reviewed':
+                                status = 'Υπό Εξέταση';
+                                break;
+                            case 'completed':
+                                status = 'Περατωμένη';
+                                break;
+                            case 'unassigned':
+                                status = 'Υπό Ανάθεση';
+                        }
+
+                        row.innerHTML = `
+                            <td>${thesis.title}</td>
+                            <td>${thesis.theme_id}</td>
+                            <td>${thesis.role || 'Καθηγητής'}</td>
+                            <td>${status}</td>
+                        `;
+                        row.addEventListener('click', (event) => {
+                            showInfoSection();
+                        });
+
+                        thesesTableBody.appendChild(row);
+                    });
+            } else {
+                console.error('Σφάλμα:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
+}
 
 
 

@@ -300,16 +300,17 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <p>Κατάσταση Διπλωματικής</p>
-                                    <a class="dropdown-item" href="#">Υπό Ανάθεση</a>
-                                    <a class="dropdown-item" href="#">Υπό Εξέταση</a>
-                                    <a class="dropdown-item" href="#">Περατωμένες</a>
-                                    <a class="dropdown-item" href="#">Ακυρωμένες</a>
+                                    <a class="dropdown-item" href="#" data-filter="to-be-reviewed">Υπό Εξέταση</a>
+                                    <a class="dropdown-item" href="#" data-filter="completed">Περατωμένες</a>
+                                    <a class="dropdown-item" href="#" data-filter="canceled">Ακυρωμένες</a>
+                                    <a class="dropdown-item" href="#" data-filter="active">Ενεργές</a>
+                                    <a class="dropdown-item" href="#" data-filter="unassigned">Υπό Ανάθεση</a>
                                     <div class="dropdown-divider"></div>
                                     <p>Ρόλος</p>
-                                    <a class="dropdown-item" href="#">Επιβλέπων</a>
-                                    <a class="dropdown-item" href="#">Μέλος Τριμελούς</a>
-
+                                    <a class="dropdown-item" href="#" data-filter="teacher">Επιβλέπων</a>
+                                    <a class="dropdown-item" href="#" data-filter="committee-member">Μέλος Τριμελούς</a>
                                 </div>
+
                             </div>
                             <table id="theses" class="table table-striped table-hover">
                                 <thead>
@@ -341,22 +342,22 @@
 
             <!-- Κεντρικό layout -->
             <div class="col-lg-6 float-start">
-                    <div class="card">
+                <div class="card">
 
-                        <div class="card-header">
-                            Ημερομηνία λήψης της πρόσκλησης
-                        </div>
-                        
-                        <div class="card-body">
-                            <h5 class="card-title">Τίτλος Διπλωματικής</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">Αποστολέας</h6>
-                            <p class="card-text">Περιγραφή Διπλωματικής</p>
-                            <button class="btn btn-sm btn-secondary">Βασικές Πληροφορίες Διπλωματικών</button>
-                            <button class="btn btn-sm btn-primary">Αποδοχή</button>
-                            <button class="btn btn-sm btn-outline-danger">Απόρριψη</button>
-                        </div>
+                    <div class="card-header">
+                        Ημερομηνία λήψης της πρόσκλησης
                     </div>
-                
+
+                    <div class="card-body">
+                        <h5 class="card-title">Τίτλος Διπλωματικής</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Αποστολέας</h6>
+                        <p class="card-text">Περιγραφή Διπλωματικής</p>
+                        <button class="btn btn-sm btn-secondary">Βασικές Πληροφορίες Διπλωματικών</button>
+                        <button class="btn btn-sm btn-primary">Αποδοχή</button>
+                        <button class="btn btn-sm btn-outline-danger">Απόρριψη</button>
+                    </div>
+                </div>
+
             </div>
 
         </div>
