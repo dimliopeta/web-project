@@ -58,8 +58,8 @@ function insertData() {
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO students (name, surname, student_number, street, number, city, postcode, father_name, landline_telephone, mobile_telephone, email, password)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    INSERT INTO students (name, surname, student_number, street, number, city, postcode, father_name, landline_telephone, mobile_telephone, email, contact_email,  password)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
                     student.name,
@@ -72,6 +72,7 @@ function insertData() {
                     student.father_name,
                     student.landline_telephone,
                     student.mobile_telephone,
+                    student.email,
                     student.email,
                     'defaultpassword' // Προσωρινός κωδικός
                 ], (insertErr) => {

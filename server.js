@@ -27,7 +27,7 @@ db.query('SELECT 1', (err, results) => {
 
 // Ορισμός του index file και των public αρχειων
 app.use(express.static('public', {
-index: 'index.html' // Ορισμός του index για το static
+    index: 'index.html' // Ορισμός του index για το static
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware για έλεγχο JWT
 app.use(cookieParser());
 const authenticateJWT = (req, res, next) => {
-    const token = req.cookies?.token ||  req.headers.authorization?.split(' ')[1]; // Παίρνει το token από το header ή απο το cookie. Στη περιπτωση μας, απο το cookie. 
+    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1]; // Παίρνει το token από το header ή απο το cookie. Στη περιπτωση μας, απο το cookie. 
 
     if (!token) {
         console.log('No token found.');
@@ -97,13 +97,13 @@ app.get('/login', (req, res) => {
                 return res.redirect(user.role === 'professor' ? '/teacher' : '/student');
             }
             // Αν το token είναι μη έγκυρο, συνεχίζουμε
-            res.setHeader('Cache-Control', 'no-store'); 
+            res.setHeader('Cache-Control', 'no-store');
             res.setHeader('Pragma', 'no-cache');
             return res.sendFile(path.join(__dirname, 'views', 'login.html'));
         });
     } else {
         // Αν δεν υπάρχει token, εμφανίζουμε το login.html
-        res.setHeader('Cache-Control', 'no-store'); 
+        res.setHeader('Cache-Control', 'no-store');
         res.setHeader('Pragma', 'no-cache');
         return res.sendFile(path.join(__dirname, 'views', 'login.html'));
     }
@@ -164,12 +164,12 @@ app.post('/login', (req, res) => {
 
 
 // Προστατευμένα routes για καθηγητές και φοιτητές
-    // Σελίδα για καθηγητές
+// Σελίδα για καθηγητές
 app.get('/teacher', authenticateJWT, authorizeRole('professor'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'teacher.html'));
 });
 
-    // Σελίδα για φοιτητές
+// Σελίδα για φοιτητές
 app.get('/student', authenticateJWT, authorizeRole('student'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'student.html'));
 });
@@ -188,7 +188,7 @@ app.post('/logout', authenticateJWT, (req, res) => {
 // Endpoint για την ανάρτηση PDF αρχείων με χρήση multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null,'theses_pdf'); // Correct path
+        cb(null, 'theses_pdf'); // Correct path
     },
     filename: (req, file, cb) => {
         // Ensure user is authenticated and has a name
@@ -314,7 +314,7 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
         } else {
             console.log("Theses created without pdf"); // Log if no PDF is uploaded
         }
-    
+
         return res.status(201).json({ success: true, message: 'Η διπλωματική δημιουργήθηκε επιτυχώς!' });
     });
 });
@@ -450,7 +450,7 @@ app.post('/api/updateProfile', authenticateJWT, (req, res) => {
     const userId = req.user.userId; // ID του χρήστη από το JWT
     const updates = req.body; // Τα δεδομένα που στέλνει ο client
 
-    if (updates.email && !/\S+@\S+\.\S+/.test(updates.email)) {
+    if (updates.contact_email && !/\S+@\S+\.\S+/.test(updates.contact_email)) {
         return res.status(400).json({ success: false, message: 'Invalid email format.' });
     }
     if (updates.mobile_telephone && !/^\d{10}$/.test(updates.mobile_telephone)) {

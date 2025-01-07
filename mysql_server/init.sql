@@ -15,6 +15,7 @@ CREATE TABLE `Students` (
     `landline_telephone` VARCHAR(20) NULL,
     `mobile_telephone` VARCHAR(20) NULL,
     `email` VARCHAR(100) NULL UNIQUE,
+    `contact_email` VARCHAR(100) NULL,
     `password` VARCHAR(20) NULL,
     `thesis_id` VARCHAR(10) NULL
 );

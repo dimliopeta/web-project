@@ -77,7 +77,7 @@ function loadStudentProfile() {
             document.querySelector('#student_profile [data-field="student_number"]').textContent = student.student_number;
 
             // Contact information
-            document.querySelector('#student_profile [data-field="email"]').textContent = student.email;
+            document.querySelector('#student_profile [data-field="contact_email"]').textContent = student.contact_email;
             document.querySelector('#student_profile [data-field="mobile_telephone"]').textContent = student.mobile_telephone;
             document.querySelector('#student_profile [data-field="landline_telephone"]').textContent = student.landline_telephone;
             document.querySelector('#student_profile [data-field="street"]').textContent = student.street;
