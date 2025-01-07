@@ -94,7 +94,7 @@ app.get('/login', (req, res) => {
         jwt.verify(token, SECRET_KEY, (err, user) => {
             if (!err && user) {
                 // Αν ο χρήστης είναι έγκυρος, ανακατεύθυνση
-                return res.redirect(user.role === 'professor' ? '/teacher' : '/student');
+                return res.redirect(user.role === 'professor' ? '/professor' : '/student');
             }
             // Αν το token είναι μη έγκυρο, συνεχίζουμε
             res.setHeader('Cache-Control', 'no-store');
@@ -149,7 +149,7 @@ app.post('/login', (req, res) => {
 
             // Ανακατεύθυνση με βάση τον ρόλο
             if (user.role === 'professor') {
-                return res.redirect('/teacher');
+                return res.redirect('/professor');
             } else if (user.role === 'student') {
                 return res.redirect('/student');
             }
@@ -165,8 +165,8 @@ app.post('/login', (req, res) => {
 
 // Προστατευμένα routes για καθηγητές και φοιτητές
 // Σελίδα για καθηγητές
-app.get('/teacher', authenticateJWT, authorizeRole('professor'), (req, res) => {
-    res.sendFile(path.join(__dirname, 'protected_views', 'teacher.html'));
+app.get('/professor', authenticateJWT, authorizeRole('professor'), (req, res) => {
+    res.sendFile(path.join(__dirname, 'protected_views', 'professor.html'));
 });
 
 // Σελίδα για φοιτητές
@@ -233,7 +233,7 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
     const query = `
         SELECT theme_id, title, summary
         FROM THESES
-        WHERE teacher_id = ? AND status = 'unassigned';
+        WHERE professor_id = ? AND status = 'unassigned';
     `;
 
     db.query(query, [professorId], (err, results) => {
@@ -277,7 +277,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
 // Ανάκτηση διπλωματικών καθηγητή
 app.get('/api/theses', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
-    const query = `SELECT * FROM THESES WHERE teacher_id = ?;`;
+    const query = `SELECT * FROM THESES WHERE professor_id = ?;`;
 
     db.query(query, [professorId], (err, results) => {
         if (err) {
@@ -301,7 +301,7 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
     }
     const filePath = req.file ? req.file.path : null; // Save the file path if uploaded
 
-    const query = `INSERT INTO THESES (teacher_id, student_id, title, summary, pdf_path) VALUES (?, ?, ?, ?, ?);`;
+    const query = `INSERT INTO THESES (professor_id, student_id, title, summary, pdf_path) VALUES (?, ?, ?, ?, ?);`;
     db.query(query, [professorId, null, title, summary, filePath], (err, result) => {
         if (err) {
             console.error('Σφάλμα κατά την αποθήκευση της διπλωματικής:', err);
@@ -371,7 +371,7 @@ app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => 
     const getThesisQuery = `
         SELECT title, summary, pdf_path
         FROM THESES
-        WHERE theme_id = ? AND teacher_id = ?;
+        WHERE theme_id = ? AND professor_id = ?;
     `;
     db.query(getThesisQuery, [thesisId, professorId], (err, results) => {
         if (err) {
@@ -411,7 +411,7 @@ app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => 
         const updateQuery = `
             UPDATE THESES
             SET title = ?, summary = ?, pdf_path = ?
-            WHERE theme_id = ? AND teacher_id = ?;
+            WHERE theme_id = ? AND professor_id = ?;
         `;
         db.query(updateQuery, [updatedData.title, updatedData.summary, updatedData.pdf_path, thesisId, professorId], (err) => {
             if (err) {

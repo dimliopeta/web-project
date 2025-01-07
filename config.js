@@ -96,12 +96,12 @@ function insertData() {
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO theses (theme_id, teacher_id, student_id, title, summary, status, pdf_path)
+                    INSERT INTO theses (theme_id, professor_id, student_id, title, summary, status, pdf_path)
                     VALUES (?, ?, ?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
                     thesis.theme_id,
-                    thesis.teacher_id,
+                    thesis.professor_id,
                     thesis.student_id || null, // Χρησιμοποίησε NULL αν το student_id είναι κενό
                     thesis.title,
                     thesis.summary,

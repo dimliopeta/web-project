@@ -406,8 +406,8 @@ function applyFilter(filterValue) {
                     .filter(thesis => {
                         if (['to-be-reviewed', 'active', 'completed', 'canceled', 'unassigned'].includes(filterValue)) {
                             return thesis.status === filterValue;
-                        } else if (filterValue === 'teacher') {
-                            return thesis.role === 'teacher';
+                        } else if (filterValue === 'professor') {
+                            return thesis.role === 'professor';
                         } else if (filterValue === 'committee-member') {
                             return thesis.role === 'committee-member';
                         }
