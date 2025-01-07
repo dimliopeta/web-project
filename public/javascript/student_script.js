@@ -114,22 +114,22 @@ function loadStudentThesis() {
                 // Update the dashboard with thesis details
                 document.querySelector('#dashboard [data-field="thesis_status"]').textContent = thesis.thesis_status;
                 document.querySelector('#dashboard [data-field="thesis_title"]').textContent = thesis.thesis_title;
-                document.querySelector('#dashboard [data-field="teacher_name"]').textContent = thesis.teacher_name;
-                document.querySelector('#dashboard [data-field="teacher_surname"]').textContent = thesis.teacher_name;
-                document.querySelector('#dashboard [data-field="committee2_name"]').textContent = thesis.committee2_name;
-                document.querySelector('#dashboard [data-field="committee3_name"]').textContent = thesis.committee3_name;
-                document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.thesis_start_date;
-                document.querySelector('#dashboard [data-field="thesis_test_date"]').textContent = thesis.thesis_test_date;
-                document.querySelector('#dashboard [data-field="thesis_end_date"]').textContent = thesis.thesis_end_date;
-                document.querySelector('#dashboard [data-field="thesis_grade_total"]').textContent = thesis.thesis_grade_total;
-                document.querySelector('#dashboard [data-field="thesis_grade_1"]').textContent = thesis.thesis_grade_1;
-                document.querySelector('#dashboard [data-field="thesis_grade_2"]').textContent = thesis.thesis_grade_2;
-                document.querySelector('#dashboard [data-field="thesis_grade_3"]').textContent = thesis.thesis_grade_3;
-                document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.thesis_pdf;
+                document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
+                document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
+                //document.querySelector('#dashboard [data-field="committee2_name"]').textContent = thesis.committee2_name;
+                //document.querySelector('#dashboard [data-field="committee3_name"]').textContent = thesis.committee3_name;
+                document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
+                document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
+                document.querySelector('#dashboard [data-field="thesis_end_date"]').textContent = thesis.end_date;
+                //document.querySelector('#dashboard [data-field="thesis_grade_total"]').textContent = thesis.thesis_grade_total;
+                //document.querySelector('#dashboard [data-field="thesis_grade_1"]').textContent = thesis.thesis_grade_1;
+                //document.querySelector('#dashboard [data-field="thesis_grade_2"]').textContent = thesis.thesis_grade_2;
+                //document.querySelector('#dashboard [data-field="thesis_grade_3"]').textContent = thesis.thesis_grade_3;
+                document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
                 document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.thesis_nimertis_link;
-                document.querySelector('#dashboard [data-field="thesis_test_report"]').textContent = thesis.thesis_test_report;
-                document.querySelector('#dashboard [data-field="thesis_uploaded_file"]').textContent = thesis.thesis_uploaded_file;
-                document.querySelector('#dashboard [data-field="thesis_uploaded_link"]').textContent = thesis.thesis_uploaded_link; 
+                //document.querySelector('#dashboard [data-field="thesis_exam_report"]').textContent = thesis.thesis_exam_report;
+                //document.querySelector('#dashboard [data-field="thesis_uploaded_file"]').textContent = thesis.thesis_uploaded_file;
+                //document.querySelector('#dashboard [data-field="thesis_uploaded_link"]').textContent = thesis.thesis_uploaded_link; 
                 
 
                 
