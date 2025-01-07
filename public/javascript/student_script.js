@@ -95,55 +95,42 @@ function loadStudentProfile() {
 function loadStudentThesis() {
     const token = localStorage.getItem('token');
 
-    fetch('/api/student/thesis', {
+    fetch('/api/theses', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
         }
     })
         .then(response => {
+            console.log("ok1"); // check if this is null
             if (!response.ok) {
                 throw new Error('Failed to fetch thesis data');
             }
             return response.json(); // Parse the response as JSON
         })
         .then(data => {
+            console.log("ok2"); // check if this is null
+            console.log(data); // Log the response to see its structure
+            console.log("ok3"); // check if this is null
             if (data.success) {
-                const thesis = data.thesis;
+                console.log("ok4"); // check if this is null
+                const thesis = data;
+                console.log("ok after data"); // check if this is null
+                console.log(data); // check if this is null
 
                 // Update the dashboard with thesis details
-                document.querySelector('#dashboard [data-field="thesis_status"]').textContent = thesis.thesis_status;
-                document.querySelector('#dashboard [data-field="thesis_title"]').textContent = thesis.thesis_title;
-                document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
-                document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
-                //document.querySelector('#dashboard [data-field="committee2_name"]').textContent = thesis.committee2_name;
-                //document.querySelector('#dashboard [data-field="committee3_name"]').textContent = thesis.committee3_name;
-                document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
-                document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
-                document.querySelector('#dashboard [data-field="thesis_end_date"]').textContent = thesis.end_date;
-                //document.querySelector('#dashboard [data-field="thesis_grade_total"]').textContent = thesis.thesis_grade_total;
-                //document.querySelector('#dashboard [data-field="thesis_grade_1"]').textContent = thesis.thesis_grade_1;
-                //document.querySelector('#dashboard [data-field="thesis_grade_2"]').textContent = thesis.thesis_grade_2;
-                //document.querySelector('#dashboard [data-field="thesis_grade_3"]').textContent = thesis.thesis_grade_3;
-                document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
-                document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.thesis_nimertis_link;
-                //document.querySelector('#dashboard [data-field="thesis_exam_report"]').textContent = thesis.thesis_exam_report;
-                //document.querySelector('#dashboard [data-field="thesis_uploaded_file"]').textContent = thesis.thesis_uploaded_file;
-                //document.querySelector('#dashboard [data-field="thesis_uploaded_link"]').textContent = thesis.thesis_uploaded_link; 
+                console.log(document.querySelector('#dashboard [data-field="status"]')); // check if this is null
+                document.querySelector('#dashboard [data-field="thesis_status"]').textContent = thesis.status;
+               // document.querySelector('#dashboard [data-field="thesis_title"]').textContent = thesis.title;
+              //  document.querySelector('#dashboard [data-field="thesis_summary"]').textContent = thesis.summary;
+              //  document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
+              //  document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
+               // document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
+               // document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
+              //  document.querySelector('#dashboard [data-field="thesis_end_date"]').textContent = thesis.end_date;
+              //  document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
+              //  document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.thesis_nimertis_link;
 
-
-
-
-                // Handle PDF button (if applicable)
-                const pdfButton = document.querySelector('#dashboard .btn-outline-primary');
-                if (thesis.thesis_pdf_path) {
-                    pdfButton.style.display = 'inline-block';
-                    pdfButton.addEventListener('click', () => {
-                        window.open(thesis.thesis_pdf_path, '_blank');
-                    });
-                } else {
-                    pdfButton.style.display = 'none';
-                }
             } else {
                 console.error('Error:', data.message);
             }
@@ -178,9 +165,9 @@ document.querySelector('#student_profile').addEventListener('click', function (e
             // Update the field display
             field.textContent = newValue;
             button.textContent = 'Αλλαγή';
-                        // Revert button appearance to grey
-                        button.classList.remove('btn-success');
-                        button.classList.add('btn-outline-primary');
+            // Revert button appearance to grey
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
 
             // Save the updated data to the backend
             const token = localStorage.getItem('token'); // Get the JWT token
@@ -212,6 +199,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 //------ Load the student profile after DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     loadStudentProfile();
+    loadStudentThesis();
 });
 
 //---------------Show the dashboard as main page after DOM is loaded---------------

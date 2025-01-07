@@ -274,12 +274,25 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
 
 
 
-// Ανάκτηση διπλωματικών καθηγητή
-app.get('/api/theses', authenticateJWT, (req, res) => {
-    const professorId = req.user.userId;
-    const query = `SELECT * FROM THESES WHERE professor_id = ?;`;
 
-    db.query(query, [professorId], (err, results) => {
+//-----------API to fetch theses data data for both students and professors-----------
+app.get('/api/theses', authenticateJWT, (req, res) => {
+    const userId = req.user.userId; // Get user ID from the JWT
+    const role = req.user.role;    // Assume JWT includes the role ('professor' or 'student')
+
+    let query;
+
+    if (role === 'professor') {
+        // Retrieve theses assigned to the professor
+        query = `SELECT * FROM Theses WHERE professor_id = ${userId};`;
+    } else if (role === 'student') {
+        // Retrieve the thesis assigned to the student
+        query = `SELECT * FROM Theses WHERE student_id = ${userId};`;
+    } else {
+        return res.status(403).json({ success: false, message: 'Unauthorized access.' });
+    }
+
+    db.query(query, (err, results) => {
         if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
@@ -288,7 +301,6 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, theses: results });
     });
 });
-
 
 //Δημιουργία νέου θέματος 
 app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) => {
