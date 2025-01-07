@@ -270,6 +270,8 @@ document.getElementById('assignThesisButton').addEventListener('click', function
         .then(data => {
             if (data.success) {
                 alert('Η ανάθεση ολοκληρώθηκε επιτυχώς!');
+
+                loadUnassignedTheses();
             } else {
                 alert('Σφάλμα: ' + data.message);
             }
