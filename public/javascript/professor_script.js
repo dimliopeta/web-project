@@ -23,6 +23,9 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 loadTheses();
             } else if (targetId === 'assign') {
                 loadUnassignedTheses();
+            } else if (targetId === 'invitations' )
+            {
+                loadInvitations();
             }
         }
 
@@ -141,6 +144,9 @@ document.getElementById('changeStudentButton').addEventListener('click', functio
     delete document.getElementById('assignThesisButton').dataset.studentId;
 });
 
+
+
+
 // Φόρτωση Διπλωματικών
 function loadUnassignedTheses() {
     fetch('/api/theses/unassigned')
@@ -240,6 +246,88 @@ function showInfoSection(thesis) {
 
     // Εστίαση στο edit-section
     infoSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+
+document.getElementById('editThesisForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const thesisId = this.dataset.id;
+    const title = document.getElementById('editTitle').value;
+    const summary = document.getElementById('editSummary').value;
+    const pdf = document.getElementById('editPdf').files[0]; // Νέο αρχείο PDF
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('summary', summary);
+    if (pdf) {
+        formData.append('pdf', pdf); // Επισύναψη νέου αρχείου PDF αν υπάρχει
+    }
+
+    fetch(`/api/theses/${thesisId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Αν χρειάζεται token
+        },
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Η διπλωματική ενημερώθηκε επιτυχώς!');
+                loadUnassignedTheses(); // Επαναφόρτωση λίστας
+            } else {
+                alert(`Σφάλμα: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα:', error);
+            alert('Κάτι πήγε στραβά κατά την αποθήκευση!');
+        });
+});
+
+
+function loadInvitations() {
+    fetch('/api/invitations', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Data from API:', data);
+
+            const container = document.querySelector('#invitations .row');
+            container.innerHTML = ''; // Καθαρισμός προηγούμενου περιεχομένου
+
+            if (data.success && data.invitations.length > 0) {
+                data.invitations.forEach(invitation => {
+                    const card = document.createElement('div');
+                    card.classList.add('col-lg-6', 'mb-3');
+                    card.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">
+                                Ημερομηνία Πρόσκλησης: ${invitation.invitation_date || 'Μη διαθέσιμη'}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">${invitation.thesis_title || 'Χωρίς τίτλο'}</h5>
+                                <p class="card-text">${invitation.thesis_summary || 'Δεν υπάρχει περιγραφή'}</p>
+                                <p class="text-muted">Κατάσταση: ${invitation.invitation_status || 'Μη διαθέσιμη'}</p>
+                                <button class="btn btn-primary btn-sm">Αποδοχή</button>
+                                <button class="btn btn-outline-danger btn-sm">Απόρριψη</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                console.warn('No invitations found or API error.');
+                container.innerHTML = '<h5 class="text-center">Δεν υπάρχουν προσκλήσεις!</h5>';
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά τη φόρτωση των προσκλήσεων:', error);
+        });
 }
 
 
@@ -473,5 +561,6 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 
 document.addEventListener('DOMContentLoaded', function () {
     loadTheses();
+    loadInvitations();
     loadUnassignedTheses();
 });

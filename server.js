@@ -337,6 +337,47 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
 });
 
 
+app.get('/api/invitations', authenticateJWT, (req, res) => {
+    const professorId = req.user.userId; // Εξαγωγή professor ID από το JWT
+    console.log('Professor ID:', professorId);
+
+    if (!professorId) {
+        return res.status(400).json({ success: false, message: 'Professor ID is missing.' });
+    }
+
+    const query = `
+       SELECT 
+        i.id AS invitation_id,
+        i.thesis_id,
+        i.professor_id,
+        i.status AS invitation_status,
+        i.invitation_date,
+        i.response_date,
+        t.title AS thesis_title,
+        t.summary AS thesis_summary
+        FROM 
+            Invitations i
+        JOIN 
+            Theses t ON i.thesis_id = t.thesis_id
+        WHERE 
+            i.professor_id = ?;
+
+    `;
+
+    db.query(query, [professorId], (err, results) => {
+        if (err) {
+            console.error('Error fetching invitations:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+
+        console.log('Invitations from DB:', results);
+        res.json({ success: true, invitations: results });
+    });
+});
+
+
+
+
 //Ανάθεση σε φοιτητή 
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     // Μετατροπή των τιμών σε αριθμούς
