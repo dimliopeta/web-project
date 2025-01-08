@@ -13,7 +13,10 @@ const PORT = 3000;
 const SECRET_KEY = 'your-secret-key';
 
 
-// Έλεγχος σύνδεσης με τη βάση δεδομένων
+
+//----------------------------- STARTUP SETTINGS -----------------------------
+
+//-------------- Check if the server is connected to the database --------------
 db.query('SELECT 1', (err, results) => {
     if (err) {
         console.error('Database connection failed:', err);
@@ -23,10 +26,7 @@ db.query('SELECT 1', (err, results) => {
     }
 });
 
-
-
-
-// Ορισμός του index file και των public αρχειων
+//-------------- Set Index file and the public folder --------------
 app.use(express.static('public', {
     index: 'index.html' // Ορισμός του index για το static
 }));
@@ -35,12 +35,12 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
+//----------------------------- TOKEN-COOKIES CONTROL AND LOGIN ROLE ROUTING -----------------------------
 
-
-// Middleware για έλεγχο JWT
+//-------------- JWT token control --------------
 app.use(cookieParser());
 const authenticateJWT = (req, res, next) => {
-    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1]; // Παίρνει το token από το header ή απο το cookie. Στη περιπτωση μας, απο το cookie. 
+    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1]; // Extract token from header or cookie - in this case, from the cookie 
 
     if (!token) {
         console.log('No token found.');
@@ -53,11 +53,10 @@ const authenticateJWT = (req, res, next) => {
             return res.status(403).send('Invalid token');
         }
 
-        req.user = user; // Αποθηκεύουμε τα δεδομένα του χρήστη στο request
+        req.user = user;
         next();
     });
 };
-
 const authorizeRole = (requiredRole) => {
     return (req, res, next) => {
         if (req.user.role !== requiredRole) {
@@ -66,9 +65,6 @@ const authorizeRole = (requiredRole) => {
         next();
     };
 };
-
-
-
 app.get('/api/check-auth', (req, res) => {
     const token = req.cookies?.token;
 
@@ -84,35 +80,28 @@ app.get('/api/check-auth', (req, res) => {
     });
 });
 
-
-
-// Route για το /login και /login.html
-
+// Route for /login and /login.html
 app.get('/login', (req, res) => {
     const token = req.cookies?.token;
 
     if (token) {
         jwt.verify(token, SECRET_KEY, (err, user) => {
             if (!err && user) {
-                // Αν ο χρήστης είναι έγκυρος, ανακατεύθυνση
+                // If valid user
                 return res.redirect(user.role === 'professor' ? '/professor' : '/student');
             }
-            // Αν το token είναι μη έγκυρο, συνεχίζουμε
+            // If not
             res.setHeader('Cache-Control', 'no-store');
             res.setHeader('Pragma', 'no-cache');
             return res.sendFile(path.join(__dirname, 'views', 'login.html'));
         });
     } else {
-        // Αν δεν υπάρχει token, εμφανίζουμε το login.html
+        // If token missing, return to login
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('Pragma', 'no-cache');
         return res.sendFile(path.join(__dirname, 'views', 'login.html'));
     }
 });
-
-
-
-
 
 // Login endpoint
 app.post('/login', (req, res) => {
@@ -142,13 +131,13 @@ app.post('/login', (req, res) => {
             const token = jwt.sign(
                 { userId: user.id, role: user.role },
                 SECRET_KEY,
-                { expiresIn: '1h' } // Το token λήγει σε 1 ώρα
+                { expiresIn: '1h' } // Token TTL = 1hr
             );
 
-            // Αποθήκευση του token σε cookie για εύκολη χρήση
+            // Save the token in a cookie for ease of use
             res.cookie('token', token, { httpOnly: true });
 
-            // Ανακατεύθυνση με βάση τον ρόλο
+            // Redirect based on role
             if (user.role === 'professor') {
                 return res.redirect('/professor');
             } else if (user.role === 'student') {
@@ -160,33 +149,27 @@ app.post('/login', (req, res) => {
     });
 });
 
-
-
-
-
-// Προστατευμένα routes για καθηγητές και φοιτητές
-// Σελίδα για καθηγητές
+// Route user to protected view page pased on role
 app.get('/professor', authenticateJWT, authorizeRole('professor'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'professor.html'));
 });
 
-// Σελίδα για φοιτητές
 app.get('/student', authenticateJWT, authorizeRole('student'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'student.html'));
 });
 
 // Logout endpoint
 app.post('/logout', authenticateJWT, (req, res) => {
-    // Καθαρισμός του cookie που περιέχει το JWT
+    // Clear existing cookie
     res.clearCookie('token', { httpOnly: true });
-    // Ανακατεύθυνση στο index
+    // Return to index
     res.redirect('/');
 });
 
 
+//----------------------------- APIs FOR PAGE FUNCTIONS -----------------------------
 
-//---------------------- MULTER DECLARATION FOR PDFs ONLY -----------------------
-// Αρχικοποίηση multer για την ανάρτηση PDF αρχείων
+//----------------- Multer middleware declaration/setup for PDF upload -----------------
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'theses_pdf'); // Correct path if both the server and the folder are in the same directory
@@ -199,8 +182,7 @@ const storage = multer.diskStorage({
         cb(null, fileName); // Save the file with the formatted name
     }
 });
-
-// Φίλτρο για την ανάρτηση μόνο PDF αρχείων και όχι άλλων τύπων και αρχικοποίηση multer
+// Filter to ensure only PDFs are uploaded
 const upload = multer({
     storage: storage,
     fileFilter: (req, file, cb) => {
@@ -213,28 +195,8 @@ const upload = multer({
     limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
 });
 
-//Endpoint ανάρτησης
-app.post('/theses_pdf', authenticateJWT, upload.single('pdf'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('No file uploaded or invalid file type');
-    }
 
-    console.log("PDF uploaded:", req.file); // Log the uploaded file
-
-    res.status(200).json({
-        message: 'File uploaded successfully!',
-        file: {
-            filename: req.file.filename,
-            path: req.file.path
-        }
-    });
-});
-
-
-
-
-
-
+//----------------- API to fetch Unassigned Theses Data -----------------
 app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
 
@@ -255,7 +217,64 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
 });
 
 
-//Εύρεση φοιτητή από καθηγητή
+//----------------- API to fetch Theses Data for both students and professors -----------------
+app.get('/api/theses', authenticateJWT, (req, res) => {
+    const userId = req.user.userId; // Get user Id and Role from the JWT
+    const role = req.user.role;    
+
+    let query;
+
+    if (role === 'professor') {
+        query = `SELECT * FROM Theses WHERE professor_id = ${userId};`;
+
+    } else if (role === 'student') {
+        query = `SELECT
+                    Theses.*,
+                     Professors.name AS professor_name, 
+                    Professors.surname AS professor_surname, 
+                    Committees.member1_id AS committee_member1_id, 
+                    Committees.member2_id AS committee_member2_id
+                FROM Theses
+                LEFT JOIN Professors ON Theses.professor_id = Professors.id
+                LEFT JOIN Committees ON Theses.Thesis_id = Committees.Thesis_id
+                WHERE Theses.student_id = ${userId};`;
+    } else {
+        return res.status(403).json({ success: false, message: 'Unauthorized access.' });
+    }
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+
+        res.status(200).json({ success: true, theses: results });
+    });
+});
+
+
+//----------------- API to fetch Student Data by Id -----------------
+app.get('/api/student', authenticateJWT, (req, res) => {
+    const userId = req.user.userId; // Get user ID from the JWT
+
+    const query = `SELECT * FROM students WHERE id = ?`;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching student data:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        // Send the student data as a response
+        res.json(results[0]);
+    });
+});
+
+
+//----------------- API for Student Search Bar for thesis assignment -----------------
 app.get('/api/student-search', authenticateJWT, (req, res) => {
     const { input } = req.query;
 
@@ -286,45 +305,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
 });
 
 
-
-
-//-----------API to fetch theses data data for both students and professors-----------
-app.get('/api/theses', authenticateJWT, (req, res) => {
-    const userId = req.user.userId; // Get user ID from the JWT
-    const role = req.user.role;    // Assume JWT includes the role ('professor' or 'student')
-
-    let query;
-
-    if (role === 'professor') {
-        // Retrieve theses assigned to the professor
-        query = `SELECT * FROM Theses WHERE professor_id = ${userId};`;
-    } else if (role === 'student') {
-        // Retrieve the thesis assigned to the student
-        query = `SELECT
-                    Theses.*,
-                     Professors.name AS professor_name, 
-                    Professors.surname AS professor_surname, 
-                    Committees.member1_id AS committee_member1_id, 
-                    Committees.member2_id AS committee_member2_id
-                FROM Theses
-                LEFT JOIN Professors ON Theses.professor_id = Professors.id
-                LEFT JOIN Committees ON Theses.Thesis_id = Committees.Thesis_id
-                WHERE Theses.student_id = ${userId};`;
-    } else {
-        return res.status(403).json({ success: false, message: 'Unauthorized access.' });
-    }
-
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
-        }
-
-        res.status(200).json({ success: true, theses: results });
-    });
-});
-
-//Δημιουργία νέου θέματος 
+//----------------- API to Create New Thesis -----------------
 app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) => {
     const { title, summary } = req.body;
     const professorId = req.user.userId;
@@ -333,7 +314,7 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
     if (!title || !summary) {
         return res.status(400).json({ success: false, message: 'Title and summary are required' });
     }
-    const filePath = file ? file.path : null; // Save the file path if uploaded
+    const filePath = file ? file.path : null; // Save the file path if uploaded, else null
 
     const query = `INSERT INTO THESES (professor_id, student_id, title, summary, pdf_path) VALUES (?, ?, ?, ?, ?);`;
     db.query(query, [professorId, null, title, summary, filePath], (err, result) => {
@@ -354,8 +335,81 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
 });
 
 
+//----------------- API to Edit existing Thesis -----------------
+app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => {
+    const thesisId = req.params.id;   /// TO FIX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    const { title, summary } = req.body;
+    const file = req.file;
+    const professorId = req.user.userId;
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesis ID.' });
+    }
+
+    if (!title && !summary && !file) {
+        return res.status(400).json({ success: false, message: 'No changes provided.' });
+    }
+
+    const getThesisQuery = `
+        SELECT title, summary, pdf_path
+        FROM THESES
+        WHERE thesis_id = ? AND professor_id = ?;
+    `;
+    db.query(getThesisQuery, [thesisId, professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση της διπλωματικής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Η διπλωματική δεν βρέθηκε.' });
+        }
+
+        const oldData = results[0];
+        const updatedData = {
+            title: title || oldData.title,
+            summary: summary || oldData.summary,
+            pdf_path: file ? file.path : oldData.pdf_path,
+        };
+
+        // Check for any changes
+        if (
+            updatedData.title === oldData.title &&
+            updatedData.summary === oldData.summary &&
+            updatedData.pdf_path === oldData.pdf_path
+        ) {
+            return res.status(400).json({ success: false, message: 'No changes detected.' });
+        }
+
+        // Delete old PDF if a new one was uploaded
+        if (file && oldData.pdf_path) {
+            const fs = require('fs');
+            fs.unlink(oldData.pdf_path, (err) => {
+                if (err) console.error('Σφάλμα κατά τη διαγραφή του παλιού αρχείου:', err);
+            });
+        }
+
+        // Update Database
+        const updateQuery = `
+            UPDATE THESES
+            SET title = ?, summary = ?, pdf_path = ?
+            WHERE thesis_id = ? AND professor_id = ?;
+        `;
+        db.query(updateQuery, [updatedData.title, updatedData.summary, updatedData.pdf_path, thesisId, professorId], (err) => {
+            if (err) {
+                console.error('Σφάλμα κατά την ενημέρωση της διπλωματικής:', err);
+                return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+            }
+
+            res.status(200).json({ success: true, message: 'Η διπλωματική ενημερώθηκε επιτυχώς!' });
+        });
+    });
+});
+
+
+//----------------- API for Invitation Control -----------------
 app.get('/api/invitations', authenticateJWT, (req, res) => {
-    const professorId = req.user.userId; // Εξαγωγή professor ID από το JWT
+    const professorId = req.user.userId; // Get professor ID from the JWT
     console.log('Professor ID:', professorId);
 
     if (!professorId) {
@@ -393,15 +447,13 @@ app.get('/api/invitations', authenticateJWT, (req, res) => {
 });
 
 
-
-
-//Ανάθεση σε φοιτητή 
+//----------------- API to Assign Thesis to Students -----------------
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
-    // Μετατροπή των τιμών σε αριθμούς
+    // Convert data to numbers
     const studentId = parseInt(req.body.studentId, 10);
     const thesisId = parseInt(req.body.thesisId, 10);
 
-    // Έλεγχος αν οι τιμές είναι έγκυρες
+    // Check if valid
     if (isNaN(studentId) || isNaN(thesisId)) {
         return res.status(400).json({ success: false, message: 'Μη έγκυρα δεδομένα. Παρακαλώ δοκιμάστε ξανά.' });
     }
@@ -427,103 +479,10 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
 });
 
 
-//Επεξεργασία Διπλωματικής
-app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => {
-    const thesisId = req.params.id;
-    const { title, summary } = req.body;
-    const file = req.file;
-    const professorId = req.user.userId;
-
-    if (!thesisId) {
-        return res.status(400).json({ success: false, message: 'Missing thesis ID.' });
-    }
-
-    if (!title && !summary && !file) {
-        return res.status(400).json({ success: false, message: 'No changes provided.' });
-    }
-
-    // Εύρεση των υπαρχόντων δεδομένων
-    const getThesisQuery = `
-        SELECT title, summary, pdf_path
-        FROM THESES
-        WHERE thesis_id = ? AND professor_id = ?;
-    `;
-    db.query(getThesisQuery, [thesisId, professorId], (err, results) => {
-        if (err) {
-            console.error('Σφάλμα κατά την ανάκτηση της διπλωματικής:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'Η διπλωματική δεν βρέθηκε.' });
-        }
-
-        const oldData = results[0];
-        const updatedData = {
-            title: title || oldData.title,
-            summary: summary || oldData.summary,
-            pdf_path: file ? file.path : oldData.pdf_path,
-        };
-
-        // Έλεγχος αν υπάρχει κάποια αλλαγή
-        if (
-            updatedData.title === oldData.title &&
-            updatedData.summary === oldData.summary &&
-            updatedData.pdf_path === oldData.pdf_path
-        ) {
-            return res.status(400).json({ success: false, message: 'No changes detected.' });
-        }
-
-        // Διαγραφή του παλιού αρχείου PDF αν έχει ανέβει νέο
-        if (file && oldData.pdf_path) {
-            const fs = require('fs');
-            fs.unlink(oldData.pdf_path, (err) => {
-                if (err) console.error('Σφάλμα κατά τη διαγραφή του παλιού αρχείου:', err);
-            });
-        }
-
-        // Ενημέρωση των δεδομένων στη βάση
-        const updateQuery = `
-            UPDATE THESES
-            SET title = ?, summary = ?, pdf_path = ?
-            WHERE thesis_id = ? AND professor_id = ?;
-        `;
-        db.query(updateQuery, [updatedData.title, updatedData.summary, updatedData.pdf_path, thesisId, professorId], (err) => {
-            if (err) {
-                console.error('Σφάλμα κατά την ενημέρωση της διπλωματικής:', err);
-                return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
-            }
-
-            res.status(200).json({ success: true, message: 'Η διπλωματική ενημερώθηκε επιτυχώς!' });
-        });
-    });
-});
-
-// API to fetch student data by ID
-app.get('/api/student', authenticateJWT, (req, res) => {
-    const userId = req.user.userId; // Extract user ID from the JWT
-
-    const query = `SELECT * FROM students WHERE id = ?`;
-
-    db.query(query, [userId], (err, results) => {
-        if (err) {
-            console.error('Error fetching student data:', err);
-            return res.status(500).json({ error: 'Database error' });
-        }
-        if (results.length === 0) {
-            return res.status(404).json({ error: 'Student not found' });
-        }
-
-        // Send the student data as a response
-        res.json(results[0]);
-    });
-});
-
-
-//-----------API to update student contact data after button press-----------
+//-------------- API to Edit Student contact data via Button --------------
 app.post('/api/updateProfile', authenticateJWT, (req, res) => {
-    const userId = req.user.userId; // ID του χρήστη από το JWT
-    const updates = req.body; // Τα δεδομένα που στέλνει ο client
+    const userId = req.user.userId;
+    const updates = req.body;
 
     if (updates.contact_email && !/\S+@\S+\.\S+/.test(updates.contact_email)) {
         return res.status(400).json({ success: false, message: 'Invalid email format.' });
@@ -532,11 +491,11 @@ app.post('/api/updateProfile', authenticateJWT, (req, res) => {
         return res.status(400).json({ success: false, message: 'Invalid mobile phone number.' });
     }
 
-    // Δημιουργία SQL query για δυναμική ενημέρωση
+    // SQL query for dynamic update
     const fields = Object.keys(updates).map((field) => `${field} = ?`).join(', ');
     const values = Object.values(updates);
 
-    // Προσθήκη του ID του χρήστη στις παραμέτρους
+    // Add the User Id to the parameters
     values.push(userId);
 
     const query = `UPDATE students SET ${fields} WHERE id = ?`;
@@ -556,5 +515,6 @@ app.post('/api/updateProfile', authenticateJWT, (req, res) => {
 });
 
 
-// Εκκίνηση του server
+
+//----------------------------- SERVER START -----------------------------
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
