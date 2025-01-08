@@ -142,10 +142,26 @@ function loadStudentThesis() {
                 updateDataField('professor_surname', thesis.professor_surname);
                 updateDataField('thesis_start_date', thesis.thesis_start_date);
                 updateDataField('thesis_exam_date', thesis.thesis_exam_date);
-                updateDataField('thesis_pdf', thesis.thesis_pdf);
                 updateDataField('thesis_nimertis_link', thesis.thesis_nimertis_link);
 
-                
+                // Update PDF link or handle missing PDF
+                updateDataField('thesis_pdf', thesis.pdf_path ? 'Click to view PDF' : 'No PDF available');
+
+                // Handle the PDF download button
+                const pdfButton = document.querySelector('#dashboard [data-field="pdf_button"]');
+                if (thesis.pdf_path) {
+                    // If there's a PDF, set the link to open it in a new tab
+                    pdfButton.addEventListener('click', () => {
+                        window.open(thesis.pdf_path, '_blank'); // Opens PDF in a new tab
+                    });
+                } else {
+                    // If no PDF, disable the button or alert
+                    pdfButton.addEventListener('click', () => {
+                        alert('No PDF available for this thesis.');
+                    });
+                    //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
+                    //pdfButton.style.display = 'none'; //// Optionally hide the button if no PDF exists
+                }
             } else {
                 console.error('No thesis found for this student');
             }

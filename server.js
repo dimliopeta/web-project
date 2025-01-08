@@ -8,6 +8,7 @@ const multer = require('multer');
 
 
 const app = express();
+app.use('/theses_pdf', express.static(path.join(__dirname, 'theses_pdf')));
 const PORT = 3000;
 const SECRET_KEY = 'your-secret-key';
 
@@ -194,7 +195,7 @@ const storage = multer.diskStorage({
         // Ensure user is authenticated and has a name
         const professorId = req.user?.userId || 'Unknown-User'; // Use 'Unknown-User' if not found
         const originalName = file.originalname.replace(/\s+/g, '_'); // Replace spaces with underscores for a clean filename
-        const fileName = `${professorId} - ${originalName}.pdf`; // Format the filename
+        const fileName = `${professorId}-${originalName}`; // Format the filename
         cb(null, fileName); // Save the file with the formatted name
     }
 });
@@ -212,6 +213,22 @@ const upload = multer({
     limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
 });
 
+//Endpoint ανάρτησης
+app.post('/theses_pdf', authenticateJWT, upload.single('pdf'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('No file uploaded or invalid file type');
+    }
+
+    console.log("PDF uploaded:", req.file); // Log the uploaded file
+
+    res.status(200).json({
+        message: 'File uploaded successfully!',
+        file: {
+            filename: req.file.filename,
+            path: req.file.path
+        }
+    });
+});
 
 
 
