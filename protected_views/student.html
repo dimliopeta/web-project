@@ -85,9 +85,9 @@
                         <h3 class="text-primary">Διπλωματική</h3>
                         <div row>
                             <span>Κατάσταση:</span>
-                            <span data-field="status"></span>
+                            <span data-field="thesis_status"></span>
                         </div>
-                        <button type="button" class="btn btn-primary float-center my-2">Διαχείρηση</button>
+                        <button type="button" href="#configure_thesis" data-target="configure_thesis" class="btn btn-primary float-center my-2">Διαχείριση</button>
                     </div>
 
                     <div class="card-body">
@@ -101,7 +101,7 @@
                             <span data-field=""></span>
                         </h5>
 
-                        <h6 class="pt-2">Τριμελής:</h6>
+                        <h5 class="pt-3 pb-2">Τριμελής:</h5>
                         <div class="row">
                             <div class="col-sm-4">
                                 <span data-field="professor_name"></span>
@@ -120,8 +120,11 @@
 
                     <div class="card-footer text-muted">
                         <span>Ημερομηνία έναρξης:</span>
-                        <span data-field="thesis_start_date">thesis_start_date</span>
-                        <button type="button" class="btn btn-outline-primary btn-sm float-end" data-field="pdf_button">PDF</button>
+                        <span class="pe-5"data-field="thesis_start_date">thesis_start_date</span>
+                        <span class="ps-5">Διάρκεια:</span>
+                        <span data-field="thesis_duration">thesis_duration</span>
+                        <button type="button" data-field="pdf_button"
+                            class="btn btn-outline-primary btn-sm float-end">PDF</button>
                     </div>
 
                 </div>
@@ -173,10 +176,12 @@
                                             <p class="mb-0">Email επικοινωνίας</p>
                                         </div>
                                         <div class="col-sm-7">
-                                            <p class="text-muted mb-0" data-field="contact_email">student_contact_mail</p>
+                                            <p class="text-muted mb-0" data-field="contact_email">student_contact_mail
+                                            </p>
                                         </div>
                                         <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
                                         </div>
                                     </div>
                                     <hr>
@@ -188,7 +193,8 @@
                                             <p class="text-muted mb-0" data-field="mobile_telephone">student_tel_mob</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
                                         </div>
                                     </div>
                                     <hr>
@@ -201,7 +207,8 @@
                                             </p>
                                         </div>
                                         <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
                                         </div>
                                     </div>
                                     <hr>
@@ -213,7 +220,8 @@
                                             <p class="text-muted mb-0" data-field="street">student_street</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
                                         </div>
                                     </div>
                                     <hr>
@@ -225,7 +233,8 @@
                                             <p class="text-muted mb-0" data-field="number">student_street_number</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
                                         </div>
                                     </div>
                                     <hr>
@@ -237,7 +246,8 @@
                                             <p class="text-muted mb-0" data-field="city">student_city</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
                                         </div>
                                     </div>
                                     <hr>
@@ -249,7 +259,8 @@
                                             <p class="text-muted mb-0 " data-field="postcode">student_postcode</p>
                                         </div>
                                         <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
                                         </div>
                                     </div>
                                 </div>

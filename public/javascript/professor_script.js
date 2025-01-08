@@ -23,8 +23,7 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 loadTheses();
             } else if (targetId === 'assign') {
                 loadUnassignedTheses();
-            } else if (targetId === 'invitations' )
-            {
+            } else if (targetId === 'invitations') {
                 loadInvitations();
             }
         }

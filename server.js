@@ -220,7 +220,7 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
 //----------------- API to fetch Theses Data for both students and professors -----------------
 app.get('/api/theses', authenticateJWT, (req, res) => {
     const userId = req.user.userId; // Get user Id and Role from the JWT
-    const role = req.user.role;    
+    const role = req.user.role;
 
     let query;
 
@@ -230,13 +230,17 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     } else if (role === 'student') {
         query = `SELECT
                     Theses.*,
-                     Professors.name AS professor_name, 
+                    Professors.name AS professor_name, 
                     Professors.surname AS professor_surname, 
-                    Committees.member1_id AS committee_member1_id, 
-                    Committees.member2_id AS committee_member2_id
+                    Committee1.name AS committee_member1_name,
+                    Committee1.surname AS committee_member1_surname,
+                    Committee2.name AS committee_member2_name,
+                    Committee2.surname AS committee_member2_surname
                 FROM Theses
                 LEFT JOIN Professors ON Theses.professor_id = Professors.id
-                LEFT JOIN Committees ON Theses.Thesis_id = Committees.Thesis_id
+                LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
+                LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
+                LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
                 WHERE Theses.student_id = ${userId};`;
     } else {
         return res.status(403).json({ success: false, message: 'Unauthorized access.' });
