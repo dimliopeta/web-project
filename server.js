@@ -411,7 +411,7 @@ app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => 
 });
 
 
-//----------------- API for Invitation Control -----------------
+//----------------- API for Invitation Loading -----------------
 app.get('/api/invitations', authenticateJWT, (req, res) => {
     const professorId = req.user.userId; // Get professor ID from the JWT
     console.log('Professor ID:', professorId);
@@ -449,6 +449,38 @@ app.get('/api/invitations', authenticateJWT, (req, res) => {
         res.json({ success: true, invitations: results });
     });
 });
+
+
+
+//----------------- API for Invitation Acceptance/Rejection -----------------
+app.post('/api/invitations/:id/action', authenticateJWT, (req, res) => {
+    const invitationId = req.params.id;
+    const { action } = req.body; // Αποδοχή της δράσης από το σώμα του αιτήματος
+
+    if (!['accepted', 'rejected'].includes(action)) {
+        return res.status(400).json({ success: false, message: 'Invalid action provided.' });
+    }
+
+    const query = `
+        UPDATE Invitations 
+        SET status = ?, response_date = NOW() 
+        WHERE id = ?;
+    `;
+
+    db.query(query, [action, invitationId], (err, results) => {
+        if (err) {
+            console.error('Error updating invitation:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Invitation not found.' });
+        }
+
+        res.json({ success: true, message: `Η πρόσκληση ${action === 'accepted' ? 'αποδέχθηκε' : 'απορρίφθηκε'} επιτυχώς!` });
+    });
+});
+
 
 
 //----------------- API to Assign Thesis to Students -----------------

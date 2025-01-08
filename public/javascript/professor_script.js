@@ -286,6 +286,10 @@ document.getElementById('editThesisForm').addEventListener('submit', function (e
 });
 
 
+
+
+
+//------------ Invitation Loading Froentend ----------
 function loadInvitations() {
     fetch('/api/invitations', {
         headers: {
@@ -312,12 +316,27 @@ function loadInvitations() {
                                 <h5 class="card-title">${invitation.thesis_title || 'Χωρίς τίτλο'}</h5>
                                 <p class="card-text">${invitation.thesis_summary || 'Δεν υπάρχει περιγραφή'}</p>
                                 <p class="text-muted">Κατάσταση: ${invitation.invitation_status || 'Μη διαθέσιμη'}</p>
-                                <button class="btn btn-primary btn-sm">Αποδοχή</button>
-                                <button class="btn btn-outline-danger btn-sm">Απόρριψη</button>
+                                <button class="btn btn-primary btn-sm accept-btn" data-id="${invitation.invitation_id}">Αποδοχή</button>
+                                <button class="btn btn-outline-danger btn-sm reject-btn" data-id="${invitation.invitation_id}">Απόρριψη</button>
                             </div>
                         </div>
                     `;
                     container.appendChild(card);
+                });
+
+                // Προσθήκη event listeners στα κουμπιά
+                document.querySelectorAll('.accept-btn').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const invitationId = event.target.dataset.id;
+                        handleInvitationAction(invitationId, 'accepted');
+                    });
+                });
+
+                document.querySelectorAll('.reject-btn').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const invitationId = event.target.dataset.id;
+                        handleInvitationAction(invitationId, 'rejected');
+                    });
                 });
             } else {
                 console.warn('No invitations found or API error.');
@@ -328,6 +347,34 @@ function loadInvitations() {
             console.error('Σφάλμα κατά τη φόρτωση των προσκλήσεων:', error);
         });
 }
+
+
+
+
+//-------------Invitation Acceptance/Rejection ------------------
+function handleInvitationAction(invitationId, action) {
+    fetch(`/api/invitations/${invitationId}/action`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action }) // Δράση: "accepted" ή "rejected"
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                loadInvitations(); // Επαναφόρτωση της λίστας προσκλήσεων
+            } else {
+                alert(`Σφάλμα: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την ενέργεια πρόσκλησης:', error);
+        });
+}
+
 
 
 
