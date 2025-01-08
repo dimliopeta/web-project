@@ -256,9 +256,14 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        SELECT id, name, surname
-        FROM students
-        WHERE id LIKE ? OR name LIKE ? OR surname LIKE ?
+        SELECT s.id, s.name, s.surname
+        FROM students s
+        WHERE (s.id LIKE ? OR s.name LIKE ? OR s.surname LIKE ?)
+          AND s.id NOT IN (
+              SELECT DISTINCT student_id
+              FROM theses
+              WHERE student_id IS NOT NULL
+          );
     `;
     const searchInput = `%${input}%`;
 
