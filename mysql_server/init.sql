@@ -40,6 +40,9 @@ CREATE TABLE `Theses`(
     `summary` TEXT NULL,
     `status` ENUM('unassigned','active','to-be-reviewed','completed','canceled') DEFAULT 'unassigned', 
 	`pdf_path` VARCHAR(200) NULL,
+	`start_date` TIMESTAMP NULL,
+	`exam_date` TIMESTAMP NULL,
+	`nimertis_link` VARCHAR(200) NULL,
     FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`),
     FOREIGN KEY (`student_id`) REFERENCES `Students`(`id`)
 

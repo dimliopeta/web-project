@@ -112,17 +112,30 @@ function loadStudentThesis() {
             if (data.success && data.theses.length > 0) {
                 // If thesis data exists, populate the dashboard with the thesis info
                 const thesis = data.theses[0]; // Assuming one thesis per student
-                document.querySelector('#dashboard [data-field="status"]').textContent = thesis.status || 'No status available';
+                
+                let status;
+                switch (thesis.status) {
+                    case 'active':
+                        status = 'Ενεργή';
+                        break;
+                    case 'to-be-reviewed':
+                        status = 'Υπό Εξέταση';
+                        break;
+                    case 'completed':
+                        status = 'Περατωμένη';
+                        break;
+                    case 'unassigned':
+                        status = 'Υπό Ανάθεση';
+                }
+                document.querySelector('#dashboard [data-field="status"]').textContent = status || 'No status available';
                 document.querySelector('#dashboard [data-field="thesis_title"]').textContent = thesis.title || 'No title available';
                 document.querySelector('#dashboard [data-field="thesis_summary"]').textContent = thesis.summary || 'No summary available';
-                //  document.querySelector('#dashboard [data-field="thesis_summary"]').textContent = thesis.summary;
-                //  document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
-                //  document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
-                // document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
-                // document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
-                //  document.querySelector('#dashboard [data-field="thesis_end_date"]').textContent = thesis.end_date;
-                //  document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
-                //  document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.thesis_nimertis_link;
+                document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
+                document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
+                document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
+                document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
+                document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
+                document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.nimertis_link;
             } else {
                 console.error('No thesis found for this student');
             }
