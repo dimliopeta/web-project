@@ -62,10 +62,11 @@ CREATE TABLE `Invitations`(
 CREATE TABLE `Committees`(
     `commitee_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `thesis_id` INT NOT NULL,
-    `committee_member1_id` INT NOT NULL,
-	`committee_member2_id` INT NOT NULL,
+    `member1_id` INT NOT NULL,
+	`member2_id` INT NOT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
-    FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`)
+    FOREIGN KEY (`member1_id`) REFERENCES `Professors`(`id`),
+	FOREIGN KEY (`member2_id`) REFERENCES `Professors`(`id`)
 );
 
 CREATE TABLE `Grades`(
