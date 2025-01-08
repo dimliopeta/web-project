@@ -127,16 +127,25 @@ function loadStudentThesis() {
                     case 'unassigned':
                         status = 'Υπό Ανάθεση';
                 }
-                document.querySelector('#dashboard [data-field="status"]').textContent = status || 'No status available';
-                document.querySelector('#dashboard [data-field="thesis_title"]').textContent = thesis.title || 'No title available';
-                document.querySelector('#dashboard [data-field="thesis_summary"]').textContent = thesis.summary || 'No summary available';
-                document.querySelector('#dashboard [data-field="professor_name"]').textContent = `${thesis.professor_name || 'N/A'} ${thesis.professor_surname || 'N/A'}`;
-                //document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
-                //document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
-                //document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
-                //document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
-                //document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
-                //document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.nimertis_link;
+                //Helper function to replace ALL data-fields -and not just their first instance- as is needed
+                function updateDataField(dataField, value, errorMessage = 'Error - no data') {
+                    const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
+                    elements.forEach(element => {
+                        // If value is null or invalid, show error message
+                        element.textContent = (value && value !== null) ? value : errorMessage;
+                    });
+                }
+                updateDataField('status', status);
+                updateDataField('thesis_title', thesis.title);
+                updateDataField('thesis_summary', thesis.summary);
+                updateDataField('professor_name', thesis.professor_name);
+                updateDataField('professor_surname', thesis.professor_surname);
+                updateDataField('thesis_start_date', thesis.thesis_start_date);
+                updateDataField('thesis_exam_date', thesis.thesis_exam_date);
+                updateDataField('thesis_pdf', thesis.thesis_pdf);
+                updateDataField('thesis_nimertis_link', thesis.thesis_nimertis_link);
+
+                
             } else {
                 console.error('No thesis found for this student');
             }

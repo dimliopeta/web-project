@@ -281,7 +281,7 @@ document.getElementById('assignThesisButton').addEventListener('click', function
 
 
 
-
+//------------------THESIS CREATION MODAL ------------------------------------
 document.getElementById('thesisForm').addEventListener('submit', function (e) {
     e.preventDefault(); // Αποτροπή της παραδοσιακής υποβολής φόρμας
 

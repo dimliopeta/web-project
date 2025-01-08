@@ -184,11 +184,11 @@ app.post('/logout', authenticateJWT, (req, res) => {
 
 
 
-
-// Endpoint για την ανάρτηση PDF αρχείων με χρήση multer
+//---------------------- MULTER DECLARATION FOR PDFs ONLY -----------------------
+// Αρχικοποίηση multer για την ανάρτηση PDF αρχείων
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'theses_pdf'); // Correct path
+        cb(null, 'theses_pdf'); // Correct path if both the server and the folder are in the same directory
     },
     filename: (req, file, cb) => {
         // Ensure user is authenticated and has a name
@@ -212,20 +212,11 @@ const upload = multer({
     limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
 });
 
-//Endpoint ανάρτησης
-app.post('/theses_pdf', authenticateJWT, upload.single('pdf'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('No file uploaded or invalid file type');
-    }
 
-    res.status(200).json({
-        message: 'File uploaded successfully!',
-        file: {
-            filename: req.file.filename,
-            path: req.file.path
-        }
-    });
-});
+
+
+
+
 
 app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
@@ -292,11 +283,16 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         query = `SELECT * FROM Theses WHERE professor_id = ${userId};`;
     } else if (role === 'student') {
         // Retrieve the thesis assigned to the student
-        query = `SELECT Theses.*, Professors.name, Professors.surname, Committees.member1_id, Committees.member2_id
-        FROM Theses
-        LEFT JOIN Professors ON Theses.professor_id = Professors.id
-        LEFT JOIN Committees ON Theses.Thesis_id = Committees.Thesis_id
-        WHERE Theses.student_id = ${userId};`;
+        query = `SELECT
+                    Theses.*,
+                     Professors.name AS professor_name, 
+                    Professors.surname AS professor_surname, 
+                    Committees.member1_id AS committee_member1_id, 
+                    Committees.member2_id AS committee_member2_id
+                FROM Theses
+                LEFT JOIN Professors ON Theses.professor_id = Professors.id
+                LEFT JOIN Committees ON Theses.Thesis_id = Committees.Thesis_id
+                WHERE Theses.student_id = ${userId};`;
     } else {
         return res.status(403).json({ success: false, message: 'Unauthorized access.' });
     }
@@ -320,7 +316,7 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
     if (!title || !summary) {
         return res.status(400).json({ success: false, message: 'Title and summary are required' });
     }
-    const filePath = req.file ? req.file.path : null; // Save the file path if uploaded
+    const filePath = file ? file.path : null; // Save the file path if uploaded
 
     const query = `INSERT INTO THESES (professor_id, student_id, title, summary, pdf_path) VALUES (?, ?, ?, ?, ?);`;
     db.query(query, [professorId, null, title, summary, filePath], (err, result) => {
