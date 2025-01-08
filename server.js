@@ -292,7 +292,11 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         query = `SELECT * FROM Theses WHERE professor_id = ${userId};`;
     } else if (role === 'student') {
         // Retrieve the thesis assigned to the student
-        query = `SELECT * FROM Theses WHERE student_id = ${userId};`;
+        query = `SELECT Theses.*, Professors.name, Professors.surname, Committees.member1_id, Committees.member2_id
+        FROM Theses
+        LEFT JOIN Professors ON Theses.professor_id = Professors.id
+        LEFT JOIN Committees ON Theses.Thesis_id = Committees.Thesis_id
+        WHERE Theses.student_id = ${userId};`;
     } else {
         return res.status(403).json({ success: false, message: 'Unauthorized access.' });
     }

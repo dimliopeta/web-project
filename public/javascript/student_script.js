@@ -130,12 +130,13 @@ function loadStudentThesis() {
                 document.querySelector('#dashboard [data-field="status"]').textContent = status || 'No status available';
                 document.querySelector('#dashboard [data-field="thesis_title"]').textContent = thesis.title || 'No title available';
                 document.querySelector('#dashboard [data-field="thesis_summary"]').textContent = thesis.summary || 'No summary available';
-                document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
-                document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
-                document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
-                document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
-                document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
-                document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.nimertis_link;
+                document.querySelector('#dashboard [data-field="professor_name"]').textContent = `${thesis.professor_name || 'N/A'} ${thesis.professor_surname || 'N/A'}`;
+                //document.querySelector('#dashboard [data-field="professor_name"]').textContent = thesis.professor_name;
+                //document.querySelector('#dashboard [data-field="professor_surname"]').textContent = thesis.professor_name;
+                //document.querySelector('#dashboard [data-field="thesis_start_date"]').textContent = thesis.start_date;
+                //document.querySelector('#dashboard [data-field="thesis_exam_date"]').textContent = thesis.exam_date;
+                //document.querySelector('#dashboard [data-field="thesis_pdf"]').textContent = thesis.pdf_path;
+                //document.querySelector('#dashboard [data-field="thesis_nimertis_link"]').textContent = thesis.nimertis_link;
             } else {
                 console.error('No thesis found for this student');
             }
