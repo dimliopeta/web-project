@@ -287,9 +287,9 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        SELECT s.id, s.name, s.surname
+        SELECT s.student_number, s.name, s.surname
         FROM students s
-        WHERE (s.id LIKE ? OR s.name LIKE ? OR s.surname LIKE ?)
+        WHERE (s.student_number LIKE ? OR s.name LIKE ? OR s.surname LIKE ?)
           AND s.id NOT IN (
               SELECT DISTINCT student_id
               FROM theses
@@ -435,7 +435,7 @@ app.get('/api/invitations', authenticateJWT, (req, res) => {
         JOIN 
             Theses t ON i.thesis_id = t.thesis_id
         WHERE 
-            i.professor_id = ?;
+            i.professor_id = ? and i.status = 'pending';
 
     `;
 
@@ -485,32 +485,66 @@ app.post('/api/invitations/:id/action', authenticateJWT, (req, res) => {
 
 //----------------- API to Assign Thesis to Students -----------------
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
-    // Convert data to numbers
     const studentId = parseInt(req.body.studentId, 10);
     const thesisId = parseInt(req.body.thesisId, 10);
 
-    // Check if valid
     if (isNaN(studentId) || isNaN(thesisId)) {
         return res.status(400).json({ success: false, message: 'Μη έγκυρα δεδομένα. Παρακαλώ δοκιμάστε ξανά.' });
     }
 
-    const query = `
+    const assignQuery = `
         UPDATE THESES
         SET student_id = ?, status = 'active'
         WHERE thesis_id = ? AND status = 'unassigned';
     `;
 
-    db.query(query, [studentId, thesisId], (err, result) => {
+    const insertQuery = `
+        INSERT INTO Committees (thesis_id, member1_id, member2_id)
+        VALUES (?, NULL, NULL);
+    `;
+
+    // Ξεκινάμε μια συναλλαγή για να διασφαλίσουμε συνοχή δεδομένων
+    db.beginTransaction((err) => {
         if (err) {
-            console.error('Σφάλμα κατά την ανάθεση διπλωματικής:', err);
+            console.error('Σφάλμα κατά την εκκίνηση της συναλλαγής:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
-        if (result.affectedRows === 0) {
-            return res.status(400).json({ success: false, message: 'Η διπλωματική δεν είναι διαθέσιμη για ανάθεση.' });
-        }
+        db.query(assignQuery, [studentId, thesisId], (assignErr, assignResult) => {
+            if (assignErr) {
+                console.error('Σφάλμα κατά την ανάθεση διπλωματικής:', assignErr);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                });
+            }
 
-        res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε επιτυχώς!' });
+            if (assignResult.affectedRows === 0) {
+                return db.rollback(() => {
+                    res.status(400).json({ success: false, message: 'Η διπλωματική δεν είναι διαθέσιμη για ανάθεση.' });
+                });
+            }
+
+            db.query(insertQuery, [thesisId], (insertErr) => {
+                if (insertErr) {
+                    console.error('Σφάλμα κατά τη δημιουργία της τριμελούς:', insertErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                    });
+                }
+
+                // Επιτυχία και για τα δύο queries, κάνουμε commit
+                db.commit((commitErr) => {
+                    if (commitErr) {
+                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                        });
+                    }
+
+                    res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε και η καταχώρηση τριμελούς δημιουργήθηκε επιτυχώς!' });
+                });
+            });
+        });
     });
 });
 

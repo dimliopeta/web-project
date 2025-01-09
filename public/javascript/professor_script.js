@@ -90,7 +90,7 @@ document.querySelector('#search-student').addEventListener('input', function () 
                 data.students.forEach(student => {
                     const listItem = document.createElement('li');
                     listItem.className = 'list-group-item list-group-item-action';
-                    listItem.textContent = `ID: ${student.id} - ${student.name} ${student.surname}`;
+                    listItem.textContent = `AM: ${student.student_number} - ${student.name} ${student.surname}`;
                     listItem.dataset.studentId = student.id;
 
                     // Προσθήκη listener για επιλογή φοιτητή
