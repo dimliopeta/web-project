@@ -62,8 +62,8 @@ CREATE TABLE `Invitations`(
 CREATE TABLE `Committees`(
     `commitee_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `thesis_id` INT NOT NULL,
-    `member1_id` INT NOT NULL,
-	`member2_id` INT NOT NULL,
+    `member1_id` INT NULL,
+	`member2_id` INT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
     FOREIGN KEY (`member1_id`) REFERENCES `Professors`(`id`),
 	FOREIGN KEY (`member2_id`) REFERENCES `Professors`(`id`)
