@@ -589,31 +589,73 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
 
 
 //----------------API for Unassigning a Thesis Theme -----------------
-app.post('/api/theses/unassign',authenticateJWT, (req, res) =>{
+app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     const thesisId = parseInt(req.body.thesisId, 10);
 
     if (isNaN(thesisId)) {
         return res.status(400).json({ success: false, message: 'Μη έγκυρο thesis ID.' });
     }
+
+    // Query για αναίρεση ανάθεσης της διπλωματικής
     const unasQuery = `
         UPDATE THESES
-        SET student_id = NULL , status = 'unassigned'
+        SET student_id = NULL, status = 'unassigned'
         WHERE thesis_id = ? AND status = 'active';
-    ;`
-    db.query(unasQuery, [thesisId], (err, result) => {
+    `;
+
+    // Query για διαγραφή της τριμελούς επιτροπής
+    const deleteCommitteeQuery = `
+        DELETE FROM Committees
+        WHERE thesis_id = ?;
+    `;
+
+    // Ξεκινάμε συναλλαγή για να διασφαλίσουμε συνοχή δεδομένων
+    db.beginTransaction((err) => {
         if (err) {
-            console.error('Σφάλμα κατά την αναίρεση ανάθεσης:', err);
+            console.error('Σφάλμα κατά την εκκίνηση της συναλλαγής:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
-        if (result.affectedRows === 0) {
-            return res.status(400).json({ success: false, message: 'Η διπλωματική δεν μπορεί να ανατεθεί ξανά.' });
-        }
+        // Εκτέλεση query για αναίρεση ανάθεσης
+        db.query(unasQuery, [thesisId], (unasErr, unasResult) => {
+            if (unasErr) {
+                console.error('Σφάλμα κατά την αναίρεση ανάθεσης:', unasErr);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                });
+            }
 
-        res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς!' });
+            if (unasResult.affectedRows === 0) {
+                return db.rollback(() => {
+                    res.status(400).json({ success: false, message: 'Η διπλωματική δεν είναι διαθέσιμη για ανάθεση.' });
+                });
+            }
+
+            // Εκτέλεση query για διαγραφή της τριμελούς επιτροπής
+            db.query(deleteCommitteeQuery, [thesisId], (deleteErr) => {
+                if (deleteErr) {
+                    console.error('Σφάλμα κατά τη διαγραφή της τριμελούς:', deleteErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                    });
+                }
+
+                // Επικύρωση της συναλλαγής
+                db.commit((commitErr) => {
+                    if (commitErr) {
+                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                        });
+                    }
+
+                    res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς και η επιτροπή διαγράφηκε!' });
+                });
+            });
+        });
     });
-
 });
+
 
 
 //-------------- API to Edit Student contact data via Button --------------

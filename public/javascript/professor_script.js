@@ -26,7 +26,7 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 loadAssignedTheses();
             } else if (targetId === 'invitations') {
                 loadInvitations();
-            } 
+            }
         }
 
         // Απόκρυψη του παραθύρου επεξεργασίας
@@ -83,33 +83,33 @@ document.querySelector('#search-student').addEventListener('input', function () 
 
     // Κλήση στο backend
     fetch(`/api/student-search?input=${encodeURIComponent(filter)}`)
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            studentList.innerHTML = ''; // Καθαρισμός λίστας
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                studentList.innerHTML = ''; // Καθαρισμός λίστας
 
-            data.students.forEach(student => {
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item list-group-item-action';
-                listItem.textContent = `AM: ${student.student_number} - ${student.name} ${student.surname}`;
-                listItem.dataset.studentId = student.id; // Αποθήκευση του ID
+                data.students.forEach(student => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item list-group-item-action';
+                    listItem.textContent = `AM: ${student.student_number} - ${student.name} ${student.surname}`;
+                    listItem.dataset.studentId = student.id; // Αποθήκευση του ID
 
-                // Προσθήκη event listener για επιλογή φοιτητή
-                listItem.addEventListener('click', function () {
-                    document.getElementById('studentNameInput').value = `${student.student_number} - ${student.name} ${student.surname}`;
-                    document.getElementById('assignThesisButton').dataset.studentId = student.id;
+                    // Προσθήκη event listener για επιλογή φοιτητή
+                    listItem.addEventListener('click', function () {
+                        document.getElementById('studentNameInput').value = `${student.student_number} - ${student.name} ${student.surname}`;
+                        document.getElementById('assignThesisButton').dataset.studentId = student.id;
 
-                    // Απόκρυψη της λίστας φοιτητών
-                    document.getElementById('studentListWrapper').style.display = 'none';
+                        // Απόκρυψη της λίστας φοιτητών
+                        document.getElementById('studentListWrapper').style.display = 'none';
+                    });
+
+                    studentList.appendChild(listItem);
                 });
-
-                studentList.appendChild(listItem);
-            });
-        } else {
-            console.error('Σφάλμα:', data.message);
-        }
-    })
-    .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
+            } else {
+                console.error('Σφάλμα:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
 
 });
 
@@ -472,6 +472,15 @@ document.getElementById('assignThesisButton').addEventListener('click', function
                 alert('Η ανάθεση ολοκληρώθηκε επιτυχώς!');
                 loadUnassignedTheses();
                 loadAssignedTheses();
+                document.getElementById('studentListWrapper').style.display = 'block';
+
+                // Επαναφέρουμε το search-student και τη λίστα φοιτητών
+                document.getElementById('search-student').value = ''; // Καθαρισμός του input αναζήτησης
+                document.getElementById('student-list').innerHTML = ''; // Καθαρισμός της λίστας φοιτητών
+
+                // Καθαρίζουμε επίσης το επιλεγμένο όνομα φοιτητή και το ID
+                document.getElementById('studentNameInput').value = '';
+                delete document.getElementById('assignThesisButton').dataset.studentId;
             } else {
                 alert('Σφάλμα: ' + data.message);
             }
