@@ -233,8 +233,8 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
         WHERE 
             t.status = 'active' and t.professor_id = ?;
     `;
-    db.query(query,[professor_id], (err,results) => {
-        if(err){
+    db.query(query, [professor_id], (err, results) => {
+        if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των ανατεθημένων διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
@@ -336,6 +336,52 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
         }
 
         res.status(200).json({ success: true, students: results });
+    });
+});
+
+//----------------- API for Professor Search Bar for thesis assignment -----------------
+app.get('/api/professor-search', authenticateJWT, (req, res) => {
+    const userId = req.user.userId;
+    const { input } = req.query;
+
+
+    if (!input) {
+        return res.status(400).json({ success: false, message: 'Το πεδίο αναζήτησης είναι κενό.' });
+    }
+
+    const query = `
+                    SELECT P.id, P.name, P.surname
+                    FROM Professors P
+                    WHERE (P.id LIKE ? OR P.name LIKE ? OR P.surname LIKE ?)
+                    AND P.id NOT IN (
+                        SELECT T.professor_id
+                        FROM Theses T
+                        WHERE T.student_id = ?
+                                    )
+                    AND P.id NOT IN (
+                        SELECT C.member1_id
+                        FROM Committees C
+                        WHERE C.member1_id IS NOT NULL
+                        AND C.thesis_id IN (SELECT thesis_id FROM Theses WHERE student_id = ?)
+                                    )
+                    AND P.id NOT IN (
+                        SELECT C.member2_id
+                        FROM Committees C
+                        WHERE C.member2_id IS NOT NULL
+                        AND C.thesis_id IN (SELECT thesis_id FROM Theses WHERE student_id = ?)
+                                    );
+
+                `;
+
+    const searchInput = `%${input}%`;
+
+    db.query(query, [searchInput, searchInput, searchInput, userId, userId, userId, userId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+    
+        res.status(200).json({ success: true, professors: results });
     });
 });
 
@@ -524,7 +570,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     console.log('Request Body:', req.body);
     console.log('Student ID:', req.body.studentId);
     console.log('Thesis ID:', req.body.thesisId);
-    
+
 
     if (isNaN(studentId) || isNaN(thesisId)) {
         return res.status(400).json({ success: false, message: 'Μη έγκυρα δεδομένα. Παρακαλώ δοκιμάστε ξανά.' });

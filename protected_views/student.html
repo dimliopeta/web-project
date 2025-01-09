@@ -48,7 +48,7 @@
 <body>
 
 
-    <!--- navbar --->
+    <!--- --->
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top nav-item dropdown">
         <a class="navbar-brand px-3 fs-4" href="student">
             <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
@@ -72,7 +72,8 @@
 
     <!--------- Main Content --------->
     <div class="main-content">
-        <!------ DashBoard ------>
+
+        <!------------------ DashBoard Page ------------------>
         <div id="dashboard" class="content-section" style="display:block;">
 
 
@@ -136,147 +137,7 @@
 
 
 
-
-        <!------- Profile page ------->
-        <div id="student_profile" class="content-section" style="display:none;">
-            <div>
-                <h2 class="text-center mt-5 pt-5 pb-3">Λογαριασμός</h2>
-            </div>
-
-            <!-- Cards & Body -->
-            <div style="background-color: #eee;">
-                <div class="container py-5">
-                    <div class="row">
-
-                        <!--Profile card-->
-                        <div class="col-lg-4">
-                            <div class="card mb-4">
-                                <div class="card-body text-center">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
-                                        alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
-                                    <h5 class="my-3">
-                                        <span data-field="name">student_name</span>
-                                        <span data-field="surname">student_surname</span>
-                                    </h5>
-                                    <p class="text-muted mb-1" data-field="student_number">student_number</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!--Contact info card-->
-                        <div class="col-lg-8">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <div class="row">
-                                        <div class="col-sm-12 text-center">
-                                            <h3 class="text-primary py-2">Στοιχεία επικοινωνίας</h3>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Email επικοινωνίας</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0" data-field="contact_email">student_contact_mail
-                                            </p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Κινητό τηλέφωνο</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0" data-field="mobile_telephone">student_tel_mob</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Σταθερό τηλέφωνο</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0" data-field="landline_telephone">student_tel_land
-                                            </p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Οδός</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0" data-field="street">student_street</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Αριθμός</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0" data-field="number">student_street_number</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Πόλη</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0" data-field="city">student_city</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">T.K.</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0 " data-field="postcode">student_postcode</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!------- Configure Thesis page ------->
+        <!------------------ Configure Thesis Page ------------------>
         <div id="configure_thesis" class="content-section" style="display:none;">
             <h2 class="text-center mt-5 pt-5 pb-3">Διαχείρηση διπλωματικής</h2>
 
@@ -285,16 +146,19 @@
 
                     <div class="card-header">
                         <h3 class="text-primary">Διπλωματική</h3>
-                        <p> Κατάσταση: status</p>
+                        <div row>
+                            <span>Κατάσταση:</span>
+                            <span data-field="thesis_status"></span>
+                        </div>
                     </div>
 
                     <div class="card-body">
-                        <!--Thesis info-->
-                        <h5 class="card-title">thesis_title</h5>
-                        <p class="card-text">thesis_summary.</p>
+                        <!-- Thesis info -->
+                        <h5 class="card-title" data-field="thesis_title"></h5>
+                        <p class="card-text" data-field="thesis_summary"></p>
                         <hr>
 
-                        <!--Grades-->
+                        <!-- Grades -->
                         <h3 class="py-1">Βαθμολογία:</h3>
                         <p> grade</p>
                         <h5 class="py-1">Τριμελής επιτροπή:</h5>
@@ -321,43 +185,80 @@
                             </div>
                         </div>
                         <hr>
-                        <!--Professors-->
-                        <h4 class="card-title">Επιβλέπων:</h4>
-                        <p> professor_id</p>
-                        <h4 class="py-1">Τριμελής επιτροπή:</h4>
+                        <!-- Professors -->
+                        <h5 class="card-title">
+                            <span>Επιβλέπων:</span>
+                            <span data-field="professor_name"></span>
+                            <span data-field="professor_surname"></span>
+                            <span data-field=""></span>
+                        </h5>
+                        <h4 class="py-3">Τριμελής επιτροπή:</h4>
                         <div class="row">
-                            <div class="col-sm-5 text-end">
-                                <p class="my-2">Επιβλέπων / 1o μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                            <div class="col-sm-5">
-                                <p class="my-2 text-start">epivlepomn_name</p>
-                            </div>
-                            <div class="col-sm-2">
-                            </div>
-                            <div class="col-sm-5 text-end">
-                                <p class="my-2">2o μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                            <div class="col-sm-5">
-                                <p class="my-2 text-start">trimeles_2</p>
-                            </div>
-                            <div class="col-sm-2">
-                                <button type="button"
-                                    class="btn btn-outline-primary btn-sm float-start">Ορισμός</button>
-                            </div>
-                            <div class="col-sm-5 text-end">
-                                <p class="mt-2 mb-0"> 3ο μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                            <div class="col-sm-5">
-                                <p class="mt-2 mb-0 text-start">trimeles3</p>
-                            </div>
-                            <div class="col-sm-2">
-                                <button type="button"
-                                    class="btn btn-outline-primary btn-sm float-start">Ορισμός</button>
+                            <span class="col-sm-5 d-flex justify-content-end">
+                                <span class="my-2"> Επιβλέπων / 1o μέλος Τριμελούς Επιτροπής:</span>
+                            </span>
+                            <span class="col-sm-5 d-flex justify-content-start" >
+                                <span class="my-2" data-field="professor_name"> </span>
+                                <span class="my-2" data-field="professor_surname"> </span>
+                            </span>
+                            <span class="col-sm-5 my-2 d-flex justify-content-end" >
+                                <span class="my-2"  > 2o μέλος Τριμελούς Επιτροπής:</span>
+                            </span>
+                            <span class="col-sm-5 d-flex justify-content-start" >
+                                <span class="my-2"  data-field="committee_member1_name"> </span>
+                                <span class="my-2"  data-field="committee_member1_surname"> </span>
+                            </span>
+                            <span class="col-sm-2"> <!-- "assign committee" added to class since ids must be unique -->
+                                <button type="button" 
+                                    class="btn btn-outline-primary btn-sm float-start assignCommittee">Ορισμός</button>
+                            </span>
+                            <span class="col-sm-5 d-flex justify-content-end">
+                                <span class="my-2"  > 3ο μέλος Τριμελούς Επιτροπής:</span>
+                            </span>
+                            <span class="col-sm-5 d-flex justify-content-start">
+                                <span class="my-2"  data-field="committee_member2_name"> </span>
+                                <span class="my-2"  data-field="committee_member2_surname"> </span>
+                            </span>
+                            <span class="col-sm-2"> <!-- "assign committee" added to class since ids must be unique -->
+                                <button type="button" 
+                                    class="btn btn-outline-primary btn-sm float-start assignCommittee">Ορισμός</button>
+                            </span>
+                        </div>
+
+                        <!-- Searh bar for Professors -->
+                        <div class="mt-5 mx-auto" id="professorSearchBar" style="display:none;">
+                            <div class="border p-3 rounded">
+                                <h5 class="text-primary">Πρόσκληση Τριμελούς</h5>
+                                <div id="professorListWrapper">
+                                    <div class="input-group mb-3">
+                                        <input type="search" class="form-control" placeholder="Αναζήτηση Καθηγητή"
+                                            aria-label="Search" id="search-professor" name="search-professor">
+                                        <span class="input-group-text">
+                                            <img src="https://img.icons8.com/ios7/600/search.png" alt="Search"
+                                                style="width: 20px; height: 20px;">
+                                        </span>
+                                    </div>
+                                    <ul id="professor-list" class="list-group mb-3"></ul>
+                                </div>
+                                <div id="chosenProfessor" style="display:none;">
+                                    <label for="professorNameInput" class="form-label">Επιλεγμένος Καθηγητής</label>
+                                    <input type="text" class="form-control" id="professorNameInput" readonly>
+                                    <button class="btn btn-secondary mt-3 w-100" id="changeProfessorButton">Αλλαγή
+                                        Επιλεγμένου Καθηγητή</button>
+
+                                    <!-- Κουμπί ανάθεσης -->
+                                    <div class="row mt-4">
+                                        <div class="col text-center">
+                                            <button class="btn btn-primary" id="assignCommitteeButton">Πρόσκληση
+                                                Καθηγητή</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <hr>
 
-                        <!--Status changes-->
+                        <!-- Status changes -->
                         <div class="row">
                             <h4 class="text-center pb-1">Αλλαγές κατάστασης</h4>
                             <div>
@@ -372,7 +273,7 @@
                         </div>
                         <hr>
 
-                        <!--Files after completion-->
+                        <!-- Files after completion -->
                         <div class="row">
                             <h4 class="pb-1 text-center">Αρχεία</h4>
                             <div class="col-sm-6 text-end">
@@ -389,7 +290,7 @@
                             </div>
                         </div>
                         <hr>
-                        <!--Active thesis management-->
+                        <!-- Active thesis management -->
                         <div class="row">
                             <h4 class="pb-1 text-center">Διαχείρηση</h4>
                             <div class="col-sm-6 text-end">
@@ -422,7 +323,7 @@
                         </div>
                     </div>
 
-                    <!--Dates-->
+                    <!-- Dates -->
                     <div class="card-footer text-muted">
                         <div class="row">
                             <div class="col-sm-4 text-center">
@@ -446,7 +347,147 @@
     </div>
 
 
-    <!-- Bootstrap JS -->
+    <!------------------ Profile Page ------------------>
+    <div id="student_profile" class="content-section" style="display:none;">
+        <div>
+            <h2 class="text-center mt-5 pt-5 pb-3">Λογαριασμός</h2>
+        </div>
+
+        <!-- Cards & Body -->
+        <div style="background-color: #eee;">
+            <div class="container py-5">
+                <div class="row">
+
+                    <!-- Profile card -->
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                                <h5 class="my-3">
+                                    <span data-field="name">student_name</span>
+                                    <span data-field="surname">student_surname</span>
+                                </h5>
+                                <p class="text-muted mb-1" data-field="student_number">student_number</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact info card -->
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-sm-12 text-center">
+                                        <h3 class="text-primary py-2">Στοιχεία επικοινωνίας</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Email επικοινωνίας</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="contact_email">student_contact_mail
+                                        </p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Κινητό τηλέφωνο</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="mobile_telephone">student_tel_mob</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Σταθερό τηλέφωνο</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="landline_telephone">student_tel_land
+                                        </p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Οδός</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="street">student_street</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Αριθμός</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="number">student_street_number</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Πόλη</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="city">student_city</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">T.K.</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0 " data-field="postcode">student_postcode</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!------------------ Bootstrap JS ------------------>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/javascript/student_script.js"></script>
 </body>

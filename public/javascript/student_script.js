@@ -133,6 +133,7 @@ function loadStudentThesis() {
                         pdfButton.addEventListener('click', () => { // If not
                             alert('No PDF available for this thesis.');
                         });
+
                         //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
                         //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
                     }
@@ -155,46 +156,86 @@ function loadStudentThesis() {
             months--;
         }
         // Calculate the difference in days
-        const days = Math.floor((currentDate - start) / (1000 * 60 * 60 * 24)) % 30; // Remaining days after full months
+        const days = Math.floor((currentDate - start) / (1000 * 60 * 60 * 24)) % 30;
 
-        return `${months} μήνες και ${days} ημέρες`; // Example: "5 μήνες και 10 ημέρες"
+        return `${months} μήνες και ${days} ημέρες`;
     }
 }
 
-//--------------- Function to calculate thesis duration---------------
-function calculateDuration(startDate) {
-    const currentDate = new Date();
-    const start = new Date(startDate);
 
-    // Calculate the difference in months
-    let months = currentDate.getMonth() - start.getMonth() + (12 * (currentDate.getFullYear() - start.getFullYear()));
+//--------------- Functions for Committee Assignment and professor Search Bar ---------------
+//--------------- Professor List creation, data load ---------------
+document.querySelector('#search-professor').addEventListener('input', function () {
+    const filter = this.value.trim();
+    const professorList = document.getElementById('professor-list');
 
-    // If the current day is earlier in the month than the start day, subtract 1 from the month count
-    if (currentDate.getDate() < start.getDate()) {
-        months--;
+    if (filter.length === 0) {
+        professorList.innerHTML = '';
+        return;
     }
 
-    // Calculate the difference in days
-    const days = Math.floor((currentDate - start) / (1000 * 60 * 60 * 24)) % 30; // Remaining days after full months
+    fetch(`/api/professor-search?input=${encodeURIComponent(filter)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                professorList.innerHTML = ''; // Clear list
 
-    return { months, days };
-}
+                data.professors.forEach(professor => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item list-group-item-action';
+                    listItem.textContent = `${professor.name} ${professor.surname}`;
+                    listItem.dataset.professorId = professor.id;
 
-// Function to update the duration in the card footer
-function updateDuration() {
-    // Fetch the thesis start date (replace 'thesis_start_date' with your actual date value)
-    const startDate = document.querySelector('[data-field="thesis_start_date"]').textContent;
+                    listItem.addEventListener('click', function () {
+                        document.getElementById('professorNameInput').value = `${professor.name} ${professor.surname}`;
+                        document.getElementById('assignCommitteeButton').dataset.professorId = professor.id;
 
-    // Calculate the duration
-    const { months, days } = calculateDuration(startDate);
+                        document.getElementById('professorListWrapper').style.display = 'none';
+                    });
 
-    // Display the duration in the data-field="thesis_duration" span
-    const durationElement = document.querySelector('[data-field="thesis_duration"]');
-    durationElement.textContent = `${months} μήνες και ${days} ημέρες`;
-}
+                    professorList.appendChild(listItem);
+                });
+            } else {
+                console.error('Σφάλμα:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
 
-// Call the function to update the duration when the page loads
-updateDuration();
+});
+//--------------- EventListener for click on specific professor ---------------
+document.querySelector('#professor-list').addEventListener('click', function (event) {
+    const selectedProfessor = event.target;
+    if (selectedProfessor.tagName === 'LI') {
+        const professorId = selectedProfessor.dataset.professorId;
+        const professorName = selectedProfessor.textContent;
+        document.getElementById('chosenProfessor').style.display = 'block';
+
+        document.getElementById('professorNameInput').value = professorName;
+        document.getElementById('assignCommitteeButton').dataset.professorId = professorId;
+        // Hide the list
+        document.getElementById('professorListWrapper').style.display = 'none';
+    }
+});
+//--------------- EventListener for changing chosed professor ---------------
+document.getElementById('changeProfessorButton').addEventListener('click', function () {
+    //Show the list again, hide the chosen professoer section
+    document.getElementById('professorListWrapper').style.display = 'block';
+    document.getElementById('chosenProfessor').style.display = 'none';
+
+    document.getElementById('search-professor').value = ''; // Clears
+    document.getElementById('professor-list').innerHTML = '';
+    document.getElementById('professorNameInput').value = '';
+
+    delete document.getElementById('assignCommitteeButton').dataset.professorId;
+});
+// Get the "Ορισμός" button to Show the professor Search Bar
+document.querySelectorAll('.assignCommittee').forEach(button => {
+    button.addEventListener('click', function () {
+        // Show the professor search bar
+        document.getElementById('professorSearchBar').style.display = 'block';
+    });
+});
+
 
 
 
