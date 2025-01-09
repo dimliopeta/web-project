@@ -217,6 +217,34 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
 });
 
 
+//------------------API for loading Assigned Theses--------------
+app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
+    const professor_id = req.user.userId;
+    const query = `
+        SELECT 
+            t.title AS thesis_title,
+            t.thesis_id,
+            CONCAT(s.name, ' ', s.surname) AS student_name,
+            s.student_number
+        FROM 
+            Theses t
+        JOIN 
+            Students s ON t.student_id = s.id
+        WHERE 
+            t.status = 'active' and t.professor_id = ?;
+    `;
+    db.query(query,[professor_id], (err,results) => {
+        if(err){
+            console.error('Σφάλμα κατά την ανάκτηση των ανατεθημένων διπλωματικών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+        res.status(200).json({ success: true, theses: results });
+    });
+});
+
+
+
+
 //----------------- API to fetch Theses Data for both students and professors -----------------
 app.get('/api/theses', authenticateJWT, (req, res) => {
     const userId = req.user.userId; // Get user Id and Role from the JWT
@@ -290,7 +318,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        SELECT s.student_number, s.name, s.surname
+        SELECT s.id, s.student_number, s.name, s.surname
         FROM students s
         WHERE (s.student_number LIKE ? OR s.name LIKE ? OR s.surname LIKE ?)
           AND s.id NOT IN (
@@ -310,6 +338,8 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, students: results });
     });
 });
+
+
 
 
 //----------------- API to Create New Thesis -----------------
@@ -491,6 +521,11 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     const studentId = parseInt(req.body.studentId, 10);
     const thesisId = parseInt(req.body.thesisId, 10);
 
+    console.log('Request Body:', req.body);
+    console.log('Student ID:', req.body.studentId);
+    console.log('Thesis ID:', req.body.thesisId);
+    
+
     if (isNaN(studentId) || isNaN(thesisId)) {
         return res.status(400).json({ success: false, message: 'Μη έγκυρα δεδομένα. Παρακαλώ δοκιμάστε ξανά.' });
     }
@@ -549,6 +584,35 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
             });
         });
     });
+});
+
+
+
+//----------------API for Unassigning a Thesis Theme -----------------
+app.post('/api/theses/unassign',authenticateJWT, (req, res) =>{
+    const thesisId = parseInt(req.body.thesisId, 10);
+
+    if (isNaN(thesisId)) {
+        return res.status(400).json({ success: false, message: 'Μη έγκυρο thesis ID.' });
+    }
+    const unasQuery = `
+        UPDATE THESES
+        SET student_id = NULL , status = 'unassigned'
+        WHERE thesis_id = ? AND status = 'active';
+    ;`
+    db.query(unasQuery, [thesisId], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την αναίρεση ανάθεσης:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(400).json({ success: false, message: 'Η διπλωματική δεν μπορεί να ανατεθεί ξανά.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς!' });
+    });
+
 });
 
 

@@ -23,9 +23,10 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 loadTheses();
             } else if (targetId === 'assign') {
                 loadUnassignedTheses();
+                loadAssignedTheses();
             } else if (targetId === 'invitations') {
                 loadInvitations();
-            }
+            } 
         }
 
         // Απόκρυψη του παραθύρου επεξεργασίας
@@ -82,33 +83,34 @@ document.querySelector('#search-student').addEventListener('input', function () 
 
     // Κλήση στο backend
     fetch(`/api/student-search?input=${encodeURIComponent(filter)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                studentList.innerHTML = ''; // Καθαρίζουμε τη λίστα
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            studentList.innerHTML = ''; // Καθαρισμός λίστας
 
-                data.students.forEach(student => {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'list-group-item list-group-item-action';
-                    listItem.textContent = `AM: ${student.student_number} - ${student.name} ${student.surname}`;
-                    listItem.dataset.studentId = student.id;
+            data.students.forEach(student => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item list-group-item-action';
+                listItem.textContent = `AM: ${student.student_number} - ${student.name} ${student.surname}`;
+                listItem.dataset.studentId = student.id; // Αποθήκευση του ID
 
-                    // Προσθήκη listener για επιλογή φοιτητή
-                    listItem.addEventListener('click', function () {
-                        document.getElementById('studentNameInput').value = `${student.name} ${student.surname} (ID: ${student.id})`;
-                        document.getElementById('assignThesisButton').dataset.studentId = student.id;
+                // Προσθήκη event listener για επιλογή φοιτητή
+                listItem.addEventListener('click', function () {
+                    document.getElementById('studentNameInput').value = `${student.student_number} - ${student.name} ${student.surname}`;
+                    document.getElementById('assignThesisButton').dataset.studentId = student.id;
 
-                        // Απόκρυψη της λίστας φοιτητών
-                        document.getElementById('studentListWrapper').style.display = 'none';
-                    });
-
-                    studentList.appendChild(listItem);
+                    // Απόκρυψη της λίστας φοιτητών
+                    document.getElementById('studentListWrapper').style.display = 'none';
                 });
-            } else {
-                console.error('Σφάλμα:', data.message);
-            }
-        })
-        .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
+
+                studentList.appendChild(listItem);
+            });
+        } else {
+            console.error('Σφάλμα:', data.message);
+        }
+    })
+    .catch(err => console.error('Σφάλμα κατά την επικοινωνία με το API:', err));
+
 });
 
 
@@ -145,8 +147,72 @@ document.getElementById('changeStudentButton').addEventListener('click', functio
 
 
 
+//Φόρτωση ανατεθημένων θεμάτων
+function loadAssignedTheses() {
+    fetch('/api/theses/assigned', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const asThesesTableBody = document.querySelector('#assign table tbody');
+                asThesesTableBody.innerHTML = ''; // Καθαρισμός προηγούμενων δεδομένων
 
-// Φόρτωση Διπλωματικών
+                data.theses.forEach(thesis => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${thesis.thesis_title}</td>
+                        <td>${thesis.thesis_id}</td>
+                        <td>${thesis.student_name}</td>
+                        <td>${thesis.student_number}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" data-id="${thesis.thesis_id}">Αναίρεση Ανάθεσης</button>
+                        </td>
+                    `;
+
+                    // Προσθήκη event listener για το κουμπί "Αναίρεση Ανάθεσης"
+                    const unassignButton = row.querySelector('button');
+                    unassignButton.addEventListener('click', () => {
+                        unassignThesis(thesis.thesis_id);
+                    });
+
+                    asThesesTableBody.appendChild(row);
+                });
+            } else {
+                console.error('Σφάλμα:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
+}
+
+function unassignThesis(thesisId) {
+    fetch(`/api/theses/unassign`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ thesisId })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Η ανάθεση αφαιρέθηκε επιτυχώς!');
+                loadAssignedTheses(); // Επαναφόρτωση της λίστας
+                loadUnassignedTheses();
+            } else {
+                console.error('Σφάλμα:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα κατά την αναίρεση ανάθεσης:', err));
+}
+
+
+
+
+// Φόρτωση Θεμάτων που δεν έχουν ανατεθεί 
 function loadUnassignedTheses() {
     fetch('/api/theses/unassigned')
         .then(response => response.json())
@@ -404,14 +470,15 @@ document.getElementById('assignThesisButton').addEventListener('click', function
         .then(data => {
             if (data.success) {
                 alert('Η ανάθεση ολοκληρώθηκε επιτυχώς!');
-
                 loadUnassignedTheses();
+                loadAssignedTheses();
             } else {
                 alert('Σφάλμα: ' + data.message);
             }
         })
         .catch(err => console.error('Σφάλμα:', err));
 });
+
 
 
 
@@ -609,4 +676,5 @@ document.addEventListener('DOMContentLoaded', function () {
     loadTheses();
     loadInvitations();
     loadUnassignedTheses();
+    loadAssignedTheses();
 });
