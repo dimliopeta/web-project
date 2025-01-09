@@ -105,6 +105,7 @@ function loadStudentThesis() {
                 updateDataField('professor_name', thesis.professor_name);
                 updateDataField('professor_surname', thesis.professor_surname);
                 updateDataField('thesis_start_date', thesis.start_date || 'Δεν έχει εκκινήσει');
+                updateDataField('thesis_end_date', thesis.end_date || 'Δεν');
                 updateDataField('thesis_exam_date', thesis.exam_date);
                 updateDataField('thesis_nimertis_link', thesis.nimertis_link);
                 updateDataField('committee_member1_name', thesis.committee_member1_name || 'Δεν έχει οριστεί');

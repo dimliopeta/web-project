@@ -8,7 +8,7 @@ const multer = require('multer');
 
 
 const app = express();
-app.use('/theses_pdf', express.static(path.join(__dirname, 'theses_pdf')));
+app.use('/theses_pdf', express.static(path.join(__dirname, 'files/theses_pdf')));
 const PORT = 3000;
 const SECRET_KEY = 'your-secret-key';
 
@@ -172,7 +172,7 @@ app.post('/logout', authenticateJWT, (req, res) => {
 //----------------- Multer middleware declaration/setup for PDF upload -----------------
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'theses_pdf'); // Correct path if both the server and the folder are in the same directory
+        cb(null, 'files/theses_pdf'); // Correct path if both the server and the folder are in the same directory
     },
     filename: (req, file, cb) => {
         // Ensure user is authenticated and has a name
@@ -267,6 +267,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                     Committee1.surname AS committee_member1_surname,
                     Committee2.name AS committee_member2_name,
                     Committee2.surname AS committee_member2_surname
+
                 FROM Theses
                 LEFT JOIN Professors ON Theses.professor_id = Professors.id
                 LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
