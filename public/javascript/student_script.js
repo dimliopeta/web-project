@@ -104,34 +104,61 @@ function loadStudentThesis() {
                 updateDataField('thesis_summary', thesis.summary);
                 updateDataField('professor_name', thesis.professor_name);
                 updateDataField('professor_surname', thesis.professor_surname);
-                updateDataField('thesis_start_date', thesis.thesis_start_date);
-                updateDataField('thesis_exam_date', thesis.thesis_exam_date);
-                updateDataField('thesis_nimertis_link', thesis.thesis_nimertis_link);
-                updateDataField('committee_member1_name', thesis.committee_member1_name ? 'placeholder' : 'Δεν έχει οριστεί');
-                updateDataField('committee_member1_surname', thesis.committee_member1_surname ? 'placeholder' : ' ');
-                updateDataField('committee_member2_name', thesis.committee_member2_name ? 'placeholder' : 'Δεν έχει οριστεί');
-                updateDataField('committee_member2_surname', thesis.committee_member2_surname ? 'placeholder' : ' ');
+                updateDataField('thesis_start_date', thesis.start_date || 'Δεν έχει εκκινήσει');
+                updateDataField('thesis_exam_date', thesis.exam_date);
+                updateDataField('thesis_nimertis_link', thesis.nimertis_link);
+                updateDataField('committee_member1_name', thesis.committee_member1_name || 'Δεν έχει οριστεί');
+                updateDataField('committee_member1_surname', thesis.committee_member1_surname || ' ');
+                updateDataField('committee_member2_name', thesis.committee_member2_name || 'Δεν έχει οριστεί');
+                updateDataField('committee_member2_surname', thesis.committee_member2_surname || ' ');
 
-                // Handle the PDF download button
-                const pdfButton = document.querySelector('#dashboard [data-field="pdf_button"]');
-                if (thesis.pdf_path) { // If PDF exists
-                    pdfButton.addEventListener('click', () => {
-                        window.open(thesis.pdf_path, '_blank'); // Opens PDF in a new tab
-                    });
+                // Calculate and display thesis duration
+                const durationElement = document.querySelector('[data-field="duration_block"]');
+                if (thesis.start_date) {
+                    durationElement.style.display = 'inline';
+                    const duration = calculateDuration(thesis.start_date);
+                    updateDataField('thesis_duration', duration);
                 } else {
-                    pdfButton.addEventListener('click', () => { // If not
-                        alert('No PDF available for this thesis.');
-                    });
-                    //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
-                    //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
+                    durationElement.style.display = 'none';
+
                 }
-            } else {
-                console.error('No thesis found for this student');
-            }
-        })
+
+                    // Handle the PDF download button
+                    const pdfButton = document.querySelector('#dashboard [data-field="pdf_button"]');
+                    if (thesis.pdf_path) { // If PDF exists
+                        pdfButton.addEventListener('click', () => {
+                            window.open(thesis.pdf_path, '_blank'); // Opens PDF in a new tab
+                        });
+                    } else {
+                        pdfButton.addEventListener('click', () => { // If not
+                            alert('No PDF available for this thesis.');
+                        });
+                        //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
+                        //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
+                    }
+                } else {
+                    console.error('No thesis found for this student');
+                }
+            })
         .catch(error => {
             console.error('Error loading thesis data:', error);
         });
+
+    // Helper function to calculate the duration in months and days
+    function calculateDuration(startDate) {
+        const currentDate = new Date();
+        const start = new Date(startDate);
+
+        // Calculate the difference in months
+        let months = currentDate.getMonth() - start.getMonth() + (12 * (currentDate.getFullYear() - start.getFullYear()));
+        if (currentDate.getDate() < start.getDate()) {
+            months--;
+        }
+        // Calculate the difference in days
+        const days = Math.floor((currentDate - start) / (1000 * 60 * 60 * 24)) % 30; // Remaining days after full months
+
+        return `${months} μήνες και ${days} ημέρες`; // Example: "5 μήνες και 10 ημέρες"
+    }
 }
 
 //--------------- Function to calculate thesis duration---------------
@@ -141,7 +168,7 @@ function calculateDuration(startDate) {
 
     // Calculate the difference in months
     let months = currentDate.getMonth() - start.getMonth() + (12 * (currentDate.getFullYear() - start.getFullYear()));
-    
+
     // If the current day is earlier in the month than the start day, subtract 1 from the month count
     if (currentDate.getDate() < start.getDate()) {
         months--;

@@ -225,11 +225,14 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     let query;
 
     if (role === 'professor') {
-        query = `SELECT * FROM Theses WHERE professor_id = ${userId};`;
+        query = `SELECT *, DATE_FORMAT(start_date, '%Y-%m-%d') AS start_date 
+                 FROM Theses
+                 WHERE professor_id = ${userId};`;
 
     } else if (role === 'student') {
         query = `SELECT
                     Theses.*,
+                    DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
                     Professors.name AS professor_name, 
                     Professors.surname AS professor_surname, 
                     Committee1.name AS committee_member1_name,
