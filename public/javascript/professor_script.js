@@ -548,13 +548,30 @@ function loadTheses() {
             'Authorization': `Bearer ${token}`
         }
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 const thesesTableBody = document.querySelector('#theses tbody');
-                thesesTableBody.innerHTML = '';
+                if (!thesesTableBody) {
+                    console.error('Δεν βρέθηκε το στοιχείο #theses tbody.');
+                    return;
+                }
+
+                thesesTableBody.innerHTML = ''; // Καθαρισμός του πίνακα
+
+                if (data.theses.length === 0) {
+                    thesesTableBody.innerHTML = '<tr><td colspan="4">Δεν βρέθηκαν δεδομένα.</td></tr>';
+                    return;
+                }
 
                 data.theses.forEach(thesis => {
+                    console.log('Προσθήκη θέματος:', thesis);
+
                     const row = document.createElement('tr');
 
                     let status;
@@ -570,27 +587,27 @@ function loadTheses() {
                             break;
                         case 'unassigned':
                             status = 'Υπό Ανάθεση';
+                            break;
+                        default:
+                            status = 'Άγνωστη Κατάσταση';
                     }
 
                     row.innerHTML = `
                         <td>${thesis.title}</td>
                         <td>${thesis.thesis_id}</td>
-                        <td>${thesis.role || 'Επιβλέπων'}</td>
+                        <td>${thesis.student_id ? 'Φοιτητής' : 'Επιβλέπων'}</td>
                         <td>${status}</td>
                     `;
-                    row.addEventListener('click', (event) => {
-                        showInfoSection();
-                    });
-
-
                     thesesTableBody.appendChild(row);
                 });
             } else {
-                console.error('Σφάλμα:', data.message);
+                console.error('Σφάλμα API:', data.message);
             }
         })
-        .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
+        .catch(err => console.error('Σφάλμα φόρτωσης:', err));
 }
+
+
 
 document.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', event => {
@@ -613,15 +630,15 @@ function applyFilter(filterValue) {
             if (data.success) {
                 const thesesTableBody = document.querySelector('#theses tbody');
                 thesesTableBody.innerHTML = '';
+                if (!thesesTableBody) {
+                    console.error('Δεν βρέθηκε το στοιχείο #theses tbody στη σελίδα.');
+                    return;
+                }
 
                 data.theses
                     .filter(thesis => {
                         if (['to-be-reviewed', 'active', 'completed', 'canceled', 'unassigned'].includes(filterValue)) {
                             return thesis.status === filterValue;
-                        } else if (filterValue === 'professor') {
-                            return thesis.role === 'professor';
-                        } else if (filterValue === 'committee-member') {
-                            return thesis.role === 'committee-member';
                         }
                         return true; // Default: εμφάνιση όλων
                     })
@@ -630,8 +647,8 @@ function applyFilter(filterValue) {
 
                         let status;
                         switch (thesis.status) {
-                            case 'active':
-                                status = 'Ενεργή';
+                            case 'assigned':
+                                status = 'Υπό Ανάθεση';
                                 break;
                             case 'to-be-reviewed':
                                 status = 'Υπό Εξέταση';
@@ -640,13 +657,19 @@ function applyFilter(filterValue) {
                                 status = 'Περατωμένη';
                                 break;
                             case 'unassigned':
-                                status = 'Υπό Ανάθεση';
+                                status = 'Μη Ανατεθημένο Θέμα';
+                                break;
+                            case 'active':
+                                status = 'Ενεργή';
+                                break;
+                            default:
+                                status = 'Άγνωστη Κατάσταση';
                         }
 
                         row.innerHTML = `
                             <td>${thesis.title}</td>
                             <td>${thesis.thesis_id}</td>
-                            <td>${thesis.role || 'Επιβλέπων'}</td>
+                            <td>${thesis.student_id ? 'Φοιτητής' : 'Επιβλέπων'}</td>
                             <td>${status}</td>
                         `;
                         row.addEventListener('click', (event) => {
@@ -661,6 +684,7 @@ function applyFilter(filterValue) {
         })
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
+
 
 
 

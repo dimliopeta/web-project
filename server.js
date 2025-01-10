@@ -231,7 +231,7 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
         JOIN 
             Students s ON t.student_id = s.id
         WHERE 
-            t.status = 'active' and t.professor_id = ?;
+            t.status = 'assigned' and t.professor_id = ?;
     `;
     db.query(query, [professor_id], (err, results) => {
         if (err) {
