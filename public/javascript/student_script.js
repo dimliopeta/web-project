@@ -79,6 +79,12 @@ function loadStudentThesis() {
 
                 let status;
                 switch (thesis.status) {
+                    case 'null':
+                        status = 'Δεν έχει εκκινήσει διπλωματική.';
+                        break;
+                    case 'unassigned':
+                        status = 'Υπό Ανάθεση';
+                        break;
                     case 'active':
                         status = 'Ενεργή';
                         break;
@@ -87,9 +93,6 @@ function loadStudentThesis() {
                         break;
                     case 'completed':
                         status = 'Περατωμένη';
-                        break;
-                    case 'unassigned':
-                        status = 'Υπό Ανάθεση';
                 }
                 //Helper functions to replace ALL data-fields -and not just their first instance- as is needed
                 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
@@ -124,24 +127,24 @@ function loadStudentThesis() {
 
                 }
 
-                    // Handle the PDF download button
-                    const pdfButton = document.querySelector('#dashboard [data-field="pdf_button"]');
-                    if (thesis.pdf_path) { // If PDF exists
-                        pdfButton.addEventListener('click', () => {
-                            window.open(thesis.pdf_path, '_blank'); // Opens PDF in a new tab
-                        });
-                    } else {
-                        pdfButton.addEventListener('click', () => { // If not
-                            alert('No PDF available for this thesis.');
-                        });
-
-                        //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
-                        //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
-                    }
+                // Handle the PDF download button
+                const pdfButton = document.querySelector('#dashboard [data-field="pdf_button"]');
+                if (thesis.pdf_path) { // If PDF exists
+                    pdfButton.addEventListener('click', () => {
+                        window.open(thesis.pdf_path, '_blank'); // Opens PDF in a new tab
+                    });
                 } else {
-                    console.error('No thesis found for this student');
+                    pdfButton.addEventListener('click', () => { // If not
+                        alert('No PDF available for this thesis.');
+                    });
+
+                    //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
+                    //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
                 }
-            })
+            } else {
+                console.error('No thesis found for this student');
+            }
+        })
         .catch(error => {
             console.error('Error loading thesis data:', error);
         });
@@ -161,6 +164,100 @@ function loadStudentThesis() {
 
         return `${months} μήνες και ${days} ημέρες`;
     }
+}
+
+
+//--------------- Show/Hide Configuration parts based on status ---------------
+function loadSectionsBasedOnStatus() {
+    const token = localStorage.getItem('token');
+    fetch('/api/theses', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch thesis data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.theses.length > 0) {
+                const thesis = data.theses[0];
+                // Reference each section
+                const infoSection = document.getElementById("infoSection");
+                const professorsSection = document.getElementById("professorsSection");
+                const gradesSection = document.getElementById("gradesSection");
+                const statusChangesSection = document.getElementById("statusChangesSection");
+                const completedFilesSection = document.getElementById("completedFilesSection");
+                const managementSection = document.getElementById("managementSection");
+                const datesSection = document.getElementById("datesSection");
+                // Show all sections as default
+                infoSection.style.display = "block";
+                professorsSection.style.display = "block";
+                gradesSection.style.display = "block";
+                statusChangesSection.style.display = "block";
+                completedFilesSection.style.display = "block";
+                managementSection.style.display = "block";
+                datesSection.style.display = "block";
+
+                switch (thesis.status) {
+                    case 'unassigned':
+                        infoSection.style.display = "block";
+                        professorsSection.style.display = "block";
+                        gradesSection.style.display = "block";
+                        statusChangesSection.style.display = "block";
+                        completedFilesSection.style.display = "block";
+                        managementSection.style.display = "block";
+                        datesSection.style.display = "block";
+                        break;
+                    case 'active':
+                        infoSection.style.display = "block";
+                        professorsSection.style.display = "block";
+                        gradesSection.style.display = "block";
+                        statusChangesSection.style.display = "block";
+                        completedFilesSection.style.display = "block";
+                        managementSection.style.display = "block";
+                        datesSection.style.display = "block";
+                        break;
+                    case 'to-be-reviewed':
+                        infoSection.style.display = "block";
+                        professorsSection.style.display = "block";
+                        gradesSection.style.display = "block";
+                        statusChangesSection.style.display = "block";
+                        completedFilesSection.style.display = "block";
+                        managementSection.style.display = "block";
+                        datesSection.style.display = "block";
+                        break;
+                    case 'completed':
+                        infoSection.style.display = "block";
+                        professorsSection.style.display = "block";
+                        gradesSection.style.display = "block";
+                        statusChangesSection.style.display = "block";
+                        completedFilesSection.style.display = "block";
+                        managementSection.style.display = "block";
+                        datesSection.style.display = "block";
+                        break;
+                    case 'canceled':
+                        infoSection.style.display = "block";
+                        professorsSection.style.display = "block";
+                        gradesSection.style.display = "block";
+                        statusChangesSection.style.display = "block";
+                        completedFilesSection.style.display = "block";
+                        managementSection.style.display = "block";
+                        datesSection.style.display = "block";
+                        break;
+                }
+
+
+            } else {
+                console.error('No thesis found for this student');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading thesis data:', error);
+        });
 }
 
 
@@ -190,7 +287,6 @@ document.querySelector('#search-professor').addEventListener('input', function (
                     listItem.addEventListener('click', function () {
                         document.getElementById('professorNameInput').value = `${professor.name} ${professor.surname}`;
                         document.getElementById('assignCommitteeButton').dataset.professorId = professor.id;
-
                         document.getElementById('professorListWrapper').style.display = 'none';
                     });
 
@@ -236,7 +332,6 @@ document.querySelectorAll('.assignCommittee').forEach(button => {
         document.getElementById('professorSearchBar').style.display = 'block';
     });
 });
-
 
 
 
@@ -345,6 +440,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 document.addEventListener('DOMContentLoaded', () => {
     loadStudentProfile();
     loadStudentThesis();
+    loadSectionsBasedOnStatus();
 });
 
 //--------------- Show the dashboard as main page after DOM is loaded ---------------
