@@ -535,31 +535,168 @@ app.get('/api/invitations', authenticateJWT, (req, res) => {
 //----------------- API for Invitation Acceptance/Rejection -----------------
 app.post('/api/invitations/:id/action', authenticateJWT, (req, res) => {
     const invitationId = req.params.id;
-    const { action } = req.body; // Αποδοχή της δράσης από το σώμα του αιτήματος
+    const { action } = req.body;
 
     if (!['accepted', 'rejected'].includes(action)) {
         return res.status(400).json({ success: false, message: 'Invalid action provided.' });
     }
 
-    const query = `
-        UPDATE Invitations 
-        SET status = ?, response_date = NOW() 
-        WHERE id = ?;
+    const getInvitationQuery = `
+        SELECT i.thesis_id, i.professor_id, c.member1_id, c.member2_id
+        FROM Invitations i
+        LEFT JOIN Committees c ON i.thesis_id = c.thesis_id
+        WHERE i.id = ?;
     `;
 
-    db.query(query, [action, invitationId], (err, results) => {
+    db.query(getInvitationQuery, [invitationId], (err, results) => {
         if (err) {
-            console.error('Error updating invitation:', err);
+            console.error('Error fetching invitation:', err);
             return res.status(500).json({ success: false, message: 'Database error.' });
         }
 
-        if (results.affectedRows === 0) {
+        if (results.length === 0) {
             return res.status(404).json({ success: false, message: 'Invitation not found.' });
         }
 
-        res.json({ success: true, message: `Η πρόσκληση ${action === 'accepted' ? 'αποδέχθηκε' : 'απορρίφθηκε'} επιτυχώς!` });
+        const { thesis_id, professor_id, member1_id, member2_id } = results[0];
+
+        db.beginTransaction((transactionErr) => {
+            if (transactionErr) {
+                console.error('Transaction error:', transactionErr);
+                return res.status(500).json({ success: false, message: 'Database transaction error.' });
+            }
+
+            if (action === 'accepted') {
+                let updateCommitteeQuery;
+                if (!member1_id) {
+                    updateCommitteeQuery = `
+                        UPDATE Committees 
+                        SET member1_id = ? 
+                        WHERE thesis_id = ?;
+                    `;
+                } else if (!member2_id) {
+                    updateCommitteeQuery = `
+                        UPDATE Committees 
+                        SET member2_id = ? 
+                        WHERE thesis_id = ?;
+                    `;
+                } else {
+                    return db.rollback(() => {
+                        res.status(400).json({ success: false, message: 'Committee already full.' });
+                    });
+                }
+
+                db.query(updateCommitteeQuery, [professor_id, thesis_id], (err) => {
+                    if (err) {
+                        console.error('Error updating committee:', err);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Database error updating committee.' });
+                        });
+                    }
+
+                    const updateInvitationQuery = `
+                        UPDATE Invitations 
+                        SET status = 'accepted', response_date = NOW() 
+                        WHERE id = ?;
+                    `;
+
+                    db.query(updateInvitationQuery, [invitationId], (err) => {
+                        if (err) {
+                            console.error('Error updating invitation:', err);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Database error updating invitation.' });
+                            });
+                        }
+
+                        // Ελέγχουμε αν έχουν γεμίσει οι θέσεις
+                        const checkCommitteeQuery = `
+                            SELECT member1_id, member2_id 
+                            FROM Committees 
+                            WHERE thesis_id = ?;
+                        `;
+
+                        db.query(checkCommitteeQuery, [thesis_id], (err, committeeResults) => {
+                            if (err) {
+                                console.error('Error checking committee:', err);
+                                return db.rollback(() => {
+                                    res.status(500).json({ success: false, message: 'Database error checking committee.' });
+                                });
+                            }
+
+                            const { member1_id, member2_id } = committeeResults[0];
+
+                            if (member1_id && member2_id) {
+                                const cancelPendingInvitationsQuery = `
+                                    UPDATE Invitations
+                                    SET status = 'cancelled'
+                                    WHERE thesis_id = ? AND status = 'pending';
+                                `;
+
+                                db.query(cancelPendingInvitationsQuery, [thesis_id], (err) => {
+                                    if (err) {
+                                        console.error('Error cancelling invitations:', err);
+                                        return db.rollback(() => {
+                                            res.status(500).json({ success: false, message: 'Database error cancelling pending invitations.' });
+                                        });
+                                    }
+
+                                    db.commit((commitErr) => {
+                                        if (commitErr) {
+                                            console.error('Transaction commit error:', commitErr);
+                                            return db.rollback(() => {
+                                                res.status(500).json({ success: false, message: 'Transaction commit error.' });
+                                            });
+                                        }
+
+                                        res.json({ success: true, message: 'Invitation accepted, committee full, and other invitations cancelled.' });
+                                    });
+                                });
+                            } else {
+                                db.commit((commitErr) => {
+                                    if (commitErr) {
+                                        console.error('Transaction commit error:', commitErr);
+                                        return db.rollback(() => {
+                                            res.status(500).json({ success: false, message: 'Transaction commit error.' });
+                                        });
+                                    }
+
+                                    res.json({ success: true, message: 'Invitation accepted and professor added to committee.' });
+                                });
+                            }
+                        });
+                    });
+                });
+            } else if (action === 'rejected') {
+                const rejectInvitationQuery = `
+                    UPDATE Invitations 
+                    SET status = 'rejected', response_date = NOW() 
+                    WHERE id = ?;
+                `;
+
+                db.query(rejectInvitationQuery, [invitationId], (err) => {
+                    if (err) {
+                        console.error('Error rejecting invitation:', err);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Database error rejecting invitation.' });
+                        });
+                    }
+
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            console.error('Transaction commit error:', commitErr);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Transaction commit error.' });
+                            });
+                        }
+
+                        res.json({ success: true, message: 'Invitation rejected successfully.' });
+                    });
+                });
+            }
+        });
     });
 });
+
 
 
 
@@ -579,7 +716,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
 
     const assignQuery = `
         UPDATE THESES
-        SET student_id = ?, status = 'active'
+        SET student_id = ?, status = 'assigned'
         WHERE thesis_id = ? AND status = 'unassigned';
     `;
 
@@ -647,7 +784,7 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     const unasQuery = `
         UPDATE THESES
         SET student_id = NULL, status = 'unassigned'
-        WHERE thesis_id = ? AND status = 'active';
+        WHERE thesis_id = ? AND status = 'assigned';
     `;
 
     // Query για διαγραφή της τριμελούς επιτροπής
