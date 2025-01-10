@@ -157,7 +157,7 @@ function loadAssignedTheses() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const asThesesTableBody = document.querySelector('#assign table tbody');
+                const asThesesTableBody = document.querySelector('#assigned-theses tbody');
                 asThesesTableBody.innerHTML = ''; // Καθαρισμός προηγούμενων δεδομένων
 
                 data.theses.forEach(thesis => {
@@ -556,7 +556,7 @@ function loadTheses() {
         })
         .then(data => {
             if (data.success) {
-                const thesesTableBody = document.querySelector('#theses tbody');
+                const thesesTableBody = document.querySelector('#list #theses tbody');
                 if (!thesesTableBody) {
                     console.error('Δεν βρέθηκε το στοιχείο #theses tbody.');
                     return;
@@ -585,11 +585,11 @@ function loadTheses() {
                         case 'completed':
                             status = 'Περατωμένη';
                             break;
-                        case 'unassigned':
+                        case 'assigned':
                             status = 'Υπό Ανάθεση';
                             break;
                         default:
-                            status = 'Άγνωστη Κατάσταση';
+                            status = 'Μη ανατεθημένο θέμα';
                     }
 
                     row.innerHTML = `
@@ -598,6 +598,8 @@ function loadTheses() {
                         <td>${thesis.student_id ? 'Φοιτητής' : 'Επιβλέπων'}</td>
                         <td>${status}</td>
                     `;
+                    console.log('Row created:', row);
+
                     thesesTableBody.appendChild(row);
                 });
             } else {
