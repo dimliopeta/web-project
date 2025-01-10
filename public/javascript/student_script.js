@@ -79,9 +79,6 @@ function loadStudentThesis() {
 
                 let status;
                 switch (thesis.status) {
-                    case 'null':
-                        status = 'Δεν έχει εκκινήσει διπλωματική.';
-                        break;
                     case 'assigned':
                         status = 'Υπό Ανάθεση';
                         break;
@@ -94,14 +91,7 @@ function loadStudentThesis() {
                     case 'completed':
                         status = 'Περατωμένη';
                 }
-                //Helper functions to replace ALL data-fields -and not just their first instance- as is needed
-                function updateDataField(dataField, value, errorMessage = 'Error - no data') {
-                    const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
-                    elements.forEach(element => {
-                        // If value is null or invalid, show error message
-                        element.textContent = (value && value !== null) ? value : errorMessage;
-                    });
-                }
+
                 updateDataField('thesis_status', status); // Declared above, used in switch
                 updateDataField('thesis_title', thesis.title);
                 updateDataField('thesis_summary', thesis.summary);
@@ -141,8 +131,13 @@ function loadStudentThesis() {
                     //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
                     //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
                 }
-            } else {
+            } else if(data.success && data.theses.length == 0){
                 console.error('No thesis found for this student');
+                updateDataField('thesis_status', "Δεν έχει εκκινήσει");
+                const dashboardFooter = document.getElementById("dashboardFooter");
+                const dashboardBody = document.getElementById("dashboardBody");
+                dashboardBody.style.display = "none";
+                dashboardFooter.style.display = "none";
             }
         })
         .catch(error => {
@@ -153,7 +148,6 @@ function loadStudentThesis() {
     function calculateDuration(startDate) {
         const currentDate = new Date();
         const start = new Date(startDate);
-
         // Calculate the difference in months
         let months = currentDate.getMonth() - start.getMonth() + (12 * (currentDate.getFullYear() - start.getFullYear()));
         if (currentDate.getDate() < start.getDate()) {
@@ -163,6 +157,14 @@ function loadStudentThesis() {
         const days = Math.floor((currentDate - start) / (1000 * 60 * 60 * 24)) % 30;
 
         return `${months} μήνες και ${days} ημέρες`;
+    }
+    //Helper functions to replace ALL data-fields -and not just their first instance- as is needed
+    function updateDataField(dataField, value, errorMessage = 'Error - no data') {
+        const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
+        elements.forEach(element => {
+            // If value is null or invalid, show error message
+            element.textContent = (value && value !== null) ? value : errorMessage;
+        });
     }
 }
 
@@ -187,14 +189,19 @@ function loadSectionsBasedOnStatus() {
                 const thesis = data.theses[0];
                 // Reference each section
                 const infoSection = document.getElementById("infoSection");
+                const configurationBody = document.getElementById("configurationBody");
+                const configurationFooter = document.getElementById("configurationFooter");
                 const professorsSection = document.getElementById("professorsSection");
                 const gradesSection = document.getElementById("gradesSection");
                 const statusChangesSection = document.getElementById("statusChangesSection");
                 const completedFilesSection = document.getElementById("completedFilesSection");
                 const managementSection = document.getElementById("managementSection");
                 const datesSection = document.getElementById("datesSection");
+
                 // Show all sections as default
                 infoSection.style.display = "block";
+                configurationBody.style.display = "block";
+                configurationFooter.style.display = "block";
                 professorsSection.style.display = "block";
                 gradesSection.style.display = "block";
                 statusChangesSection.style.display = "block";
@@ -202,9 +209,12 @@ function loadSectionsBasedOnStatus() {
                 managementSection.style.display = "block";
                 datesSection.style.display = "block";
 
+
                 switch (thesis.status) {
                     case 'assigned':
                         infoSection.style.display = "block";
+                        configurationBody.style.display = "block";
+                        configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
@@ -214,6 +224,8 @@ function loadSectionsBasedOnStatus() {
                         break;
                     case 'active':
                         infoSection.style.display = "block";
+                        configurationBody.style.display = "block";
+                        configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
@@ -223,6 +235,8 @@ function loadSectionsBasedOnStatus() {
                         break;
                     case 'to-be-reviewed':
                         infoSection.style.display = "block";
+                        configurationBody.style.display = "block";
+                        configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
@@ -232,6 +246,8 @@ function loadSectionsBasedOnStatus() {
                         break;
                     case 'completed':
                         infoSection.style.display = "block";
+                        configurationBody.style.display = "block";
+                        configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
@@ -241,6 +257,8 @@ function loadSectionsBasedOnStatus() {
                         break;
                     case 'canceled':
                         infoSection.style.display = "block";
+                        configurationBody.style.display = "block";
+                        configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
@@ -251,8 +269,33 @@ function loadSectionsBasedOnStatus() {
                 }
 
 
-            } else {
+            } else if (data.success && data.theses.length == 0) {
                 console.error('No thesis found for this student');
+                const thesis = data.theses[0];
+                // Reference each section
+                const infoSection = document.getElementById("infoSection");
+                const configurationBody = document.getElementById("configurationBody");
+                const configurationFooter = document.getElementById("configurationFooter");
+                const professorsSection = document.getElementById("professorsSection");
+                const gradesSection = document.getElementById("gradesSection");
+                const statusChangesSection = document.getElementById("statusChangesSection");
+                const completedFilesSection = document.getElementById("completedFilesSection");
+                const managementSection = document.getElementById("managementSection");
+                const datesSection = document.getElementById("datesSection");
+                // Hide all sections but the info
+                infoSection.style.display = "block";
+                configurationBody.style.display = "none";
+                configurationFooter.style.display = "none";
+                professorsSection.style.display = "none";
+                gradesSection.style.display = "none";
+                statusChangesSection.style.display = "none";
+                completedFilesSection.style.display = "none";
+                managementSection.style.display = "none";
+                datesSection.style.display = "none";
+
+            } else {
+                console.error('Error retriving data.');
+
             }
         })
         .catch(error => {
