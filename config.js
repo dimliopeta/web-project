@@ -118,6 +118,52 @@ function insertData() {
         });
     });
 
+    data.committees.forEach(committee => {
+        const query = `SELECT * FROM COMMITTEES WHERE thesis_id=?;`;
+        db.query(query, [committee.thesis_id], (err, results) => {
+            if (err) {
+                console.error('Error checking for duplicate committees: ', err);
+                return;
+            }
+            if (results.length === 0) {
+                const insertQuery = `
+                    INSERT INTO committees (thesis_id)
+                    VALUES (?);
+                `;
+                db.query(insertQuery,[committee.thesis_id], (insertErr) =>{
+                    if (insertErr) {
+                        console.error('Error inserting thesis:', insertErr);
+                    } else {
+                        console.log(`Committee ${committee.thesis_id} added successfully.`);
+                    }
+                });
+            }
+        });
+    });
+
+    data.invitations.forEach(invitation => {
+        const query = `SELECT * FROM INVITATIONS WHERE thesis_id=?;`;
+        db.query(query, [invitation.thesis_id], (err, results) => {
+            if (err) {
+                console.error('Error checking for duplicate invitations: ', err);
+                return;
+            }
+            if (results.length === 0) {
+                const insertQuery = `
+                    INSERT INTO invitations (thesis_id, professor_id)
+                    VALUES (?, ?);
+                `;
+                db.query(insertQuery,[invitation.thesis_id,invitation.professor_id], (insertErr) =>{
+                    if (insertErr) {
+                        console.error('Error inserting invitation:', insertErr);
+                    } else {
+                        console.log(`Invitation ${invitation.thesis_id} added successfully.`);
+                    }
+                });
+            }
+        });
+    });
+
     console.log(`Database up-to-date!`);
 }
 

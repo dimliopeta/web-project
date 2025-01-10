@@ -1225,6 +1225,24 @@
         "pdf_path":"",
         "start_date": null
       }
-    
-    ]
+    ],
+    "invitations":[
+      {
+        "thesis_id": "1",
+        "professor_id":"1"
+      },
+      {
+        "thesis_id": "1",
+        "professor_id":"2"
+      },
+      {
+        "thesis_id": "1",
+        "professor_id":"3"
+      }
+      ],
+      "committees":[
+        {
+          "thesis_id":"1"
+        }
+      ]
   }
