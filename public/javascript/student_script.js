@@ -82,7 +82,7 @@ function loadStudentThesis() {
                     case 'null':
                         status = 'Δεν έχει εκκινήσει διπλωματική.';
                         break;
-                    case 'unassigned':
+                    case 'assigned':
                         status = 'Υπό Ανάθεση';
                         break;
                     case 'active':
@@ -203,7 +203,7 @@ function loadSectionsBasedOnStatus() {
                 datesSection.style.display = "block";
 
                 switch (thesis.status) {
-                    case 'unassigned':
+                    case 'assigned':
                         infoSection.style.display = "block";
                         professorsSection.style.display = "block";
                         gradesSection.style.display = "block";
