@@ -159,14 +159,14 @@ function loadStudentThesis() {
             console.error('Error loading thesis data:', error);
         });
 
-    // Helper function to calculate the final grade (average of 3 committee members' grades)
+    // Helper function to calculate the Final Grade (average of 3 committee members' grades)
     function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
         const grade1 = parseFloat(committeeMember1Grade) || null;
         const grade2 = parseFloat(committeeMember2Grade) || null;
         const grade3 = parseFloat(supervisorGrade) || null;
 
         if (grade1 === null || grade2 === null || grade3 === null) {
-            return 'No grade set yet';
+            return 'Η βαθμολόγιση δεν έχει ολοκληρωθεί.';
         }
 
         const totalGrade = grade1 + grade2 + grade3;
@@ -307,7 +307,7 @@ function loadSectionsBasedOnStatus() {
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "block";
-                        managementSection.style.display = "none";
+                        managementSection.style.display = "block";
                         datesSection.style.display = "block";
                         break;
                     case 'canceled':
