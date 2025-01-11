@@ -90,31 +90,46 @@ function loadStudentThesis() {
                         break;
                     case 'completed':
                         status = 'Περατωμένη';
-                }
+                        break;
+                    case 'canceled':
+                        status = 'Ακυρωμένη.';
 
+                }
                 updateDataField('thesis_status', status); // Declared above, used in switch
                 updateDataField('thesis_title', thesis.title);
                 updateDataField('thesis_summary', thesis.summary);
                 updateDataField('professor_name', thesis.professor_name);
                 updateDataField('professor_surname', thesis.professor_surname);
                 updateDataField('thesis_start_date', thesis.start_date || 'Δεν έχει εκκινήσει');
-                updateDataField('thesis_end_date', thesis.end_date || 'Δεν');
-                updateDataField('thesis_exam_date', thesis.exam_date);
+                updateDataField('thesis_exam_date', thesis.exam_date || 'Δεν');
                 updateDataField('thesis_nimertis_link', thesis.nimertis_link);
                 updateDataField('committee_member1_name', thesis.committee_member1_name || 'Δεν έχει οριστεί');
                 updateDataField('committee_member1_surname', thesis.committee_member1_surname || ' ');
                 updateDataField('committee_member2_name', thesis.committee_member2_name || 'Δεν έχει οριστεί');
                 updateDataField('committee_member2_surname', thesis.committee_member2_surname || ' ');
+                updateDataField('supervisor_grade', thesis.supervisor_grade || ' ');
+                updateDataField('committee_member1_grade', thesis.committee_member1_grade || ' ');
+                updateDataField('committee_member2_grade', thesis.committee_member2_grade || ' ');
 
-                // Calculate and display thesis duration
-                const durationElement = document.querySelector('[data-field="duration_block"]');
-                if (thesis.start_date) {
-                    durationElement.style.display = 'inline';
+                const finalGrade = calculateFinalGrade(thesis.supervisor_grade, thesis.committee_member1_grade, thesis.committee_member2_grade);
+                updateDataField('final_grade', finalGrade);
+
+                // Display thesis start date, duration, end date based on status
+                const dashboardDuration = document.querySelector('[data-field="dashboardDuration"]');
+                const dashboardStartDate = document.querySelector('[data-field="dashboardStartDate"]');
+                const dashboardExamDate = document.querySelector('[data-field="dashboardExamDate"]');
+
+                if (thesis.start_date && thesis.status === "active") {
+                    dashboardDuration.style.display = 'inline';
+                    dashboardExamDate.style.display = 'none';
                     const duration = calculateDuration(thesis.start_date);
                     updateDataField('thesis_duration', duration);
+                } else if (thesis.start_date && (thesis.status === "to-be-reviewed" || thesis.status === "completed")) {
+                    dashboardDuration.style.display = 'none';
+                    dashboardExamDate.style.display = 'inline';
                 } else {
-                    durationElement.style.display = 'none';
-
+                    dashboardDuration.style.display = 'none';
+                    dashboardExamDate.style.display = 'none';
                 }
 
                 // Handle the PDF download button
@@ -131,7 +146,7 @@ function loadStudentThesis() {
                     //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
                     //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
                 }
-            } else if(data.success && data.theses.length == 0){
+            } else if (data.success && data.theses.length == 0) {
                 console.error('No thesis found for this student');
                 updateDataField('thesis_status', "Δεν έχει εκκινήσει");
                 const dashboardFooter = document.getElementById("dashboardFooter");
@@ -144,21 +159,41 @@ function loadStudentThesis() {
             console.error('Error loading thesis data:', error);
         });
 
-    // Helper function to calculate the duration in months and days
+    // Helper function to calculate the final grade (average of 3 committee members' grades)
+    function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
+        const grade1 = parseFloat(committeeMember1Grade) || null;
+        const grade2 = parseFloat(committeeMember2Grade) || null;
+        const grade3 = parseFloat(supervisorGrade) || null;
+
+        if (grade1 === null || grade2 === null || grade3 === null) {
+            return 'No grade set yet';
+        }
+
+        const totalGrade = grade1 + grade2 + grade3;
+        const finalGrade = totalGrade / 3;
+        return finalGrade.toFixed(2);
+    }
+
+    // Helper function to calculate the thesis duration in months and days
     function calculateDuration(startDate) {
         const currentDate = new Date();
         const start = new Date(startDate);
-        // Calculate the difference in months
-        let months = currentDate.getMonth() - start.getMonth() + (12 * (currentDate.getFullYear() - start.getFullYear()));
-        if (currentDate.getDate() < start.getDate()) {
-            months--;
-        }
-        // Calculate the difference in days
-        const days = Math.floor((currentDate - start) / (1000 * 60 * 60 * 24)) % 30;
 
-        return `${months} μήνες και ${days} ημέρες`;
+        let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
+        let days = currentDate.getDate() - start.getDate();
+
+        // Adjust for negative days (crossed into a new month)
+        if (days < 0) {
+            totalMonths--; // Subtract one month
+            const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
+            days += previousMonth;
+        }
+        const monthText = totalMonths > 0 ? `${totalMonths} μήνες` : '';
+        const dayText = days > 0 ? `${days} ημέρες` : '';
+
+        return [monthText, dayText].filter(Boolean).join(' και ');
     }
-    //Helper functions to replace ALL data-fields -and not just their first instance- as is needed
+    //Helper function to replace ALL data-fields -and not just their first instance- as is needed
     function updateDataField(dataField, value, errorMessage = 'Error - no data') {
         const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
         elements.forEach(element => {
@@ -166,6 +201,8 @@ function loadStudentThesis() {
             element.textContent = (value && value !== null) ? value : errorMessage;
         });
     }
+
+
 }
 
 
@@ -197,6 +234,9 @@ function loadSectionsBasedOnStatus() {
                 const completedFilesSection = document.getElementById("completedFilesSection");
                 const managementSection = document.getElementById("managementSection");
                 const datesSection = document.getElementById("datesSection");
+                const configurationDuration = document.querySelector('[data-field="configurationDuration"]');
+                const configurationStartDate = document.querySelector('[data-field="configurationStartDate"]');
+                const configurationExamDate = document.querySelector('[data-field="configurationExamDate"]');
 
                 // Show all sections as default
                 infoSection.style.display = "block";
@@ -210,26 +250,41 @@ function loadSectionsBasedOnStatus() {
                 datesSection.style.display = "block";
 
 
+                // Display thesis start date, duration, end date based on status
+                if (thesis.start_date && thesis.status === "active") {
+                    configurationDuration.style.display = 'inline';
+                    configurationExamDate.style.display = 'none';
+                    const duration = calculateDuration(thesis.start_date);
+                    updateDataField('thesis_duration', duration);
+                } else if (thesis.start_date && (thesis.status === "to-be-reviewed" || thesis.status === "completed")) {
+                    configurationDuration.style.display = 'none';
+                    configurationExamDate.style.display = 'inline';
+                } else {
+                    configurationDuration.style.display = 'none';
+                    configurationExamDate.style.display = 'none';
+                }
+
+
                 switch (thesis.status) {
                     case 'assigned':
                         infoSection.style.display = "block";
                         configurationBody.style.display = "block";
                         configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
-                        gradesSection.style.display = "block";
-                        statusChangesSection.style.display = "block";
-                        completedFilesSection.style.display = "block";
-                        managementSection.style.display = "block";
-                        datesSection.style.display = "block";
+                        gradesSection.style.display = "none";
+                        statusChangesSection.style.display = "none";
+                        completedFilesSection.style.display = "none";
+                        managementSection.style.display = "none";
+                        datesSection.style.display = "none";
                         break;
                     case 'active':
                         infoSection.style.display = "block";
                         configurationBody.style.display = "block";
                         configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
-                        gradesSection.style.display = "block";
+                        gradesSection.style.display = "none";
                         statusChangesSection.style.display = "block";
-                        completedFilesSection.style.display = "block";
+                        completedFilesSection.style.display = "none";
                         managementSection.style.display = "block";
                         datesSection.style.display = "block";
                         break;
@@ -238,9 +293,9 @@ function loadSectionsBasedOnStatus() {
                         configurationBody.style.display = "block";
                         configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
-                        gradesSection.style.display = "block";
+                        gradesSection.style.display = "none";
                         statusChangesSection.style.display = "block";
-                        completedFilesSection.style.display = "block";
+                        completedFilesSection.style.display = "none";
                         managementSection.style.display = "block";
                         datesSection.style.display = "block";
                         break;
@@ -252,19 +307,19 @@ function loadSectionsBasedOnStatus() {
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "block";
-                        managementSection.style.display = "block";
+                        managementSection.style.display = "none";
                         datesSection.style.display = "block";
                         break;
                     case 'canceled':
                         infoSection.style.display = "block";
-                        configurationBody.style.display = "block";
-                        configurationFooter.style.display = "block";
+                        configurationBody.style.display = "none";
+                        configurationFooter.style.display = "none";
                         professorsSection.style.display = "block";
-                        gradesSection.style.display = "block";
-                        statusChangesSection.style.display = "block";
-                        completedFilesSection.style.display = "block";
-                        managementSection.style.display = "block";
-                        datesSection.style.display = "block";
+                        gradesSection.style.display = "none";
+                        statusChangesSection.style.display = "none";
+                        completedFilesSection.style.display = "none";
+                        managementSection.style.display = "none";
+                        datesSection.style.display = "none";
                         break;
                 }
 
@@ -272,7 +327,7 @@ function loadSectionsBasedOnStatus() {
             } else if (data.success && data.theses.length == 0) {
                 console.error('No thesis found for this student');
                 const thesis = data.theses[0];
-                // Reference each section
+
                 const infoSection = document.getElementById("infoSection");
                 const configurationBody = document.getElementById("configurationBody");
                 const configurationFooter = document.getElementById("configurationFooter");
@@ -282,7 +337,7 @@ function loadSectionsBasedOnStatus() {
                 const completedFilesSection = document.getElementById("completedFilesSection");
                 const managementSection = document.getElementById("managementSection");
                 const datesSection = document.getElementById("datesSection");
-                // Hide all sections but the info
+
                 infoSection.style.display = "block";
                 configurationBody.style.display = "none";
                 configurationFooter.style.display = "none";
@@ -494,3 +549,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+//If exam dates exists and status completed , end_date=exam date. Also create end date as null.
+//2 instances of PARAMS in server.js
+//API Naming scheme . What even is '/api/invitations/:id/action'

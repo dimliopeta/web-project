@@ -96,8 +96,8 @@ function insertData() {
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?);
+                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date, exam_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
                     thesis.professor_id,
@@ -106,7 +106,8 @@ function insertData() {
                     thesis.summary,
                     thesis.status,
                     thesis.pdf_path || null, // Χρησιμοποίησε NULL αν το pdf_path είναι κενό
-                    thesis.start_date
+                    thesis.start_date,
+                    thesis.exam_date
                 ], (insertErr) => {
                     if (insertErr) {
                         console.error('Error inserting thesis:', insertErr);
@@ -142,22 +143,22 @@ function insertData() {
     });
 
     data.invitations.forEach(invitation => {
-        const query = `SELECT * FROM INVITATIONS WHERE thesis_id=?;`;
-        db.query(query, [invitation.thesis_id], (err, results) => {
+        const query = `SELECT * FROM INVITATIONS WHERE id=?;`;
+        db.query(query, [invitation.id], (err, results) => {
             if (err) {
                 console.error('Error checking for duplicate invitations: ', err);
                 return;
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO invitations (thesis_id, professor_id)
-                    VALUES (?, ?);
+                    INSERT INTO invitations (id, thesis_id, professor_id)
+                    VALUES (?, ?, ?);
                 `;
-                db.query(insertQuery,[invitation.thesis_id,invitation.professor_id], (insertErr) =>{
+                db.query(insertQuery,[invitation.id, invitation.thesis_id,invitation.professor_id], (insertErr) =>{
                     if (insertErr) {
                         console.error('Error inserting invitation:', insertErr);
                     } else {
-                        console.log(`Invitation ${invitation.thesis_id} added successfully.`);
+                        console.log(`Invitation ${invitation.id} added successfully.`);
                     }
                 });
             }

@@ -54,7 +54,7 @@ CREATE TABLE `Invitations`(
     `professor_id` INT,
     `status` ENUM('pending','accepted','rejected', 'cancelled') DEFAULT 'pending',
     `invitation_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `response_date` TIMESTAMP NULL,
+    `response_date` DATE NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
     FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`)
 );

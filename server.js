@@ -261,19 +261,34 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         query = `SELECT
                     Theses.*,
                     DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
+                    DATE_FORMAT(Theses.exam_date, '%Y-%m-%d') AS exam_date,
                     Professors.name AS professor_name, 
                     Professors.surname AS professor_surname, 
                     Committee1.name AS committee_member1_name,
                     Committee1.surname AS committee_member1_surname,
                     Committee2.name AS committee_member2_name,
-                    Committee2.surname AS committee_member2_surname
-
+                    Committee2.surname AS committee_member2_surname,
+                    SupervisorGrade.grade AS supervisor_grade,
+                    SupervisorGrade.comments AS supervisor_comments,
+                    Committee1Grade.grade AS committee_member1_grade,
+                    Committee1Grade.comments AS committee_member1_comments,
+                    Committee2Grade.grade AS committee_member2_grade,
+                    Committee2Grade.comments AS committee_member2_comments
                 FROM Theses
                 LEFT JOIN Professors ON Theses.professor_id = Professors.id
                 LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
                 LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
                 LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
-                WHERE Theses.student_id = ${userId};`;
+                LEFT JOIN Grades AS SupervisorGrade ON Theses.thesis_id = SupervisorGrade.thesis_id 
+                    AND Theses.professor_id = SupervisorGrade.professor_id
+                LEFT JOIN Grades AS Committee1Grade ON Theses.thesis_id = Committee1Grade.thesis_id 
+                    AND Committees.member1_id = Committee1Grade.professor_id
+                LEFT JOIN Grades AS Committee2Grade ON Theses.thesis_id = Committee2Grade.thesis_id 
+                    AND Committees.member2_id = Committee2Grade.professor_id
+                WHERE Theses.student_id = ${userId};
+`;
+
+                
     } else {
         return res.status(403).json({ success: false, message: 'Unauthorized access.' });
     }
@@ -534,7 +549,7 @@ app.get('/api/invitations', authenticateJWT, (req, res) => {
 
 //----------------- API for Invitation Acceptance/Rejection -----------------
 app.post('/api/invitations/:id/action', authenticateJWT, (req, res) => {
-    const invitationId = req.params.id;
+    const invitationId = req.params.id;  //// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
     const { action } = req.body;
 
     if (!['accepted', 'rejected'].includes(action)) {

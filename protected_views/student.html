@@ -122,17 +122,21 @@
                         </section>
                     </div>
 
-                    <div class="card-footer text-muted" id="dashboardFooter">
-                        <section>
+                    <div class="card-footer text-muted">
+                        <span data-field="dashboardStartDate">
                             <span class="ps-5">Ημερομηνία έναρξης:</span>
                             <span class="pe-4" data-field="thesis_start_date"> </span>
-                            <span data-field="duration_block" style="display: none;">
-                                <span class="ps-5">Διάρκεια:</span>
-                                <span data-field="thesis_duration"> </span>
-                            </span>
-                            <button type="button" data-field="pdf_button"
-                                class="btn btn-outline-primary btn-sm float-end">PDF</button>
-                        </section>
+                        </span>
+                        <span data-field="dashboardExamDate">
+                            <span class="ps-5">Ημερομηνία περάτωσης:</span>
+                            <span class="pe-4" data-field="thesis_exam_date"> </span>
+                        </span>
+                        <span data-field="dashboardDuration">
+                            <span class="ps-5">Διάρκεια:</span>
+                            <span data-field="thesis_duration"> </span>
+                        </span>
+                        <button type="button" data-field="pdf_button"
+                            class="btn btn-outline-primary btn-sm float-end">PDF</button>
                     </div>
                 </div>
 
@@ -163,10 +167,11 @@
                         <section id="infoSection">
                             <h5 class="card-title" data-field="thesis_title"></h5>
                             <p class="card-text" data-field="thesis_summary"></p>
-                            <hr>
                         </section>
+
                         <!-- Professors -->
                         <section id="professorsSection">
+                            <hr>
                             <h4 class="card-title">
                                 <span>Επιβλέπων:</span>
                                 <span data-field="professor_name"></span>
@@ -229,7 +234,7 @@
                                         <button class="btn btn-secondary mt-3 w-100" id="changeProfessorButton">Αλλαγή
                                             Επιλεγμένου Καθηγητή</button>
 
-                                        <!-- Κουμπί ανάθεσης -->
+                                        <!-- Invite Button -->
                                         <div class="row mt-4">
                                             <div class="col text-center">
                                                 <button class="btn btn-primary" id="assignCommitteeButton">Πρόσκληση
@@ -239,41 +244,44 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr>
                         </section>
 
                         <!-- Grades -->
                         <section id="gradesSection">
-                            <h4 class="py-1">Τελική Βαθμολογία:</h4>
-                            <p> grade</p>
-                            <h5 class="py-1">Βαθμολογία Τριμελούς:</h5>
-                            <div class="row">
-                                <div class="col-sm-4 text-center">
-                                    <p class="my-2">Επιβλέπων / 1o μέλος Τριμελούς Επιτροπής:</p>
-                                </div>
-                                <div class="col-sm-4 text-center">
-                                    <p class="my-2">2o μέλος Τριμελούς Επιτροπής:</p>
-                                </div>
-                                <div class="col-sm-4 text-center">
-                                    <p class="mt-2 mb-0"> 3ο μέλος Τριμελούς Επιτροπής:</p>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <p class="my-2 text-center">b1</p>
-                                </div>
-                                <div class="col-sm-4">
-                                    <p class="my-2 text-center">b2</p>
-                                </div>
-                                <div class="col-sm-4">
-                                    <p class="mt-2 mb-0 text-center">b3</p>
-                                </div>
-                            </div>
                             <hr>
+                            <h4 class="py-1">Τελική Βαθμολογία:</h4>
+                            <h4 data-field="final_grade"> </h4>
+                            <h5 class="py-2">Βαθμολογία Τριμελούς:</h5>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span data-field="professor_name"> </span>
+                                    <span data-field="professor_surname"> </span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <span data-field="committee_member1_name"> </span>
+                                    <span data-field="committee_member1_surname"> </span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <span data-field="committee_member2_name"> </span>
+                                    <span data-field="committee_member2_surname"> </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <p class="my-2 text-center">grade_1</p>
+                                </div>
+                                <div class="col-sm-4">
+                                    <p class="my-2 text-center">grade_2</p>
+                                </div>
+                                <div class="col-sm-4">
+                                    <p class="mt-2 mb-0 text-center">grade_3</p>
+                                </div>
+                            </div>
                         </section>
 
                         <!-- Status changes -->
                         <section id="statusChangesSection">
+                            <hr>
                             <div class="row">
                                 <h4 class="text-center pb-1">Αλλαγές κατάστασης</h4>
                                 <div>
@@ -286,11 +294,11 @@
                                     <p>allag3</p>
                                 </div>
                             </div>
-                            <hr>
                         </section>
 
                         <!-- Files after completion -->
                         <section id="completedFilesSection">
+                            <hr>
                             <div class="row">
                                 <h4 class="pb-1 text-center">Αρχεία</h4>
                                 <div class="col-sm-6 text-end">
@@ -308,11 +316,11 @@
                                         class="btn btn-outline-primary btn-sm float-start">Link</button>
                                 </div>
                             </div>
-                            <hr>
                         </section>
 
                         <!-- Active thesis management -->
                         <section id="managementSection">
+                            <hr>
                             <div class="row">
                                 <h4 class="pb-1 text-center">Διαχείρηση</h4>
                                 <div class="col-sm-6 text-end">
@@ -344,27 +352,25 @@
                                         class="btn btn-outline-primary btn-sm float-start">Κατάθεση</button>
                                 </div>
                             </div>
+                        </section>
                     </div>
-                    </section>
+
 
                     <!-- Dates -->
                     <div class="card-footer text-muted" id="configurationFooter">
                         <section id="datesSection">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="col-sm-4">
-                                    <span>Ημερομηνία έναρξης: </span>
-                                    <span data-field="thesis_start_date">t</span>
-                                </div>
-                                <div class="col-sm-4">
-                                    <span>Ημερομηνία ολοκληρωσης:</span>
-                                    <span data-field="thesis_end_date">t</span>
-                                </div>
-                                <div class="col-sm-4">
-                                    <span data-field="duration_block">
-                                        <span>Διάρκεια:</span>
-                                        <span data-field="thesis_duration">t</span>
-                                    </span>
-                                </div>
+                            <span data-field="configurationStartDate">
+                                <span class="ps-5">Ημερομηνία έναρξης:</span>
+                                <span class="pe-4" data-field="thesis_start_date"> </span>
+                            </span>
+                            <span data-field="configurationExamDate">
+                                <span class="ps-5">Ημερομηνία περάτωσης:</span>
+                                <span class="pe-4" data-field="thesis_exam_date"> </span>
+                            </span>
+                            <span data-field="configurationDuration">
+                                <span class="ps-5">Διάρκεια:</span>
+                                <span data-field="thesis_duration"> </span>
+                            </span>
                         </section>
                     </div>
                 </div>
