@@ -253,9 +253,13 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     let query;
 
     if (role === 'professor') {
-        query = `SELECT *, DATE_FORMAT(start_date, '%Y-%m-%d') AS start_date 
-                 FROM Theses
-                 WHERE professor_id = ${userId};`;
+        query = `SELECT 
+                    t.*,
+                    DATE_FORMAT(t.start_date, '%Y-%m-%d') AS start_date,
+                IF(t.professor_id = ${userId}, 'Επιβλέπων', 'Μέλος Τριμελούς') AS role
+                FROM Theses t
+                LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+                WHERE t.professor_id = ${userId} OR c.member1_id = ${userId} OR c.member2_id = ${userId};`;
 
     } else if (role === 'student') {
         query = `SELECT
@@ -738,7 +742,7 @@ app.get('/api/invitation-history', authenticateJWT, (req, res) => {
     LEFT JOIN 
         Students s ON t.student_id = s.id
     WHERE 
-        i.status != 'pending' AND t.professor_id = ?;
+        i.status != 'pending' AND i.professor_id = ?;
     `;
     db.query(query, [professorId], (err, results) => {
         if (err) {

@@ -301,18 +301,28 @@ function showInfoSection(thesis) {
     const thesesCompartment = document.getElementById('theses-compartment');
 
     if (!infoSection || !thesesCompartment) {
-        console.error('Το edit-section ή το themes-compartment δεν βρέθηκε στο DOM.');
+        console.error('Το info-compartment ή το theses-compartment δεν βρέθηκε.');
         return;
     }
+
+    // Ενημέρωση περιεχομένου
+    infoSection.innerHTML = `
+        <div class="border p-3 rounded">
+            <h5 class="text-primary">Βασικές Πληροφορίες</h5>
+            <p>Τίτλος: ${thesis.title || 'Δεν υπάρχει τίτλος'}</p>
+            <p>Περίληψη: ${thesis.summary || 'Δεν υπάρχει διαθέσιμη περίληψη.'}</p>
+        </div>
+    `;
 
     // Αλλαγή διατάξεων
     thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
     thesesCompartment.classList.add('col-md-6');
     infoSection.classList.remove('d-none');
 
-    // Εστίαση στο edit-section
+    // Scroll to the info section
     infoSection.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 
 document.getElementById('editThesisForm').addEventListener('submit', function (e) {
@@ -666,10 +676,15 @@ function loadTheses() {
                     row.innerHTML = `
                         <td>${thesis.title}</td>
                         <td>${thesis.thesis_id}</td>
-                        <td>${thesis.student_id ? 'Φοιτητής' : 'Επιβλέπων'}</td>
+                        <td>${thesis.role}</td>
                         <td>${status}</td>
                     `;
                     console.log('Row created:', row);
+
+                    row.addEventListener('click', (event) => {
+                        showInfoSection(thesis);
+                        console.log('clicked!');
+                    });
 
                     thesesTableBody.appendChild(row);
                 });
@@ -681,7 +696,7 @@ function loadTheses() {
 }
 
 
-
+//------------Event Listener for Filter dropdown----------------
 document.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', event => {
         event.preventDefault(); // Αποφυγή default συμπεριφοράς του link
@@ -690,6 +705,8 @@ document.querySelectorAll('.dropdown-item').forEach(item => {
     });
 });
 
+
+//------------Filtering for Theses List----------------
 function applyFilter(filterValue) {
     const token = localStorage.getItem('token');
 
@@ -742,11 +759,12 @@ function applyFilter(filterValue) {
                         row.innerHTML = `
                             <td>${thesis.title}</td>
                             <td>${thesis.thesis_id}</td>
-                            <td>${thesis.student_id ? 'Φοιτητής' : 'Επιβλέπων'}</td>
+                            <td>${thesis.role}</td>
                             <td>${status}</td>
                         `;
                         row.addEventListener('click', (event) => {
-                            showInfoSection();
+                            showInfoSection(thesis);
+                            console.log('clicked!');
                         });
 
                         thesesTableBody.appendChild(row);
