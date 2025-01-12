@@ -352,6 +352,11 @@ app.post('/api/upload_attachment', authenticateJWT, upload.single('attachment'),
     const thesisId = req.body.thesis_id;
     const attachmentType = req.body.type; // 'file' or 'link'
 
+    console.log("Received upload request:");
+    console.log("Thesis ID:", thesisId);
+    console.log("Attachment Type:", attachmentType);
+    console.log("File:", req.file);  // Log the uploaded file info
+
     if (!thesisId || !attachmentType) {
         return res.status(400).json({ success: false, message: 'Thesis ID and attachment type are required' });
     }

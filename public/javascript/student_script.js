@@ -432,10 +432,9 @@ document.querySelectorAll('.assignCommittee').forEach(button => {
 });
 
 
-// --------------- Function for handling the entire Thesis Management section ---------------
+// --------------- Functions for handling the entire Thesis Management section ---------------
 function setupThesisManagement() {
     const token = localStorage.getItem('token')
-    const thesisInfo = null;
 
     fetch('/api/theses', {
         method: 'GET',
@@ -451,84 +450,48 @@ function setupThesisManagement() {
         })
         .then(data => {
             if (data.success && data.theses.length > 0) {
-                const thesisInfo = data.theses[0];
-                console.log(thesisInfo);
-                setupEventListeners(thesisInfo);
+                const thesis = data.theses[0];
+                setupEventListeners(thesis);
             }
         })
-
-    // Event listeners for the management buttons
-    document.getElementById('configurationButtonUploadFile').addEventListener('click', function () {
-        showSection('configurationUploadFileSection');
-    });
-
-    document.getElementById('configurationButtonUploadLink').addEventListener('click', function () {
-        showSection('linkSection');
-    });
-
-    document.getElementById('configurationButtonSetExamDate').addEventListener('click', function () {
-        showSection('examDateSection');
-    });
-
-    document.getElementById('configurationButtonNimertisSubmission').addEventListener('click', function () {
-        showSection('nimertisSection');
-    });
-
-    // File upload button handler
+}
+// FUNCTIONS TO HANDLE BUTTON PRESS FOR LINK/FILE UPLOAD
+function setupEventListeners(thesis) {
+    // Event listener for the file upload button
     document.getElementById('configurationUploadFile').addEventListener('click', function () {
         const fileInput = document.getElementById('fileInput').files[0];
         if (fileInput) {
-            uploadFile(fileInput);
+            console.log(fileInput);  // Debug: Log the file object
+            if (thesis) {
+                uploadFile(fileInput, thesis);  // Pass thesis to the uploadFile function
+            } else {
+                alert('Thesis information is not available.');
+            }
         } else {
             alert('Please select a file to upload.');
         }
     });
-    // Link upload button handler
+    // Event listener for the link upload button
     document.getElementById('uploadLink').addEventListener('click', function () {
         const link = document.getElementById('configurationLinkInput').value;
         if (link) {
-            uploadLink(link);
+            if (thesis) {
+                uploadLink(link, thesis);  // Pass thesis to the uploadLink function
+            } else {
+                alert('Thesis information is not available.');
+            }
         } else {
             alert('Please enter a link.');
         }
     });
-    // Exam date set button handler
-    document.getElementById('configurationSetExamDateSection').addEventListener('click', function () {
-        const examDate = document.getElementById('examDateInput').value;
-        if (examDate) {
-            document.getElementById('examDateInfo').textContent = 'Exam Date set: ' + examDate;
-        } else {
-            alert('Please select an exam date.');
-        }
-    });
-    // Nimertis link submit button handler
-    document.getElementById('configurtaionSubmitNimertis').addEventListener('click', function () {
-        const nimertisLink = document.getElementById('configurationNimertisSubmissionSection').value;
-        if (nimertisLink) {
-            document.getElementById('configurationNimertisInfo').textContent = 'Nimertis link submitted: ' + nimertisLink;
-        } else {
-            alert('Please enter the Nimertis link.');
-        }
-    });
 }
-// Helper function to show a specific section and hide the others
-function showSection(sectionId) {
-    const sections = ['configurationUploadFileSection', 'linkSection', 'examDateSection', 'nimertisSection'];
-    sections.forEach(function (section) {
-        const element = document.getElementById(section);
-        if (section === sectionId) {
-            element.style.display = 'block';
-        } else {
-            element.style.display = 'none';
-        }
-    });
-}
-// Function to handle file upload to the server
-function uploadFile(fileInput) {
+// FUNCTIONS TO COMMUNICATE WITH THE BACKEND
+// File Upload
+function uploadFile(fileInput, thesis) {
     const formData = new FormData();
     formData.append('attachment', fileInput);
     formData.append('type', 'file'); // Specify that this is a file upload
-    formData.append('thesis_id', thesisInfo.thesis_id);
+    formData.append('thesis_id', thesis.thesis_id);
 
     fetch('/api/upload_attachment', {
         method: 'POST',
@@ -548,12 +511,12 @@ function uploadFile(fileInput) {
             alert('Error uploading file');
         });
 }
-// Function to handle link upload to the server
-function uploadLink(link) {
+// Link upload
+function uploadLink(link, thesis) {
     const formData = new FormData();
     formData.append('type', 'link'); // Specify that this is a link upload
     formData.append('link', link); // Add the link to FormData
-    formData.append('thesis_id', thesisInfo.thesis_id);
+    formData.append('thesis_id', thesis.thesis_id);
 
     fetch('/api/upload_attachment', {
         method: 'POST',
@@ -574,6 +537,55 @@ function uploadLink(link) {
             alert('Error uploading link');
         });
 }
+
+// Exam date set button handler
+document.getElementById('configurationSetExamDateSection').addEventListener('click', function () {
+    const examDate = document.getElementById('examDateInput').value;
+    if (examDate) {
+        document.getElementById('examDateInfo').textContent = 'Exam Date set: ' + examDate;
+    } else {
+        alert('Please select an exam date.');
+    }
+});
+// Nimertis link submit button handler
+document.getElementById('configurtaionSubmitNimertis').addEventListener('click', function () {
+    const nimertisLink = document.getElementById('configurationNimertisSubmissionSection').value;
+    if (nimertisLink) {
+        document.getElementById('configurationNimertisInfo').textContent = 'Nimertis link submitted: ' + nimertisLink;
+    } else {
+        alert('Please enter the Nimertis link.');
+    }
+});
+
+// SHOW/HIDE CONTROL FOR THESIS MANAGEMENT SECTIONS
+document.getElementById('configurationButtonUploadFile').addEventListener('click', function () {
+    showSection('configurationUploadFileSection');
+});
+
+document.getElementById('configurationButtonUploadLink').addEventListener('click', function () {
+    showSection('linkSection');
+});
+
+document.getElementById('configurationButtonSetExamDate').addEventListener('click', function () {
+    showSection('examDateSection');
+});
+
+document.getElementById('configurationButtonNimertisSubmission').addEventListener('click', function () {
+    showSection('nimertisSection');
+});
+
+// Helper function to show a specific section and hide the others
+function showSection(sectionId) {
+    const sections = ['configurationUploadFileSection', 'linkSection', 'examDateSection', 'nimertisSection'];
+    sections.forEach(function (section) {
+        const element = document.getElementById(section);
+        if (section === sectionId) {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    });
+}
 // Helper function to add a link to the list of uploaded links
 function addLinkToList(link) {
     const linkList = document.getElementById('configurationUploadLinkSection');
@@ -586,7 +598,6 @@ function addLinkToList(link) {
     newLinkElement.appendChild(linkText);
     linkList.appendChild(newLinkElement);
 }
-
 
 
 //------------------------------ PROFILE PAGE ------------------------------
