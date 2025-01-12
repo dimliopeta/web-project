@@ -629,19 +629,14 @@ app.post('/api/theses/new', authenticateJWT, uploadPDFOnly.single('pdf'), (req, 
 });
 
 //----------------- API to Edit existing Thesis -----------------
-app.put('/api/theses/:id', authenticateJWT, uploadPDFOnly.single('pdf'), (req, res) => {
-    const thesisId = req.params.id;   /// TO FIX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    const { title, summary } = req.body;
+app.put('/api/theses/update', authenticateJWT, uploadPDFOnly.single('pdf'), (req, res) => {
+    const { thesisId, title, summary } = req.body;
     const file = req.file;
     const professorId = req.user.userId;
 
-    if (!thesisId) {
-        return res.status(400).json({ success: false, message: 'Missing thesis ID.' });
-    }
-
-    if (!title && !summary && !file) {
-        return res.status(400).json({ success: false, message: 'No changes provided.' });
-    }
+    if (!thesisId || (!title && !summary && !file)) {
+        return res.status(400).json({ success: false, message: 'Invalid input.' });
+      }
 
     const getThesisQuery = `
         SELECT title, summary, pdf_path
@@ -739,14 +734,14 @@ app.get('/api/invitations', authenticateJWT, (req, res) => {
 });
 
 
-//----------------- API for Invitation Acceptance/Rejection -----------------
-app.post('/api/invitations/:id/action', authenticateJWT, (req, res) => {
-    const invitationId = req.params.id;  //// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-    const { action } = req.body;
 
-    if (!['accepted', 'rejected'].includes(action)) {
-        return res.status(400).json({ success: false, message: 'Invalid action provided.' });
-    }
+//----------------- API for Invitation Acceptance/Rejection -----------------
+app.post('/api/invitations/action', authenticateJWT, (req, res) => {
+    const {invitationId, action } = req.body;
+
+    if (!invitationId || !['accepted', 'rejected'].includes(action)) {
+        return res.status(400).json({ success: false, message: 'Invalid input.' });
+      }
 
     const getInvitationQuery = `
         SELECT i.thesis_id, i.professor_id, c.member1_id, c.member2_id

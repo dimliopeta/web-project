@@ -449,19 +449,20 @@ function enableGrading(thesisId) {
 document.getElementById('editThesisForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    const thesisId = this.dataset.id;
+    const thesisId = this.dataset.id; // Διατήρηση του ID από το dataset
     const title = document.getElementById('editTitle').value;
     const summary = document.getElementById('editSummary').value;
     const pdf = document.getElementById('editPdf').files[0]; // Νέο αρχείο PDF
 
     const formData = new FormData();
+    formData.append('thesisId', thesisId); // Προσθήκη του ID στο body
     formData.append('title', title);
     formData.append('summary', summary);
     if (pdf) {
         formData.append('pdf', pdf); // Επισύναψη νέου αρχείου PDF αν υπάρχει
     }
 
-    fetch(`/api/theses/${thesisId}`, {
+    fetch('/api/theses/update', { // Τροποποίηση του endpoint για να μην χρησιμοποιεί το ID στο URL
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}` // Αν χρειάζεται token
@@ -620,28 +621,29 @@ function loadInvitationHistory() {
 
 //-------------Invitation Acceptance/Rejection ------------------
 function handleInvitationAction(invitationId, action) {
-    fetch(`/api/invitations/${invitationId}/action`, {
+    fetch('/api/invitations/action', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action }) // Δράση: "accepted" ή "rejected"
+        body: JSON.stringify({ invitationId, action }),
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert(data.message);
-                loadInvitations(); // Επαναφόρτωση της λίστας προσκλήσεων
+                loadInvitations(); // Reload invitations
                 loadInvitationHistory();
             } else {
-                alert(`Σφάλμα: ${data.message}`);
+                alert(`Error: ${data.message}`);
             }
         })
         .catch(error => {
-            console.error('Σφάλμα κατά την ενέργεια πρόσκλησης:', error);
+            console.error('Error handling invitation action:', error);
         });
 }
+
 
 
 
