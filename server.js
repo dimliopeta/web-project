@@ -251,53 +251,91 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     const role = req.user.role;
 
     let query;
+    let queryParams = [];
 
     if (role === 'professor') {
-        query = `SELECT 
-                    t.*,
-                    DATE_FORMAT(t.start_date, '%Y-%m-%d') AS start_date,
-                IF(t.professor_id = ${userId}, 'Επιβλέπων', 'Μέλος Τριμελούς') AS role
-                FROM Theses t
-                LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
-                WHERE t.professor_id = ${userId} OR c.member1_id = ${userId} OR c.member2_id = ${userId};`;
+        query = `
 
+
+SELECT 
+    t.thesis_id,
+    t.title,
+    t.summary,
+    t.status,
+    CONCAT(s.name, ' ', s.surname) AS student_name,
+    s.student_number,
+    s.contact_email AS student_email,
+    CONCAT(p.name, ' ', p.surname) AS professor_name,
+    p.email AS professor_email,
+    c.member1_id AS committee_member1_id,
+    CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
+    c.member2_id AS committee_member2_id,
+    CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
+    t.start_date,
+    t.exam_date,
+    g.grade AS supervisor_grade,
+    g.comments AS supervisor_comments,
+    GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
+    CASE
+        WHEN t.professor_id = ? THEN 'Επιβλέπων'
+        WHEN c.member1_id = ? OR c.member2_id = ? THEN 'Μέλος Τριμελούς'
+        ELSE 'Άγνωστος'
+    END AS role
+FROM Theses t
+LEFT JOIN Students s ON t.student_id = s.id
+LEFT JOIN Professors p ON t.professor_id = p.id
+LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+LEFT JOIN Professors c1 ON c.member1_id = c1.id
+LEFT JOIN Professors c2 ON c.member2_id = c2.id
+LEFT JOIN Grades g ON g.thesis_id = t.thesis_id AND g.professor_id = t.professor_id
+LEFT JOIN Invitations i ON i.thesis_id = t.thesis_id
+WHERE p.id = ? OR c.member1_id = ? OR c.member2_id = ?
+GROUP BY 
+    t.thesis_id, t.title, t.summary, t.status, t.start_date, t.exam_date,
+    s.name, s.surname, s.student_number, s.contact_email,
+    p.name, p.surname, p.email,
+    c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname, 
+    g.grade, g.comments;
+
+        `;
+        queryParams = [userId, userId, userId, userId, userId, userId];
     } else if (role === 'student') {
-        query = `SELECT
-                    Theses.*,
-                    DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
-                    DATE_FORMAT(Theses.exam_date, '%Y-%m-%d') AS exam_date,
-                    Professors.name AS professor_name, 
-                    Professors.surname AS professor_surname, 
-                    Committee1.name AS committee_member1_name,
-                    Committee1.surname AS committee_member1_surname,
-                    Committee2.name AS committee_member2_name,
-                    Committee2.surname AS committee_member2_surname,
-                    SupervisorGrade.grade AS supervisor_grade,
-                    SupervisorGrade.comments AS supervisor_comments,
-                    Committee1Grade.grade AS committee_member1_grade,
-                    Committee1Grade.comments AS committee_member1_comments,
-                    Committee2Grade.grade AS committee_member2_grade,
-                    Committee2Grade.comments AS committee_member2_comments
-                FROM Theses
-                LEFT JOIN Professors ON Theses.professor_id = Professors.id
-                LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
-                LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
-                LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
-                LEFT JOIN Grades AS SupervisorGrade ON Theses.thesis_id = SupervisorGrade.thesis_id 
-                    AND Theses.professor_id = SupervisorGrade.professor_id
-                LEFT JOIN Grades AS Committee1Grade ON Theses.thesis_id = Committee1Grade.thesis_id 
-                    AND Committees.member1_id = Committee1Grade.professor_id
-                LEFT JOIN Grades AS Committee2Grade ON Theses.thesis_id = Committee2Grade.thesis_id 
-                    AND Committees.member2_id = Committee2Grade.professor_id
-                WHERE Theses.student_id = ${userId};
-`;
-
-
+        query = `
+            SELECT
+                Theses.*,
+                DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
+                DATE_FORMAT(Theses.exam_date, '%Y-%m-%d') AS exam_date,
+                Professors.name AS professor_name, 
+                Professors.surname AS professor_surname, 
+                Committee1.name AS committee_member1_name,
+                Committee1.surname AS committee_member1_surname,
+                Committee2.name AS committee_member2_name,
+                Committee2.surname AS committee_member2_surname,
+                SupervisorGrade.grade AS supervisor_grade,
+                SupervisorGrade.comments AS supervisor_comments,
+                Committee1Grade.grade AS committee_member1_grade,
+                Committee1Grade.comments AS committee_member1_comments,
+                Committee2Grade.grade AS committee_member2_grade,
+                Committee2Grade.comments AS committee_member2_comments
+            FROM Theses
+            LEFT JOIN Professors ON Theses.professor_id = Professors.id
+            LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
+            LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
+            LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
+            LEFT JOIN Grades AS SupervisorGrade ON Theses.thesis_id = SupervisorGrade.thesis_id 
+                AND Theses.professor_id = SupervisorGrade.professor_id
+            LEFT JOIN Grades AS Committee1Grade ON Theses.thesis_id = Committee1Grade.thesis_id 
+                AND Committees.member1_id = Committee1Grade.professor_id
+            LEFT JOIN Grades AS Committee2Grade ON Theses.thesis_id = Committee2Grade.thesis_id 
+                AND Committees.member2_id = Committee2Grade.professor_id
+            WHERE Theses.student_id = ?;
+        `;
+        queryParams = [userId];
     } else {
         return res.status(403).json({ success: false, message: 'Unauthorized access.' });
     }
 
-    db.query(query, (err, results) => {
+    db.query(query, queryParams, (err, results) => {
         if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
@@ -306,6 +344,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, theses: results });
     });
 });
+
 
 
 //----------------- API to fetch Student Data by Id -----------------
@@ -852,6 +891,11 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
         WHERE thesis_id = ?;
     `;
 
+    const deleteInvitationsQuery = `
+        DELETE FROM INVITATIONS
+        WHERE thesis_id = ?;
+    `;
+
     // Ξεκινάμε συναλλαγή για να διασφαλίσουμε συνοχή δεδομένων
     db.beginTransaction((err) => {
         if (err) {
@@ -875,24 +919,31 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
             }
 
             // Εκτέλεση query για διαγραφή της τριμελούς επιτροπής
-            db.query(deleteCommitteeQuery, [thesisId], (deleteErr) => {
-                if (deleteErr) {
-                    console.error('Σφάλμα κατά τη διαγραφή της τριμελούς:', deleteErr);
+            db.query(deleteInvitationsQuery, [thesisId], (deleteIErr) => {
+                if (deleteIErr) {
+                    console.error('Σφάλμα κατά τη διαγραφή των προσκλήσεων:', deleteIErr);
                     return db.rollback(() => {
                         res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
                     });
                 }
 
-                // Επικύρωση της συναλλαγής
-                db.commit((commitErr) => {
-                    if (commitErr) {
-                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                db.query(deleteCommitteeQuery, [thesisId], (deleteErr) => {
+                    if (deleteErr) {
+                        console.error('Σφάλμα κατά τη διαγραφή της τριμελούς:', deleteErr);
                         return db.rollback(() => {
                             res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
                         });
                     }
-
-                    res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς και η επιτροπή διαγράφηκε!' });
+                    // Επικύρωση της συναλλαγής
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                            });
+                        }
+                        res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς, οι προσκλήσεις και η επιτροπή διαγράφηκαν!' });
+                    });
                 });
             });
         });

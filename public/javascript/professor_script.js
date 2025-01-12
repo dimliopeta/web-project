@@ -305,23 +305,30 @@ function showInfoSection(thesis) {
         return;
     }
 
-    // Ενημέρωση περιεχομένου
+    // Δημιουργία περιεχομένου βασικών πληροφοριών
     infoSection.innerHTML = `
         <div class="border p-3 rounded">
             <h5 class="text-primary">Βασικές Πληροφορίες</h5>
-            <p>Τίτλος: ${thesis.title || 'Δεν υπάρχει τίτλος'}</p>
-            <p>Περίληψη: ${thesis.summary || 'Δεν υπάρχει διαθέσιμη περίληψη.'}</p>
+            <p><strong>Τίτλος:</strong> ${thesis.title || 'Δεν υπάρχει τίτλος'}</p>
+            <p><strong>Κατάσταση:</strong> ${thesis.status || 'Άγνωστη'}</p>
+            <p><strong>Περιγραφή:</strong> ${thesis.summary || 'Δεν υπάρχει διαθέσιμη περιγραφή.'}</p>
+            <p><strong>Ρόλος Καθηγητή:</strong> ${thesis.role || 'Άγνωστος'}</p>
+            <p><strong>Φοιτητής:</strong> ${thesis.student_name || 'Δεν έχει ανατεθεί'} (ΑΜ: ${thesis.student_number || '-'})</p>
+            <p><strong>Στοιχεία Επικοινωνίας Φοιτητή:</strong> ${thesis.student_email || 'Δεν υπάρχουν διαθέσιμα στοιχεία'}</p>
+            <button id="manage-thesis-btn" class="btn btn-primary mt-3">Διαχείριση Διπλωματικής</button>
         </div>
     `;
 
-    // Αλλαγή διατάξεων
-    thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
-    thesesCompartment.classList.add('col-md-6');
+    thesesCompartment.classList.replace('col-lg-8', 'col-md-6');
     infoSection.classList.remove('d-none');
-
-    // Scroll to the info section
     infoSection.scrollIntoView({ behavior: 'smooth' });
+
+    // Event για Διαχείριση
+    document.getElementById('manage-thesis-btn').addEventListener('click', () => {
+        showManagementSection(thesis);
+    });
 }
+
 
 
 
@@ -653,8 +660,6 @@ function loadTheses() {
                 data.theses.forEach(thesis => {
                     console.log('Προσθήκη θέματος:', thesis);
 
-                    const row = document.createElement('tr');
-
                     let status;
                     switch (thesis.status) {
                         case 'active':
@@ -673,14 +678,21 @@ function loadTheses() {
                             status = 'Μη ανατεθημένο θέμα';
                     }
 
+                    const roleText = thesis.role === 'Επιβλέπων' ? 'Επιβλέπων Καθηγητής' 
+                  : thesis.role === 'Μέλος Τριμελούς' ? 'Μέλος Τριμελούς Επιτροπής' 
+                  : 'Άγνωστος Ρόλος';
+
+
+                    // Δημιουργία γραμμής πίνακα
+                    const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${thesis.title}</td>
-                        <td>${thesis.thesis_id}</td>
-                        <td>${thesis.role}</td>
+                        <td>${thesis.title || 'Χωρίς τίτλο'}</td>
+                        <td>${thesis.thesis_id || 'Χωρίς ID'}</td>
+                        <td>${roleText}</td>
                         <td>${status}</td>
                     `;
-                    console.log('Row created:', row);
 
+                    // Ενεργοποίηση εμφάνισης πληροφοριών κατά το κλικ
                     row.addEventListener('click', (event) => {
                         showInfoSection(thesis);
                         console.log('clicked!');
@@ -694,6 +706,8 @@ function loadTheses() {
         })
         .catch(err => console.error('Σφάλμα φόρτωσης:', err));
 }
+
+
 
 
 //------------Event Listener for Filter dropdown----------------
