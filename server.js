@@ -8,7 +8,7 @@ const multer = require('multer');
 
 
 const app = express();
-app.use('/theses_pdf', express.static(path.join(__dirname, 'files/theses_pdf')));
+app.use('/files', express.static(path.join(__dirname, 'files')));
 const PORT = 3000;
 const SECRET_KEY = 'your-secret-key';
 

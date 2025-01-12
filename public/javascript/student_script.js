@@ -161,48 +161,48 @@ function loadStudentThesis() {
 
 }
 
-    // Helper function to calculate the Final Grade (average of 3 committee members' grades)
-    function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
-        const grade1 = parseFloat(committeeMember1Grade) || null;
-        const grade2 = parseFloat(committeeMember2Grade) || null;
-        const grade3 = parseFloat(supervisorGrade) || null;
+// Helper function to calculate the Final Grade (average of 3 committee members' grades)
+function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
+    const grade1 = parseFloat(committeeMember1Grade) || null;
+    const grade2 = parseFloat(committeeMember2Grade) || null;
+    const grade3 = parseFloat(supervisorGrade) || null;
 
-        if (grade1 === null || grade2 === null || grade3 === null) {
-            return 'Η βαθμολόγιση δεν έχει ολοκληρωθεί.';
-        }
-
-        const totalGrade = grade1 + grade2 + grade3;
-        const finalGrade = totalGrade / 3;
-        return finalGrade.toFixed(2);
+    if (grade1 === null || grade2 === null || grade3 === null) {
+        return 'Η βαθμολόγιση δεν έχει ολοκληρωθεί.';
     }
 
-    // Helper function to calculate the thesis duration in months and days
-    function calculateDuration(startDate) {
-        const currentDate = new Date();
-        const start = new Date(startDate);
+    const totalGrade = grade1 + grade2 + grade3;
+    const finalGrade = totalGrade / 3;
+    return finalGrade.toFixed(2);
+}
 
-        let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
-        let days = currentDate.getDate() - start.getDate();
+// Helper function to calculate the thesis duration in months and days
+function calculateDuration(startDate) {
+    const currentDate = new Date();
+    const start = new Date(startDate);
 
-        // Adjust for negative days (crossed into a new month)
-        if (days < 0) {
-            totalMonths--; // Subtract one month
-            const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
-            days += previousMonth;
-        }
-        const monthText = totalMonths > 0 ? `${totalMonths} μήνες` : '';
-        const dayText = days > 0 ? `${days} ημέρες` : '';
+    let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
+    let days = currentDate.getDate() - start.getDate();
 
-        return [monthText, dayText].filter(Boolean).join(' και ');
+    // Adjust for negative days (crossed into a new month)
+    if (days < 0) {
+        totalMonths--; // Subtract one month
+        const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
+        days += previousMonth;
     }
-    //Helper function to replace ALL data-fields -and not just their first instance- as is needed
-    function updateDataField(dataField, value, errorMessage = 'Error - no data') {
-        const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
-        elements.forEach(element => {
-            // If value is null or invalid, show error message
-            element.textContent = (value && value !== null) ? value : errorMessage;
-        });
-    }
+    const monthText = totalMonths > 0 ? `${totalMonths} μήνες` : '';
+    const dayText = days > 0 ? `${days} ημέρες` : '';
+
+    return [monthText, dayText].filter(Boolean).join(' και ');
+}
+//Helper function to replace ALL data-fields -and not just their first instance- as is needed
+function updateDataField(dataField, value, errorMessage = 'Error - no data') {
+    const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
+    elements.forEach(element => {
+        // If value is null or invalid, show error message
+        element.textContent = (value && value !== null) ? value : errorMessage;
+    });
+}
 
 
 
@@ -452,6 +452,7 @@ function setupThesisManagement() {
             if (data.success && data.theses.length > 0) {
                 const thesis = data.theses[0];
                 setupEventListeners(thesis);
+                fetchAndDisplayAttachments(thesis);
             }
         })
 }
@@ -459,10 +460,10 @@ function setupThesisManagement() {
 function setupEventListeners(thesis) {
     // Event listener for the file upload button
     document.getElementById('configurationUploadFile').addEventListener('click', function () {
-        const fileInput = document.getElementById('fileInput').files[0];
-        if (fileInput) {
+        const configurationFileInput = document.getElementById('configurationFileInput').files[0];
+        if (configurationFileInput) {
             if (thesis) {
-                uploadFile(fileInput, thesis);  // Pass thesis to the uploadFile function
+                uploadFile(configurationFileInput, thesis);  // Pass thesis to the uploadFile function
             } else {
                 alert('Thesis information is not available.');
             }
@@ -471,11 +472,11 @@ function setupEventListeners(thesis) {
         }
     });
     // Event listener for the link upload button
-    document.getElementById('uploadLink').addEventListener('click', function () {
-        const link = document.getElementById('configurationLinkInput').value;
-        if (link) {
+    document.getElementById('configurationUploadLink').addEventListener('click', function () {
+        const configurationLinkInput = document.getElementById('configurationLinkInput').value;
+        if (configurationLinkInput) {
             if (thesis) {
-                uploadLink(link, thesis);  // Pass thesis to the uploadLink function
+                uploadLink(configurationLinkInput, thesis);  // Pass thesis to the uploadLink function
             } else {
                 alert('Thesis information is not available.');
             }
@@ -500,14 +501,15 @@ function uploadFile(fileInput, thesis) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('fileInfo').textContent = 'File uploaded: ' + fileInput.name;
+                alert('File uploaded successfully. Any previous file has been replaced.');
+                fetchAndDisplayAttachments(thesis); // Refresh the displayed file
             } else {
                 alert('Error uploading file: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error uploading file:', error);
-            alert('Error uploading file');
+            alert('Error uploading file.');
         });
 }
 // Link upload
@@ -527,6 +529,7 @@ function uploadLink(link, thesis) {
             if (data.success) {
                 addLinkToList(link); // Add the uploaded link to the list
                 document.getElementById('configurationLinkInput').value = ''; // Clear the input field
+                fetchAndDisplayAttachments(thesis);
             } else {
                 alert('Error uploading link: ' + data.message);
             }
@@ -555,6 +558,71 @@ document.getElementById('configurtaionSubmitNimertis').addEventListener('click',
         alert('Please enter the Nimertis link.');
     }
 });
+
+// Function to Fetch and Display the Attachments Already Saved
+function fetchAndDisplayAttachments(thesis) {
+    const token = localStorage.getItem('token');
+
+    fetch(`/api/fetch_attachments?thesis_id=${thesis.thesis_id}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const configurationFileInfo = document.getElementById('configurationFileInfo');
+                const configurationUploadedLinksList = document.getElementById('configurationUploadedLinksList');
+
+                // Clear existing content
+                configurationFileInfo.innerHTML = 'No file uploaded yet.';
+                configurationUploadedLinksList.innerHTML = '';
+
+                // Separate files and links from the results
+                const file = data.attachments.find(attachment => attachment.type === 'file');
+                const links = data.attachments.filter(attachment => attachment.type === 'link');
+
+                // Display file
+                if (file) {
+                    const link = document.createElement('a');
+                    link.href = file.file_path.replace('./', '/');
+                    link.textContent = file.file_path.split('/').pop();
+                    link.download = link.textContent; //Press to download
+                    configurationFileInfo.innerHTML = '';
+                    configurationFileInfo.appendChild(link);
+                } else {
+                    configurationFileInfo.innerHTML = 'No file uploaded yet.';
+                }
+
+                // Display links
+                if (links.length > 0) {
+                    // Remove the "No links uploaded yet" message
+                    const noLinksMessage = document.querySelector('#configurationUploadedLinksList li');
+                    if (noLinksMessage) {
+                        noLinksMessage.remove();
+                    }
+                    links.forEach(linkObj => {
+                        const li = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = linkObj.link_path;
+                        link.textContent = linkObj.link_path;
+                        link.target = '_blank'; // Press t open in a new tab
+                        li.appendChild(link);
+                        configurationUploadedLinksList.appendChild(li);
+                    });
+                } else {
+                    configurationUploadedLinksList.innerHTML = '<li class="no-bullet">No links uploaded yet.</li>';
+                }
+            } else {
+                alert('Failed to fetch attachments: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching attachments:', error);
+            alert('Error fetching attachments.');
+        });
+}
 
 // SHOW/HIDE CONTROL FOR THESIS MANAGEMENT SECTIONS
 document.getElementById('configurationButtonUploadFile').addEventListener('click', function () {
@@ -587,7 +655,7 @@ function showSection(sectionId) {
 }
 // Helper function to add a link to the list of uploaded links
 function addLinkToList(link) {
-    const linkList = document.getElementById('configurationUploadLinkSection');
+    const linkList = document.getElementById('configurationUploadedLinksList');
     const newLinkElement = document.createElement('div');
     newLinkElement.classList.add('link-item');
 
@@ -717,6 +785,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 //If exam dates exists and status completed , end_date=exam date. Also create end date as null.
-//2 instances of PARAMS in server.js
-//API Naming scheme . What even is '/api/invitations/:id/action'
+
+//API Naming scheme.
 
