@@ -709,3 +709,4 @@ window.addEventListener('DOMContentLoaded', () => {
 //If exam dates exists and status completed , end_date=exam date. Also create end date as null.
 //2 instances of PARAMS in server.js
 //API Naming scheme . What even is '/api/invitations/:id/action'
+
