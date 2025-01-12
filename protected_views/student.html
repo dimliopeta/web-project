@@ -323,33 +323,69 @@
                             <hr>
                             <div class="row">
                                 <h4 class="pb-1 text-center">Διαχείρηση</h4>
-                                <div class="col-sm-6 text-end">
-                                    <p>Ανάρτηση αρχείου:</p>
-                                </div>
+
+                                <!-- Left side buttons -->
                                 <div class="col-sm-6">
-                                    <button type="button"
-                                        class="btn btn-outline-primary btn-sm float-start">Αρχείο</button>
+                                    <div class="list-group">
+                                        <!-- Upload File -->
+                                        <button class="list-group-item list-group-item-action" id="configurationButtonUploadFile">
+                                            Ανάρτηση αρχείου
+                                        </button>
+                                        <!-- Upload Link -->
+                                        <button class="list-group-item list-group-item-action" id="configurationButtonUploadLink">
+                                            Ανάρτηση συνδέσμου
+                                        </button>
+                                        <!-- Set Exam Date -->
+                                        <button class="list-group-item list-group-item-action" id="configurationButtonSetExamDate">
+                                            Ορισμός ημ/νιας εξέτασης
+                                        </button>
+                                        <!-- Nimertis Submission -->
+                                        <button class="list-group-item list-group-item-action"
+                                            id="configurationButtonNimertisSubmission">
+                                            Κατάθεση στο "Νημερτής"
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-sm-6 text-end">
-                                    <p>Ανάρτηση συνδέσμου:</p>
-                                </div>
+
+                                <!-- Right side content -->
                                 <div class="col-sm-6">
-                                    <button type="button"
-                                        class="btn btn-outline-primary btn-sm float-start">Σύνδεσμος</button>
-                                </div>
-                                <div class="col-sm-6 text-end">
-                                    <p>Ορισμός ημ/νιας εξέτασης:</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <button type="button"
-                                        class="btn btn-outline-primary btn-sm float-start">Ημερομηνία</button>
-                                </div>
-                                <div class="col-sm-6 text-end">
-                                    <p>Κατάθεση στο "Νημερτής":</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <button type="button"
-                                        class="btn btn-outline-primary btn-sm float-start">Κατάθεση</button>
+                                    <!-- Section for File Upload -->
+                                    <div id="configurationUploadFileSection" class="accordion-section" style="display:none;">
+                                        <h5>Uploaded File</h5>
+                                        <p id="fileInfo">No file uploaded yet.</p>
+                                        <input type="file" id="fileInput" class="form-control mb-2">
+                                        <button type="button" class="btn btn-outline-primary" id="configurationUploadFile">Upload
+                                            File</button>
+                                    </div>
+
+                                    <!-- Section for Link Upload -->
+                                    <div id="linkSection" class="accordion-section" style="display:none;">
+                                        <h5>Uploaded Link</h5>
+                                        <p id="configurationUploadLinkSection">No link uploaded yet.</p>
+                                        <input type="text" id="configurationLinkInput" class="form-control mb-2"
+                                            placeholder="Enter link">
+                                        <button type="button" class="btn btn-outline-primary" id="uploadLink">Upload
+                                            Link</button>
+                                    </div>
+
+                                    <!-- Section for Exam Date -->
+                                    <div id="examDateSection" class="accordion-section" style="display:none;">
+                                        <h5>Exam Date</h5>
+                                        <p id="examDateInfo">No exam date set yet.</p>
+                                        <input type="date" id="examDateInput" class="form-control mb-2">
+                                        <button type="button" class="btn btn-outline-primary" id="configurationSetExamDateSection">Set Exam
+                                            Date</button>
+                                    </div>
+
+                                    <!-- Section for Nimertis Link -->
+                                    <div id="nimertisSection" class="accordion-section" style="display:none;">
+                                        <h5>Nimertis Link</h5>
+                                        <p id="configurationNimertisInfo">No Nimertis link submitted yet.</p>
+                                        <input type="text" id="configurationNimertisSubmissionSection" class="form-control mb-2"
+                                            placeholder="Enter Nimertis link">
+                                        <button type="button" class="btn btn-outline-primary" id="configurtaionSubmitNimertis">Submit
+                                            Nimertis Link</button>
+                                    </div>
                                 </div>
                             </div>
                         </section>

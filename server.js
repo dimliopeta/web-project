@@ -288,7 +288,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 WHERE Theses.student_id = ${userId};
 `;
 
-                
+
     } else {
         return res.status(403).json({ success: false, message: 'Unauthorized access.' });
     }
@@ -396,7 +396,7 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
-    
+
         res.status(200).json({ success: true, professors: results });
     });
 });
