@@ -83,8 +83,8 @@ CREATE TABLE `Attachments`(
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `thesis_id` INT NOT NULL,
     `type` ENUM('file','link'),
-    `link_path` INT NULL,
-    `file_path` INT NULL,
+    `link_path` VARCHAR(200) NULL,
+    `file_path` VARCHAR(200) NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 
