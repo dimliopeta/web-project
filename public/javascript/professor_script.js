@@ -26,6 +26,7 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 loadAssignedTheses();
             } else if (targetId === 'invitations') {
                 loadInvitations();
+                loadInvitationHistory();
             }
         }
 
@@ -416,6 +417,75 @@ function loadInvitations() {
 
 
 
+//-----------------Invitation History Frontend -------------------
+function loadInvitationHistory() {
+    console.log('Fetching invitation history...');
+    fetch('/api/invitation-history', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+        .then(response => {
+            console.log('Fetch Response:', response);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('API Data:', data);
+            if (data.success) {
+                const invHistTableBody = document.querySelector('#invitation-history tbody');
+                if (!invHistTableBody) {
+                    console.error('Δεν βρέθηκε το στοιχείο #theses tbody.');
+                    return;
+                }
+
+                invHistTableBody.innerHTML = ''; // Καθαρισμός του πίνακα
+
+                if (data.invitations.length === 0) {
+                    invHistTableBody.innerHTML = '<tr><td colspan="7">Δεν βρέθηκαν δεδομένα.</td></tr>';
+                    return;
+                }
+
+                data.invitations.forEach(invitation => {
+                    console.log('Invitation Data:', invitation);
+                    const row = document.createElement('tr');
+
+                    let response;
+                    switch (invitation.response) {
+                        case 'cancelled':
+                            response = 'Ακυρωμένη';
+                            break;
+                        case 'rejected':
+                            response = 'Απορρίφθηκε';
+                            break;
+                        case 'accepted':
+                            response = 'Εγκρίθηκε';
+                            break;
+                    }
+
+                    row.innerHTML = `
+                        <td>${invitation.thesis_title}</td>
+                        <td>${invitation.professor_name}</td>
+                        <td>${invitation.student_name}</td>
+                        <td>${invitation.student_number}</td>
+                        <td>${response}</td>
+                        <td>${invitation.invitation_date}</td>
+                        <td>${invitation.response_date}</td>
+                    `;
+                    invHistTableBody.appendChild(row);
+                });
+            } else {
+                console.error('Σφάλμα API:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα φόρτωσης:', err));
+}
+
+
+
+
 
 //-------------Invitation Acceptance/Rejection ------------------
 function handleInvitationAction(invitationId, action) {
@@ -432,6 +502,7 @@ function handleInvitationAction(invitationId, action) {
             if (data.success) {
                 alert(data.message);
                 loadInvitations(); // Επαναφόρτωση της λίστας προσκλήσεων
+                loadInvitationHistory();
             } else {
                 alert(`Σφάλμα: ${data.message}`);
             }
@@ -710,6 +781,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 document.addEventListener('DOMContentLoaded', function () {
     loadTheses();
     loadInvitations();
+    loadInvitationHistory();
     loadUnassignedTheses();
     loadAssignedTheses();
 });

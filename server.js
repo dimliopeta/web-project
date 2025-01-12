@@ -714,6 +714,46 @@ app.post('/api/invitations/:id/action', authenticateJWT, (req, res) => {
 
 
 
+app.get('/api/invitation-history', authenticateJWT, (req, res) => {
+    console.log('Endpoint /api/invitation-history hit');
+    const professorId = req.user.userId;
+    console.log('Professor ID from JWT:', req.user.userId);
+
+    const query = ` 
+    SELECT 
+        i.id AS invitation_id,
+        t.title AS thesis_title,
+        CONCAT(p.name, ' ', p.surname) AS professor_name,
+        CONCAT(s.name, ' ', s.surname) AS student_name,
+        s.student_number AS student_number,
+        i.status AS response,
+        DATE(i.invitation_date) AS invitation_date,
+        DATE(i.response_date) AS response_date
+    FROM 
+        Invitations i
+    LEFT JOIN 
+        Theses t ON i.thesis_id = t.thesis_id
+    LEFT JOIN 
+        Professors p ON t.professor_id = p.id
+    LEFT JOIN 
+        Students s ON t.student_id = s.id
+    WHERE 
+        i.status != 'pending' AND t.professor_id = ?;
+    `;
+    db.query(query, [professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση του ιστορικού προσκλήσεων:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+        console.log('Executed Query:', query);
+        console.log('Professor ID:', professorId);
+        console.log('Past Invitations from DB:', results);
+        res.json({ success: true, invitations: results });
+    });
+});
+
+
+
 
 //----------------- API to Assign Thesis to Students -----------------
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
