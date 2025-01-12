@@ -169,8 +169,8 @@ app.post('/logout', authenticateJWT, (req, res) => {
 
 //----------------------------- APIs FOR PAGE FUNCTIONS -----------------------------
 
-//----------------- Multer middleware declaration/setup for PDF upload -----------------
-const storage = multer.diskStorage({
+//----------------- Multer declaration/setup for Theses' PDFs -----------------
+const StoragePDFOnly = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'files/theses_pdf'); // Correct path if both the server and the folder are in the same directory
     },
@@ -183,8 +183,8 @@ const storage = multer.diskStorage({
     }
 });
 // Filter to ensure only PDFs are uploaded
-const upload = multer({
-    storage: storage,
+const uploadPDFONly = multer({
+    storage: StoragePDFOnly,
     fileFilter: (req, file, cb) => {
         if (file.mimetype === 'application/pdf') {
             cb(null, true);
@@ -192,6 +192,23 @@ const upload = multer({
             cb(new Error('Only PDF files are allowed'), false);
         }
     },
+    limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
+});
+
+//----------------- Multer declaration/setup for Theses' Attachments -----------------
+const StorageAttachments = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'files/uploaded_files');
+    },
+    filename: (req, file, cb) => {
+        const originalName = file.originalname.replace(/\s+/g, '_');
+        const fileName = `${originalName}`;
+        cb(null, fileName);
+    }
+});
+
+const UploadAttachments = multer({
+    storage: StorageAttachments,
     limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
 });
 
@@ -347,7 +364,7 @@ GROUP BY
 
 
 //----------------- API to handle Attachment Upload (File or Link) in Configuration page Management Section -----------------
-app.post('/api/upload_attachment', authenticateJWT, upload.single('attachment'), (req, res) => {
+app.post('/api/upload_attachment', authenticateJWT, UploadAttachments.single('attachment'), (req, res) => {
     const userId = req.user.userId;
     const thesisId = req.body.thesis_id;
     const attachmentType = req.body.type; // 'file' or 'link'
@@ -565,7 +582,7 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
 
 
 //----------------- API to Create New Thesis -----------------
-app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) => {
+app.post('/api/theses/new', authenticateJWT, uploadPDFONly.single('pdf'), (req, res) => {
     const { title, summary } = req.body;
     const professorId = req.user.userId;
     const file = req.file;
@@ -595,7 +612,7 @@ app.post('/api/theses/new', authenticateJWT, upload.single('pdf'), (req, res) =>
 
 
 //----------------- API to Edit existing Thesis -----------------
-app.put('/api/theses/:id', authenticateJWT, upload.single('pdf'), (req, res) => {
+app.put('/api/theses/:id', authenticateJWT, uploadPDFOnly.single('pdf'), (req, res) => {
     const thesisId = req.params.id;   /// TO FIX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     const { title, summary } = req.body;
     const file = req.file;
