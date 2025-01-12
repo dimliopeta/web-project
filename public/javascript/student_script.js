@@ -159,6 +159,8 @@ function loadStudentThesis() {
             console.error('Error loading thesis data:', error);
         });
 
+}
+
     // Helper function to calculate the Final Grade (average of 3 committee members' grades)
     function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
         const grade1 = parseFloat(committeeMember1Grade) || null;
@@ -202,8 +204,6 @@ function loadStudentThesis() {
         });
     }
 
-
-}
 
 
 //--------------- Show/Hide Configuration parts based on status ---------------
@@ -461,7 +461,6 @@ function setupEventListeners(thesis) {
     document.getElementById('configurationUploadFile').addEventListener('click', function () {
         const fileInput = document.getElementById('fileInput').files[0];
         if (fileInput) {
-            console.log(fileInput);  // Debug: Log the file object
             if (thesis) {
                 uploadFile(fileInput, thesis);  // Pass thesis to the uploadFile function
             } else {
