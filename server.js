@@ -180,7 +180,7 @@ const StoragePDFOnly = multer.diskStorage({
     }
 });
 // Filter to ensure only PDFs are uploaded
-const uploadPDFONly = multer({
+const uploadPDFOnly = multer({
     storage: StoragePDFOnly,
     fileFilter: (req, file, cb) => {
         if (file.mimetype === 'application/pdf') {
