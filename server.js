@@ -451,6 +451,30 @@ app.post('/api/upload_attachment', authenticateJWT, UploadAttachments.single('at
         return res.status(400).json({ success: false, message: 'Invalid attachment type' });
     }
 });
+//----------------- API to handle Nimertis Link Upload in Configuration page Management Section -----------------
+app.post('/api/update_nimertis_link', authenticateJWT, (req, res) => {
+    const { thesis_id, nimertis_link } = req.body;
+    const userId = req.user.userId;
+
+    const query = `
+        UPDATE Theses
+        SET nimertis_link = ?
+        WHERE thesis_id = ? AND (student_id = ? OR professor_id = ?)
+    `;
+
+    db.query(query, [nimertis_link, thesis_id, userId, userId], (err, result) => {
+        if (err) {
+            console.error('Error updating Nimertis link:', err);
+            return res.status(500).json({ success: false, message: 'Server error' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(400).json({ success: false, message: 'Thesis not found or permission denied' });
+        }
+
+        res.status(200).json({ success: true });
+    });
+});
 
 //----------------- API to fetch Attachments by Thesis Id -----------------
 app.get('/api/fetch_attachments', authenticateJWT, (req, res) => {

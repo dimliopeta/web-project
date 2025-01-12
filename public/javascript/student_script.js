@@ -1,4 +1,4 @@
-//------------------------------ STARTUP SETTINGS ------------------------------
+//--------------------------------------------- STARTUP SETTINGS ---------------------------------------------
 //--------------- Event listener for the navbar ---------------
 document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     tab.addEventListener('click', function (e) {
@@ -54,27 +54,25 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 
 
 
-//------------------------------ DASHBOARD & THESIS CONFIGURATION PAGE ------------------------------
-//---------------Load Thesis Function---------------
+//--------------------------------------------- DASHBOARD & THESIS CONFIGURATION PAGE ---------------------------------------------
+//------------------------------Load Thesis Function and helper functions------------------------------
 function loadStudentThesis() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
 
-    // Fetch thesis data from the backend API
     fetch('/api/theses', {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${token}` // Add token to authorization header
+            'Authorization': `Bearer ${token}`
         }
     })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch thesis data');
             }
-            return response.json(); // Parse the response as JSON
+            return response.json();
         })
         .then(data => {
             if (data.success && data.theses.length > 0) {
-                // If thesis data exists, populate the dashboard with the thesis info
                 const thesis = data.theses[0]; // Assuming one thesis per student
 
                 let status;
@@ -134,12 +132,12 @@ function loadStudentThesis() {
 
                 // Handle the PDF download button
                 const pdfButton = document.querySelector('#dashboard [data-field="pdf_button"]');
-                if (thesis.pdf_path) { // If PDF exists
+                if (thesis.pdf_path) {
                     pdfButton.addEventListener('click', () => {
                         window.open(thesis.pdf_path, '_blank'); // Opens PDF in a new tab
                     });
                 } else {
-                    pdfButton.addEventListener('click', () => { // If not
+                    pdfButton.addEventListener('click', () => {
                         alert('No PDF available for this thesis.');
                     });
 
@@ -160,8 +158,7 @@ function loadStudentThesis() {
         });
 
 }
-
-// Helper function to calculate the Final Grade (average of 3 committee members' grades)
+//---------------Helper function to calculate the Final Grade (average of 3 committee members' grades)
 function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
     const grade1 = parseFloat(committeeMember1Grade) || null;
     const grade2 = parseFloat(committeeMember2Grade) || null;
@@ -175,8 +172,7 @@ function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMe
     const finalGrade = totalGrade / 3;
     return finalGrade.toFixed(2);
 }
-
-// Helper function to calculate the thesis duration in months and days
+//---------------Helper function to calculate the thesis duration in months and days
 function calculateDuration(startDate) {
     const currentDate = new Date();
     const start = new Date(startDate);
@@ -195,7 +191,7 @@ function calculateDuration(startDate) {
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
-//Helper function to replace ALL data-fields -and not just their first instance- as is needed
+//---------------Helper function to replace ALL data-fields -and not just their first instance- as is needed
 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
     const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
     elements.forEach(element => {
@@ -206,7 +202,7 @@ function updateDataField(dataField, value, errorMessage = 'Error - no data') {
 
 
 
-//--------------- Show/Hide Configuration parts based on status ---------------
+//------------------------------ Show/Hide Configuration Page parts based on status ------------------------------
 function loadSectionsBasedOnStatus() {
     const token = localStorage.getItem('token');
     fetch('/api/theses', {
@@ -359,8 +355,8 @@ function loadSectionsBasedOnStatus() {
 }
 
 
-//--------------- Functions for Committee Assignment and professor Search Bar ---------------
-//--------------- Professor List creation, data load ---------------
+//------------------------------ Functions for Committee Assignment and Professor Search Bar ------------------------------
+//------------------------------ Professor List creation, data load ------------------------------
 document.querySelector('#search-professor').addEventListener('input', function () {
     const filter = this.value.trim();
     const professorList = document.getElementById('professor-list');
@@ -432,7 +428,8 @@ document.querySelectorAll('.assignCommittee').forEach(button => {
 });
 
 
-// --------------- Functions for handling the entire Thesis Management section ---------------
+// ------------------------------ Functions for Thesis Management handling ------------------------------
+//--------------- Main func that pulls thesis data and helper funcs ---------------
 function setupThesisManagement() {
     const token = localStorage.getItem('token')
 
@@ -453,17 +450,18 @@ function setupThesisManagement() {
                 const thesis = data.theses[0];
                 setupEventListeners(thesis);
                 fetchAndDisplayAttachments(thesis);
+                fetchAndDisplayNimertisLink(thesis);
             }
         })
 }
-// FUNCTIONS TO HANDLE BUTTON PRESS FOR LINK/FILE UPLOAD
+//--------------- Functions for upload button click Event Listeners ---------------
 function setupEventListeners(thesis) {
-    // Event listener for the file upload button
-    document.getElementById('configurationUploadFile').addEventListener('click', function () {
-        const configurationFileInput = document.getElementById('configurationFileInput').files[0];
-        if (configurationFileInput) {
+    // File upload button
+    document.getElementById('configurationUploadFileButton').addEventListener('click', function () {
+        const configurationUploadFileInputBox = document.getElementById('configurationUploadFileInputBox').files[0];
+        if (configurationUploadFileInputBox) {
             if (thesis) {
-                uploadFile(configurationFileInput, thesis);  // Pass thesis to the uploadFile function
+                uploadFile(configurationUploadFileInputBox, thesis);  // Pass thesis to the uploadFile function
             } else {
                 alert('Thesis information is not available.');
             }
@@ -471,12 +469,12 @@ function setupEventListeners(thesis) {
             alert('Please select a file to upload.');
         }
     });
-    // Event listener for the link upload button
-    document.getElementById('configurationUploadLink').addEventListener('click', function () {
-        const configurationLinkInput = document.getElementById('configurationLinkInput').value;
-        if (configurationLinkInput) {
+    // Link upload button
+    document.getElementById('configurationUploadLinkButton').addEventListener('click', function () {
+        const configurationUploadLinkInputBox = document.getElementById('configurationUploadLinkInputBox').value;
+        if (configurationUploadLinkInputBox) {
             if (thesis) {
-                uploadLink(configurationLinkInput, thesis);  // Pass thesis to the uploadLink function
+                uploadLink(configurationUploadLinkInputBox, thesis);  // Pass thesis to the uploadLink function
             } else {
                 alert('Thesis information is not available.');
             }
@@ -484,8 +482,22 @@ function setupEventListeners(thesis) {
             alert('Please enter a link.');
         }
     });
+
+    // Nimertis upload button
+    document.getElementById('configurationUploadNimertisButton').addEventListener('click', function () {
+        const configurationUploadNimertisInputBox = document.getElementById('configurationUploadNimertisInputBox').value;
+        if (configurationUploadNimertisInputBox) {
+            if (thesis) {
+                uploadNimertisLink(configurationUploadNimertisInputBox, thesis);
+            } else {
+                alert('Thesis information is not available.');
+            }
+        } else {
+            alert('Please enter a Nimertis link.');
+        }
+    });
 }
-// FUNCTIONS TO COMMUNICATE WITH THE BACKEND
+//--------------- Functions to upload Attachments via APIs ---------------
 // File Upload
 function uploadFile(fileInput, thesis) {
     const formData = new FormData();
@@ -495,14 +507,14 @@ function uploadFile(fileInput, thesis) {
 
     fetch('/api/upload_attachment', {
         method: 'POST',
-        body: formData,
+        body: formData,         //Send as formData since its a file
         credentials: 'include', // Ensure the cookie is sent with the request
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('File uploaded successfully. Any previous file has been replaced.');
-                fetchAndDisplayAttachments(thesis); // Refresh the displayed file
+                fetchAndDisplayAttachments(thesis); // Refresh the displayed file on every upload
             } else {
                 alert('Error uploading file: ' + data.message);
             }
@@ -516,19 +528,19 @@ function uploadFile(fileInput, thesis) {
 function uploadLink(link, thesis) {
     const formData = new FormData();
     formData.append('type', 'link'); // Specify that this is a link upload
-    formData.append('link', link); // Add the link to FormData
+    formData.append('link', link);
     formData.append('thesis_id', thesis.thesis_id);
 
     fetch('/api/upload_attachment', {
         method: 'POST',
-        body: formData,
+        body: formData, 
         credentials: 'include', // Ensure the cookie is sent with the request
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                addLinkToList(link); // Add the uploaded link to the list
-                document.getElementById('configurationLinkInput').value = ''; // Clear the input field
+                addLinkToList(link);
+                document.getElementById('configurationUploadLinkInputBox').value = '';
                 fetchAndDisplayAttachments(thesis);
             } else {
                 alert('Error uploading link: ' + data.message);
@@ -539,7 +551,6 @@ function uploadLink(link, thesis) {
             alert('Error uploading link');
         });
 }
-
 // Exam date set button handler
 document.getElementById('configurationSetExamDateSection').addEventListener('click', function () {
     const examDate = document.getElementById('examDateInput').value;
@@ -549,17 +560,41 @@ document.getElementById('configurationSetExamDateSection').addEventListener('cli
         alert('Please select an exam date.');
     }
 });
-// Nimertis link submit button handler
-document.getElementById('configurtaionSubmitNimertis').addEventListener('click', function () {
-    const nimertisLink = document.getElementById('configurationNimertisSubmissionSection').value;
-    if (nimertisLink) {
-        document.getElementById('configurationNimertisInfo').textContent = 'Nimertis link submitted: ' + nimertisLink;
-    } else {
-        alert('Please enter the Nimertis link.');
+//--------------- Functions to upload Nimertis Link via API ---------------
+function uploadNimertisLink(link, thesis) {
+    if (!link.startsWith('https://nemertes.library.upatras.gr/')) {
+        alert('Invalid Nimertis link. It must start with https://nemertes.library.upatras.gr/');
+        return;
     }
-});
 
-// Function to Fetch and Display the Attachments Already Saved
+    const data = {
+        nimertis_link: link,
+        thesis_id: thesis.thesis_id
+    };
+
+    fetch('/api/update_nimertis_link', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',  // Send as JSON
+        },
+        body: JSON.stringify(data),
+        credentials: 'include',
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                thesis.nimertis_link = link;
+                fetchAndDisplayNimertisLink(thesis); // Refresh the displayed Nimertis link
+            } else {
+                alert('Error uploading Nimertis link: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error uploading Nimertis link:', error);
+            alert('Error uploading Nimertis link.');
+        });
+}
+//------------------------------ Helper function to Fetch and Display the Attachments Already Saved ------------------------------
 function fetchAndDisplayAttachments(thesis) {
     const token = localStorage.getItem('token');
 
@@ -575,15 +610,12 @@ function fetchAndDisplayAttachments(thesis) {
                 const configurationFileInfo = document.getElementById('configurationFileInfo');
                 const configurationUploadedLinksList = document.getElementById('configurationUploadedLinksList');
 
-                // Clear existing content
-                configurationFileInfo.innerHTML = 'No file uploaded yet.';
+                configurationFileInfo.innerHTML = 'Δεν έχει αναρτηθεί αρχείο';
                 configurationUploadedLinksList.innerHTML = '';
 
-                // Separate files and links from the results
                 const file = data.attachments.find(attachment => attachment.type === 'file');
                 const links = data.attachments.filter(attachment => attachment.type === 'link');
 
-                // Display file
                 if (file) {
                     const link = document.createElement('a');
                     link.href = file.file_path.replace('./', '/');
@@ -592,10 +624,9 @@ function fetchAndDisplayAttachments(thesis) {
                     configurationFileInfo.innerHTML = '';
                     configurationFileInfo.appendChild(link);
                 } else {
-                    configurationFileInfo.innerHTML = 'No file uploaded yet.';
+                    configurationFileInfo.innerHTML = 'Δεν έχει αναρτηθεί αρχείο';
                 }
 
-                // Display links
                 if (links.length > 0) {
                     // Remove the "No links uploaded yet" message
                     const noLinksMessage = document.querySelector('#configurationUploadedLinksList li');
@@ -612,7 +643,7 @@ function fetchAndDisplayAttachments(thesis) {
                         configurationUploadedLinksList.appendChild(li);
                     });
                 } else {
-                    configurationUploadedLinksList.innerHTML = '<li class="no-bullet">No links uploaded yet.</li>';
+                    configurationUploadedLinksList.innerHTML = '<li class="no-bullet">Δεν έχουν αναρτηθεί σύνδεσμοι</li>';
                 }
             } else {
                 alert('Failed to fetch attachments: ' + data.message);
@@ -623,8 +654,24 @@ function fetchAndDisplayAttachments(thesis) {
             alert('Error fetching attachments.');
         });
 }
+//------------------------------ Helper function to Fetch and Display the Nimertis Link Already Saved ------------------------------
+function fetchAndDisplayNimertisLink(thesis) {
 
-// SHOW/HIDE CONTROL FOR THESIS MANAGEMENT SECTIONS
+    const nimertisLink = thesis.nimertis_link;
+    const nimertisInfo = document.getElementById('configurationNimertisLinkInfo');
+
+    if (nimertisLink) {
+        const linkElement = document.createElement('a');
+        linkElement.href = nimertisLink;
+        linkElement.textContent = `${nimertisLink}`;
+        linkElement.target = '_blank';
+        nimertisInfo.innerHTML = '';
+        nimertisInfo.appendChild(linkElement);
+    } else {
+        nimertisInfo.textContent = 'Δεν έχει αναρτηθεί σύνδεσμος';
+    }
+}
+//------------------------------ Show/Hide Management Sections based on section clicked on ------------------------------
 document.getElementById('configurationButtonUploadFile').addEventListener('click', function () {
     showSection('configurationUploadFileSection');
 });
@@ -640,8 +687,7 @@ document.getElementById('configurationButtonSetExamDate').addEventListener('clic
 document.getElementById('configurationButtonNimertisSubmission').addEventListener('click', function () {
     showSection('nimertisSection');
 });
-
-// Helper function to show a specific section and hide the others
+//--------------- Helper function to show a specific section and hide the others ---------------
 function showSection(sectionId) {
     const sections = ['configurationUploadFileSection', 'linkSection', 'examDateSection', 'nimertisSection'];
     sections.forEach(function (section) {
@@ -653,7 +699,7 @@ function showSection(sectionId) {
         }
     });
 }
-// Helper function to add a link to the list of uploaded links
+//--------------- Helper function to add a link to the list of uploaded links ---------------
 function addLinkToList(link) {
     const linkList = document.getElementById('configurationUploadedLinksList');
     const newLinkElement = document.createElement('div');
@@ -667,8 +713,9 @@ function addLinkToList(link) {
 }
 
 
-//------------------------------ PROFILE PAGE ------------------------------
-//--------------- Load Profile Function ---------------
+
+//--------------------------------------------- PROFILE PAGE ---------------------------------------------
+//------------------------------ Load Profile Function ------------------------------
 function loadStudentProfile() {
     const token = localStorage.getItem('token');
 
@@ -709,7 +756,7 @@ function loadStudentProfile() {
         });
 }
 
-//--------------- Event Listener for clicks on the edit buttons in Student Profile ---------------
+//------------------------------ Event Listener for clicks on the edit buttons in Student Profile ------------------------------
 document.querySelector('#student_profile').addEventListener('click', function (event) {
     // Check if the clicked element is a toggle button
     if (event.target.classList.contains('toggle-edit')) {
@@ -767,8 +814,8 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 
 
 
-//------------------------------ RUN FUNCTIONS AFTER DOM ------------------------------
-//--------------- Load the student profile after DOM is loaded ---------------
+//--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
+//------------------------------ Load the student profile after DOM is loaded ------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     loadStudentProfile();
     loadStudentThesis();
@@ -776,7 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupThesisManagement();
 });
 
-//--------------- Show the dashboard as main page after DOM is loaded ---------------
+//------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------
 window.addEventListener('DOMContentLoaded', () => {
     const defaultTab = document.querySelector('a[href="#dashboard"]');
     if (defaultTab) {

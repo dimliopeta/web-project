@@ -47,7 +47,7 @@
         }
 
         .left-ul-30{
-            margin-left: 30px;
+            margin-left: 25px;
         }
     </style>
 </head>
@@ -362,24 +362,24 @@
                                     <!-- Section for File Upload -->
                                     <div id="configurationUploadFileSection" class="accordion-section"
                                         style="display:none;">
-                                        <h5>Uploaded File</h5>
-                                        <p id="configurationFileInfo">No file uploaded yet.</p>
+                                        <h5>Ανηρτημένα αρχεία</h5>
+                                        <p id="configurationFileInfo">Δεν έχει αναρτηθεί αρχείο.</p>
                                         <input type="file" id="configurationFileInput" class="form-control mb-2">
                                         <button type="button" class="btn btn-outline-primary"
-                                            id="configurationUploadFile">Upload
-                                            File</button>
+                                            id="configurationUploadFileButton">Ανάρτηση
+                                            </button>
                                     </div>
                                     <!-- Section for Link Upload -->
                                     <div id="linkSection" class="accordion-section" style="display:none;">
-                                        <h5 class="left-ul-30">Uploaded Links</h5>
+                                        <h5 class="left-ul-30">Ανηρτημένοι Σύνδεσμοι</h5>
                                         <ul id="configurationUploadedLinksList">
-                                            <li>No link uploaded yet.</li>
+                                            <li>Δεν έχουν αναρτηθεί σύνδεσμοι</li>
                                         </ul>
-                                        <input type="text" id="configurationLinkInput" class="form-control mb-2"
+                                        <input type="text" id="configurationUploadLinkInputBox" class="form-control mb-2"
                                             placeholder="Enter link">
                                         <button type="button" class="btn btn-outline-primary"
-                                            id="configurationUploadLink">Upload
-                                            Link</button>
+                                            id="configurationUploadLinkButton">Ανάρτηση
+                                            </button>
                                     </div>
 
                                     <!-- Section for Exam Date -->
@@ -388,19 +388,17 @@
                                         <p id="examDateInfo">No exam date set yet.</p>
                                         <input type="date" id="examDateInput" class="form-control mb-2">
                                         <button type="button" class="btn btn-outline-primary"
-                                            id="configurationSetExamDateSection">Set Exam
-                                            Date</button>
+                                            id="configurationSetExamDateSection">Ορισμός ημ/νίας εξέτασης</button>
                                     </div>
 
                                     <!-- Section for Nimertis Link -->
                                     <div id="nimertisSection" class="accordion-section" style="display:none;">
-                                        <h5>Nimertis Link</h5>
-                                        <p id="configurationNimertisInfo">No Nimertis link submitted yet.</p>
-                                        <input type="text" id="configurationNimertisSubmissionSection"
+                                        <h5>Σύνδεσμος στο αποθετήριο "Νημερτής"</h5>
+                                        <p id="configurationNimertisLinkInfo">Δεν έχει αναρτηθεί σύνδεσμος</p>
+                                        <input type="text" id="configurationUploadNimertisInputBox"
                                             class="form-control mb-2" placeholder="Enter Nimertis link">
                                         <button type="button" class="btn btn-outline-primary"
-                                            id="configurtaionSubmitNimertis">Submit
-                                            Nimertis Link</button>
+                                            id="configurationUploadNimertisButton">Ανάρτηση</button>
                                     </div>
                                 </div>
                             </div>
