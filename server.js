@@ -306,7 +306,7 @@ LEFT JOIN Professors c1 ON c.member1_id = c1.id
 LEFT JOIN Professors c2 ON c.member2_id = c2.id
 LEFT JOIN Grades g ON g.thesis_id = t.thesis_id AND g.professor_id = t.professor_id
 LEFT JOIN Invitations i ON i.thesis_id = t.thesis_id
-WHERE p.id = ? OR c.member1_id = ? OR c.member2_id = ?
+WHERE (p.id = ? OR c.member1_id = ? OR c.member2_id = ?) AND t.status != 'unassigned'
 GROUP BY 
     t.thesis_id, t.title, t.summary, t.status, t.start_date, t.exam_date,
     s.name, s.surname, s.student_number, s.contact_email,
