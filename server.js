@@ -255,48 +255,46 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
 
     if (role === 'professor') {
         query = `
-
-
-SELECT 
-    t.thesis_id,
-    t.title,
-    t.summary,
-    t.status,
-    CONCAT(s.name, ' ', s.surname) AS student_name,
-    s.student_number,
-    s.contact_email AS student_email,
-    CONCAT(p.name, ' ', p.surname) AS professor_name,
-    p.email AS professor_email,
-    c.member1_id AS committee_member1_id,
-    CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
-    c.member2_id AS committee_member2_id,
-    CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
-    t.start_date,
-    t.exam_date,
-    g.grade AS supervisor_grade,
-    g.comments AS supervisor_comments,
-    GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
-    CASE
-        WHEN t.professor_id = ? THEN 'Επιβλέπων'
-        WHEN c.member1_id = ? OR c.member2_id = ? THEN 'Μέλος Τριμελούς'
-        ELSE 'Άγνωστος'
-    END AS role
-FROM Theses t
-LEFT JOIN Students s ON t.student_id = s.id
-LEFT JOIN Professors p ON t.professor_id = p.id
-LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
-LEFT JOIN Professors c1 ON c.member1_id = c1.id
-LEFT JOIN Professors c2 ON c.member2_id = c2.id
-LEFT JOIN Grades g ON g.thesis_id = t.thesis_id AND g.professor_id = t.professor_id
-LEFT JOIN Invitations i ON i.thesis_id = t.thesis_id
-WHERE p.id = ? OR c.member1_id = ? OR c.member2_id = ?
-GROUP BY 
-    t.thesis_id, t.title, t.summary, t.status, t.start_date, t.exam_date,
-    s.name, s.surname, s.student_number, s.contact_email,
-    p.name, p.surname, p.email,
-    c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname, 
-    g.grade, g.comments;
-
+        SELECT 
+            t.thesis_id,
+            t.title,
+            t.summary,
+            t.status,
+            CONCAT(s.name, ' ', s.surname) AS student_name,
+            s.student_number,
+            s.contact_email AS student_email,
+            CONCAT(p.name, ' ', p.surname) AS professor_name,
+            p.email AS professor_email,
+            c.member1_id AS committee_member1_id,
+            CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
+            c.member2_id AS committee_member2_id,
+            CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
+            t.start_date,
+            t.exam_date,
+            g.grade AS supervisor_grade,
+            g.comments AS supervisor_comments,
+            GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
+            CASE
+                WHEN t.professor_id = ? THEN 'Επιβλέπων'
+                WHEN c.member1_id = ? OR c.member2_id = ? THEN 'Μέλος Τριμελούς'
+                ELSE 'Άγνωστος'
+            END AS role
+        FROM Theses t
+        LEFT JOIN Students s ON t.student_id = s.id
+        LEFT JOIN Professors p ON t.professor_id = p.id
+        LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+        LEFT JOIN Professors c1 ON c.member1_id = c1.id
+        LEFT JOIN Professors c2 ON c.member2_id = c2.id
+        LEFT JOIN Grades g ON g.thesis_id = t.thesis_id AND g.professor_id = t.professor_id
+        LEFT JOIN Invitations i ON i.thesis_id = t.thesis_id
+        WHERE (p.id = ? OR c.member1_id = ? OR c.member2_id = ?) AND t.status != 'unassigned'
+        GROUP BY 
+            t.thesis_id, t.title, t.summary, t.status, t.start_date, t.exam_date,
+            s.name, s.surname, s.student_number, s.contact_email,
+            p.name, p.surname, p.email,
+            c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname, 
+            g.grade, g.comments;
+            
         `;
         queryParams = [userId, userId, userId, userId, userId, userId];
     } else if (role === 'student') {

@@ -228,7 +228,7 @@ function loadUnassignedTheses() {
                     row.innerHTML = `
                         <td>${thesis.title}</td>
                         <td>${thesis.thesis_id}</td>
-                        <td>Υπό Ανάθεση</td>
+                        <td>Μη ανατεθημένο θέμα</td>
                         <td>
                             <button class="btn btn-sm btn-primary" data-id="${thesis.thesis_id}">Επεξεργασία</button>
                         </td>
@@ -708,6 +708,78 @@ function loadTheses() {
 }
 
 
+document.getElementById('export-csv').addEventListener('click', () => {
+    const token = localStorage.getItem('token');
+    fetch('/api/theses', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const rows = data.theses;
+            if (rows.length === 0) {
+                alert('Δεν υπάρχουν δεδομένα για εξαγωγή.');
+                return;
+            }
+
+            // Δημιουργία κεφαλίδων (headers) από τα κλειδιά του πρώτου αντικειμένου
+            const headers = Object.keys(rows[0]).map(header => `"${header}"`).join(',');
+
+            // Δημιουργία περιεχομένου CSV από τις τιμές
+            const csvContent = rows.map(row => {
+                return Object.values(row).map(value => `"${value || ''}"`).join(',');
+            });
+
+            const csvBlob = new Blob(
+                [`\uFEFF${headers}\n${csvContent.join('\n')}`], // Προσθέτει το BOM για σωστή κωδικοποίηση
+                { type: 'text/csv;charset=utf-8;' }
+            );
+            
+            const url = URL.createObjectURL(csvBlob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'theses.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            console.error('Σφάλμα API:', data.message);
+        }
+    })
+    .catch(err => console.error('Σφάλμα φόρτωσης:', err));
+});
+
+
+document.getElementById('export-json').addEventListener('click', () => {
+    const token = localStorage.getItem('token');
+    fetch('/api/theses', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const rows = data.theses;
+            if (rows.length === 0) {
+                alert('Δεν υπάρχουν δεδομένα για εξαγωγή.');
+                return;
+            }
+
+            // Δημιουργία JSON
+            const jsonBlob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json;charset=utf-8;' });
+
+            const url = URL.createObjectURL(jsonBlob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'theses.json');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            console.error('Σφάλμα API:', data.message);
+        }
+    })
+    .catch(err => console.error('Σφάλμα φόρτωσης:', err));
+});
 
 
 //------------Event Listener for Filter dropdown----------------
