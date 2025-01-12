@@ -72,6 +72,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+
+
 // Αναζήτηση Φοιτητών
 document.querySelector('#search-student').addEventListener('input', function () {
     const filter = this.value.trim();
@@ -115,6 +118,8 @@ document.querySelector('#search-student').addEventListener('input', function () 
 });
 
 
+
+
 // Επιλογή Φοιτητή από τη Λίστα
 document.querySelector('#student-list').addEventListener('click', function (event) {
     const selectedStudent = event.target; // Παίρνουμε το στοιχείο που επιλέχθηκε
@@ -131,6 +136,9 @@ document.querySelector('#student-list').addEventListener('click', function (even
     }
 });
 
+
+
+
 // Αλλαγή Επιλεγμένου Φοιτητή
 // Εμφάνιση λίστας φοιτητών όταν πατάει το κουμπί "Αλλαγή Επιλεγμένου Φοιτητή"
 document.getElementById('changeStudentButton').addEventListener('click', function () {
@@ -145,6 +153,8 @@ document.getElementById('changeStudentButton').addEventListener('click', functio
     document.getElementById('studentNameInput').value = '';
     delete document.getElementById('assignThesisButton').dataset.studentId;
 });
+
+
 
 
 
@@ -187,6 +197,10 @@ function loadAssignedTheses() {
         })
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
+
+
+
+
 
 function unassignThesis(thesisId) {
     fetch(`/api/theses/unassign`, {
@@ -262,6 +276,11 @@ function loadUnassignedTheses() {
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
 }
 
+
+
+
+
+
 function showEditSection(thesis) {
     const editSection = document.getElementById('edit-section');
     const themesCompartment = document.getElementById('themes-compartment');
@@ -296,39 +315,135 @@ function showEditSection(thesis) {
     editSection.scrollIntoView({ behavior: 'smooth' });
 }
 
+
+
+
+
 function showInfoSection(thesis) {
     const infoSection = document.getElementById('info-compartment');
     const thesesCompartment = document.getElementById('theses-compartment');
 
-    if (!infoSection || !thesesCompartment) {
-        console.error('Το info-compartment ή το theses-compartment δεν βρέθηκε.');
-        return;
+    thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
+    thesesCompartment.classList.add('col-md-6');
+
+    infoSection.classList.remove('d-none');
+    infoSection.innerHTML = ''; // Καθαρισμός προηγούμενου περιεχομένου
+
+    const status = thesis.status;
+
+    // Δημιουργία τίτλου
+    const title = document.createElement('h5');
+    title.textContent = thesis.title || 'Χωρίς τίτλο';
+    title.classList.add('text-primary');
+    infoSection.appendChild(title);
+
+    // Προσθήκη βασικών πεδίων
+    const fields = [
+        { label: 'Περιγραφή', value: thesis.summary },
+        { label: 'Φοιτητής', value: `${thesis.student_name || 'Χωρίς φοιτητή'} (ΑΜ: ${thesis.student_number || 'Χωρίς ΑΜ'})` },
+        { label: 'Στοιχεία Επικοινωνίας', value: thesis.student_email || 'Χωρίς email' },
+        { label: 'Ημερομηνία Εκκίνησης', value: thesis.start_date || 'Χωρίς ημερομηνία' },
+    ];
+
+    // Δυναμική προσθήκη πεδίων ανάλογα με την κατάσταση
+    if (status === 'assigned') {
+        fields.push(
+            { label: 'Ρόλος Καθηγητή', value: thesis.professor_name || 'Άγνωστος' },
+            { label: 'Προσκλήσεις και Απαντήσεις', value: thesis.invitations_status || 'Καμία πληροφορία' }
+        );
+
+        // Κουμπί αναίρεσης ανάθεσης
+        const undoButton = createButton('Αναίρεση Ανάθεσης', 'btn-danger', () => unassignThesis(thesis.thesis_id));
+        infoSection.appendChild(undoButton);
     }
 
-    // Δημιουργία περιεχομένου βασικών πληροφοριών
-    infoSection.innerHTML = `
-        <div class="border p-3 rounded">
-            <h5 class="text-primary">Βασικές Πληροφορίες</h5>
-            <p><strong>Τίτλος:</strong> ${thesis.title || 'Δεν υπάρχει τίτλος'}</p>
-            <p><strong>Κατάσταση:</strong> ${thesis.status || 'Άγνωστη'}</p>
-            <p><strong>Περιγραφή:</strong> ${thesis.summary || 'Δεν υπάρχει διαθέσιμη περιγραφή.'}</p>
-            <p><strong>Ρόλος Καθηγητή:</strong> ${thesis.role || 'Άγνωστος'}</p>
-            <p><strong>Φοιτητής:</strong> ${thesis.student_name || 'Δεν έχει ανατεθεί'} (ΑΜ: ${thesis.student_number || '-'})</p>
-            <p><strong>Στοιχεία Επικοινωνίας Φοιτητή:</strong> ${thesis.student_email || 'Δεν υπάρχουν διαθέσιμα στοιχεία'}</p>
-            <button id="manage-thesis-btn" class="btn btn-primary mt-3">Διαχείριση Διπλωματικής</button>
-        </div>
-    `;
+    if (status === 'active') {
+        fields.push(
+            { label: 'Μέλη Τριμελούς Επιτροπής', value: `${thesis.committee_member1_name || 'Χωρίς μέλος'}, ${thesis.committee_member2_name || 'Χωρίς μέλος'}` },
+            { label: 'Ημερομηνίες Αλλαγής Κατάστασης', value: thesis.status_change_dates || 'Χωρίς πληροφορία' }
+        );
 
-    thesesCompartment.classList.replace('col-lg-8', 'col-md-6');
-    infoSection.classList.remove('d-none');
-    infoSection.scrollIntoView({ behavior: 'smooth' });
+        // Κουμπί δημιουργίας σημείωσης
+        const noteButton = createButton('Δημιουργία Σημείωσης', 'btn-primary', () => createNoteForThesis(thesis.thesis_id));
+        infoSection.appendChild(noteButton);
 
-    // Event για Διαχείριση
-    document.getElementById('manage-thesis-btn').addEventListener('click', () => {
-        showManagementSection(thesis);
+        // Κουμπί αλλαγής κατάστασης σε "Υπό Εξέταση"
+        const statusButton = createButton('Αλλαγή Κατάστασης σε Υπό Εξέταση', 'btn-warning', () => changeStatusToUnderReview(thesis.thesis_id));
+        infoSection.appendChild(statusButton);
+    }
+
+    if (status === 'canceled') {
+        fields.push(
+            { label: 'Λόγος Ακύρωσης', value: thesis.cancellation_reason || 'Χωρίς πληροφορία' }
+        );
+    }
+
+    if (status === 'to-be-reviewed') {
+        fields.push(
+            { label: 'Μέλη Τριμελούς Επιτροπής', value: `${thesis.committee_member1_name || 'Χωρίς μέλος'}, ${thesis.committee_member2_name || 'Χωρίς μέλος'}` },
+            { label: 'Πρόχειρο Κείμενο PDF', value: thesis.draft_pdf || 'Χωρίς κείμενο' }
+        );
+
+        // Κουμπί παραγωγής ανακοίνωσης
+        const announceButton = createButton('Παραγωγή Ανακοίνωσης και Δημοσίευση', 'btn-success', () => publishAnnouncement(thesis.thesis_id));
+        infoSection.appendChild(announceButton);
+
+        // Κουμπί ενεργοποίησης βαθμολογίας
+        const gradeButton = createButton('Ενεργοποίηση Βαθμολογίας', 'btn-info', () => enableGrading(thesis.thesis_id));
+        infoSection.appendChild(gradeButton);
+    }
+
+    if (status === 'completed') {
+        fields.push(
+            { label: 'Μέλη Τριμελούς Επιτροπής', value: `${thesis.committee_member1_name || 'Χωρίς μέλος'}, ${thesis.committee_member2_name || 'Χωρίς μέλος'}` },
+            { label: 'Βαθμοί και Συνολικός Βαθμός', value: thesis.grades || 'Χωρίς βαθμολογία' },
+            { label: 'Σύνδεσμος Τελικού Κειμένου', value: thesis.final_repository_link || 'Χωρίς σύνδεσμο' }
+        );
+    }
+
+    // Δημιουργία HTML για όλα τα πεδία
+    fields.forEach(field => {
+        const div = document.createElement('div');
+        div.classList.add('mb-2');
+        div.innerHTML = `<strong>${field.label}:</strong> ${field.value}`;
+        infoSection.appendChild(div);
     });
 }
 
+
+
+// Συνάρτηση για δημιουργία κουμπιών
+function createButton(text, btnClass, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.classList.add('btn', btnClass, 'mt-2', 'me-2');
+    button.addEventListener('click', onClick);
+    return button;
+}
+
+
+
+// Dummy λειτουργίες για τα κουμπιά
+function undoAssignment(thesisId) {
+    console.log(`Αναίρεση ανάθεσης για τη διπλωματική με ID ${thesisId}`);
+}
+
+function createNoteForThesis(thesisId) {
+    console.log(`Δημιουργία σημείωσης για τη διπλωματική με ID ${thesisId}`);
+}
+
+function changeStatusToUnderReview(thesisId) {
+    console.log(`Αλλαγή κατάστασης σε "Υπό Εξέταση" για τη διπλωματική με ID ${thesisId}`);
+}
+
+
+function publishAnnouncement(thesisId) {
+    console.log(`Παραγωγή ανακοίνωσης για τη διπλωματική με ID ${thesisId}`);
+}
+
+function enableGrading(thesisId) {
+    console.log(`Ενεργοποίηση βαθμολογίας για τη διπλωματική με ID ${thesisId}`);
+}
 
 
 

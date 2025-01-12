@@ -613,7 +613,7 @@ app.post('/api/theses/new', authenticateJWT, uploadPDFOnly.single('pdf'), (req, 
 
 //----------------- API to Edit existing Thesis -----------------
 app.put('/api/theses/:id', authenticateJWT, uploadPDFOnly.single('pdf'), (req, res) => {
-    const thesisId = req.params.id;   /// TO FIX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    const thesisId = req.params.id; 
     const { title, summary } = req.body;
     const file = req.file;
     const professorId = req.user.userId;
@@ -726,7 +726,7 @@ app.get('/api/invitations', authenticateJWT, (req, res) => {
 
 //----------------- API for Invitation Acceptance/Rejection -----------------
 app.post('/api/invitations/:id/action', authenticateJWT, (req, res) => {
-    const invitationId = req.params.id;  //// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+    const invitationId = req.params.id;  
     const { action } = req.body;
 
     if (!['accepted', 'rejected'].includes(action)) {
