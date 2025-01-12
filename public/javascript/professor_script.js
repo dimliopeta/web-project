@@ -676,11 +676,11 @@ function loadTheses() {
                     row.innerHTML = `
                         <td>${thesis.title}</td>
                         <td>${thesis.thesis_id}</td>
-                        <td>${thesis.student_id ? 'Φοιτητής' : 'Επιβλέπων'}</td>
+                        <td>${thesis.role}</td>
                         <td>${status}</td>
                     `;
                     console.log('Row created:', row);
-                    
+
                     row.addEventListener('click', (event) => {
                         showInfoSection(thesis);
                         console.log('clicked!');
@@ -696,7 +696,7 @@ function loadTheses() {
 }
 
 
-
+//------------Event Listener for Filter dropdown----------------
 document.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', event => {
         event.preventDefault(); // Αποφυγή default συμπεριφοράς του link
@@ -705,6 +705,8 @@ document.querySelectorAll('.dropdown-item').forEach(item => {
     });
 });
 
+
+//------------Filtering for Theses List----------------
 function applyFilter(filterValue) {
     const token = localStorage.getItem('token');
 
@@ -757,7 +759,7 @@ function applyFilter(filterValue) {
                         row.innerHTML = `
                             <td>${thesis.title}</td>
                             <td>${thesis.thesis_id}</td>
-                            <td>${thesis.student_id ? 'Φοιτητής' : 'Επιβλέπων'}</td>
+                            <td>${thesis.role}</td>
                             <td>${status}</td>
                         `;
                         row.addEventListener('click', (event) => {
