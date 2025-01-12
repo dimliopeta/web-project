@@ -318,7 +318,6 @@ function showEditSection(thesis) {
 
 
 
-
 function showInfoSection(thesis) {
     const infoSection = document.getElementById('info-compartment');
     const thesesCompartment = document.getElementById('theses-compartment');
