@@ -582,7 +582,7 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
 
 
 //----------------- API to Create New Thesis -----------------
-app.post('/api/theses/new', authenticateJWT, uploadPDFONly.single('pdf'), (req, res) => {
+app.post('/api/theses/new', authenticateJWT, uploadPDFOnly.single('pdf'), (req, res) => {
     const { title, summary } = req.body;
     const professorId = req.user.userId;
     const file = req.file;
