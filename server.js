@@ -346,6 +346,118 @@ GROUP BY
 });
 
 
+//----------------- API to handle Attachment Upload (File or Link) in Configuration page Management Section -----------------
+app.post('/api/upload_attachment', authenticateJWT, upload.single('attachment'), (req, res) => {
+    const userId = req.user.userId;
+    const thesisId = req.body.thesis_id;
+    const attachmentType = req.body.type; // 'file' or 'link'
+
+    if (!thesisId || !attachmentType) {
+        return res.status(400).json({ success: false, message: 'Thesis ID and attachment type are required' });
+    }
+
+    // Handle FILE attachment
+    if (attachmentType === 'file') {
+        const filePath = req.file ? `./files/uploaded_files/${req.file.filename}` : null;
+
+        // Check if the thesis already has a file (only one file can be uploaded)
+        const checkQuery = `
+            SELECT * FROM Attachments WHERE thesis_id = ? AND type = 'file';
+        `;
+        db.query(checkQuery, [thesisId], (err, results) => {
+            if (err) {
+                console.error('Error checking existing attachments:', err);
+                return res.status(500).json({ success: false, message: 'Server error' });
+            }
+
+            if (results.length > 0) {
+                // If there's already a file, delete the old attachment
+                const deleteQuery = `
+                    DELETE FROM Attachments WHERE thesis_id = ? AND type = 'file';
+                `;
+                db.query(deleteQuery, [thesisId], (err) => {
+                    if (err) {
+                        console.error('Error deleting old attachment:', err);
+                        return res.status(500).json({ success: false, message: 'Server error' });
+                    }
+
+                    const insertQuery = `
+                        INSERT INTO Attachments (thesis_id, type, file_path) 
+                        VALUES (?, 'file', ?);
+                    `;
+                    db.query(insertQuery, [thesisId, filePath], (err, result) => {
+                        if (err) {
+                            console.error('Error inserting new file attachment:', err);
+                            return res.status(500).json({ success: false, message: 'Server error' });
+                        }
+                        res.status(200).json({ success: true, message: 'File uploaded successfully' });
+                    });
+                });
+            } else {
+                // If no file exists, insert the new one
+                const insertQuery = `
+                    INSERT INTO Attachments (thesis_id, type, file_path) 
+                    VALUES (?, 'file', ?);
+                `;
+                db.query(insertQuery, [thesisId, filePath], (err, result) => {
+                    if (err) {
+                        console.error('Error inserting file attachment:', err);
+                        return res.status(500).json({ success: false, message: 'Server error' });
+                    }
+                    res.status(200).json({ success: true, message: 'File uploaded successfully' });
+                });
+            }
+        });
+        // Handle LINK attachment
+    } else if (attachmentType === 'link') {
+        const linkPath = req.body.link;
+
+        if (!linkPath) {
+            return res.status(400).json({ success: false, message: 'Link is required for link type' });
+        }
+
+        const insertQuery = `
+            INSERT INTO Attachments (thesis_id, type, link_path) 
+            VALUES (?, 'link', ?);
+        `;
+        db.query(insertQuery, [thesisId, linkPath], (err, result) => {
+            if (err) {
+                console.error('Error inserting link attachment:', err);
+                return res.status(500).json({ success: false, message: 'Server error' });
+            }
+            res.status(200).json({ success: true, message: 'Link uploaded successfully' });
+        });
+    } else {
+        return res.status(400).json({ success: false, message: 'Invalid attachment type' });
+    }
+});
+
+//----------------- API to fetch Attachments by Thesis Id -----------------
+app.get('/api/fetch_attachments', authenticateJWT, (req, res) => {
+    const userId = req.user.userId;
+    const thesisId = req.query.thesis_id;
+
+    const query = `
+        SELECT * 
+        FROM Attachments 
+        WHERE thesis_id = ? 
+        AND EXISTS (
+            SELECT 1 
+            FROM Theses 
+            WHERE Theses.thesis_id = Attachments.thesis_id
+            AND (Theses.student_id = ? OR Theses.professor_id = ?)
+        );
+    `;
+
+    db.query(query, [thesisId, userId, userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching attachments:', err);
+            return res.status(500).json({ success: false, message: 'Server error' });
+        }
+
+        res.status(200).json({ success: true, attachments: results });
+    });
+});
 
 //----------------- API to fetch Student Data by Id -----------------
 app.get('/api/student', authenticateJWT, (req, res) => {
