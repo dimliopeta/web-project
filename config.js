@@ -96,8 +96,8 @@ function insertData() {
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date, exam_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
                     thesis.professor_id,
@@ -106,8 +106,7 @@ function insertData() {
                     thesis.summary,
                     thesis.status,
                     thesis.pdf_path || null, // Χρησιμοποίησε NULL αν το pdf_path είναι κενό
-                    thesis.start_date,
-                    thesis.exam_date
+                    thesis.start_date
                 ], (insertErr) => {
                     if (insertErr) {
                         console.error('Error inserting thesis:', insertErr);
