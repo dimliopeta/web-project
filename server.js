@@ -398,7 +398,10 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
     }
 
     const query = `
-        SELECT date, type_of_exam, location 
+        SELECT 
+        DATE_FORMAT(examinations.date, '%Y-%m-%d') AS date,
+        examinations.type_of_exam, 
+        examinations.location 
         FROM examinations 
         WHERE thesis_id = ?;
     `;
