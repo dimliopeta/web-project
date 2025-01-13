@@ -451,6 +451,7 @@ function setupThesisManagement() {
                 setupEventListeners(thesis);
                 fetchAndDisplayAttachments(thesis);
                 fetchAndDisplayNimertisLink(thesis);
+                fetchAndDisplayExaminations(thesis);
             }
         })
 }
@@ -496,9 +497,23 @@ function setupEventListeners(thesis) {
             alert('Please enter a Nimertis link.');
         }
     });
+
+    // Examination Data upload button
+    document.getElementById('configurationExamDataSubmitButton').addEventListener('click', function () {
+        const examDate = document.getElementById('configurationExamDateInputBox').value;
+        const typeOfExam = document.getElementById('configurationTypeOfExamInputBox').value;
+        const examLocation = document.getElementById('configurationExamLocationInputBox').value;
+
+        if (!examDate || !typeOfExam || !examPlace) {
+            alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
+        } else {
+            uploadExaminationDetails({ examDate, examType, examLocation, thesis });
+
+        }
+    });
 }
-//--------------- Functions to upload Attachments via APIs ---------------
-// File Upload
+//------------------------------ Functions to upload Attachments-Nimertis Link-Examination Details via APIs ------------------------------
+//--------------- File Upload
 function uploadFile(fileInput, thesis) {
     const formData = new FormData();
     formData.append('attachment', fileInput);
@@ -524,7 +539,7 @@ function uploadFile(fileInput, thesis) {
             alert('Error uploading file.');
         });
 }
-// Link upload
+//--------------- Link upload
 function uploadLink(link, thesis) {
     const formData = new FormData();
     formData.append('type', 'link'); // Specify that this is a link upload
@@ -533,7 +548,7 @@ function uploadLink(link, thesis) {
 
     fetch('/api/upload_attachment', {
         method: 'POST',
-        body: formData, 
+        body: formData,
         credentials: 'include', // Ensure the cookie is sent with the request
     })
         .then(response => response.json())
@@ -551,16 +566,8 @@ function uploadLink(link, thesis) {
             alert('Error uploading link');
         });
 }
-// Exam date set button handler
-document.getElementById('configurationSubmitButton').addEventListener('click', function () {
-    const examDate = document.getElementById('configurationExamDateInput').value;
-    if (examDate) {
-        document.getElementById('configurationExamDateInfo').textContent = 'Exam Date set: ' + examDate;
-    } else {
-        alert('Please select an exam date.');
-    }
-});
-//--------------- Functions to upload Nimertis Link via API ---------------
+
+//--------------- Nimertis Link upload
 function uploadNimertisLink(link, thesis) {
     if (!link.startsWith('https://nemertes.library.upatras.gr/')) {
         alert('Invalid Nimertis link. It must start with https://nemertes.library.upatras.gr/');
@@ -594,7 +601,40 @@ function uploadNimertisLink(link, thesis) {
             alert('Error uploading Nimertis link.');
         });
 }
-//------------------------------ Helper function to Fetch and Display the Attachments Already Saved ------------------------------
+//--------------- Examination Details upload
+function uploadExaminationDetails({ examDate, typeOfExam, examLocation, thesis }) {
+   
+        const data = {
+            thesis_id: thesis.thesis_id,
+            exam_date: examDate,
+            type_of_exam: typeOfExam,
+            location: examLocation,
+        };
+    
+        fetch('/api/examinations_upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+            credentials: 'include', // Ensure cookies are sent
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Exam details successfully saved.');
+                    fetchAndDisplayExaminations(thesis); // Refresh exam details display
+                } else {
+                    alert('Failed to save exam details: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving exam details:', error);
+                alert('Error saving exam details.');
+            });
+}
+//------------------------------ Helper functions to Fetch and Display Attachments-Nimertis link-Examination Details ------------------------------
+//--------------- Fetch and Display File&Links
 function fetchAndDisplayAttachments(thesis) {
     const token = localStorage.getItem('token');
 
@@ -654,7 +694,7 @@ function fetchAndDisplayAttachments(thesis) {
             alert('Error fetching attachments.');
         });
 }
-//------------------------------ Helper function to Fetch and Display the Nimertis Link Already Saved ------------------------------
+//--------------- Fetch and Display Nimertis Links
 function fetchAndDisplayNimertisLink(thesis) {
 
     const nimertisLink = thesis.nimertis_link;
@@ -671,6 +711,39 @@ function fetchAndDisplayNimertisLink(thesis) {
         nimertisInfo.textContent = 'Δεν έχει αναρτηθεί σύνδεσμος';
     }
 }
+
+//--------------- Fetch and Display Examination Date-Type-Location
+function fetchAndDisplayExaminations(thesis) {
+    const token = localStorage.getItem('token');
+
+    fetch(`/api/examinations/${thesis.thesis_id}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const { exam_date, type_of_exam, location } = data.exam_details;
+
+                // Update UI with fetched details
+                document.getElementById('configurationExamDateInfo').textContent =
+                    exam_date ? `Ημερομηνία: ${exam_date}` : 'Δεν έχει οριστεί.';
+                document.getElementById('configurationWayInfo').textContent =
+                    type_of_exam ? `Τρόπος: ${type_of_exam}` : 'Δεν έχει οριστεί.';
+                document.getElementById('configurationPlaceInfo').textContent =
+                    location ? `Τοποθεσία: ${location}` : 'Δεν έχει οριστεί.';
+            } else {
+                alert('Failed to fetch exam details: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching exam details:', error);
+            alert('Error fetching exam details.');
+        });
+}
+
 //------------------------------ Show/Hide Management Sections based on section clicked on ------------------------------
 document.getElementById('configurationButtonUploadFile').addEventListener('click', function () {
     showSection('configurationUploadFileSection');

@@ -90,7 +90,7 @@ CREATE TABLE `Attachments`(
 CREATE TABLE `Examinations`(
     `thesis_id` INT NOT NULL PRIMARY KEY,
     `type_of_exam` ENUM('online','in-person') DEFAULT 'in-person',
-    `exam_date` DATE NULL,
+    `date` DATE NULL,
     `location` VARCHAR(200) NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );

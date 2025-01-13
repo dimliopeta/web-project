@@ -310,7 +310,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 c.member2_id AS committee_member2_id,
                 CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
                 t.start_date,
-                t.exam_date,
+                e.exam_date,
                 g.grade AS supervisor_grade,
                 g.comments AS supervisor_comments,
                 GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
@@ -323,13 +323,14 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
             LEFT JOIN Students s ON t.student_id = s.id
             LEFT JOIN Professors p ON t.professor_id = p.id
             LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+            LEFT JOIN Examinations e ON Theses.thesis_id = Examinations.thesis_id
             LEFT JOIN Professors c1 ON c.member1_id = c1.id
             LEFT JOIN Professors c2 ON c.member2_id = c2.id
             LEFT JOIN Grades g ON g.thesis_id = t.thesis_id AND g.professor_id = t.professor_id
             LEFT JOIN Invitations i ON i.thesis_id = t.thesis_id
             WHERE (p.id = ? OR c.member1_id = ? OR c.member2_id = ?) AND t.status != 'unassigned'
             GROUP BY 
-                t.thesis_id, t.title, t.summary, t.status, t.start_date, t.exam_date,
+                t.thesis_id, t.title, t.summary, t.status, t.start_date, e.exam_date,
                 s.name, s.surname, s.student_number, s.contact_email,
                 p.name, p.surname, p.email,
                 c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname, 
@@ -343,7 +344,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
             SELECT
                 Theses.*,
                 DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
-                DATE_FORMAT(Theses.exam_date, '%Y-%m-%d') AS exam_date,
+                DATE_FORMAT(Examinations.date, '%Y-%m-%d') AS exam_date,
                 Professors.name AS professor_name, 
                 Professors.surname AS professor_surname, 
                 Committee1.name AS committee_member1_name,
@@ -361,6 +362,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
             LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
             LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
             LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
+            LEFT JOIN Examinations ON Theses.thesis_id = Examinations.thesis_id
             LEFT JOIN Grades AS SupervisorGrade ON Theses.thesis_id = SupervisorGrade.thesis_id 
                 AND Theses.professor_id = SupervisorGrade.professor_id
             LEFT JOIN Grades AS Committee1Grade ON Theses.thesis_id = Committee1Grade.thesis_id 
@@ -384,42 +386,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     });
 });
 
-//----------------- API to for Exam Date-Means-Location upload -----------------
-app.post('/api/examinations_upload', (req, res) => {
-    const { thesis_id, exam_date, type_of_exam, location } = req.body;
-
-    if (!thesis_id || !exam_date || !type_of_exam || !location) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Thesis ID, exam date, type of exam, and location are required.' 
-        });
-    }
-
-    const query = `
-        INSERT INTO examinations (thesis_id, exam_date, type_of_exam, location)
-        VALUES (?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE 
-            exam_date = VALUES(exam_date),
-            type_of_exam = VALUES(type_of_exam),
-            location = VALUES(location);
-    `;
-
-    db.query(query, [thesis_id, exam_date, type_of_exam, location], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Failed to save examination details.' 
-            });
-        }
-        res.json({ 
-            success: true, 
-            message: 'Examination details saved successfully.' 
-        });
-    });
-});
-
-//----------------- API to Load Exam Date-Means-Location -----------------
+//----------------- API to Fetch Exam Date-Type-Location -----------------
 app.get('/api/examinations/:thesis_id', (req, res) => {
     const { thesis_id } = req.params;
 
@@ -431,7 +398,7 @@ app.get('/api/examinations/:thesis_id', (req, res) => {
     }
 
     const query = `
-        SELECT exam_date, type_of_exam, location 
+        SELECT date, type_of_exam, location 
         FROM examinations 
         WHERE thesis_id = ?;
     `;
@@ -456,6 +423,41 @@ app.get('/api/examinations/:thesis_id', (req, res) => {
         res.json({ 
             success: true, 
             data: results[0] 
+        });
+    });
+});
+
+//----------------- API to for Exam Date-Type-Location upload -----------------
+app.post('/api/examinations_upload', (req, res) => {
+    const { thesis_id, exam_date, type_of_exam, location } = req.body;
+
+    if (!thesis_id || !exam_date || !type_of_exam || !location) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Thesis ID, exam date, type of exam, and location are required.' 
+        });
+    }
+
+    const query = `
+        INSERT INTO examinations (thesis_id, date, type_of_exam, location)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+            date = VALUES(date),
+            type_of_exam = VALUES(type_of_exam),
+            location = VALUES(location);
+    `;
+
+    db.query(query, [thesis_id, exam_date, type_of_exam, location], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Failed to save examination details.' 
+            });
+        }
+        res.json({ 
+            success: true, 
+            message: 'Examination details saved successfully.' 
         });
     });
 });
