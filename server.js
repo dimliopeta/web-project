@@ -44,19 +44,27 @@ const authenticateJWT = (req, res, next) => {
 
     if (!token) {
         console.log('No token found.');
-        return res.status(401).send('Access denied');
+        return res.redirect('/login');
+
     }
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) {
             console.log('Token not verified.');
-            return res.status(403).send('Invalid token');
+            return res.redirect('/login'); 
+
         }
 
         req.user = user;
         next();
     });
 };
+
+
+
+
+
+
 const authorizeRole = (requiredRole) => {
     return (req, res, next) => {
         if (req.user.role !== requiredRole) {
@@ -65,6 +73,9 @@ const authorizeRole = (requiredRole) => {
         next();
     };
 };
+
+
+
 app.get('/api/check-auth', (req, res) => {
     const token = req.cookies?.token;
 
@@ -79,6 +90,11 @@ app.get('/api/check-auth', (req, res) => {
         res.json({ isAuthenticated: true, role: user.role });
     });
 });
+
+
+
+
+
 
 // Route for /login and /login.html
 app.get('/login', (req, res) => {
@@ -102,6 +118,12 @@ app.get('/login', (req, res) => {
         return res.sendFile(path.join(__dirname, 'views', 'login.html'));
     }
 });
+
+
+
+
+
+
 
 // Login endpoint
 app.post('/login', (req, res) => {
@@ -145,6 +167,8 @@ app.post('/login', (req, res) => {
             }
         } else {
             res.status(401).send('Invalid credentials');
+            return res.sendFile(path.join(__dirname, 'views', 'login.html'));
+
         }
     });
 });

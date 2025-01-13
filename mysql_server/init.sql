@@ -41,7 +41,6 @@ CREATE TABLE `Theses`(
     `status` ENUM('unassigned', 'assigned','active','to-be-reviewed','completed','canceled') DEFAULT 'unassigned', 
 	`pdf_path` VARCHAR(200) NULL,
 	`start_date` DATE NULL DEFAULT NULL,
-	`exam_date` DATE NULL,
 	`nimertis_link` VARCHAR(200) NULL,
     FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`),
     FOREIGN KEY (`student_id`) REFERENCES `Students`(`id`)
@@ -85,6 +84,14 @@ CREATE TABLE `Attachments`(
     `type` ENUM('file','link'),
     `link_path` VARCHAR(200) NULL,
     `file_path` VARCHAR(200) NULL,
+    FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
+);
+
+CREATE TABLE `Examinations`(
+    `thesis_id` INT NOT NULL PRIMARY KEY,
+    `type_of_exam` ENUM('online','in-person') DEFAULT 'in-person',
+    `exam_date` DATE NULL,
+    `location` VARCHAR(200) NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 
