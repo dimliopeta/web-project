@@ -507,10 +507,10 @@ function setupEventListeners(thesis) {
         if (!examDate || !typeOfExam || !examLocation) {
             alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
         } else {
-            if(typeOfExam === "Δια ζώσης"){
+            if (typeOfExam === "Δια ζώσης") {
                 typeOfExamProper = "in-person";
             }
-            else if(typeOfExam === "Εξ αποστάσεως"){
+            else if (typeOfExam === "Εξ αποστάσεως") {
                 typeOfExamProper = "online";
             }
             uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, thesis });
@@ -523,7 +523,7 @@ function setupEventListeners(thesis) {
 function uploadFile(fileInput, thesis) {
     const formData = new FormData();
     formData.append('attachment', fileInput);
-    formData.append('type', 'file'); // Specify that this is a file upload
+    formData.append('type', 'file');
     formData.append('thesis_id', thesis.thesis_id);
 
     fetch('/api/upload_attachment', {
@@ -608,36 +608,37 @@ function uploadNimertisLink(link, thesis) {
         });
 }
 //--------------- Examination Details upload
-function uploadExaminationDetails({ examDate, typeOfExam, examLocation, thesis }) {
-   
-        const data = {
-            thesis_id: thesis.thesis_id,
-            exam_date: examDate,
-            type_of_exam: typeOfExam,
-            location: examLocation,
-        };
-    
-        fetch('/api/examinations_upload', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-            credentials: 'include', // Ensure cookies are sent
+function uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, thesis }) {
+    const data = {
+        thesis_id: thesis.thesis_id,
+        exam_date: examDate,
+        type_of_exam: typeOfExamProper,
+        location: examLocation,
+    };
+
+
+    fetch('/api/examinations_upload', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include', // Ensure cookies are sent
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Exam details successfully saved.');
+                fetchAndDisplayExaminations(thesis); // Refresh exam details display
+                //document.getElementById('examDateSection').style.display = 'block';
+            } else {
+                alert('Failed to save exam details: ' + data.message);
+            }
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Exam details successfully saved.');
-                    fetchAndDisplayExaminations(thesis); // Refresh exam details display
-                } else {
-                    alert('Failed to save exam details: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error saving exam details:', error);
-                alert('Error saving exam details.');
-            });
+        .catch(error => {
+            console.error('Error saving exam details:', error);
+            alert('Error saving exam details.');
+        });
 }
 //------------------------------ Helper functions to Fetch and Display Attachments-Nimertis link-Examination Details ------------------------------
 //--------------- Fetch and Display File&Links
@@ -729,16 +730,22 @@ function fetchAndDisplayExaminations(thesis) {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             if (data.success) {
-                const { exam_date, type_of_exam, location } = data;
+                let { exam_date, type_of_exam, location } = data;
 
+                exam_date = exam_date ? exam_date : 'Δεν έχει οριστεί.';
+                type_of_exam = type_of_exam ? type_of_exam : 'Δεν έχει οριστεί.';
+                location = location ? location : 'Δεν έχει οριστεί.';
+                console.log('date, type_of_exam, location');
+                console.log(exam_date, type_of_exam, location);
+                console.log('data');
+                console.log(data);
                 document.getElementById('configurationExamDateInfo').textContent =
-                exam_date ? `Ημερομηνία: ${exam_date}` : 'Δεν έχει οριστεί.';
+                    exam_date ? `Ημερομηνία: ${exam_date}` : 'Δεν έχει οριστεί.';
                 document.getElementById('configurationTypeOfExamInfo').textContent =
-                type_of_exam ? `Τρόπος: ${type_of_exam}` : 'Δεν έχει οριστεί.';
+                    type_of_exam ? `Τρόπος: ${type_of_exam}` : 'Δεν έχει οριστεί.';
                 document.getElementById('configurationExamLocationInfo').textContent =
-                location ? `Τοποθεσία: ${location}` : 'Δεν έχει οριστεί.';
+                    location ? `Τοποθεσία: ${location}` : 'Δεν έχει οριστεί.';
             } else {
                 alert('Failed to fetch exam details: ' + data.message);
             }
