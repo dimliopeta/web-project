@@ -384,6 +384,81 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     });
 });
 
+//----------------- API to for Exam Date-Means-Location upload -----------------
+app.post('/api/examinations_upload', (req, res) => {
+    const { thesis_id, exam_date, type_of_exam, location } = req.body;
+
+    if (!thesis_id || !exam_date || !type_of_exam || !location) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Thesis ID, exam date, type of exam, and location are required.' 
+        });
+    }
+
+    const query = `
+        INSERT INTO examinations (thesis_id, exam_date, type_of_exam, location)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+            exam_date = VALUES(exam_date),
+            type_of_exam = VALUES(type_of_exam),
+            location = VALUES(location);
+    `;
+
+    db.query(query, [thesis_id, exam_date, type_of_exam, location], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Failed to save examination details.' 
+            });
+        }
+        res.json({ 
+            success: true, 
+            message: 'Examination details saved successfully.' 
+        });
+    });
+});
+
+//----------------- API to Load Exam Date-Means-Location -----------------
+app.get('/api/examinations/:thesis_id', (req, res) => {
+    const { thesis_id } = req.params;
+
+    if (!thesis_id) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Thesis ID is required.' 
+        });
+    }
+
+    const query = `
+        SELECT exam_date, type_of_exam, location 
+        FROM examinations 
+        WHERE thesis_id = ?;
+    `;
+
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Failed to fetch examination details.' 
+            });
+        }
+
+        if (results.length === 0) {
+            return res.json({ 
+                success: true, 
+                data: null, 
+                message: 'No examination details found for the given thesis.' 
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            data: results[0] 
+        });
+    });
+});
 
 //----------------- API to handle Attachment Upload (File or Link) in Configuration page Management Section -----------------
 app.post('/api/upload_attachment', authenticateJWT, UploadAttachments.single('attachment'), (req, res) => {

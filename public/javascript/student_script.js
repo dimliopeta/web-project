@@ -552,10 +552,10 @@ function uploadLink(link, thesis) {
         });
 }
 // Exam date set button handler
-document.getElementById('configurationSetExamDateSection').addEventListener('click', function () {
-    const examDate = document.getElementById('examDateInput').value;
+document.getElementById('configurationSubmitButton').addEventListener('click', function () {
+    const examDate = document.getElementById('configurationExamDateInput').value;
     if (examDate) {
-        document.getElementById('examDateInfo').textContent = 'Exam Date set: ' + examDate;
+        document.getElementById('configurationExamDateInfo').textContent = 'Exam Date set: ' + examDate;
     } else {
         alert('Please select an exam date.');
     }
