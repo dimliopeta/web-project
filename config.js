@@ -118,6 +118,7 @@ function insertData() {
         });
     });
 
+    //Εισαγωγή Τριμελών
     data.committees.forEach(committee => {
         const query = `SELECT * FROM COMMITTEES WHERE thesis_id=?;`;
         db.query(query, [committee.thesis_id], (err, results) => {
@@ -140,7 +141,7 @@ function insertData() {
             }
         });
     });
-
+    //Εισαγωγή Προσκλήσεων
     data.invitations.forEach(invitation => {
         const query = `SELECT * FROM INVITATIONS WHERE id=?;`;
         db.query(query, [invitation.id], (err, results) => {
@@ -158,6 +159,34 @@ function insertData() {
                         console.error('Error inserting invitation:', insertErr);
                     } else {
                         console.log(`Invitation ${invitation.id} added successfully.`);
+                    }
+                });
+            }
+        });
+    });
+    // Εισαγωγή Εξετάσεων
+    data.examinations.forEach(examination => {
+        const query = `SELECT * FROM EXAMINATIONS WHERE thesis_id=?;`;
+        db.query(query, [examination.thesis_id], (err, results) => {
+            if (err) {
+                console.error('Error checking for duplicate examinations: ', err);
+                return;
+            }
+            if (results.length === 0) {
+                const insertQuery = `
+                    INSERT INTO EXAMINATIONS (thesis_id, date, type_of_exam, location)
+                    VALUES (?, ?, ?, ?);
+                `;
+                db.query(insertQuery, [
+                    examination.thesis_id,
+                    examination.date,
+                    examination.type_of_exam,
+                    examination.location
+                ], (insertErr) => {
+                    if (insertErr) {
+                        console.error('Error inserting examination:', insertErr);
+                    } else {
+                        console.log(`Examination ${examination.thesis_id} added successfully.`);
                     }
                 });
             }
