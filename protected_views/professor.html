@@ -316,16 +316,19 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <p>Κατάσταση Διπλωματικής</p>
-                                    <a class="dropdown-item" href="#" data-filter="to-be-reviewed">Υπό Εξέταση</a>
-                                    <a class="dropdown-item" href="#" data-filter="completed">Περατωμένες</a>
-                                    <a class="dropdown-item" href="#" data-filter="canceled">Ακυρωμένες</a>
-                                    <a class="dropdown-item" href="#" data-filter="active">Ενεργές</a>
-                                    <a class="dropdown-item" href="#" data-filter="unassigned">Υπό Ανάθεση</a>
+                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'to-be-reviewed')">Υπό Εξέταση</a>
+                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'completed')">Περατωμένες</a>
+                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'canceled')">Ακυρωμένες</a>
+                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'active')">Ενεργές</a>
+                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'assigned')">Υπό Ανάθεση</a>
                                     <div class="dropdown-divider"></div>
                                     <p>Ρόλος</p>
-                                    <a class="dropdown-item" href="#" data-filter="professor">Επιβλέπων</a>
-                                    <a class="dropdown-item" href="#" data-filter="committee-member">Μέλος Τριμελούς</a>
+                                    <a class="dropdown-item" href="#" onclick="applyFilter('role', 'Επιβλέπων')">Επιβλέπων</a>
+                                    <a class="dropdown-item" href="#" onclick="applyFilter('role', 'Μέλος Τριμελούς')">Μέλος Τριμελούς</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#" onclick="clearFilters()">Αναίρεση Φίλτρου</a>
                                 </div>
+                                
 
                             </div>
                             <table id="theses" class="table table-striped table-hover">

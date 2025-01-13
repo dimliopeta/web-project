@@ -909,7 +909,12 @@ document.querySelectorAll('.dropdown-item').forEach(item => {
 
 
 //------------Filtering for Theses List----------------
-function applyFilter(filterValue) {
+let appliedFilters = { status: null, role: null };
+
+function applyFilter(filterType, filterValue) {
+    // Ενημέρωση των εφαρμοσμένων φίλτρων
+    appliedFilters[filterType] = filterValue;
+
     const token = localStorage.getItem('token');
 
     fetch('/api/theses', {
@@ -921,18 +926,19 @@ function applyFilter(filterValue) {
         .then(data => {
             if (data.success) {
                 const thesesTableBody = document.querySelector('#theses tbody');
-                thesesTableBody.innerHTML = '';
                 if (!thesesTableBody) {
                     console.error('Δεν βρέθηκε το στοιχείο #theses tbody στη σελίδα.');
                     return;
                 }
 
+                thesesTableBody.innerHTML = '';
+
+                // Φιλτράρισμα των δεδομένων
                 data.theses
                     .filter(thesis => {
-                        if (['to-be-reviewed', 'active', 'completed', 'canceled', 'unassigned'].includes(filterValue)) {
-                            return thesis.status === filterValue;
-                        }
-                        return true; // Default: εμφάνιση όλων
+                        const matchesStatus = !appliedFilters.status || thesis.status === appliedFilters.status;
+                        const matchesRole = !appliedFilters.role || thesis.role === appliedFilters.role;
+                        return matchesStatus && matchesRole;
                     })
                     .forEach(thesis => {
                         const row = document.createElement('tr');
@@ -964,9 +970,8 @@ function applyFilter(filterValue) {
                             <td>${thesis.role}</td>
                             <td>${status}</td>
                         `;
-                        row.addEventListener('click', (event) => {
+                        row.addEventListener('click', () => {
                             showInfoSection(thesis);
-                            console.log('clicked!');
                         });
 
                         thesesTableBody.appendChild(row);
@@ -976,6 +981,11 @@ function applyFilter(filterValue) {
             }
         })
         .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
+}
+
+function clearFilters() {
+    appliedFilters = { status: null, role: null };
+    applyFilter(); // Επαναφόρτωση χωρίς φίλτρα
 }
 
 
