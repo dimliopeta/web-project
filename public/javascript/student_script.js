@@ -628,7 +628,6 @@ function uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, th
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Exam details successfully saved.');
                 fetchAndDisplayExaminations(thesis); // Refresh exam details display
                 //document.getElementById('examDateSection').style.display = 'block';
             } else {
@@ -731,21 +730,18 @@ function fetchAndDisplayExaminations(thesis) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                let { exam_date, type_of_exam, location } = data;
+                const examData = data.examination;
+                if (examData.type_of_exam === "in-person") {
+                    examData.type_of_exam = "Δια ζώσης";
+                } else if (examData.type_of_exam === "online") {
+                    examData.type_of_exam = "Εξ αποστάσως";
+                }
+                const [year, month, day] = examData.date.split("-");
+                examData.date = `${day}-${month}-${year}`;
 
-                exam_date = exam_date ? exam_date : 'Δεν έχει οριστεί.';
-                type_of_exam = type_of_exam ? type_of_exam : 'Δεν έχει οριστεί.';
-                location = location ? location : 'Δεν έχει οριστεί.';
-                console.log('date, type_of_exam, location');
-                console.log(exam_date, type_of_exam, location);
-                console.log('data');
-                console.log(data);
-                document.getElementById('configurationExamDateInfo').textContent =
-                    exam_date ? `Ημερομηνία: ${exam_date}` : 'Δεν έχει οριστεί.';
-                document.getElementById('configurationTypeOfExamInfo').textContent =
-                    type_of_exam ? `Τρόπος: ${type_of_exam}` : 'Δεν έχει οριστεί.';
-                document.getElementById('configurationExamLocationInfo').textContent =
-                    location ? `Τοποθεσία: ${location}` : 'Δεν έχει οριστεί.';
+                document.getElementById('configurationExamDateInfo').innerHTML = `${examData.date || 'Δεν έχει οριστεί.'}`;
+                document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
+                document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
             } else {
                 alert('Failed to fetch exam details: ' + data.message);
             }

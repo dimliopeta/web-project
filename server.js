@@ -51,7 +51,7 @@ const authenticateJWT = (req, res, next) => {
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) {
             console.log('Token not verified.');
-            return res.redirect('/login'); 
+            return res.redirect('/login');
 
         }
 
@@ -391,9 +391,9 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
     const { thesis_id } = req.params;
 
     if (!thesis_id) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Thesis ID is required.' 
+        return res.status(400).json({
+            success: false,
+            message: 'Thesis ID is required.'
         });
     }
 
@@ -409,35 +409,32 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
     db.query(query, [thesis_id], (err, results) => {
         if (err) {
             console.error(err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Failed to fetch examination details.' 
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to fetch examination details.'
             });
         }
 
         if (results.length === 0) {
-            return res.json({ 
-                success: true, 
-                data: null, 
-                message: 'No examination details found for the given thesis.' 
+            return res.json({
+                success: true,
+                data: null,
+                message: 'No examination details found for the given thesis.'
             });
         }
 
-        res.json({ 
-            success: true, 
-            data: results[0] 
-        });
+        res.json({ success: true, examination: results[0] });
     });
 });
 
-//----------------- API to for Exam Date-Type-Location upload -----------------
+//----------------- API for Exam Date-Type-Location upload -----------------
 app.post('/api/examinations_upload', (req, res) => {
     const { thesis_id, exam_date, type_of_exam, location } = req.body;
 
     if (!thesis_id || !exam_date || !type_of_exam || !location) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Thesis ID, exam date, type of exam, and location are required.' 
+        return res.status(400).json({
+            success: false,
+            message: 'Thesis ID, exam date, type of exam, and location are required.'
         });
     }
 
@@ -453,14 +450,14 @@ app.post('/api/examinations_upload', (req, res) => {
     db.query(query, [thesis_id, exam_date, type_of_exam, location], (err, result) => {
         if (err) {
             console.error(err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Failed to save examination details.' 
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to save examination details.'
             });
         }
-        res.json({ 
-            success: true, 
-            message: 'Examination details saved successfully.' 
+        res.json({
+            success: true,
+            message: 'Examination details saved successfully.'
         });
     });
 });
@@ -740,7 +737,7 @@ app.put('/api/theses/update', authenticateJWT, uploadPDFOnly.single('pdf'), (req
 
     if (!thesisId || (!title && !summary && !file)) {
         return res.status(400).json({ success: false, message: 'Invalid input.' });
-      }
+    }
 
     const getThesisQuery = `
         SELECT title, summary, pdf_path
@@ -841,11 +838,11 @@ app.get('/api/invitations', authenticateJWT, (req, res) => {
 
 //----------------- API for Invitation Acceptance/Rejection -----------------
 app.post('/api/invitations/action', authenticateJWT, (req, res) => {
-    const {invitationId, action } = req.body;
+    const { invitationId, action } = req.body;
 
     if (!invitationId || !['accepted', 'rejected'].includes(action)) {
         return res.status(400).json({ success: false, message: 'Invalid input.' });
-      }
+    }
 
     const getInvitationQuery = `
         SELECT i.thesis_id, i.professor_id, c.member1_id, c.member2_id
