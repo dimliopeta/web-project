@@ -323,7 +323,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
             LEFT JOIN Students s ON t.student_id = s.id
             LEFT JOIN Professors p ON t.professor_id = p.id
             LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
-            LEFT JOIN Examinations e ON Theses.thesis_id = Examinations.thesis_id
+            LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
             LEFT JOIN Professors c1 ON c.member1_id = c1.id
             LEFT JOIN Professors c2 ON c.member2_id = c2.id
             LEFT JOIN Grades g ON g.thesis_id = t.thesis_id AND g.professor_id = t.professor_id
