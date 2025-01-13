@@ -174,14 +174,15 @@ function insertData() {
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO EXAMINATIONS (thesis_id, date, type_of_exam, location)
-                    VALUES (?, ?, ?, ?);
+                    INSERT INTO EXAMINATIONS (thesis_id, date, type_of_exam, location, exam_report)
+                    VALUES (?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
                     examination.thesis_id,
                     examination.date,
                     examination.type_of_exam,
-                    examination.location
+                    examination.location,
+                    examination.exam_report
                 ], (insertErr) => {
                     if (insertErr) {
                         console.error('Error inserting examination:', insertErr);

@@ -386,7 +386,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     });
 });
 
-//----------------- API to Fetch Exam Date-Type-Location -----------------
+//----------------- API to Fetch Exam Date-Type-Location-Report -----------------
 app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
     const { thesis_id } = req.params;
 
@@ -401,7 +401,8 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
         SELECT 
         DATE_FORMAT(examinations.date, '%Y-%m-%d') AS date,
         examinations.type_of_exam, 
-        examinations.location 
+        examinations.location,
+        examinations.exam_report 
         FROM examinations 
         WHERE thesis_id = ?;
     `;

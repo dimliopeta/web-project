@@ -92,6 +92,7 @@ CREATE TABLE `Examinations`(
     `date` DATE NULL,
     `type_of_exam` ENUM('online','in-person') DEFAULT 'in-person',
     `location` VARCHAR(200) NULL,
+    `exam_report` VARCHAR(200) NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 

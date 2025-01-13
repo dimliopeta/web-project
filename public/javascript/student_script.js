@@ -470,7 +470,7 @@ function setupEventListeners(thesis) {
             alert('Please select a file to upload.');
         }
     });
-    // Link upload button
+    // Link upload button event listener
     document.getElementById('configurationUploadLinkButton').addEventListener('click', function () {
         const configurationUploadLinkInputBox = document.getElementById('configurationUploadLinkInputBox').value;
         if (configurationUploadLinkInputBox) {
@@ -484,7 +484,7 @@ function setupEventListeners(thesis) {
         }
     });
 
-    // Nimertis upload button
+    // Nimertis upload button event listener
     document.getElementById('configurationUploadNimertisButton').addEventListener('click', function () {
         const configurationUploadNimertisInputBox = document.getElementById('configurationUploadNimertisInputBox').value;
         if (configurationUploadNimertisInputBox) {
@@ -498,7 +498,7 @@ function setupEventListeners(thesis) {
         }
     });
 
-    // Examination Data upload button
+    // Examination Data upload button event listener
     document.getElementById('configurationExamDataSubmitButton').addEventListener('click', function () {
         const examDate = document.getElementById('configurationExamDateInputBox').value;
         const typeOfExam = document.getElementById('configurationTypeOfExamInputBox').value;
@@ -717,7 +717,7 @@ function fetchAndDisplayNimertisLink(thesis) {
         nimertisInfo.textContent = 'Δεν έχει αναρτηθεί σύνδεσμος';
     }
 }
-//--------------- Fetch and Display Examination Date-Type-Location
+//--------------- Fetch and Display Examination Date-Type-Location-Report
 function fetchAndDisplayExaminations(thesis) {
     const token = localStorage.getItem('token');
 
@@ -730,18 +730,23 @@ function fetchAndDisplayExaminations(thesis) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Translate type of exam
                 const examData = data.examination;
                 if (examData.type_of_exam === "in-person") {
                     examData.type_of_exam = "Δια ζώσης";
                 } else if (examData.type_of_exam === "online") {
                     examData.type_of_exam = "Εξ αποστάσως";
                 }
+                // Format the date properly
                 const [year, month, day] = examData.date.split("-");
                 examData.date = `${day}-${month}-${year}`;
 
                 document.getElementById('configurationExamDateInfo').innerHTML = `${examData.date || 'Δεν έχει οριστεί.'}`;
                 document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
                 document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
+                //Set the exam_report download link in the HTML
+                document.getElementById('configurationCompletedFilesExamReport').dataset.reportPath = examData.exam_report || '';
+
             } else {
                 alert('Failed to fetch exam details: ' + data.message);
             }
@@ -792,6 +797,29 @@ function addLinkToList(link) {
     newLinkElement.appendChild(linkText);
     linkList.appendChild(newLinkElement);
 }
+//------------------------------ Completed Files Section Event Listeners  ------------------------------
+//--------------- Examination Report button Event Listener  ---------------
+document.getElementById('configurationCompletedFilesExamReport').addEventListener('click', function () {
+    const reportPath = this.dataset.reportPath; // Retrieve the saved report path
+    if (reportPath) {
+        // Trigger file download
+        const link = document.createElement('a');
+        link.href = `${reportPath}`;
+        console.log("path is");
+        console.log(link.href);
+        link.download = reportPath;
+        link.click();
+    } else {
+        alert('Το πρακτικό εξέτασης δεν είναι ακόμα διαθέσιμο.');
+    }
+
+
+});
+//--------------- Nimertis Link Download button Event Listener  ---------------
+document.getElementById('configurationCompletedFilesNimertisLink').addEventListener('click', function () {
+
+});
+
 
 
 
@@ -892,7 +920,6 @@ document.querySelector('#student_profile').addEventListener('click', function (e
         }
     }
 });
-
 
 
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
