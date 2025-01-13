@@ -373,43 +373,33 @@ function showInfoSection(thesis) {
     if (thesis.role === 'Επιβλέπων') {
         switch (thesis.status) {
             case 'assigned':
-                const buttonsContainer = document.createElement('div');
-                buttonsContainer.classList.add('d-flex', 'gap-2', 'mt-3');
+                addAssignedSection(thesis, statusSection);
+                break;
 
-                const showInvitationsButton = document.createElement('button');
-                showInvitationsButton.textContent = 'Εμφάνιση Προσκλήσεων';
-                showInvitationsButton.classList.add('btn', 'btn-info', 'mt-2');
-                showInvitationsButton.onclick = () => {
-                    const existingList = statusSection.querySelector('.invitations-list');
+            case "active":
+                addActiveSection(thesis, statusSection);
+                break;
 
-                    if (existingList) {
-                        // Αν η λίστα υπάρχει, την αφαιρούμε και αλλάζουμε το κουμπί στην αρχική του κατάσταση
-                        existingList.remove();
-                        showInvitationsButton.textContent = 'Εμφάνιση Προσκλήσεων';
-                        showInvitationsButton.classList.remove('btn-primary');
-                        showInvitationsButton.classList.add('btn-info');
-                    } else {
-                        // Αν η λίστα δεν υπάρχει, την εμφανίζουμε και αλλάζουμε το κουμπί για "Απόκρυψη"
-                        console.log('Container:', statusSection);
-                        showThesesInvitations(thesis.invitations || [], statusSection);
-                        showInvitationsButton.textContent = 'Απόκρυψη Προσκλήσεων';
-                        showInvitationsButton.classList.remove('btn-info');
-                        showInvitationsButton.classList.add('btn-primary');
-                    }
-                };
-                buttonsContainer.appendChild(showInvitationsButton);
+            case "to-be-reviewed":
+                addToBeReviewedSection(thesis, statusSection);
+                break;
+            case "canceled":
+                const canceledSection = document.createElement('section');
 
-                const unassignThButton = document.createElement('button');
-                unassignThButton.textContent = 'Αναίρεση Ανάθεσης';
-                unassignThButton.classList.add('btn', 'btn-danger', 'mt-2');
-                unassignThButton.onclick = () => unassignThesis(thesis.thesis_id);
-                buttonsContainer.appendChild(unassignThButton);
+                const canceledTitle = document.createElement('h4');
+                canceledTitle.textContent = 'Ακυρωμένη Διπλωματική';
+                canceledSection.appendChild(canceledTitle);
 
-                statusSection.appendChild(buttonsContainer);
+                const departmentInfo = document.createElement('p');
+                departmentInfo.innerHTML = `
+                        <strong>Αριθμός Τμήματος:</strong> ${thesis.cancellation_department || 'Δεν υπάρχει διαθέσιμη πληροφορία'}
+                    `;
+                canceledSection.appendChild(departmentInfo);
 
-                const hr = document.createElement('hr');
-                hr.classList.add('my-3');
-                statusSection.appendChild(hr);
+                const canceledHr = document.createElement('hr');
+                canceledSection.appendChild(canceledHr);
+
+                statusSection.appendChild(canceledSection);
                 break;
 
         }
@@ -429,6 +419,226 @@ function showInfoSection(thesis) {
     infoSection.appendChild(footer);
 }
 
+function createButton(id, text, classes, onClick = null) {
+    const button = document.createElement('button');
+    button.id = id;
+    button.textContent = text;
+    button.classList.add(...classes);
+    if (onClick) {
+        button.onclick = onClick;
+    }
+    return button;
+}
+
+
+
+//------------Frontend for a To-Be-Reviewed Thesis Management----------
+function addToBeReviewedSection(thesis, container){
+    // Τμήμα για λήψη αρχείου διπλωματικής
+    const downloadSection = document.createElement('section');
+
+    const downloadButton = createButton('download-thesis-button', 'Λήψη Αρχείου Διπλωματικής', ['btn', 'btn-primary', 'mb-3']);
+
+    downloadSection.appendChild(downloadButton);
+
+    const downloadHr = document.createElement('hr');
+    downloadSection.appendChild(downloadHr);
+
+    container.appendChild(downloadSection);
+
+    // Τμήμα για δημιουργία ανακοίνωσης
+    const announcementSection = document.createElement('section');
+
+    const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3']);
+    announcementSection.appendChild(announcementButton);
+
+    const announcementHr = document.createElement('hr');
+    announcementSection.appendChild(announcementHr);
+
+    container.appendChild(announcementSection);
+
+    // Τμήμα για καταχώρηση βαθμού
+    const gradeSection = document.createElement('section');
+
+    const gradeTitle = document.createElement('h4');
+    gradeTitle.textContent = 'Καταχώρηση Βαθμού';
+    gradeSection.appendChild(gradeTitle);
+
+    const criteria = [
+        'Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%)',
+        'Χρονικό διάστημα εκπόνησής της (15%)',
+        'Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%)',
+        'Συνολική εικόνα της παρουσίασης (10%)'
+    ];
+
+    criteria.forEach((criterion, index) => {
+        const label = document.createElement('label');
+        label.textContent = criterion;
+        label.classList.add('form-label', 'mt-3');
+        gradeSection.appendChild(label);
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = `grade-criterion-${index + 1}`;
+        input.classList.add('form-control');
+        input.placeholder = `Βαθμός (0-10)`;
+        gradeSection.appendChild(input);
+    });
+
+    const submitGradeButton = createButton('submit-grade-button', 'Καταχώρηση Βαθμού', ['btn', 'btn-success', 'mt-3', 'mb-3']);
+    gradeSection.appendChild(submitGradeButton);
+
+    // Εμφάνιση βαθμών άλλων μελών
+    const otherGradesTitle = document.createElement('h5');
+    otherGradesTitle.textContent = 'Βαθμοί άλλων μελών';
+    gradeSection.appendChild(otherGradesTitle);
+
+    const gradesList = document.createElement('div');
+    gradesList.id = 'grades-list';
+    gradesList.classList.add('border', 'p-3', 'mt-2');
+    gradesList.style.maxHeight = '150px';
+    gradesList.style.overflowY = 'auto';
+    gradesList.innerHTML = `
+            <p><strong>Καθηγητής Παπαδόπουλος:</strong></p>
+            <p>Ποιότητα Δ.Ε.: 8</p>
+            <p>Χρονικό διάστημα: 9</p>
+            <p>Ποιότητα κειμένου: 7</p>
+            <p>Παρουσίαση: 8</p>
+            <hr>
+            <p><strong>Καθηγητής Ιωάννου:</strong></p>
+            <p>Ποιότητα Δ.Ε.: 7</p>
+            <p>Χρονικό διάστημα: 8</p>
+            <p>Ποιότητα κειμένου: 8</p>
+            <p>Παρουσίαση: 9</p>
+        `;
+    gradeSection.appendChild(gradesList);
+
+    const gradeHr = document.createElement('hr');
+    gradeSection.appendChild(gradeHr);
+
+    container.appendChild(gradeSection);
+}
+
+
+
+//------------Frontend for an Assigned Thesis Management----------
+function addAssignedSection(thesis, container) {
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.classList.add('d-flex', 'gap-2', 'mt-3');
+
+    const showInvitationsButton =  createButton('show-inv', 'Εμφάνιση Προσκλήσεων', ['btn', 'btn-info', 'mt-2'], () => {
+        const existingList = container.querySelector('.invitations-list');
+
+        if (existingList) {
+            // Αν η λίστα υπάρχει, την αφαιρούμε και αλλάζουμε το κουμπί στην αρχική του κατάσταση
+            existingList.remove();
+            showInvitationsButton.textContent = 'Εμφάνιση Προσκλήσεων';
+            showInvitationsButton.classList.remove('btn-primary');
+            showInvitationsButton.classList.add('btn-info');
+        } else {
+            // Αν η λίστα δεν υπάρχει, την εμφανίζουμε και αλλάζουμε το κουμπί για "Απόκρυψη"
+            console.log('Container:', container);
+            showThesesInvitations(thesis.invitations || [], container);
+            showInvitationsButton.textContent = 'Απόκρυψη Προσκλήσεων';
+            showInvitationsButton.classList.remove('btn-info');
+            showInvitationsButton.classList.add('btn-primary');
+        }
+    });
+    buttonsContainer.appendChild(showInvitationsButton);
+
+    const unassignThButton =  createButton('unassign-thesis-button', 'Αναίρεση Ανάθεσης', ['btn', 'btn-danger', 'mt-2'],() => unassignThesis(thesis.thesis_id));
+
+    buttonsContainer.appendChild(unassignThButton);
+    container.appendChild(buttonsContainer);
+
+    const hr = document.createElement('hr');
+    hr.classList.add('my-3');
+    container.appendChild(hr);
+}
+
+
+
+//------------Frontend for an Active Thesis Management----------
+function addActiveSection(thesis, container) {
+    // Τμήμα για καταχώρηση σημείωσης
+    const notesSection = document.createElement('section');
+
+    const notesTitle = document.createElement('h4');
+    notesTitle.textContent = 'Σημειώσεις';
+    notesSection.appendChild(notesTitle);
+
+    const noteTextarea = document.createElement('textarea');
+    noteTextarea.id = 'new-note';
+    noteTextarea.classList.add('form-control', 'mb-2');
+    noteTextarea.placeholder = 'Καταχωρήστε μια νέα σημείωση (μέγιστο 300 χαρακτήρες)';
+    noteTextarea.maxLength = 300;
+    notesSection.appendChild(noteTextarea);
+
+    const addNoteButton =  createButton('add-note', 'Καταχώρηση Σημείωσης', ['btn', 'btn-primary', 'mb-3']);
+    notesSection.appendChild(addNoteButton);
+
+    const previousNotesTitle = document.createElement('h5');
+    previousNotesTitle.textContent = 'Προηγούμενες Σημειώσεις';
+    notesSection.appendChild(previousNotesTitle);
+
+    const notesList = document.createElement('div');
+    notesList.id = 'notes-list';
+    notesList.classList.add('border', 'p-3');
+    notesList.style.maxHeight = '150px';
+    notesList.style.overflowY = 'auto';
+    notesList.innerHTML = '<p class="text-muted">Δεν υπάρχουν σημειώσεις.</p>';
+    notesSection.appendChild(notesList);
+
+    const notesHr = document.createElement('hr');
+    notesSection.appendChild(notesHr);
+
+    container.appendChild(notesSection);
+
+    // Τμήμα για ακύρωση διπλωματικής
+    const cancelSection = document.createElement('section');
+
+    const cancelTitle = document.createElement('h4');
+    cancelTitle.textContent = 'Ακύρωση Διπλωματικής';
+    cancelSection.appendChild(cancelTitle);
+
+    const cancellationNumberInput = document.createElement('input');
+    cancellationNumberInput.type = 'number';
+    cancellationNumberInput.id = 'cancellation-number';
+    cancellationNumberInput.classList.add('form-control', 'mb-2');
+    cancellationNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
+    cancelSection.appendChild(cancellationNumberInput);
+
+    const cancellationYearInput = document.createElement('input');
+    cancellationYearInput.type = 'number';
+    cancellationYearInput.id = 'cancellation-year';
+    cancellationYearInput.classList.add('form-control', 'mb-2');
+    cancellationYearInput.placeholder = 'Έτος Γενικής Συνέλευσης';
+    cancelSection.appendChild(cancellationYearInput);
+
+    const cancelButton = createButton('cancel-thesis-button', 'Ακύρωση Διπλωματικής', ['btn', 'btn-danger', 'mb-3']);
+    cancelSection.appendChild(cancelButton);
+
+    const cancelHr = document.createElement('hr');
+    cancelSection.appendChild(cancelHr);
+
+    container.appendChild(cancelSection);
+
+    // Τμήμα για αλλαγή κατάστασης
+    const changeStatusSection = document.createElement('section');
+
+    const changeStatusTitle = document.createElement('h4');
+    changeStatusTitle.textContent = 'Αλλαγή Κατάστασης';
+    changeStatusSection.appendChild(changeStatusTitle);
+
+    
+    const changeStatusButton = createButton('change-to-under-review-button', 'Αλλαγή σε Υπό Εξέταση', ['btn', 'btn-warning']);
+    changeStatusSection.appendChild(changeStatusButton);
+
+    const changeStatusHr = document.createElement('hr');
+    changeStatusSection.appendChild(changeStatusHr);
+
+    container.appendChild(changeStatusSection);
+}
 
 function showThesesInvitations(invitations, container) {
     // Έλεγχος αν το container είναι έγκυρο
@@ -480,34 +690,6 @@ function showThesesInvitations(invitations, container) {
     container.appendChild(invitationsList);
 }
 
-
-//${invitation.status || 'Χωρίς Απάντηση'} 
-//${invitation.invitation_date || 'Χωρίς Ημερομηνία'}
-//${invitation.response_date || 'Χωρίς Ημερομηνία'}
-//
-//
-//
-//
-//
-//
-// Dummy λειτουργίες για τα κουμπιά
-
-function createNoteForThesis(thesisId) {
-    console.log(`Δημιουργία σημείωσης για τη διπλωματική με ID ${thesisId}`);
-}
-
-function changeStatusToUnderReview(thesisId) {
-    console.log(`Αλλαγή κατάστασης σε "Υπό Εξέταση" για τη διπλωματική με ID ${thesisId}`);
-}
-
-
-function publishAnnouncement(thesisId) {
-    console.log(`Παραγωγή ανακοίνωσης για τη διπλωματική με ID ${thesisId}`);
-}
-
-function enableGrading(thesisId) {
-    console.log(`Ενεργοποίηση βαθμολογίας για τη διπλωματική με ID ${thesisId}`);
-}
 
 
 //------------Edit Theme Button Event Listener-----------
