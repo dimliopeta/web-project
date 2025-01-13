@@ -448,6 +448,21 @@ function setupThesisManagement() {
         .then(data => {
             if (data.success && data.theses.length > 0) {
                 const thesis = data.theses[0];
+
+                // If Nimertis Link exists in the thesis table, then 
+                const nimertisLinkButton = document.getElementById('configurationCompletedFilesNimertisLink');
+                if (thesis.nimertis_link) {
+                    nimertisLinkButton.addEventListener('click', () => {
+                        window.open(thesis.nimertis_link, '_blank');
+                    });
+                    
+                } else {
+                    nimertisLinkButton.addEventListener('click', () => {
+                        alert('Ο σύνδεσμος Νημερτή δεν είναι ακόμα διαθέσιμος.')
+                    });
+                        
+                }
+
                 setupEventListeners(thesis);
                 fetchAndDisplayAttachments(thesis);
                 fetchAndDisplayNimertisLink(thesis);
@@ -744,7 +759,7 @@ function fetchAndDisplayExaminations(thesis) {
                 document.getElementById('configurationExamDateInfo').innerHTML = `${examData.date || 'Δεν έχει οριστεί.'}`;
                 document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
                 document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
-                //Set the exam_report download link in the HTML
+                //Set the exam_report link in the HTML
                 document.getElementById('configurationCompletedFilesExamReport').dataset.reportPath = examData.exam_report || '';
 
             } else {
@@ -802,22 +817,15 @@ function addLinkToList(link) {
 document.getElementById('configurationCompletedFilesExamReport').addEventListener('click', function () {
     const reportPath = this.dataset.reportPath; // Retrieve the saved report path
     if (reportPath) {
-        // Trigger file download
-        const link = document.createElement('a');
-        link.href = `${reportPath}`;
-        console.log("path is");
-        console.log(link.href);
-        link.download = reportPath;
-        link.click();
+        const newTab = window.open(reportPath, '_blank');
+        if (newTab) {
+            newTab.focus();
+        } else {
+            alert('Unable to open the report. Please check your browser settings.');
+        }
     } else {
         alert('Το πρακτικό εξέτασης δεν είναι ακόμα διαθέσιμο.');
     }
-
-
-});
-//--------------- Nimertis Link Download button Event Listener  ---------------
-document.getElementById('configurationCompletedFilesNimertisLink').addEventListener('click', function () {
-
 });
 
 
