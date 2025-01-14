@@ -207,7 +207,6 @@ function calculateDuration(startDate) {
 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
     const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
     elements.forEach(element => {
-        // If value is null or invalid, show error message
         element.textContent = (value && value !== null) ? value : errorMessage;
     });
 }
@@ -801,7 +800,8 @@ function loadExamReportData() {
         })
         .then(data => {
             if (data.success && data.examReport.length > 0) {
-                const reportData = data.examReport;
+                const reportData = data.examReport[0];
+                console.log(reportData);
 
                 const finalGrade = calculateFinalGrade(reportData.supervisor_grade, reportData.committee_member1_grade, reportData.committee_member2_grade);
                 updateDataField('final_grade', finalGrade);
@@ -827,7 +827,7 @@ function loadExamReportData() {
                 updateDataField('examReportCommitteeMember1NameSurname', committeeMember1NameSurname);
                 updateDataField('examReportCommitteeMember2NameSurname', committeeMember2NameSurname);
                 updateDataField('examReportAssemblyNo', reportData.exam_date);
-                updateDataField('examReportTitle', reportData.title);
+                updateDataField('examReportTitle', reportData.thesis_title);
                 updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
                 updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
                 updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
@@ -835,7 +835,7 @@ function loadExamReportData() {
 
                 
                 
-            } else if (data.success && data.examReport == 0) {
+            } else if (data.success && data.examReport.length == 0) {
                 console.error('No Report Data found for this student');
             }
         })
@@ -888,8 +888,8 @@ function addLinkToList(link) {
 //------------------------------ Completed Files Section Event Listeners  ------------------------------
 //--------------- Examination Report button Event Listener  ---------------
 document.getElementById('configurationCompletedFilesExamReportButton').addEventListener('click', function () {
+    loadExamReportData();
     const examReportSection = document.getElementById('examReportHTMLSection');
-
     // Toggle visibility of the section
     if (examReportSection.style.display === 'none' || examReportSection.style.display === '') {
         examReportSection.style.display = 'block';

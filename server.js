@@ -399,7 +399,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
         S.name AS student_name, 
         S.surname AS student_surname, 
         E.location AS exam_location, 
-        E.date AS exam_date,
+        DATE_FORMAT(E.date, '%Y-%m-%d') AS exam_date,
         P.name AS professor_name, 
         P.surname AS professor_surname, 
         C1.name AS committee_member1_name,
