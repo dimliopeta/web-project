@@ -10,7 +10,7 @@ const db = mysql.createConnection({
 });
 
 // Μετατρέπουμε τα JSON objects σε Javascript objects και τα αποθηκεύουμε στο data
-const data = JSON.parse(fs.readFileSync('./public/json/data.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync('./provided_data/data.json', 'utf8'));
 
 // Εισαγωγή δεδομένων στη βάση
 function insertData() {
@@ -58,8 +58,8 @@ function insertData() {
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO students (name, surname, student_number, street, number, city, postcode, father_name, landline_telephone, mobile_telephone, email, password)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    INSERT INTO students (name, surname, student_number, street, number, city, postcode, father_name, landline_telephone, mobile_telephone, email, contact_email,  password)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
                     student.name,
@@ -72,6 +72,7 @@ function insertData() {
                     student.father_name,
                     student.landline_telephone,
                     student.mobile_telephone,
+                    student.email,
                     student.email,
                     'defaultpassword' // Προσωρινός κωδικός
                 ], (insertErr) => {
@@ -87,38 +88,145 @@ function insertData() {
 
     // Εισαγωγή διπλωματικών
     data.theses.forEach(thesis => {
-        const query = `SELECT * FROM THESES WHERE theme_id=?;`;
-        db.query(query, [thesis.theme_id], (err, results) => {
+        const query = `SELECT * FROM THESES WHERE thesis_id=?;`;
+        db.query(query, [thesis.thesis_id], (err, results) => {
             if (err) {
                 console.error('Error checking for duplicate theses: ', err);
                 return;
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO theses (theme_id, teacher_id, student_id, title, summary, status, pdf_path)
+                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date)
                     VALUES (?, ?, ?, ?, ?, ?, ?);
                 `;
                 db.query(insertQuery, [
-                    thesis.theme_id,
-                    thesis.teacher_id,
+                    thesis.professor_id,
                     thesis.student_id || null, // Χρησιμοποίησε NULL αν το student_id είναι κενό
                     thesis.title,
                     thesis.summary,
                     thesis.status,
-                    thesis.pdf_path || null // Χρησιμοποίησε NULL αν το pdf_path είναι κενό
+                    thesis.pdf_path || null, // Χρησιμοποίησε NULL αν το pdf_path είναι κενό
+                    thesis.start_date
                 ], (insertErr) => {
                     if (insertErr) {
                         console.error('Error inserting thesis:', insertErr);
                     } else {
-                        console.log(`Thesis ${thesis.theme_id} added successfully.`);
+                        console.log(`Thesis ${thesis.thesis_id} added successfully.`);
                     }
                 });
             }
         });
     });
 
+    //Εισαγωγή Τριμελών
+    data.committees.forEach(committee => {
+        const query = `SELECT * FROM COMMITTEES WHERE thesis_id=?;`;
+        db.query(query, [committee.thesis_id], (err, results) => {
+            if (err) {
+                console.error('Error checking for duplicate committees: ', err);
+                return;
+            }
+            if (results.length === 0) {
+                const insertQuery = `
+                    INSERT INTO committees (thesis_id)
+                    VALUES (?);
+                `;
+                db.query(insertQuery,[committee.thesis_id], (insertErr) =>{
+                    if (insertErr) {
+                        console.error('Error inserting thesis:', insertErr);
+                    } else {
+                        console.log(`Committee ${committee.thesis_id} added successfully.`);
+                    }
+                });
+            }
+        });
+    });
+    //Εισαγωγή Προσκλήσεων
+    data.invitations.forEach(invitation => {
+        const query = `SELECT * FROM INVITATIONS WHERE id=?;`;
+        db.query(query, [invitation.id], (err, results) => {
+            if (err) {
+                console.error('Error checking for duplicate invitations: ', err);
+                return;
+            }
+            if (results.length === 0) {
+                const insertQuery = `
+                    INSERT INTO invitations (id, thesis_id, professor_id)
+                    VALUES (?, ?, ?);
+                `;
+                db.query(insertQuery,[invitation.id, invitation.thesis_id,invitation.professor_id], (insertErr) =>{
+                    if (insertErr) {
+                        console.error('Error inserting invitation:', insertErr);
+                    } else {
+                        console.log(`Invitation ${invitation.id} added successfully.`);
+                    }
+                });
+            }
+        });
+    });
+    // Εισαγωγή Εξετάσεων
+    data.examinations.forEach(examination => {
+        const query = `SELECT * FROM EXAMINATIONS WHERE thesis_id=?;`;
+        db.query(query, [examination.thesis_id], (err, results) => {
+            if (err) {
+                console.error('Error checking for duplicate examinations: ', err);
+                return;
+            }
+            if (results.length === 0) {
+                const insertQuery = `
+                    INSERT INTO EXAMINATIONS (thesis_id, date, type_of_exam, location, exam_report)
+                    VALUES (?, ?, ?, ?, ?);
+                `;
+                db.query(insertQuery, [
+                    examination.thesis_id,
+                    examination.date,
+                    examination.type_of_exam,
+                    examination.location,
+                    examination.exam_report
+                ], (insertErr) => {
+                    if (insertErr) {
+                        console.error('Error inserting examination:', insertErr);
+                    } else {
+                        console.log(`Examination ${examination.thesis_id} added successfully.`);
+                    }
+                });
+            }
+        });
+    });
+
+        // Εισαγωγή Logs
+        data.logs.forEach(log => {
+            const query = `SELECT * FROM LOGS WHERE logs.id=?;`;
+            db.query(query, [log.id], (err, results) => {
+                if (err) {
+                    console.error('Error checking for duplicate logs: ', err);
+                    return;
+                }
+                if (results.length === 0) {
+                    const insertQuery = `
+                        INSERT INTO LOGS (id, thesis_id, date_of_change, old_state, new_state)
+                        VALUES (?, ?, ?, ?, ?);
+                    `;
+                    db.query(insertQuery, [
+                        log.id,
+                        log.thesis_id,
+                        log.date_of_change,
+                        log.old_state,
+                        log.new_state
+                    ], (insertErr) => {
+                        if (insertErr) {
+                            console.error('Error inserting logs:', insertErr);
+                        } else {
+                            console.log(`Log ${log.id} added successfully.`);
+                        }
+                    });
+                }
+            });
+        });
+
     console.log(`Database up-to-date!`);
 }
+
 
 
 
@@ -126,4 +234,4 @@ function insertData() {
 insertData();
 
 
-    module.exports = db;
+module.exports = db;

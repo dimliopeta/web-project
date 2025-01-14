@@ -34,7 +34,6 @@
             /* Dynamic adjustment of font size */
         }
 
-
         .navbar-nav .nav-link.active {
             font-weight: bold;
             color: #0d6efd;
@@ -42,13 +41,31 @@
             border-bottom: 2px solid #0d6efd;
             /* Bottom border color */
         }
+
+        .no-bullet {
+            list-style-type: none;
+        }
+
+        .left-ul-30 {
+            margin-left: 25px;
+        }
+
+        .logcard {
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logcard-body {
+            padding: 15px;
+        }
+
     </style>
 </head>
 
 <body>
 
 
-    <!--- navbar --->
+    <!--- --->
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top nav-item dropdown">
         <a class="navbar-brand px-3 fs-4" href="student">
             <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
@@ -62,337 +79,664 @@
                 <a class="nav-item nav-link" href="#dashboard">Επισκόπιση Θέματος</a>
                 <a class="nav-item nav-link" href="#configure_thesis">Διαχείριση Διπλωματικής</a>
             </div>
-            <button type="button" class="nav-item btn btn-outline-secondary ms-auto" data-target="student_profile">Λογαριασμός</button>
-            <button type="button" class="nav-item btn btn-outline-secondary float-end mx-4" id="logout-btn">Έξοδος</button>
-            
+            <button type="button" class="nav-item btn btn-outline-secondary ms-auto"
+                data-target="student_profile">Λογαριασμός</button>
+            <button type="button" class="nav-item btn btn-outline-secondary float-end mx-4"
+                id="logout-btn">Έξοδος</button>
+
         </div>
     </nav>
 
     <!--------- Main Content --------->
     <div class="main-content">
-        <!------ DashBoard ------>
+
+        <!------------------ DashBoard Page ------------------>
         <div id="dashboard" class="content-section" style="display:block;">
 
 
             <!-- Thesis view body -->
-            <h2 class="text-center mt-5 pt-5">Επισκόπηση θέματος Διπλωματικής Εργασίας</h2>
+            <h2 class="text-center mt-5 pt-5 pb-3">Επισκόπηση θέματος Διπλωματικής Εργασίας</h2>
             <div class="col-lg-8 mx-auto">
                 <div class="card text-center">
 
                     <div class="card-header">
                         <h3 class="text-primary">Διπλωματική</h3>
-                        <div>status</div>
-                        <button type="button" class="btn btn-primary float-center my-2">Διαχείρηση</button>
+                        <div row>
+                            <span>Κατάσταση:</span>
+                            <span data-field="thesis_status"></span>
+                        </div>
+                        <button type="button" href="#configure_thesis" data-target="configure_thesis"
+                            class="btn btn-primary float-center my-2">Διαχείριση</button>
                     </div>
 
-                    <div class="card-body">
-                        <h5 class="card-title">thesis_title</h5>
-                        <p class="card-text">thesis_summary.</p>
-                        <hr>
-                        <h6 class="card-title">Επιβλέπων: teacher_id</h6>
-                        <div class="pt-2">Τριμελής:</div>
-                        <p class="card-title">committee1 - committee2 - committee3</p>
+                    <div class="card-body" id="dashboardBody">
+                        <section>
+                            <h5 class="card-title" data-field="thesis_title"></h5>
+                            <p class="card-text" data-field="thesis_summary"></p>
+                            <hr>
+
+                            <h5 class="card-title">
+                                <span>Επιβλέπων:</span>
+                                <span data-field="professor_name"></span>
+                                <span data-field="professor_surname"></span>
+                                <span data-field=""></span>
+                            </h5>
+                            <h5 class="pt-3 pb-2">Τριμελής:</h5>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span data-field="professor_name"></span>
+                                    <span data-field="professor_surname"></span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <span data-field="committee_member1_name"> </span>
+                                    <span data-field="committee_member1_surname"> </span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <span data-field="committee_member2_name"> </span>
+                                    <span data-field="committee_member2_surname"> </span>
+                                </div>
+                            </div>
+                        </section>
                     </div>
 
                     <div class="card-footer text-muted">
-                        Ημερομηνία έναρξης: thesis_date
-                        <button type="button" class="btn btn-outline-primary btn-sm float-end">PDF</button>
+                        <span data-field="dashboardStartDate">
+                            <span class="ps-5">Ημερομηνία έναρξης:</span>
+                            <span class="pe-4" data-field="thesis_start_date"> </span>
+                        </span>
+                        <span data-field="dashboardExamDate">
+                            <span class="ps-5">Ημερομηνία περάτωσης:</span>
+                            <span class="pe-4" data-field="thesis_exam_date"> </span>
+                        </span>
+                        <span data-field="dashboardDuration">
+                            <span class="ps-5">Διάρκεια:</span>
+                            <span data-field="thesis_duration"> </span>
+                        </span>
+                        <button type="button" data-field="pdf_button"
+                            class="btn btn-outline-primary btn-sm float-end">PDF</button>
                     </div>
-
                 </div>
+
+
             </div>
         </div>
 
 
 
 
-        <!------- Profile page ------->
-        <div id="student_profile" class="content-section" style="display:none;">
-            <div>
-                <h2 class="text-center mt-5 pt-5">Λογαριασμός</h2>
-            </div>
-
-            <!-- Cards & Body -->
-            <div style="background-color: #eee;">
-                <div class="container py-5">
-                    <div class="row">
-
-                        <!--Profile card-->
-                        <div class="col-lg-4">
-                            <div class="card mb-4">
-                                <div class="card-body text-center">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
-                                        alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
-                                    <h5 class="my-3">student_name</h5>
-                                    <p class="text-muted mb-1">student_id</p>
-                                    <p class="text-muted mb-4">student_year</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!--Contact info card-->
-                        <div class="col-lg-8">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <div class="row">
-                                        <div class="col-sm-12 text-center">
-                                            <h3 class="text-primary">Στοιχεία επικοινωνίας</h3>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Email</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_mail</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Κινητό τηλέφωνο</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_tel_mob</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Σταθερό τηλέφωνο</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_tel_land</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Διεύθυνση</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_address</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">Πόλη</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_city</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-3">
-                                            <p class="mb-0">T.K.</p>
-                                        </div>
-                                        <div class="col-sm-7">
-                                            <p class="text-muted mb-0">student_tk</p>
-                                        </div>
-                                        <div class="col-sm-2 text-center">
-                                            <button type="button" class="btn btn-outline-primary btn-sm">Αλλαγή</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!------- Configure Thesis page ------->
+        <!------------------ Configure Thesis Page ------------------>
         <div id="configure_thesis" class="content-section" style="display:none;">
-            <h2 class="text-center mt-5 pt-5 pb-2">Διαχείρηση διπλωματικής</h2>
+            <h2 class="text-center mt-5 pt-5 pb-3">Διαχείρηση διπλωματικής</h2>
 
             <div class="col-lg-8 mx-auto">
                 <div class="card text-center">
 
                     <div class="card-header">
                         <h3 class="text-primary">Διπλωματική</h3>
-                        <p> Κατάσταση: status</p>
-                    </div>
-
-                    <div class="card-body">
-                        <!--Thesis info-->
-                        <h5 class="card-title">thesis_title</h5>
-                        <p class="card-text">thesis_summary.</p>
-                        <hr>
-
-                        <!--Grades-->
-                        <h3 class="py-1">Βαθμολογία:</h3>
-                        <p> grade</p>
-                        <h5 class="py-1">Τριμελής επιτροπή:</h5>
-                        <div class="row">
-                            <div class="col-sm-4 text-center">
-                                <p class="my-2">Επιβλέπων / 1o μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                            <div class="col-sm-4 text-center">
-                                <p class="my-2">2o μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                            <div class="col-sm-4 text-center">
-                                <p class="mt-2 mb-0"> 3ο μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-4">
-                                <p class="my-2 text-center">b1</p>
-                            </div>
-                            <div class="col-sm-4">
-                                <p class="my-2 text-center">b2</p>
-                            </div>
-                            <div class="col-sm-4">
-                                <p class="mt-2 mb-0 text-center">b3</p>
-                            </div>
-                        </div>
-                        <hr>
-                        <!--Proffessors-->
-                        <h4 class="card-title">Επιβλέπων:</h4>
-                        <p> teacher_id</p>
-                        <h4 class="py-1">Τριμελής επιτροπή:</h4>
-                        <div class="row">
-                            <div class="col-sm-5 text-end">
-                                <p class="my-2">Επιβλέπων / 1o μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                            <div class="col-sm-5">
-                                <p class="my-2 text-start">epivlepomn_name</p>
-                            </div>
-                            <div class="col-sm-2">
-                            </div>
-                            <div class="col-sm-5 text-end">
-                                <p class="my-2">2o μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                            <div class="col-sm-5">
-                                <p class="my-2 text-start">trimeles_2</p>
-                            </div>
-                            <div class="col-sm-2">
-                                <button type="button"
-                                    class="btn btn-outline-primary btn-sm float-start">Ορισμός</button>
-                            </div>
-                            <div class="col-sm-5 text-end">
-                                <p class="mt-2 mb-0"> 3ο μέλος Τριμελούς Επιτροπής:</p>
-                            </div>
-                            <div class="col-sm-5">
-                                <p class="mt-2 mb-0 text-start">trimeles3</p>
-                            </div>
-                            <div class="col-sm-2">
-                                <button type="button"
-                                    class="btn btn-outline-primary btn-sm float-start">Ορισμός</button>
-                            </div>
-                        </div>
-                        <hr>
-
-                        <!--Status changes-->
-                        <div class="row">
-                            <h4 class="text-center pb-1">Αλλαγές κατάστασης</h4>
-                            <div>
-                                <p>allag1</p>
-                            </div>
-                            <div>
-                                <p>allag2</p>
-                            </div>
-                            <div>
-                                <p>allag3</p>
-                            </div>
-                        </div>
-                        <hr>
-
-                        <!--Files after completion-->
-                        <div class="row">
-                            <h4 class="pb-1 text-center">Αρχεία</h4>
-                            <div class="col-sm-6 text-end">
-                                <p>Πρακτικό εξέτασης:</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <button type="button" class="btn btn-outline-primary btn-sm float-start">PDF</button>
-                            </div>
-                            <div class="col-sm-6 text-end">
-                                <p>Σύνδεσμος αποθετηρίου "Νημερτής":</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <button type="button" class="btn btn-outline-primary btn-sm float-start">Link</button>
-                            </div>
-                        </div>
-                        <hr>
-                        <!--Active thesis management-->
-                        <div class="row">
-                            <h4 class="pb-1 text-center">Διαχείρηση</h4>
-                            <div class="col-sm-6 text-end">
-                                <p>Ανάρτηση αρχείου:</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <button type="button" class="btn btn-outline-primary btn-sm float-start">Αρχείο</button>
-                            </div>
-                            <div class="col-sm-6 text-end">
-                                <p>Ανάρτηση συνδέσμου:</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <button type="button"
-                                    class="btn btn-outline-primary btn-sm float-start">Σύνδεσμος</button>
-                            </div>
-                            <div class="col-sm-6 text-end">
-                                <p>Ορισμός ημ/νιας εξέτασης:</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <button type="button"
-                                    class="btn btn-outline-primary btn-sm float-start">Ημερομηνία</button>
-                            </div>
-                            <div class="col-sm-6 text-end">
-                                <p>Κατάθεση στο "Νημερτής":</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <button type="button"
-                                    class="btn btn-outline-primary btn-sm float-start">Κατάθεση</button>
-                            </div>
+                        <div row>
+                            <span>Κατάσταση:</span>
+                            <span data-field="thesis_status"></span>
                         </div>
                     </div>
 
-                    <!--Dates-->
-                    <div class="card-footer text-muted">
-                        <div class="row">
-                            <div class="col-sm-4 text-center">
-                                <p>Ημερομηνία έναρξης: thesis_date_start</p>
+                    <div class="card-body" id="configurationBody">
+                        <!-- Thesis info -->
+                        <section id="infoSection">
+                            <h5 class="card-title" data-field="thesis_title"></h5>
+                            <p class="card-text" data-field="thesis_summary"></p>
+                        </section>
+
+                        <!-- Professors -->
+                        <section id="professorsSection">
+                            <hr>
+                            <h4 class="card-title">
+                                <span>Επιβλέπων:</span>
+                                <span data-field="professor_name"></span>
+                                <span data-field="professor_surname"></span>
+                                <span data-field=""></span>
+                            </h4>
+                            <h4 class="py-3">Τριμελής επιτροπή:</h4>
+                            <div class="row">
+                                <span class="col-sm-5 d-flex justify-content-end">
+                                    <span class="my-2"> Επιβλέπων / 1o μέλος Τριμελούς Επιτροπής:</span>
+                                </span>
+                                <span class="col-sm-5 d-flex justify-content-start">
+                                    <span class="my-2" data-field="professor_name"> </span>&nbsp;
+                                    <span class="my-2" data-field="professor_surname"> </span>
+                                </span>
+                                <span class="col-sm-5 d-flex justify-content-end">
+                                    <span class="my-2"> 2o μέλος Τριμελούς Επιτροπής:</span>
+                                </span>
+                                <span class="col-sm-5 d-flex justify-content-start">
+                                    <span class="my-2" data-field="committee_member1_name"> </span>&nbsp;
+                                    <span class="my-2" data-field="committee_member1_surname"> </span>
+                                </span>
+                                <span class="col-sm-2">
+                                    <!-- "assign committee" added to class since ids must be unique -->
+                                    <button type="button"
+                                        class="btn btn-outline-primary btn-sm mt-2 assignCommittee">Ορισμός</button>
+                                </span>
+                                <span class="col-sm-5 d-flex justify-content-end">
+                                    <span class="my-2"> 3ο μέλος Τριμελούς Επιτροπής:</span>
+                                </span>
+                                <span class="col-sm-5 d-flex justify-content-start">
+                                    <span class="my-2" data-field="committee_member2_name"> </span>&nbsp;
+                                    <span class="my-2" data-field="committee_member2_surname"> </span>
+                                </span>
+                                <span class="col-sm-2">
+                                    <!-- "assign committee" added to class since ids must be unique -->
+                                    <button type="button"
+                                        class="btn btn-outline-primary btn-sm mt-2 assignCommittee">Ορισμός</button>
+                                </span>
                             </div>
-                            <div class="col-sm-5 text-center">
-                                <p>Ημερομηνία ολοκλήρωσης: thesis_date_end</p>
+                            <!-- Searh bar for Professors -->
+                            <div class="mt-5 mx-auto" id="professorSearchBar" style="display:none;">
+                                <div class="border p-3 rounded">
+                                    <h5 class="text-primary">Πρόσκληση Τριμελούς</h5>
+                                    <div id="professorListWrapper">
+                                        <div class="input-group mb-3">
+                                            <input type="search" class="form-control" placeholder="Αναζήτηση Καθηγητή"
+                                                aria-label="Search" id="search-professor" name="search-professor">
+                                            <span class="input-group-text">
+                                                <img src="https://img.icons8.com/ios7/600/search.png" alt="Search"
+                                                    style="width: 20px; height: 20px;">
+                                            </span>
+                                        </div>
+                                        <ul id="professor-list" class="list-group mb-3"></ul>
+                                    </div>
+                                    <div id="chosenProfessor" style="display:none;">
+                                        <label for="professorNameInput" class="form-label">Επιλεγμένος
+                                            Καθηγητής</label>
+                                        <input type="text" class="form-control" id="professorNameInput" readonly>
+                                        <button class="btn btn-secondary mt-3 w-100" id="changeProfessorButton">Αλλαγή
+                                            Επιλεγμένου Καθηγητή</button>
+
+                                        <!-- Invite Button -->
+                                        <div class="row mt-4">
+                                            <div class="col text-center">
+                                                <button class="btn btn-primary" id="assignCommitteeButton">Πρόσκληση
+                                                    Καθηγητή</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-sm-3 text-center">
-                                <p>Διάρκεια περάτωσης: thesis_duration</p>
+                        </section>
+
+                        <!-- Grades -->
+                        <section id="gradesSection">
+                            <hr>
+                            <h4 class="py-1">Τελική Βαθμολογία:</h4>
+                            <h4 data-field="final_grade"> </h4>
+                            <h5 class="pt-4 pb-2">Βαθμολογία Τριμελούς:</h5>
+                            <div class="row">
+                                <h5 class="col-sm-4">
+                                    <span data-field="professor_name"> </span>
+                                    <span data-field="professor_surname"> </span>
+                                </h5>
+                                <h5 class="col-sm-4">
+                                    <span data-field="committee_member1_name"> </span>
+                                    <span data-field="committee_member1_surname"> </span>
+                                </h5>
+                                <h5 class="col-sm-4">
+                                    <span data-field="committee_member2_name"> </span>
+                                    <span data-field="committee_member2_surname"> </span>
+                                </h5>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <p class="my-2 text-center">Αναμονή</p>
+                                </div>
+                                <div class="col-sm-4">
+                                    <p class="my-2 text-center">Αναμονή</p>
+                                </div>
+                                <div class="col-sm-4">
+                                    <p class="mt-2 mb-0 text-center">Αναμονή</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Status changes -->
+                        <section id="statusChangesSection">
+                            <hr>
+                            <div class="row">
+                                <h4 class="text-center pb-3">Αλλαγές Κατάστασης</h4>
+                                <div id="statusChangeContainer">
+                                    <!-- Status change logs will be dynamically added here -->
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Files after completion -->
+                        <section id="completedFilesSection">
+                            <hr>
+                            <div class="row">
+                                <h4 class="pb-1 text-center">Αρχεία</h4>
+                                <div class="col-sm-6 text-end">
+                                    <p>Πρακτικό εξέτασης:</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button type="button" id="configurationCompletedFilesExamReportButton"
+                                        class="btn btn-outline-primary btn-sm float-start">Άνοιγμα</button>
+                                </div>
+                                <div class="col-sm-6 text-end">
+                                    <p>Σύνδεσμος αποθετηρίου "Νημερτής":</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button type="button" id="configurationCompletedFilesNimertisLink"
+                                        class="btn btn-outline-primary btn-sm float-start">Link</button>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="examReportHTMLSection" class="border border-dark p-5 m-2" style="display:none;">
+                            <h4>ΠΡΑΚΤΙΚΟ ΣΥΝΕΔΡΙΑΣΗΣ ΤΗΣ ΤΡΙΜΕΛΟΥΣ ΕΠΙΤΡΟΠΗΣ ΓΙΑ ΤΗΝ ΠΑΡΟΥΣΙΑΣΗ ΚΑΙ ΚΡΙΣΗ ΤΗΣ
+                                ΔΙΠΛΩΜΑΤΙΚΗΣ ΕΡΓΑΣΙΑΣ</h4>
+                            <span>του/της φοιτητή/φοτήτρια κ.</span>
+                            <span data-field="examReportNameSurname">……………………………</span>
+                            <section style="text-align: justify;"></section>
+                            <p></p>
+                            <span>Η συνεδρίαση πραγματοποιήθηκε</span>
+                            <div class="examReportDoneInPerson" style="display:none;">
+                                <span>στην αίθουσα</span>
+                                <span data-field="examReportLocation">……………………………</span>
+                            </div>
+                            <span class="examReportDoneOnline" style="display:none;">ηλεκτρονικά</span>
+
+                            <span>, στις </span>
+                            <span data-field="examReportDate">……………………………</span>
+                            <span>, ημέρα </span>
+                            <span data-field="examReportDateName">……………………………</span>
+                            <span>.</span>
+                            <p></p>
+                            <span>Στην συνεδρίαση είναι παρόντα τα μέλη της Τριμελούς Επιτροπής, κ.κ. :</span>
+                            <p></p>
+                            <span> 1.</span>
+                            <span data-field="examReportSupervisorNameSurname">……………………………</span>
+                            <span> ,</span>
+                            <p></p>
+                            <span> 2.</span>
+                            <span data-field="examReportCommitteeMember1NameSurname">……………………………</span>
+                            <span> ,</span>
+                            <p></p>
+                            <span> 3.</span>
+                            <span data-field="examReportCommitteeMember2NameSurname">……………………………</span>
+                            <span> ,</span>
+                            <p></p>
+                            <span>οι οποίοι ορίσθηκαν από την Συνέλευση του ΤΜΗΥΠ, στην συνεδρίαση της με
+                                αριθμό</span>
+                            <span data-field="examReportAssemblyNo">………………</span>
+                            <span>.</span>
+                            <p></p>
+                            <span>Ο/Η φοιτητής/φοιτήτρια κ.</span>
+                            <span data-field="examReportNameSurname">……………………………</span>
+                            <span>ανέπτυξε το θέμα της Διπλωματικής του/της Εργασίας, με τίτλο</span>
+                            <p></p>
+                            <span data-field="examReportTitle">……………………………»</span>
+                            <span>.</span>
+                            <p></p>
+                            <span>Στην συνέχεια υποβλήθηκαν ερωτήσεις στον υποψήφιο από τα μέλη της Τριμελούς
+                                Επιτροπής
+                                και
+                                τους άλλους παρευρισκόμενους,
+                                προκειμένου να διαμορφώσουν σαφή άποψη για το περιεχόμενο της εργασίας, για την
+                                επιστημονική συγκρότηση του μεταπτυχιακού φοιτητή.
+                                Μετά το τέλος της ανάπτυξης της εργασίας του και των ερωτήσεων, ο υποψήφιος
+                                αποχωρεί.
+                            </span>
+                            <p></p>
+                            <span>Ο Επιβλέπων καθηγητής κ.</span>
+                            <span data-field="examReportSupervisorNameSurname">……………………………</span>
+                            <span>, προτείνει στα μέλη της Τριμελούς Επιτροπής, να ψηφίσουν για το αν εγκρίνεται
+                                η διπλωματική εργασία του </span>
+                            <span data-field="examReportNameSurname">……………………………</span>
+                            <span>.</span>
+                            <p></p>
+                            <span>Τα μέλη της Τριμελούς Επιτροπής, ψηφίζουν κατ’ αλφαβητική σειρά:</span>
+                            <p></p>
+                            <span> 1.</span>
+                            <span data-field="examReportCommitteAlphabetical1">……………………………</span>
+                            <span> .</span>
+                            <p></p>
+                            <span> 2.</span>
+                            <span data-field="examReportCommitteAlphabetical2">……………………………</span>
+                            <span> .</span>
+                            <p></p>
+                            <span> 3.</span>
+                            <span data-field="examReportCommitteAlphabetical3">……………………………</span>
+                            <span> .</span>
+                            <p></p>
+                            <span>υπέρ της εγκρίσεως της Διπλωματικής Εργασίας του φοιτητή </span>
+                            <span data-field="examReportNameSurname">……………………………</span>
+                            <span>, επειδή θεωρούν επιστημονικά επαρκή και το περιεχόμενό της ανταποκρίνεται στο
+                                θέμα
+                                που
+                                του δόθηκε.</span>
+                            <p></p>
+                            <span>Μετά της έγκριση, ο εισηγητής κ. </span>
+                            <span data-field="examReportSupervisorNameSurname">……………………………</span>
+                            <span> , προτείνει στα μέλη της Τριμελούς Επιτροπής, να απονεμηθεί στο/στη
+                                φοιτητή/τρια</span>
+                            <span data-field="examReportNameSurname">……………………………</span>
+                            <span>ο βαθμός </span>
+                            <span data-field="examReportFinalGrade">……………………………</span>
+                            <span> .</span>
+                            <p></p>
+                            <span>Τα μέλη της Τριμελούς Επιτροπής, απομένουν την παρακάτω βαθμολογία:</span>
+                            <p></p>
+                            <table border="1" style="border-collapse: collapse; width: 100%; text-align: center;">
+                                <thead style="text-align: center; background-color: #f2f2f2;">
+                                    <tr>
+                                        <th style="border: 1px solid black;">Ονοματεπώνυμο</th>
+                                        <th style="border: 1px solid black;">Βαθμολογία</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportSupervisorNameSurname"> </td>
+                                        <td style="border: 1px solid black;" data-field="examReportSupervisorGrade">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportCommitteeMember1NameSurname"> </td>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportCommitteeMember1Grade"> </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportCommitteeMember2NameSurname"> </td>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportCommitteeMember2Grade"> </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p></p>
+                            <span>Μετά την έγκριση και την απονομή του βαθμού </span>
+                            <span data-field="examReportFinalGrade">……………………………</span>
+                            <span>, η Τριμελής Επιτροπή, προτείνει να προχωρήσει στην διαδικασία για να ανακηρύξει
+                                τον
+                                κ.</span>
+                            <span data-field="examReportNameSurname">……………………………</span>
+                            <span>, σε
+                                διπλωματούχο του Προγράμματος Σπουδών του «ΤΜΗΜΑΤΟΣ ΜΗΧΑΝΙΚΩΝ, ΗΛΕΚΤΡΟΝΙΚΩΝ
+                                ΥΠΟΛΟΓΙΣΤΩΝ
+                                ΚΑΙ ΠΛΗΡΟΦΟΡΙΚΗΣ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ» και να του απονέμει το Δίπλωμα
+                                Μηχανικού Η / Υ το οποίο αναγνωρίζεται ως Ενιαίος Τίτλος Σπουδών Μεταπτυχιακού
+                                Επιπέδου.
+                            </span>
+
+                        </section>
+                        </section>
+
+                        <!-- Active thesis management -->
+                        <section id="managementSection">
+                            <hr>
+                            <div class="row">
+                                <h4 class="pb-1 text-center">Διαχείρηση</h4>
+
+                                <!-- Left side buttons -->
+                                <div class="col-sm-6">
+                                    <div class="list-group">
+                                        <!-- Upload File -->
+                                        <button class="list-group-item list-group-item-action"
+                                            id="configurationButtonUploadFile">
+                                            Ανάρτηση αρχείου
+                                        </button>
+                                        <!-- Upload Link -->
+                                        <button class="list-group-item list-group-item-action"
+                                            id="configurationButtonUploadLink">
+                                            Ανάρτηση συνδέσμου
+                                        </button>
+                                        <!-- Set Exam Date -->
+                                        <button class="list-group-item list-group-item-action"
+                                            id="configurationButtonSetExamDate">
+                                            Ορισμός ημ/νιας εξέτασης
+                                        </button>
+                                        <!-- Nimertis Submission -->
+                                        <button class="list-group-item list-group-item-action"
+                                            id="configurationButtonNimertisSubmission">
+                                            Κατάθεση στο "Νημερτής"
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Right side content -->
+                                <div class="col-sm-6">
+                                    <!-- Section for File Upload -->
+                                    <div id="configurationUploadFileSection" class="accordion-section"
+                                        style="display:none;">
+                                        <h5>Ανηρτημένα αρχεία</h5>
+                                        <p id="configurationFileInfo">Δεν έχει αναρτηθεί αρχείο.</p>
+                                        <input type="file" id="configurationUploadFileInputBox"
+                                            class="form-control mb-2">
+                                        <button type="button" class="btn btn-outline-primary"
+                                            id="configurationUploadFileButton">Ανάρτηση
+                                        </button>
+                                    </div>
+                                    <!-- Section for Link Upload -->
+                                    <div id="linkSection" class="accordion-section" style="display:none;">
+                                        <h5 class="left-ul-30">Ανηρτημένοι Σύνδεσμοι</h5>
+                                        <ul id="configurationUploadedLinksList">
+                                            <li>Δεν έχουν αναρτηθεί σύνδεσμοι</li>
+                                        </ul>
+                                        <input type="text" id="configurationUploadLinkInputBox"
+                                            class="form-control mb-2" placeholder="Εισάγετε σύνδεσμο">
+                                        <button type="button" class="btn btn-outline-primary"
+                                            id="configurationUploadLinkButton">Ανάρτηση
+                                        </button>
+                                    </div>
+
+                                    <!-- Section for Exam Date -->
+                                    <div id="examDateSection" class="accordion-section" style="display:none;">
+                                        <h5>Ημερομηνία Εξέτασης</h5>
+                                        <span id="configurationExamDateInfo"> </span>
+                                        <input type="date" id="configurationExamDateInputBox" class="my-2 form-control"
+                                            inputmode="date">
+                                        <div class="row mt-3">
+                                            <div class="col-sm-6">
+                                                <h5>Τρόπος</h5>
+                                                <span id="configurationTypeOfExamInfo"> </span>
+                                                <select id="configurationTypeOfExamInputBox" class="form-control my-2">
+                                                    <option value="Δια ζώσης">Δια ζώσης</option>
+                                                    <option value="Εξ αποστάσεως">Εξ αποστάσεως</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <h5>Τοποθεσία</h5>
+                                                <span id="configurationExamLocationInfo"> </span>
+                                                <input type="text" id="configurationExamLocationInputBox"
+                                                    class="my-2 form-control" placeholder="Αίθουσα ή Zoom link">
+                                            </div>
+                                            <div class="row">
+                                                <button type="button" class="btn btn-outline-primary"
+                                                    id="configurationExamDataSubmitButton">Ορισμός</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Section for Nimertis Link -->
+                                    <div id="nimertisSection" class="accordion-section" style="display:none;">
+                                        <h5>Σύνδεσμος στο αποθετήριο "Νημερτής"</h5>
+                                        <p id="configurationNimertisLinkInfo">Δεν έχει αναρτηθεί σύνδεσμος</p>
+                                        <input type="text" id="configurationUploadNimertisInputBox"
+                                            class="form-control mb-2" placeholder="Enter Nimertis link">
+                                        <button type="button" class="btn btn-outline-primary"
+                                            id="configurationUploadNimertisButton">Ανάρτηση</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+
+                    <!-- Dates -->
+                    <div class="card-footer text-muted" id="configurationFooter">
+                        <section id="datesSection">
+                            <span data-field="configurationStartDate">
+                                <span class="ps-5">Ημερομηνία έναρξης:</span>
+                                <span class="pe-4" data-field="thesis_start_date"> </span>
+                            </span>
+                            <span data-field="configurationExamDate">
+                                <span class="ps-5">Ημερομηνία περάτωσης:</span>
+                                <span class="pe-4" data-field="thesis_exam_date"> </span>
+                            </span>
+                            <span data-field="configurationDuration">
+                                <span class="ps-5">Διάρκεια:</span>
+                                <span data-field="thesis_duration"> </span>
+                            </span>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p> </p>
+    </div>
+
+
+    <!------------------ Profile Page ------------------>
+    <div id="student_profile" class="content-section" style="display:none;">
+        <div>
+            <h2 class="text-center mt-5 pt-5 pb-3">Λογαριασμός</h2>
+        </div>
+
+        <!-- Cards & Body -->
+        <div style="background-color: #eee;">
+            <div class="container py-5">
+                <div class="row">
+
+                    <!-- Profile card -->
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                                <h5 class="my-3">
+                                    <span data-field="name">student_name</span>
+                                    <span data-field="surname">student_surname</span>
+                                </h5>
+                                <p class="text-muted mb-1" data-field="student_number">student_number</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact info card -->
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-sm-12 text-center">
+                                        <h3 class="text-primary py-2">Στοιχεία επικοινωνίας</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Email επικοινωνίας</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="contact_email">student_contact_mail
+                                        </p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Κινητό τηλέφωνο</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="mobile_telephone">student_tel_mob</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Σταθερό τηλέφωνο</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="landline_telephone">student_tel_land
+                                        </p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Οδός</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="street">student_street</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Αριθμός</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="number">student_street_number</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">Πόλη</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0" data-field="city">student_city</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <p class="mb-0">T.K.</p>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <p class="text-muted mb-0 " data-field="postcode">student_postcode</p>
+                                    </div>
+                                    <div class="col-sm-2 text-center">
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm toggle-edit">Αλλαγή</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                 </div>
             </div>
-
         </div>
-        <p> </p>
 
     </div>
 
 
-    <!-- Bootstrap JS -->
+
+    <!------------------ Bootstrap JS ------------------>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/javascript/student_script.js"></script>
 </body>
