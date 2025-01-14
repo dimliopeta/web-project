@@ -387,11 +387,38 @@ function showInfoSection(thesis) {
             canceledTitle.textContent = 'Ακυρωμένη Διπλωματική';
             canceledSection.appendChild(canceledTitle);
 
-            const departmentInfo = document.createElement('p');
-            departmentInfo.innerHTML = `
-                        <strong>Αριθμός Τμήματος:</strong> ${thesis.cancellation_department || 'Δεν υπάρχει διαθέσιμη πληροφορία'}
-                    `;
-            canceledSection.appendChild(departmentInfo);
+            const detailsParagraph = document.createElement('p');
+            detailsParagraph.textContent = 'Φόρτωση λεπτομερειών...';
+            canceledSection.appendChild(detailsParagraph);
+
+            fetch(`/api/canceled-thesis`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    thesis_id: thesis.thesis_id
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const details = data.details;
+
+                        detailsParagraph.innerHTML = `
+                                <strong>Αριθμός Τμήματος:</strong> ${details.gen_assembly_session || 'Δεν υπάρχει διαθέσιμη πληροφορία'}<br>
+                                <strong>Ημερομηνία Απόφασης:</strong> ${details.date_of_change || 'Δεν υπάρχει διαθέσιμη πληροφορία'}<br>
+                                <strong>Λόγος Ακύρωσης:</strong> ${details.cancellation_reason || 'Δεν υπάρχει διαθέσιμη πληροφορία'}
+                            `;
+                    } else {
+                        detailsParagraph.innerHTML = '<p class="text-danger">Αδυναμία φόρτωσης λεπτομερειών.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Σφάλμα κατά την ανάκτηση των λεπτομερειών ακύρωσης:', error);
+                    detailsParagraph.innerHTML = '<p class="text-danger">Σφάλμα κατά τη φόρτωση λεπτομερειών.</p>';
+                });
 
             const canceledHr = document.createElement('hr');
             canceledSection.appendChild(canceledHr);
@@ -431,56 +458,57 @@ function createButton(id, text, classes, onClick = null) {
 
 //------------Frontend for Managing an Assigned Thesis----------
 function addAssignedSection(thesis, container) {
-    if (thesis.role === "Επιβλέπων")
-    {const buttonsContainer = document.createElement('div');
-    buttonsContainer.classList.add('d-flex', 'gap-2', 'mt-3');
+    if (thesis.role === "Επιβλέπων") {
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.classList.add('d-flex', 'gap-2', 'mt-3');
 
-    const showInvitationsButton = createButton('show-inv', 'Εμφάνιση Προσκλήσεων', ['btn', 'btn-info', 'mt-2'], () => {
-        const existingList = container.querySelector('.invitations-list');
+        const showInvitationsButton = createButton('show-inv', 'Εμφάνιση Προσκλήσεων', ['btn', 'btn-info', 'mt-2'], () => {
+            const existingList = container.querySelector('.invitations-list');
 
-        if (existingList) {
-            // Αν η λίστα υπάρχει, την αφαιρούμε και αλλάζουμε το κουμπί στην αρχική του κατάσταση
-            existingList.remove();
-            showInvitationsButton.textContent = 'Εμφάνιση Προσκλήσεων';
-            showInvitationsButton.classList.remove('btn-primary');
-            showInvitationsButton.classList.add('btn-info');
-        } else {
-            // Αν η λίστα δεν υπάρχει, την εμφανίζουμε και αλλάζουμε το κουμπί για "Απόκρυψη"
-            console.log('Container:', container);
-            showThesisInvitations(thesis.thesis_id, container);
-            showInvitationsButton.textContent = 'Απόκρυψη Προσκλήσεων';
-            showInvitationsButton.classList.remove('btn-info');
-            showInvitationsButton.classList.add('btn-primary');
-        }
-    });
-    buttonsContainer.appendChild(showInvitationsButton);
+            if (existingList) {
+                // Αν η λίστα υπάρχει, την αφαιρούμε και αλλάζουμε το κουμπί στην αρχική του κατάσταση
+                existingList.remove();
+                showInvitationsButton.textContent = 'Εμφάνιση Προσκλήσεων';
+                showInvitationsButton.classList.remove('btn-primary');
+                showInvitationsButton.classList.add('btn-info');
+            } else {
+                // Αν η λίστα δεν υπάρχει, την εμφανίζουμε και αλλάζουμε το κουμπί για "Απόκρυψη"
+                console.log('Container:', container);
+                showThesisInvitations(thesis.thesis_id, container);
+                showInvitationsButton.textContent = 'Απόκρυψη Προσκλήσεων';
+                showInvitationsButton.classList.remove('btn-info');
+                showInvitationsButton.classList.add('btn-primary');
+            }
+        });
+        buttonsContainer.appendChild(showInvitationsButton);
 
-    const unassignThButton = createButton('unassign-thesis-button', 'Αναίρεση Ανάθεσης', ['btn', 'btn-danger', 'mt-2'], () => unassignThesis(thesis.thesis_id));
+        const unassignThButton = createButton('unassign-thesis-button', 'Αναίρεση Ανάθεσης', ['btn', 'btn-danger', 'mt-2'], () => unassignThesis(thesis.thesis_id));
 
-    buttonsContainer.appendChild(unassignThButton);
+        buttonsContainer.appendChild(unassignThButton);
 
-    const formContainer = document.createElement('div'); // Container για τη φόρμα
-    formContainer.classList.add('mt-3'); // Τοποθέτηση κάτω από τα κουμπιά
+        const formContainer = document.createElement('div'); // Container για τη φόρμα
+        formContainer.classList.add('mt-3'); // Τοποθέτηση κάτω από τα κουμπιά
 
-    const startButtonContainer = document.createElement('div'); // Ξεχωριστό container για το Start Button
-    startButtonContainer.classList.add('d-flex', 'align-items-center', 'mt-2');
-    buttonsContainer.appendChild(startButtonContainer);
+        const startButtonContainer = document.createElement('div'); // Ξεχωριστό container για το Start Button
+        startButtonContainer.classList.add('d-flex', 'align-items-center', 'mt-2');
+        buttonsContainer.appendChild(startButtonContainer);
 
-    checkCommitteeStatus(thesis.thesis_id).then(isFull => {
-        if (isFull) {
-            addStartThesisButton(thesis.thesis_id, formContainer);
-        }
-    });
-    container.appendChild(buttonsContainer);
-    container.appendChild(formContainer);
+        checkCommitteeStatus(thesis.thesis_id).then(isFull => {
+            if (isFull) {
+                addStartThesisButton(thesis.thesis_id, formContainer);
+            }
+        });
+        container.appendChild(buttonsContainer);
+        container.appendChild(formContainer);
 
-    const hr = document.createElement('hr');
-    hr.classList.add('my-3');
-    container.appendChild(hr);}
+        const hr = document.createElement('hr');
+        hr.classList.add('my-3');
+        container.appendChild(hr);
+    }
     else {
-        const committeeText=document.createElement('p');
+        const committeeText = document.createElement('p');
         committeeText.classList.add('text-center');
-        committeeText.innerText="Δεν μπορείτε ακόμα να διαχειριστείτε αυτή την διπλωματική!" ;
+        committeeText.innerText = "Δεν μπορείτε ακόμα να διαχειριστείτε αυτή την διπλωματική!";
         container.append(committeeText);
     }
 }

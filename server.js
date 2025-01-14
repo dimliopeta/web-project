@@ -1180,7 +1180,7 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
     });
 });
 
-//-------------Endpoint for loading all the invitations associated with a specific thesis-------
+//-------------Endpoint for loading all the notes of a professor associated with a specific thesis-------
 app.post('/api/get-notes', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
     const professor_id = req.user.userId; // Από το JWT payload
@@ -1205,6 +1205,7 @@ app.post('/api/get-notes', authenticateJWT, (req, res) => {
     });
 });
 
+//-------------Endpoint for adding a note associated with a specific thesis-------
 app.post('/api/add-note', authenticateJWT, (req, res) => {
     const { thesis_id,  content } = req.body;
     const professor_id = req.user.userId;
@@ -1220,6 +1221,39 @@ app.post('/api/add-note', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση σημείωσης.' });
         }
         res.status(200).json({ success: true, message: 'Η σημείωση καταχωρήθηκε επιτυχώς!' });
+    });
+});
+
+//-------------Endpoint for loading the info of a cancelled thesis-------
+app.post('/api/canceled-thesis', authenticateJWT, (req, res) => {
+    const { thesis_id } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
+
+    if (!thesis_id) {
+        return res.status(400).json({ success: false, message: 'Απαιτείται το thesis_id.' });
+    }
+
+    const query = `
+        SELECT 
+            l.gen_assembly_session,
+            l.cancellation_reason,
+            l.date_of_change
+        FROM Logs l
+        WHERE l.thesis_id = ? AND l.new_state = 'canceled'
+        ORDER BY l.date_of_change DESC
+        LIMIT 1;
+    `;
+
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των λεπτομερειών ακύρωσης:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκαν λεπτομέρειες για την ακυρωμένη διπλωματική.' });
+        }
+
+        res.json({ success: true, details: results[0] });
     });
 });
 
