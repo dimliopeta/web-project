@@ -388,6 +388,53 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     });
 });
 
+//----------------- API to Fetch all data to complete the Exam Report -----------------
+app.get('/api/examReportDetails_fetch', (req, res) => {
+    const query = `
+    SELECT 
+        s.name AS student_name, 
+        s.surname AS student_surname, 
+        e.location AS exam_location, 
+        e.date AS exam_date,
+        p.name AS professor_name, 
+        p.surname AS professor_surname, 
+        c1.name AS committee_member1_name,
+        c1.surname AS committee_member1_surname,
+        c2.name AS committee_member2_name,
+        c2.surname AS committee_member2_surname,
+        t.title AS thesis_title, 
+        t.summary AS thesis_summary,
+        g.grade AS grade,
+        g.comments AS grade_comments
+    FROM 
+        Students s
+    JOIN 
+        Theses t ON s.id = t.student_id
+    JOIN 
+        Examinations e ON t.thesis_id = e.thesis_id
+    JOIN 
+        Professors p ON t.professor_id = p.id
+    LEFT JOIN 
+        Committees c1 ON t.thesis_id = c1.thesis_id AND c1.member1_id IS NOT NULL
+    LEFT JOIN 
+        Committees c2 ON t.thesis_id = c2.thesis_id AND c2.member2_id IS NOT NULL
+    LEFT JOIN 
+        Grades g ON t.thesis_id = g.thesis_id
+    WHERE 
+        t.status = 'completed'  -- or you can adjust based on specific statuses
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Query failed:', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.json(results);
+        }
+    });
+});
+
+
 //----------------- API to Fetch Exam Date-Type-Location-Report -----------------
 app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
     const { thesis_id } = req.params;
