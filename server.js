@@ -389,48 +389,63 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
 });
 
 //----------------- API to Fetch all data to complete the Exam Report -----------------
-app.get('/api/examReportDetails_fetch', (req, res) => {
+app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
+    const userId = req.user.userId;
+    const role = req.user.role;
+
+    let queryParams = [];
     const query = `
     SELECT 
-        s.name AS student_name, 
-        s.surname AS student_surname, 
-        e.location AS exam_location, 
-        e.date AS exam_date,
-        p.name AS professor_name, 
-        p.surname AS professor_surname, 
-        c1.name AS committee_member1_name,
-        c1.surname AS committee_member1_surname,
-        c2.name AS committee_member2_name,
-        c2.surname AS committee_member2_surname,
-        t.title AS thesis_title, 
-        t.summary AS thesis_summary,
-        g.grade AS grade,
-        g.comments AS grade_comments
-    FROM 
-        Students s
-    JOIN 
-        Theses t ON s.id = t.student_id
-    JOIN 
-        Examinations e ON t.thesis_id = e.thesis_id
-    JOIN 
-        Professors p ON t.professor_id = p.id
-    LEFT JOIN 
-        Committees c1 ON t.thesis_id = c1.thesis_id AND c1.member1_id IS NOT NULL
-    LEFT JOIN 
-        Committees c2 ON t.thesis_id = c2.thesis_id AND c2.member2_id IS NOT NULL
-    LEFT JOIN 
-        Grades g ON t.thesis_id = g.thesis_id
-    WHERE 
-        t.status = 'completed'  -- or you can adjust based on specific statuses
-    `;
+        S.name AS student_name, 
+        S.surname AS student_surname, 
+        E.location AS exam_location, 
+        E.date AS exam_date,
+        P.name AS professor_name, 
+        P.surname AS professor_surname, 
+        C1.name AS committee_member1_name,
+        C1.surname AS committee_member1_surname,
+        C2.name AS committee_member2_name,
+        C2.surname AS committee_member2_surname,
+        T.title AS thesis_title, 
+        T.summary AS thesis_summary,
+        GS.grade AS supervisor_grade,
+        GC1.grade AS committee_member1_grade,
+        GC2.grade AS committee_member2_grade
 
-    db.query(query, (err, results) => {
+    FROM 
+        Students S
+    JOIN 
+        Theses T ON S.id = T.student_id
+    JOIN 
+        Examinations E ON T.thesis_id = E.thesis_id
+    JOIN 
+        Professors P ON T.professor_id = P.id
+    LEFT JOIN Committees C ON T.thesis_id = C.thesis_id
+    LEFT JOIN 
+        Professors C1 ON C.member1_id = C1.id
+    LEFT JOIN 
+        Professors C2 ON C.member2_id = C2.id
+    LEFT JOIN 
+        Grades AS GS ON T.thesis_id = GS.thesis_id 
+                AND T.professor_id = GS.professor_id
+    LEFT JOIN 
+        Grades AS GC1 ON T.thesis_id = GC1.thesis_id 
+                AND C.member1_id = GC1.professor_id
+    LEFT JOIN 
+        Grades AS GC2 ON T.thesis_id = GC2.thesis_id 
+                AND C.member2_id = GC2.professor_id
+    WHERE 
+         T.student_id = ?;
+        `;
+    queryParams = [userId];
+
+    db.query(query, queryParams, (err, results) => {
         if (err) {
-            console.error('Query failed:', err);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.json(results);
+            console.error('Σφάλμα κατά την ανάκτηση των δεδομένων του πρακτικού εξέτασης:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
         }
+
+        res.status(200).json({ success: true, examReport: results });
     });
 });
 
@@ -1164,8 +1179,8 @@ app.post('/api/committee-status', authenticateJWT, (req, res) => {
 });
 
 
-app.post('/api/start-thesis', authenticateJWT, (res,req) => {
-    
+app.post('/api/start-thesis', authenticateJWT, (res, req) => {
+
 });
 
 

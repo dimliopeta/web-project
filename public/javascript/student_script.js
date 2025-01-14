@@ -55,8 +55,8 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 
 
 //--------------------------------------------- DASHBOARD & THESIS CONFIGURATION PAGE ---------------------------------------------
-//------------------------------Load Student Data Function and helper functions------------------------------
-function loadStudentData() {
+//------------------------------ Load Thesis Function ------------------------------
+function loadStudentThesis() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
 
     fetch('/api/theses', {
@@ -74,7 +74,6 @@ function loadStudentData() {
         .then(data => {
             if (data.success && data.theses.length > 0) {
                 const thesis = data.theses[0]; // Assuming one thesis per student
-                console.log(thesis);
 
                 let status;
                 switch (thesis.status) {
@@ -118,21 +117,6 @@ function loadStudentData() {
                 const dashboardDuration = document.querySelector('[data-field="dashboardDuration"]');
                 const dashboardStartDate = document.querySelector('[data-field="dashboardStartDate"]');
                 const dashboardExamDate = document.querySelector('[data-field="dashboardExamDate"]');
-
-                // Update the datafields in the Exam Report
-                updateDataField('examReportLocation',);
-                updateDataField('examReportDate',);
-                updateDataField('examReportDateName',);
-                updateDataField('examReportTime',);
-                updateDataField('examReportSupervisorNameSurname',);
-                updateDataField('examReportCommitteeMember1NameSurname',);
-                updateDataField('examReportCommitteeMember2NameSurname',);
-                updateDataField('examReportAssemblyNo',);
-                updateDataField('examReportTitle',);
-                updateDataField('examReportCommitteAlphabetical1',);
-                updateDataField('examReportCommitteAlphabetical2',);
-                updateDataField('examReportCommitteAlphabetical3',);
-                updateDataField('examReportFinalGrade',);
 
                 if (thesis.start_date && thesis.status === "active") {
                     dashboardDuration.style.display = 'inline';
@@ -178,6 +162,12 @@ function loadStudentData() {
 //---------------Helper function add 2 strings together (Name + Surname)
 function nameSurname(name, surname) {
     return name + ' ' + surname;
+}
+//---------------Helper function to sort alphabetically 3 inputs
+function sortThreeStrings(input1, input2, input3) {
+    const inputs = [input1, input2, input3];
+    inputs.sort();
+    return inputs;
 }
 
 //---------------Helper function to calculate the Final Grade (average of 3 committee members' grades)
@@ -781,8 +771,7 @@ function fetchAndDisplayExaminations(thesis) {
                 document.getElementById('configurationExamDateInfo').innerHTML = `${examData.date || 'Δεν έχει οριστεί.'}`;
                 document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
                 document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
-                //Set the exam_report link in the HTML
-                document.getElementById('configurationCompletedFilesExamReport').dataset.reportPath = examData.exam_report || '';
+
 
             } else {
                 alert('Failed to fetch exam details: ' + data.message);
@@ -792,6 +781,68 @@ function fetchAndDisplayExaminations(thesis) {
             console.error('Error fetching exam details:', error);
             alert('Error fetching exam details.');
         });
+}
+
+//------------------------------ Load Exam Report Data Function ------------------------------
+function loadExamReportData() {
+    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
+
+    fetch('/api/examReportDetails_fetch', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch Exam Report data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.examReport.length > 0) {
+                const reportData = data.examReport;
+
+                const finalGrade = calculateFinalGrade(reportData.supervisor_grade, reportData.committee_member1_grade, reportData.committee_member2_grade);
+                updateDataField('final_grade', finalGrade);
+
+                const supervisorNameSurname = nameSurname(reportData.professor_name, reportData.professor_surname);
+                const committeeMember1NameSurname = nameSurname(reportData.committee_member1_name, reportData.committee_member1_surname);
+                const committeeMember2NameSurname = nameSurname(reportData.committee_member2_name, reportData.committee_member2_surname);
+                const supervisorSurnameName = nameSurname(reportData.professor_surname, reportData.professor_name);
+                const committeeMember1SurnameName = nameSurname(reportData.committee_member1_surname, reportData.committee_member1_name);
+                const committeeMember2SurnameName = nameSurname(reportData.committee_member2_surname, reportData.committee_member2_name);
+
+                sortedCommitteeNames = sortThreeStrings(supervisorSurnameName, committeeMember1SurnameName, committeeMember2SurnameName);
+                examReportCommitteAlphabetical1 = sortedCommitteeNames[0];
+                examReportCommitteAlphabetical2 = sortedCommitteeNames[1];
+                examReportCommitteAlphabetical3 = sortedCommitteeNames[2];
+
+                // Update the datafields in the Exam Report
+                updateDataField('examReportLocation', reportData.exam_location);
+                updateDataField('examReportDate', reportData.exam_date);
+                updateDataField('examReportDateName',reportData.exam_date);
+                updateDataField('examReportTime',reportData.exam_date);
+                updateDataField('examReportSupervisorNameSurname', supervisorNameSurname);
+                updateDataField('examReportCommitteeMember1NameSurname', committeeMember1NameSurname);
+                updateDataField('examReportCommitteeMember2NameSurname', committeeMember2NameSurname);
+                updateDataField('examReportAssemblyNo', reportData.exam_date);
+                updateDataField('examReportTitle', reportData.title);
+                updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
+                updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
+                updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
+                updateDataField('examReportFinalGrade', finalGrade);
+
+                
+                
+            } else if (data.success && data.examReport == 0) {
+                console.error('No Report Data found for this student');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading reportData data:', error);
+        });
+
 }
 
 //------------------------------ Show/Hide Management Sections based on section clicked on ------------------------------
@@ -836,24 +887,17 @@ function addLinkToList(link) {
 }
 //------------------------------ Completed Files Section Event Listeners  ------------------------------
 //--------------- Examination Report button Event Listener  ---------------
-document.getElementById('configurationCompletedFilesExamReport').addEventListener('click', function () {
-    const reportPath = this.dataset.reportPath; // Retrieve the saved report path
-    if (reportPath) {
-        const newTab = window.open(reportPath, '_blank');
-        if (newTab) {
-            newTab.focus();
-        } else {
-            alert('Unable to open the report. Please check your browser settings.');
-        }
+document.getElementById('configurationCompletedFilesExamReportButton').addEventListener('click', function () {
+    const examReportSection = document.getElementById('examReportHTMLSection');
+
+    // Toggle visibility of the section
+    if (examReportSection.style.display === 'none' || examReportSection.style.display === '') {
+        examReportSection.style.display = 'block';
     } else {
-        alert('Το πρακτικό εξέτασης δεν είναι ακόμα διαθέσιμο.');
+        examReportSection.style.display = 'none';
     }
 });
 
-//
-function fetchAndDisplayExamReport(thesis) {
-
-}
 
 
 //--------------------------------------------- PROFILE PAGE ---------------------------------------------
@@ -962,10 +1006,11 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
 //------------------------------ Load the student profile after DOM is loaded ------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    loadStudentData();
+    loadStudentProfile();
     loadStudentThesis();
     loadSectionsBasedOnStatus();
     setupThesisManagement();
+    loadExamReportData();
 });
 
 //------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------
