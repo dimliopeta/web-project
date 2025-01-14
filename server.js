@@ -398,7 +398,8 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
     SELECT 
         S.name AS student_name, 
         S.surname AS student_surname, 
-        E.location AS exam_location, 
+        E.location AS exam_location,
+        E.type_of_exam AS type_of_exam,
         DATE_FORMAT(E.date, '%Y-%m-%d') AS exam_date,
         P.name AS professor_name, 
         P.surname AS professor_surname, 
@@ -410,7 +411,9 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
         T.summary AS thesis_summary,
         GS.grade AS supervisor_grade,
         GC1.grade AS committee_member1_grade,
-        GC2.grade AS committee_member2_grade
+        GC2.grade AS committee_member2_grade,
+        L.gen_assembly_session as gen_assembly_session
+
 
     FROM 
         Students S
@@ -434,6 +437,8 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
     LEFT JOIN 
         Grades AS GC2 ON T.thesis_id = GC2.thesis_id 
                 AND C.member2_id = GC2.professor_id
+    LEFT JOIN
+        Logs as L ON T.Thesis_id = L.thesis_id
     WHERE 
          T.student_id = ?;
         `;

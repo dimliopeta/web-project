@@ -801,7 +801,6 @@ function loadExamReportData() {
         .then(data => {
             if (data.success && data.examReport.length > 0) {
                 const reportData = data.examReport[0];
-                console.log(reportData);
 
                 const finalGrade = calculateFinalGrade(reportData.supervisor_grade, reportData.committee_member1_grade, reportData.committee_member2_grade);
                 updateDataField('final_grade', finalGrade);
@@ -818,23 +817,38 @@ function loadExamReportData() {
                 examReportCommitteAlphabetical2 = sortedCommitteeNames[1];
                 examReportCommitteAlphabetical3 = sortedCommitteeNames[2];
 
+                const examReportDoneInPerson = document.getElementsByClassName('examReportDoneInPerson')[0];
+                const examReportDoneOnline = document.getElementsByClassName('examReportDoneOnline')[0];
+
+                if (reportData.type_of_exam === 'in-person') {
+                    examReportDoneInPerson.style.display = 'inline';
+                    examReportDoneOnline.style.display = 'none';
+                } else if (reportData.type_of_exam === 'online') {
+                    examReportDoneInPerson.style.display = 'none';
+                    examReportDoneOnline.style.display = 'inline';
+                }
+                dayName=getDayName(reportData.exam_date, "el-GR");
+
                 // Update the datafields in the Exam Report
                 updateDataField('examReportLocation', reportData.exam_location);
                 updateDataField('examReportDate', reportData.exam_date);
-                updateDataField('examReportDateName',reportData.exam_date);
-                updateDataField('examReportTime',reportData.exam_date);
-                updateDataField('examReportSupervisorNameSurname', supervisorNameSurname);
-                updateDataField('examReportCommitteeMember1NameSurname', committeeMember1NameSurname);
-                updateDataField('examReportCommitteeMember2NameSurname', committeeMember2NameSurname);
-                updateDataField('examReportAssemblyNo', reportData.exam_date);
+                updateDataField('examReportDateName', dayName);
+                updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
+                updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
+                updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
+                updateDataField('examReportAssemblyNo', reportData.gen_assembly_session);
                 updateDataField('examReportTitle', reportData.thesis_title);
                 updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
                 updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
                 updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
                 updateDataField('examReportFinalGrade', finalGrade);
+                updateDataField('examReportSupervisorGrade', reportData.supervisor_grade);
+                updateDataField('examReportCommittee1Grade', reportData.committee_member1_grade);
+                updateDataField('examReportCommittee2Grade', reportData.committee_member2_grade);
+                
 
-                
-                
+
+
             } else if (data.success && data.examReport.length == 0) {
                 console.error('No Report Data found for this student');
             }
@@ -873,6 +887,13 @@ function showSection(sectionId) {
         }
     });
 }
+//--------------- Helper function to get the day-name of a date ---------------
+function getDayName(dateStr, locale)
+{
+    var date = new Date(dateStr);
+    return date.toLocaleDateString(locale, { weekday: 'long' });        
+}
+
 //--------------- Helper function to add a link to the list of uploaded links ---------------
 function addLinkToList(link) {
     const linkList = document.getElementById('configurationUploadedLinksList');
