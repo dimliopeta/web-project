@@ -1194,10 +1194,10 @@
     {
       "thesis_id": "2",
       "professor_id": "1",
-      "student_id": "",
+      "student_id": "22",
       "title": "The Role of Normal Software Behavior in Ensuring System Reliability and Security",
       "summary": "The Role of Normal Software Behavior in Ensuring System Reliability and Security is enormous so we have to study it.",
-      "status": "unassigned",
+      "status": "assigned",
       "pdf_path": "",
       "start_date": null,
       "exam_date": null
@@ -1239,23 +1239,23 @@
   "invitations": [
     {
       "id": "1",
-      "thesis_id": "1",
+      "thesis_id": "2",
       "professor_id": "1"
     },
     {
       "id": "2",
-      "thesis_id": "1",
+      "thesis_id": "2",
       "professor_id": "2"
     },
     {
       "id": "3",
-      "thesis_id": "1",
+      "thesis_id": "2",
       "professor_id": "3"
     }
   ],
   "committees": [
     {
-      "thesis_id": "1"
+      "thesis_id": "2"
     }
   ],
   "examinations": [

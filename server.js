@@ -387,6 +387,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, theses: results });
     });
 });
+
 //----------------- API to Fetch Logs -----------------
 app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -416,6 +417,7 @@ app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, log: results });
     });
 });
+
 //----------------- API to Fetch all data to complete the Exam Report -----------------
 app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -481,7 +483,6 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, examReport: results });
     });
 });
-
 
 //----------------- API to Fetch Exam Date-Type-Location-Report -----------------
 app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
@@ -650,6 +651,7 @@ app.post('/api/upload_attachment', authenticateJWT, UploadAttachments.single('at
         return res.status(400).json({ success: false, message: 'Invalid attachment type' });
     }
 });
+
 //----------------- API to handle Nimertis Link Upload in Configuration page Management Section -----------------
 app.post('/api/update_nimertis_link', authenticateJWT, (req, res) => {
     const { thesis_id, nimertis_link } = req.body;
@@ -1100,7 +1102,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
 });
 
 
-
+//----------------- API for loading Past Invitations associated with a specific professor-----------------
 app.get('/api/invitation-history', authenticateJWT, (req, res) => {
     console.log('Endpoint /api/invitation-history hit');
     const professorId = req.user.userId;
@@ -1178,6 +1180,48 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
     });
 });
 
+//-------------Endpoint for loading all the invitations associated with a specific thesis-------
+app.post('/api/get-notes', authenticateJWT, (req, res) => {
+    const { thesis_id } = req.body;
+    const professor_id = req.user.userId; // Από το JWT payload
+
+    if (!thesis_id || !professor_id) {
+        return res.status(400).json({ success: false, message: 'Απαιτούνται τα thesis_id και professor_id.' });
+    }
+
+    const query = `
+        SELECT n.content, n.date, p.name AS professor_name
+        FROM Notes n
+        JOIN Professors p ON n.professor_id = p.id
+        WHERE n.thesis_id = ? AND n.professor_id = ?;
+    `;
+
+    db.query(query, [thesis_id, professor_id], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά τη φόρτωση σημειώσεων.' });
+        }
+        res.json({ success: true, notes: results });
+    });
+});
+
+app.post('/api/add-note', authenticateJWT, (req, res) => {
+    const { thesis_id,  content } = req.body;
+    const professor_id = req.user.userId;
+
+    if (!thesis_id || !professor_id || !content) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `INSERT INTO Notes (thesis_id, professor_id, content) VALUES (?, ?, ?)`;
+    db.query(query, [thesis_id, professor_id, content], (err) => {
+        if (err) {
+            console.error('Σφάλμα κατά την καταχώρηση σημείωσης:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση σημείωσης.' });
+        }
+        res.status(200).json({ success: true, message: 'Η σημείωση καταχωρήθηκε επιτυχώς!' });
+    });
+});
 
 
 //------Endpoint for checking if a committee is full----------
@@ -1211,7 +1255,7 @@ app.post('/api/committee-status', authenticateJWT, (req, res) => {
     });
 });
 
-
+//------Endpoint for changing an assigned thesis to active status---------------
 app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     const { thesisId, startNumber, startDate } = req.body;
 
@@ -1277,6 +1321,7 @@ app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     });
 });
 
+//------Endpoint for changing an active thesis to canceled status---------------
 app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     const { thesis_id, cancellationNumber, cancellationDate, cancellationReasonText } = req.body;
     console.log('Received data:', req.body); // Προσθήκη για debugging
