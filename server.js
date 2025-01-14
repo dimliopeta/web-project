@@ -1179,8 +1179,136 @@ app.post('/api/committee-status', authenticateJWT, (req, res) => {
 });
 
 
-app.post('/api/start-thesis', authenticateJWT, (res, req) => {
+app.post('/api/start-thesis', authenticateJWT, (req, res) => {
+    const { thesisId, startNumber, startDate } = req.body;
 
+    // Έλεγχος εισερχόμενων δεδομένων
+    if (!thesisId || !startNumber || !startDate) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const thesisQuery = `UPDATE THESES
+                         SET start_date = ?, status = 'active'
+                         WHERE thesis_id = ?`;
+
+    const logQuery = `INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state, gen_assembly_session)
+                      VALUES (?, ?, 'assigned', 'active', ?)`;
+
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error('Σφάλμα κατά την εκκίνηση της συναλλαγής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        // Εκτέλεση του πρώτου query για την ενημέρωση της διπλωματικής
+        db.query(thesisQuery, [startDate, thesisId], (thErr, thResult) => {
+            if (thErr) {
+                console.error('Σφάλμα κατά την ενημέρωση της διπλωματικής:', thErr);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Σφάλμα κατά την ενημέρωση της διπλωματικής.' });
+                });
+            }
+
+            if (thResult.affectedRows === 0) {
+                return db.rollback(() => {
+                    res.status(400).json({ success: false, message: 'Η διπλωματική δεν βρέθηκε.' });
+                });
+            }
+
+            // Εκτέλεση του δεύτερου query για την καταχώρηση στο LOGS
+            db.query(logQuery, [thesisId, startDate, startNumber], (logErr) => {
+                if (logErr) {
+                    console.error('Σφάλμα κατά την καταχώρηση στο LOGS:', logErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση στο LOGS.' });
+                    });
+                }
+
+                // Επιβεβαίωση της συναλλαγής
+                db.commit((commitErr) => {
+                    if (commitErr) {
+                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Σφάλμα κατά την επικύρωση της συναλλαγής.' });
+                        });
+                    }
+
+                    // Επιτυχής ολοκλήρωση
+                    res.status(200).json({
+                        success: true,
+                        message: 'Η διπλωματική ξεκίνησε επιτυχώς και η καταχώρηση στο LOGS ολοκληρώθηκε!'
+                    });
+                });
+            });
+        });
+    });
+});
+
+app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
+    const { thesisId, startNumber, startDate } = req.body;
+
+    // Έλεγχος εισερχόμενων δεδομένων
+    if (!thesisId || !startNumber || !startDate) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const thesisQuery = `UPDATE THESES
+                         SET status = 'canceled'
+                         WHERE thesis_id = ?`;
+
+    const logQuery = `INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state, gen_assembly_session)
+                      VALUES (?, ?,'active', 'canceled', ?)`;
+
+    
+
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error('Σφάλμα κατά την εκκίνηση της συναλλαγής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        // Εκτέλεση του πρώτου query για την ενημέρωση της διπλωματικής
+        db.query(thesisQuery, [startDate, thesisId], (thErr, thResult) => {
+            if (thErr) {
+                console.error('Σφάλμα κατά την ενημέρωση της διπλωματικής:', thErr);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Σφάλμα κατά την ενημέρωση της διπλωματικής.' });
+                });
+            }
+
+            if (thResult.affectedRows === 0) {
+                return db.rollback(() => {
+                    res.status(400).json({ success: false, message: 'Η διπλωματική δεν βρέθηκε.' });
+                });
+            }
+
+            // Εκτέλεση του δεύτερου query για την καταχώρηση στο LOGS
+            db.query(logQuery, [thesisId, startDate, startNumber], (logErr) => {
+                if (logErr) {
+                    console.error('Σφάλμα κατά την καταχώρηση στο LOGS:', logErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση στο LOGS.' });
+                    });
+                }
+
+                // Επιβεβαίωση της συναλλαγής
+                db.commit((commitErr) => {
+                    if (commitErr) {
+                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Σφάλμα κατά την επικύρωση της συναλλαγής.' });
+                        });
+                    }
+
+                    // Επιτυχής ολοκλήρωση
+                    res.status(200).json({
+                        success: true,
+                        message: 'Η διπλωματική ξεκίνησε επιτυχώς και η καταχώρηση στο LOGS ολοκληρώθηκε!'
+                    });
+                });
+            });
+        });
+    });
 });
 
 

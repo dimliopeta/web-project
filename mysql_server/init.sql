@@ -99,9 +99,10 @@ CREATE TABLE `Examinations`(
 CREATE TABLE `Logs`(
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `thesis_id` INT NOT NULL,
-    `timestamp` date,
-    `old_state` ENUM('unassigned','active','to-be-reviewed','completed','cancelled') NULL,
-    `new_state` ENUM('unassigned','active','to-be-reviewed','completed','cancelled') NULL,
-    `genassembly_session` INT NULL,
+    `date_of_change` date,
+    `old_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','canceled') NULL,
+    `new_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','canceled') NULL,
+    `gen_assembly_session` INT NULL,
+    `cancellation_reason` TEXT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );

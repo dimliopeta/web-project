@@ -595,18 +595,18 @@ function addStartThesisButton(thesisId, container) {
         startNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
         startThesisForm.appendChild(startNumberInput);
 
-        const startYearInput = document.createElement('input');
-        startYearInput.type = 'date';
-        startYearInput.id = 'start-date';
-        startYearInput.classList.add('form-control', 'mb-2');
-        startYearInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
-        startThesisForm.appendChild(startYearInput);
+        const startDateInput = document.createElement('input');
+        startDateInput.type = 'date';
+        startDateInput.id = 'start-date';
+        startDateInput.classList.add('form-control', 'mb-2');
+        startDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
+        startThesisForm.appendChild(startDateInput);
 
         const confirmStartButton = createButton('confirm-start-button', 'Επιβεβαίωση Εκκίνησης', ['btn', 'btn-primary'], () => {
             const startNumber = startNumberInput.value;
-            const startYear = startYearInput.value;
+            const startDate = startDateInput.value;
 
-            if (!startNumber || !startYear) {
+            if (!startNumber || !startDate) {
                 alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
                 return;
             }
@@ -618,13 +618,13 @@ function addStartThesisButton(thesisId, container) {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ thesisId, startNumber, startYear })
+                body: JSON.stringify({ thesisId, startNumber, startDate })
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert('Η διπλωματική ξεκίνησε επιτυχώς!');
-                        startThesisForm.innerHTML = '<p class="text-success">Η διπλωματική έχει ξεκινήσει!</p>';
+                        loadTheses();
                     } else {
                         alert(`Σφάλμα: ${data.message}`);
                     }
