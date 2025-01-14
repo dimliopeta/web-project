@@ -1250,10 +1250,11 @@ app.post('/api/start-thesis', authenticateJWT, (req, res) => {
 });
 
 app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
-    const { thesisId, startNumber, startDate } = req.body;
+    const { thesis_id, cancellationNumber, cancellationDate, cancellationReasonText } = req.body;
+    console.log('Received data:', req.body); // Προσθήκη για debugging
 
     // Έλεγχος εισερχόμενων δεδομένων
-    if (!thesisId || !startNumber || !startDate) {
+    if (!thesis_id || !cancellationNumber || !cancellationDate || !cancellationReasonText) {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
     }
 
@@ -1261,10 +1262,10 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
                          SET status = 'canceled'
                          WHERE thesis_id = ?`;
 
-    const logQuery = `INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state, gen_assembly_session)
-                      VALUES (?, ?,'active', 'canceled', ?)`;
+    const logQuery = `INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
+                         VALUES (?, ?, 'active', 'canceled', ?, ?)`;
 
-    
+
 
     db.beginTransaction((err) => {
         if (err) {
@@ -1273,7 +1274,7 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
         }
 
         // Εκτέλεση του πρώτου query για την ενημέρωση της διπλωματικής
-        db.query(thesisQuery, [startDate, thesisId], (thErr, thResult) => {
+        db.query(thesisQuery, [thesis_id], (thErr, thResult) => {
             if (thErr) {
                 console.error('Σφάλμα κατά την ενημέρωση της διπλωματικής:', thErr);
                 return db.rollback(() => {
@@ -1288,7 +1289,7 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
             }
 
             // Εκτέλεση του δεύτερου query για την καταχώρηση στο LOGS
-            db.query(logQuery, [thesisId, startDate, startNumber], (logErr) => {
+            db.query(logQuery, [thesis_id, cancellationDate, cancellationNumber, cancellationReasonText], (logErr) => {
                 if (logErr) {
                     console.error('Σφάλμα κατά την καταχώρηση στο LOGS:', logErr);
                     return db.rollback(() => {

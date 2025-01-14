@@ -106,3 +106,12 @@ CREATE TABLE `Logs`(
     `cancellation_reason` TEXT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
+
+CREATE TABLE `Notes`(
+	`id` INT NOT NULL PRIMARY KEY,
+    `thesis_id` INT NOT NULL,
+    `professor_id` INT NOT NULL,
+    `date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
+	FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`)
+);
