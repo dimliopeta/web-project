@@ -381,7 +381,29 @@ function showInfoSection(thesis) {
             addToBeReviewedSection(thesis, statusSection);
             break;
         case "canceled":
-            const canceledSection = document.createElement('section');
+            addCanceledSection(thesis, statusSection);
+            break;
+
+    }
+
+
+    infoSection.appendChild(statusSection);
+
+    // Footer με Ημερομηνίες
+    const footer = document.createElement('section');
+    footer.classList.add('text-center');
+    footer.innerHTML = `
+        <h4>Ημερομηνίες</h4>
+        <p>Ημερομηνία Έναρξης: ${thesis.start_date || 'Χωρίς ημερομηνία'}</p>
+        <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || 'Χωρίς ημερομηνία'}</p>
+        <hr>
+    `;
+    infoSection.appendChild(footer);
+}
+
+//--------------Function for Presenting a Canceled Thesis Info-------------
+function addCanceledSection(thesis, container){
+    const canceledSection = document.createElement('section');
 
             const canceledTitle = document.createElement('h4');
             canceledTitle.textContent = 'Ακυρωμένη Διπλωματική';
@@ -423,26 +445,8 @@ function showInfoSection(thesis) {
             const canceledHr = document.createElement('hr');
             canceledSection.appendChild(canceledHr);
 
-            statusSection.appendChild(canceledSection);
-            break;
-
-    }
-
-
-    infoSection.appendChild(statusSection);
-
-    // Footer με Ημερομηνίες
-    const footer = document.createElement('section');
-    footer.classList.add('text-center');
-    footer.innerHTML = `
-        <h4>Ημερομηνίες</h4>
-        <p>Ημερομηνία Έναρξης: ${thesis.start_date || 'Χωρίς ημερομηνία'}</p>
-        <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || 'Χωρίς ημερομηνία'}</p>
-        <hr>
-    `;
-    infoSection.appendChild(footer);
+            container.appendChild(canceledSection);
 }
-
 
 //---------------Function to create Buttons more easily------------ 
 function createButton(id, text, classes, onClick = null) {
