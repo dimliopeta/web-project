@@ -55,8 +55,8 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 
 
 //--------------------------------------------- DASHBOARD & THESIS CONFIGURATION PAGE ---------------------------------------------
-//------------------------------Load Thesis Function and helper functions------------------------------
-function loadStudentThesis() {
+//------------------------------Load Student Data Function and helper functions------------------------------
+function loadStudentData() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
 
     fetch('/api/theses', {
@@ -74,6 +74,7 @@ function loadStudentThesis() {
         .then(data => {
             if (data.success && data.theses.length > 0) {
                 const thesis = data.theses[0]; // Assuming one thesis per student
+                console.log(thesis);
 
                 let status;
                 switch (thesis.status) {
@@ -93,6 +94,7 @@ function loadStudentThesis() {
                         status = 'Ακυρωμένη.';
 
                 }
+                // Update the data-fields in the dashboard
                 updateDataField('thesis_status', status); // Declared above, used in switch
                 updateDataField('thesis_title', thesis.title);
                 updateDataField('thesis_summary', thesis.summary);
@@ -116,6 +118,21 @@ function loadStudentThesis() {
                 const dashboardDuration = document.querySelector('[data-field="dashboardDuration"]');
                 const dashboardStartDate = document.querySelector('[data-field="dashboardStartDate"]');
                 const dashboardExamDate = document.querySelector('[data-field="dashboardExamDate"]');
+
+                // Update the datafields in the Exam Report
+                updateDataField('examReportLocation',);
+                updateDataField('examReportDate',);
+                updateDataField('examReportDateName',);
+                updateDataField('examReportTime',);
+                updateDataField('examReportSupervisorNameSurname',);
+                updateDataField('examReportCommitteeMember1NameSurname',);
+                updateDataField('examReportCommitteeMember2NameSurname',);
+                updateDataField('examReportAssemblyNo',);
+                updateDataField('examReportTitle',);
+                updateDataField('examReportCommitteAlphabetical1',);
+                updateDataField('examReportCommitteAlphabetical2',);
+                updateDataField('examReportCommitteAlphabetical3',);
+                updateDataField('examReportFinalGrade',);
 
                 if (thesis.start_date && thesis.status === "active") {
                     dashboardDuration.style.display = 'inline';
@@ -158,6 +175,11 @@ function loadStudentThesis() {
         });
 
 }
+//---------------Helper function add 2 strings together (Name + Surname)
+function nameSurname(name, surname) {
+    return name + ' ' + surname;
+}
+
 //---------------Helper function to calculate the Final Grade (average of 3 committee members' grades)
 function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
     const grade1 = parseFloat(committeeMember1Grade) || null;
@@ -455,12 +477,12 @@ function setupThesisManagement() {
                     nimertisLinkButton.addEventListener('click', () => {
                         window.open(thesis.nimertis_link, '_blank');
                     });
-                    
+
                 } else {
                     nimertisLinkButton.addEventListener('click', () => {
                         alert('Ο σύνδεσμος Νημερτή δεν είναι ακόμα διαθέσιμος.')
                     });
-                        
+
                 }
 
                 setupEventListeners(thesis);
@@ -828,7 +850,10 @@ document.getElementById('configurationCompletedFilesExamReport').addEventListene
     }
 });
 
+//
+function fetchAndDisplayExamReport(thesis) {
 
+}
 
 
 //--------------------------------------------- PROFILE PAGE ---------------------------------------------
@@ -866,6 +891,10 @@ function loadStudentProfile() {
             document.querySelector('#student_profile [data-field="number"]').textContent = student.number;
             document.querySelector('#student_profile [data-field="city"]').textContent = student.city;
             document.querySelector('#student_profile [data-field="postcode"]').textContent = student.postcode;
+
+            // Update student details in ExamReport
+            const studentFullname = nameSurname(student.name, student.surname);
+            updateDataField('examReportNameSurname', studentFullname);
 
         })
         .catch(error => {
@@ -933,7 +962,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
 //------------------------------ Load the student profile after DOM is loaded ------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    loadStudentProfile();
+    loadStudentData();
     loadStudentThesis();
     loadSectionsBasedOnStatus();
     setupThesisManagement();

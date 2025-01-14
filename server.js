@@ -343,6 +343,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         query = `
             SELECT
                 Theses.*,
+                Examinations.*,
                 DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
                 DATE_FORMAT(Examinations.date, '%Y-%m-%d') AS exam_date,
                 Professors.name AS professor_name, 
@@ -357,6 +358,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 Committee1Grade.comments AS committee_member1_comments,
                 Committee2Grade.grade AS committee_member2_grade,
                 Committee2Grade.comments AS committee_member2_comments
+
             FROM Theses
             LEFT JOIN Professors ON Theses.professor_id = Professors.id
             LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
