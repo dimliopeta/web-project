@@ -310,7 +310,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 c.member2_id AS committee_member2_id,
                 CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
                 t.start_date,
-                e.exam_date,
+                e.date,
                 g.grade AS supervisor_grade,
                 g.comments AS supervisor_comments,
                 GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
@@ -330,7 +330,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
             LEFT JOIN Invitations i ON i.thesis_id = t.thesis_id
             WHERE (p.id = ? OR c.member1_id = ? OR c.member2_id = ?) AND t.status != 'unassigned'
             GROUP BY 
-                t.thesis_id, t.title, t.summary, t.status, t.start_date, e.exam_date,
+                t.thesis_id, t.title, t.summary, t.status, t.start_date, e.date,
                 s.name, s.surname, s.student_number, s.contact_email,
                 p.name, p.surname, p.email,
                 c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname, 
@@ -798,8 +798,9 @@ app.put('/api/theses/update', authenticateJWT, uploadPDFOnly.single('pdf'), (req
     });
 });
 
-//----------------- API for Invitation Loading -----------------
-app.get('/api/invitations', authenticateJWT, (req, res) => {
+
+//----------------- API for Invitations associated with a specific professor-----------------
+app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
     const professorId = req.user.userId; // Get professor ID from the JWT
     console.log('Professor ID:', professorId);
 
@@ -1044,6 +1045,81 @@ app.get('/api/invitation-history', authenticateJWT, (req, res) => {
 });
 
 
+//-------------Endpoint for loading all the invitations associated with a specific thesis-------
+app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
+    const { thesis_id } = req.body;
+
+    if (!thesis_id) {
+        return res.status(400).json({ success: false, message: 'Το thesis_id είναι υποχρεωτικό.' });
+    }
+
+    const query = `
+        SELECT 
+            i.id,
+            i.invitation_date,
+            i.response_date,
+            i.status AS invitation_status,
+            p.name AS professor_name,
+            p.surname AS professor_surname
+        FROM 
+            Invitations i
+        INNER JOIN 
+            Professors p ON i.professor_id = p.id
+        WHERE 
+            i.thesis_id = ?;
+    `;
+
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των προσκλήσεων:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκαν προσκλήσεις για τη συγκεκριμένη διπλωματική.' });
+        }
+
+        res.status(200).json({ success: true, invitations: results });
+    });
+});
+
+
+
+//------Endpoint for checking if a committee is full----------
+app.post('/api/committee-status', authenticateJWT, (req, res) => {
+    const { thesis_id } = req.body;
+
+    if (!thesis_id) {
+        return res.status(400).json({ success: false, message: 'Το thesis_id είναι υποχρεωτικό.' });
+    }
+
+    const query = `
+        SELECT member1_id, member2_id
+        FROM Committees
+        WHERE thesis_id = ?;
+    `;
+
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά τον έλεγχο της επιτροπής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκε επιτροπή για τη συγκεκριμένη διπλωματική.' });
+        }
+
+        const { member1_id, member2_id } = results[0];
+        const isFull = !!(member1_id && member2_id); // Επιστρέφει true αν υπάρχουν και τα δύο μέλη
+
+        res.status(200).json({ success: true, isFull });
+    });
+});
+
+
+app.post('/api/start-thesis', authenticateJWT, (res,req) => {
+    
+});
 
 
 //----------------- API to Assign Thesis to Students -----------------
