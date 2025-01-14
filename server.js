@@ -387,7 +387,35 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, theses: results });
     });
 });
+//----------------- API to Fetch Logs -----------------
+app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
+    const userId = req.user.userId;
+    const role = req.user.role;
 
+    let queryParams = [];
+    const query = `
+        SELECT 
+            logs.*,
+            theses.*,
+            DATE_FORMAT(logs.date_of_change, '%Y-%m-%d') AS date_of_change
+        FROM 
+            logs
+        INNER JOIN
+            theses ON theses.thesis_id = logs.thesis_id
+        WHERE 
+            theses.student_id = ?;
+        `;
+    queryParams = [userId];
+
+    db.query(query, queryParams, (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των δεδομένων των καταγραφών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+
+        res.status(200).json({ success: true, log: results });
+    });
+});
 //----------------- API to Fetch all data to complete the Exam Report -----------------
 app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
     const userId = req.user.userId;

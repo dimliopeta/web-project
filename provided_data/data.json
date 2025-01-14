@@ -1266,5 +1266,43 @@
       "location": "E4",
       "exam_report": null
     }
+  ],
+  "logs": [
+    { 
+      "id": "1",
+      "thesis_id": "1",
+      "date_of_change": "2025-02-01",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    { 
+      "id": "2",
+      "thesis_id": "1",
+      "date_of_change": "2025-03-05",
+      "old_state": "assigned",
+      "new_state": "active",
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    { 
+      "id": "3",
+      "thesis_id": "1",
+      "date_of_change": "2025-03-10",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    { 
+      "id": "4",
+      "thesis_id": "1",
+      "date_of_change": "2025-03-20",
+      "old_state": "to-be-reviewed",
+      "new_state": "completed",
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    }
   ]
 }

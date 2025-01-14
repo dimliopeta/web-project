@@ -194,8 +194,39 @@ function insertData() {
         });
     });
 
+        // Εισαγωγή Logs
+        data.logs.forEach(log => {
+            const query = `SELECT * FROM LOGS WHERE logs.id=?;`;
+            db.query(query, [log.id], (err, results) => {
+                if (err) {
+                    console.error('Error checking for duplicate logs: ', err);
+                    return;
+                }
+                if (results.length === 0) {
+                    const insertQuery = `
+                        INSERT INTO LOGS (id, thesis_id, date_of_change, old_state, new_state)
+                        VALUES (?, ?, ?, ?, ?);
+                    `;
+                    db.query(insertQuery, [
+                        log.id,
+                        log.thesis_id,
+                        log.date_of_change,
+                        log.old_state,
+                        log.new_state
+                    ], (insertErr) => {
+                        if (insertErr) {
+                            console.error('Error inserting logs:', insertErr);
+                        } else {
+                            console.log(`Log ${log.id} added successfully.`);
+                        }
+                    });
+                }
+            });
+        });
+
     console.log(`Database up-to-date!`);
 }
+
 
 
 

@@ -827,7 +827,7 @@ function loadExamReportData() {
                     examReportDoneInPerson.style.display = 'none';
                     examReportDoneOnline.style.display = 'inline';
                 }
-                dayName=getDayName(reportData.exam_date, "el-GR");
+                dayName = getDayName(reportData.exam_date, "el-GR");
 
                 // Update the datafields in the Exam Report
                 updateDataField('examReportLocation', reportData.exam_location);
@@ -845,12 +845,74 @@ function loadExamReportData() {
                 updateDataField('examReportSupervisorGrade', reportData.supervisor_grade);
                 updateDataField('examReportCommittee1Grade', reportData.committee_member1_grade);
                 updateDataField('examReportCommittee2Grade', reportData.committee_member2_grade);
-                
+
 
 
 
             } else if (data.success && data.examReport.length == 0) {
                 console.error('No Report Data found for this student');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading reportData data:', error);
+        });
+
+}
+//------------------------------ Function to Load Logs Data ------------------------------
+function loadLogsData() {
+    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
+
+    fetch('/api/logs_fetch', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch Logs data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const statusChangeContainer = document.getElementById('statusChangeContainer');
+            statusChangeContainer.innerHTML = '';
+
+            if (data.success && data.log.length > 0) {
+                let logData = data.log;
+
+                const statusTranslations = {
+                    'unassigned': 'Μη Ανατεθειμένη',
+                    'assigned': 'Ανατεθειμένη',
+                    'active': 'Ενεργή',
+                    'to-be-reviewed': 'Προς Εξέταση',
+                    'completed': 'Ολοκληρωμένη',
+                    'canceled': 'Ακυρωμένη'
+                };
+
+                logData = logData.map(log => {
+                    log.old_state = statusTranslations[log.old_state];
+                    log.new_state = statusTranslations[log.new_state];
+
+                    return log;
+                });
+
+                logData.forEach((log) => {
+                    const logEntry = document.createElement('div');
+                    logEntry.classList.add('logcard', 'mb-3');
+
+                    logEntry.innerHTML = `
+                        <div class="logcard-body">
+                            <h5 class="card-title">${log.old_state} → ${log.new_state}</h5>
+                            <p class="card-text">${new Date(log.date_of_change).toLocaleDateString('el-GR')}</p>
+                        </div>
+                    `;
+
+                    statusChangeContainer.appendChild(logEntry);
+                });
+            } else if (data.success && data.log.length === 0) {
+                const statusChangeContainer = document.getElementById('statusChangeContainer');
+                statusChangeContainer.innerHTML = '<p>Δεν υπάρχουν αλλαγές κατάστασης.</p>';
             }
         })
         .catch(error => {
@@ -888,10 +950,9 @@ function showSection(sectionId) {
     });
 }
 //--------------- Helper function to get the day-name of a date ---------------
-function getDayName(dateStr, locale)
-{
+function getDayName(dateStr, locale) {
     var date = new Date(dateStr);
-    return date.toLocaleDateString(locale, { weekday: 'long' });        
+    return date.toLocaleDateString(locale, { weekday: 'long' });
 }
 
 //--------------- Helper function to add a link to the list of uploaded links ---------------
@@ -1032,6 +1093,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSectionsBasedOnStatus();
     setupThesisManagement();
     loadExamReportData();
+    loadLogsData();
 });
 
 //------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------

@@ -49,6 +49,16 @@
         .left-ul-30 {
             margin-left: 25px;
         }
+
+        .logcard {
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logcard-body {
+            padding: 15px;
+        }
+
     </style>
 </head>
 
@@ -258,7 +268,7 @@
                             <hr>
                             <h4 class="py-1">Τελική Βαθμολογία:</h4>
                             <h4 data-field="final_grade"> </h4>
-                            <h5 class="pt-3 pb-2">Βαθμολογία Τριμελούς:</h5>
+                            <h5 class="pt-4 pb-2">Βαθμολογία Τριμελούς:</h5>
                             <div class="row">
                                 <h5 class="col-sm-4">
                                     <span data-field="professor_name"> </span>
@@ -290,15 +300,9 @@
                         <section id="statusChangesSection">
                             <hr>
                             <div class="row">
-                                <h4 class="text-center pb-1">Αλλαγές κατάστασης</h4>
-                                <div>
-                                    <p>allag1</p>
-                                </div>
-                                <div>
-                                    <p>allag2</p>
-                                </div>
-                                <div>
-                                    <p>allag3</p>
+                                <h4 class="text-center pb-3">Αλλαγές Κατάστασης</h4>
+                                <div id="statusChangeContainer">
+                                    <!-- Status change logs will be dynamically added here -->
                                 </div>
                             </div>
                         </section>
@@ -428,16 +432,22 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td style="border: 1px solid black;" data-field="examReportSupervisorNameSurname"> </td>
-                                        <td style="border: 1px solid black;" data-field="examReportSupervisorGrade"> </td>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportSupervisorNameSurname"> </td>
+                                        <td style="border: 1px solid black;" data-field="examReportSupervisorGrade">
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td style="border: 1px solid black;" data-field="examReportCommitteeMember1NameSurname"> </td>
-                                        <td style="border: 1px solid black;" data-field="examReportCommitteeMember1Grade"> </td>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportCommitteeMember1NameSurname"> </td>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportCommitteeMember1Grade"> </td>
                                     </tr>
                                     <tr>
-                                        <td style="border: 1px solid black;" data-field="examReportCommitteeMember2NameSurname"> </td>
-                                        <td style="border: 1px solid black;" data-field="examReportCommitteeMember2Grade"> </td>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportCommitteeMember2NameSurname"> </td>
+                                        <td style="border: 1px solid black;"
+                                            data-field="examReportCommitteeMember2Grade"> </td>
                                     </tr>
                                 </tbody>
                             </table>
