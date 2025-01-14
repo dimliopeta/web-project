@@ -675,7 +675,6 @@ function addActiveSection(thesis, container) {
             },
             body: JSON.stringify({
                 thesis_id: thesis.thesis_id,
-                professor_id: localStorage.getItem('professorId'), // Αν το έχεις αποθηκεύσει
                 content: noteContent
             })
         })
@@ -706,13 +705,15 @@ function addActiveSection(thesis, container) {
     notesList.classList.add('border', 'p-3');
     notesList.style.maxHeight = '150px';
     notesList.style.overflowY = 'auto';
-    notesList.innerHTML = '<p class="text-muted">Δεν υπάρχουν σημειώσεις.</p>';
+    notesList.innerHTML = '';
     notesSection.appendChild(notesList);
 
     const notesHr = document.createElement('hr');
     notesSection.appendChild(notesHr);
 
+    loadNotes(thesis.thesis_id);
     container.appendChild(notesSection);
+
 
     // Τμήμα για ακύρωση διπλωματικής
     cancelThesisForm = document.createElement('div');
@@ -802,6 +803,47 @@ function addActiveSection(thesis, container) {
     changeStatusSection.appendChild(changeStatusHr);
 
     container.appendChild(changeStatusSection);
+}
+
+
+function loadNotes(thesisId) {
+    fetch('/api/get-notes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            thesis_id: thesisId,
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            const notesList = document.getElementById('notes-list');
+            if (data.success) {
+                if (data.notes.length === 0) {
+                    notesList.innerHTML = '<p class="text-muted">Δεν υπάρχουν σημειώσεις.</p>';
+                } else {
+                    notesList.innerHTML = '';
+                    data.notes.forEach(note => {
+                        const noteItem = document.createElement('div');
+                        noteItem.classList.add('note-item', 'mb-2');
+                        noteItem.innerHTML = `
+                            <p>${note.content}</p>
+                            <small class="text-muted">Καθηγητής: ${note.professor_name} - ${note.date}</small>
+                            <hr>
+                        `;
+                        notesList.appendChild(noteItem);
+                    });
+                }
+            } else {
+                notesList.innerHTML = '<p class="text-danger">Αποτυχία φόρτωσης σημειώσεων.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά τη φόρτωση σημειώσεων:', error);
+            notesList.innerHTML = '<p class="text-danger">Σφάλμα κατά τη φόρτωση σημειώσεων.</p>';
+        });
 }
 
 

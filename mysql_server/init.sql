@@ -108,10 +108,11 @@ CREATE TABLE `Logs`(
 );
 
 CREATE TABLE `Notes`(
-	`id` INT NOT NULL PRIMARY KEY,
+	`id` INT NOT NULL auto_increment PRIMARY KEY,
     `thesis_id` INT NOT NULL,
     `professor_id` INT NOT NULL,
     `date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `content` TEXT NOT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
 	FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`)
 );
