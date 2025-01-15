@@ -352,6 +352,19 @@ function showInfoSection(thesis) {
     `;
     infoSection.appendChild(basicInfoSection);
 
+    // Δημιουργία του Status Change Section
+    const statusChangeSection = document.createElement('section');
+    statusChangeSection.id = 'statusChangeSection';
+    statusChangeSection.innerHTML = '<h4>Αλλαγές Καταστάσεων</h4>';
+    const statusChangeContainer= document.createElement('div');
+    statusChangeContainer.id ='statusChangeContainer';
+    statusChangeSection.appendChild(statusChangeContainer);
+    infoSection.appendChild(statusChangeSection);
+
+
+    // Κλήση της loadLogs για να γεμίσει το statusChangeSection
+    loadLogs(thesis.thesis_id);
+
     // Τριμελής Επιτροπή (εμφανίζεται μόνο για `active` και `to-be-reviewed`)
     if (thesis.status === 'active' || thesis.status === 'to-be-reviewed') {
         const committeeSection = document.createElement('section');
@@ -1035,6 +1048,71 @@ function addToBeReviewedSection(thesis, container) {
     container.appendChild(gradeSection);
 }
 
+
+function loadLogs(thesis_id) {
+    fetch('/api/thesis/logs', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            thesis_id: thesis_id, // Σωστή μεταβλητή
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            const statusChangeContainer = document.getElementById('statusChangeContainer');
+            statusChangeContainer.innerHTML = ''; // Καθαρισμός προηγούμενου περιεχομένου
+
+            if (data.success && data.log.length > 0) {
+                let logData = data.log;
+
+                const statusTranslations = {
+                    'unassigned': 'Μη Ανατεθειμένη',
+                    'assigned': 'Ανατεθειμένη',
+                    'active': 'Ενεργή',
+                    'to-be-reviewed': 'Προς Εξέταση',
+                    'completed': 'Ολοκληρωμένη',
+                    'cancelled': 'Ακυρωμένη'
+                };
+
+                logData = logData.map(log => {
+                    log.old_state = statusTranslations[log.old_state];
+                    log.new_state = statusTranslations[log.new_state];
+                    return log;
+                });
+
+                logData.forEach((log) => {
+                    const logEntry = document.createElement('div');
+                    logEntry.classList.add('card', 'mb-3', 'shadow-sm'); // Εξασφαλίζει στυλ card
+
+                    logEntry.innerHTML = `
+                        <div class="card-body">
+                            <h5 class="card-title">${log.old_state} → ${log.new_state}</h5>
+                            <p class="card-text">${new Date(log.date_of_change).toLocaleDateString('el-GR')}</p>
+                        </div>
+                    `;
+
+                    statusChangeContainer.appendChild(logEntry);
+                });
+            } else if (data.success && data.log.length === 0) {
+                const noChangesCard = document.createElement('div');
+                noChangesCard.classList.add('card', 'mb-3', 'shadow-sm'); // Στυλ κάρτας
+
+                noChangesCard.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Δεν υπάρχουν αλλαγές κατάστασης</h5>
+                    </div>
+                `;
+
+                statusChangeContainer.appendChild(noChangesCard);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading log data:', error);
+        });
+}
 
 
 //------------Edit Theme Button Event Listener-----------
