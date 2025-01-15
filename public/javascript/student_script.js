@@ -45,7 +45,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
             if (response.ok) {
                 window.location.href = '/'; // Ανακατεύθυνση στο index
             } else {
-                alert('Logout failed');
+                alert('Η αποσύνδεση απέτυχε.');
             }
         })
         .catch(err => console.error('Error:', err));
@@ -139,7 +139,7 @@ function loadStudentThesis() {
                     });
                 } else {
                     pdfButton.addEventListener('click', () => {
-                        alert('No PDF available for this thesis.');
+                        alert('Δεν υπάρχει PDF διαθέσιμο γι αυτή τη διπλωματική.');
                     });
 
                     //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
@@ -481,7 +481,7 @@ function setupThesisManagement() {
             }
         })
 }
-//--------------- Functions for upload button click Event Listeners ---------------
+//--------------- Functions for upload buttons click Event Listeners ---------------
 function setupEventListeners(thesis) {
     // File upload button
     document.getElementById('configurationUploadFileButton').addEventListener('click', function () {
@@ -490,10 +490,10 @@ function setupEventListeners(thesis) {
             if (thesis) {
                 uploadFile(configurationUploadFileInputBox, thesis);  // Pass thesis to the uploadFile function
             } else {
-                alert('Thesis information is not available.');
+                alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
         } else {
-            alert('Please select a file to upload.');
+            alert('Παρακαλώ επιλέξτε ένα αρχείο προς ανάρτηση.');
         }
     });
     // Link upload button event listener
@@ -503,10 +503,10 @@ function setupEventListeners(thesis) {
             if (thesis) {
                 uploadLink(configurationUploadLinkInputBox, thesis);  // Pass thesis to the uploadLink function
             } else {
-                alert('Thesis information is not available.');
+                alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
         } else {
-            alert('Please enter a link.');
+            alert('Παρακαλώ εισάγετε ένα σύνδεσμο προς ανάρτηση.');
         }
     });
 
@@ -517,10 +517,10 @@ function setupEventListeners(thesis) {
             if (thesis) {
                 uploadNimertisLink(configurationUploadNimertisInputBox, thesis);
             } else {
-                alert('Thesis information is not available.');
+                alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
         } else {
-            alert('Please enter a Nimertis link.');
+            alert('Παρακαλώ εισάγετε έναν σύνδεσμο προς το αποθετήριο Νημερτή.');
         }
     });
 
@@ -560,14 +560,14 @@ function uploadFile(fileInput, thesis) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('File uploaded successfully. Any previous file has been replaced.');
+                alert('Το αρχείο αναρτήθηκε. Αν υπήρχε προηγούμενο αρχείο έχει αντικατασταθεί.');
                 fetchAndDisplayAttachments(thesis); // Refresh the displayed file on every upload
             } else {
-                alert('Error uploading file: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Error uploading file:', error);
+            console.error('Παρουσιάστηκε πρόβλημα στην ανάρτηση:', error);
             alert('Error uploading file.');
         });
 }
@@ -590,19 +590,19 @@ function uploadLink(link, thesis) {
                 document.getElementById('configurationUploadLinkInputBox').value = '';
                 fetchAndDisplayAttachments(thesis);
             } else {
-                alert('Error uploading link: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error uploading link:', error);
-            alert('Error uploading link');
+            alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση:');
         });
 }
 
 //--------------- Nimertis Link upload
 function uploadNimertisLink(link, thesis) {
     if (!link.startsWith('https://nemertes.library.upatras.gr/')) {
-        alert('Invalid Nimertis link. It must start with https://nemertes.library.upatras.gr/');
+        alert('Λανθασμένη μορφή συνδέσμου. Ένας σύνδεσμος προς το αποθετήριο Νημερτή πρέπει να ξεκινά με: https://nemertes.library.upatras.gr/');
         return;
     }
 
@@ -625,12 +625,12 @@ function uploadNimertisLink(link, thesis) {
                 thesis.nimertis_link = link;
                 fetchAndDisplayNimertisLink(thesis); // Refresh the displayed Nimertis link
             } else {
-                alert('Error uploading Nimertis link: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error uploading Nimertis link:', error);
-            alert('Error uploading Nimertis link.');
+            alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση.');
         });
 }
 //--------------- Examination Details upload
@@ -657,12 +657,12 @@ function uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, th
                 fetchAndDisplayExaminations(thesis); // Refresh exam details display
                 //document.getElementById('examDateSection').style.display = 'block';
             } else {
-                alert('Failed to save exam details: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error saving exam details:', error);
-            alert('Error saving exam details.');
+            alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση.');
         });
 }
 //------------------------------ Helper functions to Fetch and Display Attachments-Nimertis link-Examination Details ------------------------------
@@ -718,12 +718,12 @@ function fetchAndDisplayAttachments(thesis) {
                     configurationUploadedLinksList.innerHTML = '<li class="no-bullet">Δεν έχουν αναρτηθεί σύνδεσμοι</li>';
                 }
             } else {
-                alert('Failed to fetch attachments: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανεύρευση των αρχείων: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Error fetching attachments:', error);
-            alert('Error fetching attachments.');
+            console.error('Error fetching files:', error);
+            alert('Παρουσιάστηκε πρόβλημα στην ανεύρευση των αρχείων.');
         });
 }
 //--------------- Fetch and Display Nimertis Links
@@ -773,12 +773,12 @@ function fetchAndDisplayExaminations(thesis) {
 
 
             } else {
-                alert('Failed to fetch exam details: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error fetching exam details:', error);
-            alert('Error fetching exam details.');
+            alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης:');
         });
 }
 
@@ -1105,6 +1105,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 //If exam dates exists and status completed , end_date=exam date. Also create end date as null.
-
+//fix buttons for inv
 //API Naming scheme.
 
