@@ -916,13 +916,18 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
         i.invitation_date,
         i.response_date,
         t.title AS thesis_title,
-        t.summary AS thesis_summary
-        FROM 
-            Invitations i
-        JOIN 
-            Theses t ON i.thesis_id = t.thesis_id
-        WHERE 
-            i.professor_id = ? and i.status = 'pending';
+        t.summary AS thesis_summary,
+        CONCAT(s.name, ' ', s.surname) AS student_name,
+        s.student_number AS student_number
+    FROM 
+        Invitations i
+    JOIN 
+        Theses t ON i.thesis_id = t.thesis_id
+    LEFT JOIN 
+        Students s ON t.student_id = s.id
+    WHERE 
+        i.professor_id = ? 
+        AND i.status = 'pending';
 
     `;
 
@@ -1292,7 +1297,7 @@ app.post('/api/thesis/to-be-reviewed', authenticateJWT, (req, res) => {
                     res.status(400).json({ success: false, message: 'Η διπλωματική δεν βρέθηκε.' });
                 });
             }
-            
+
             db.query(logQuery, [thesis_id, changeDate, changeNumber], (logErr) => {
                 if (logErr) {
                     console.error('Σφάλμα κατά την καταχώρηση στο LOGS:', logErr);
@@ -1494,6 +1499,8 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     const studentId = parseInt(req.body.studentId, 10);
     const thesisId = parseInt(req.body.thesisId, 10);
+    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Τρέχουσα ημερομηνία σε μορφή MySQL
+
 
     console.log('Request Body:', req.body);
     console.log('Student ID:', req.body.studentId);
@@ -1513,6 +1520,11 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     const insertQuery = `
         INSERT INTO Committees (thesis_id, member1_id, member2_id)
         VALUES (?, NULL, NULL);
+    `;
+
+    const inslogQuery = `
+        INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state)
+        VALUES (?, ?, 'unassigned', 'assigned');
     `;
 
     // Ξεκινάμε μια συναλλαγή για να διασφαλίσουμε συνοχή δεδομένων
@@ -1545,16 +1557,26 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
                 }
 
                 // Επιτυχία και για τα δύο queries, κάνουμε commit
-                db.commit((commitErr) => {
-                    if (commitErr) {
-                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                db.query(inslogQuery, [thesisId, currentDate], (insLogErr) => {
+
+                    if (insLogErr) {
+                        console.error('Σφάλμα κατά τη καταχώρηση στα LOGS:', insLogErr);
                         return db.rollback(() => {
                             res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
                         });
                     }
 
-                    res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε και η καταχώρηση τριμελούς δημιουργήθηκε επιτυχώς!' });
-                });
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                            });
+                        }
+
+                        res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε και η καταχώρηση τριμελούς δημιουργήθηκε επιτυχώς!' });
+                    });
+                })
             });
         });
     });
@@ -1565,6 +1587,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
 //----------------API for Unassigning a Thesis Theme -----------------
 app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     const thesisId = parseInt(req.body.thesisId, 10);
+
 
     if (isNaN(thesisId)) {
         return res.status(400).json({ success: false, message: 'Μη έγκυρο thesis ID.' });
@@ -1585,6 +1608,11 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
 
     const deleteInvitationsQuery = `
         DELETE FROM INVITATIONS
+        WHERE thesis_id = ?;
+    `;
+
+    const deleteLogsQuery = `
+        DELETE FROM Logs
         WHERE thesis_id = ?;
     `;
 
@@ -1627,14 +1655,23 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
                         });
                     }
                     // Επικύρωση της συναλλαγής
-                    db.commit((commitErr) => {
-                        if (commitErr) {
-                            console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                    db.query(deleteLogsQuery, [thesisId], (deletelogErr) => {
+                        if (deletelogErr) {
+                            console.error('Σφάλμα κατά τη διαγραφή των Logs:', deletelogErr);
                             return db.rollback(() => {
                                 res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
                             });
                         }
-                        res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς, οι προσκλήσεις και η επιτροπή διαγράφηκαν!' });
+
+                        db.commit((commitErr) => {
+                            if (commitErr) {
+                                console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                                return db.rollback(() => {
+                                    res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                                });
+                            }
+                            res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς, οι προσκλήσεις και η επιτροπή διαγράφηκαν!' });
+                        });
                     });
                 });
             });

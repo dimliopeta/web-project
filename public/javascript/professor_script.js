@@ -1106,7 +1106,7 @@ function loadInvitations() {
                             <div class="card-body">
                                 <h5 class="card-title">${invitation.thesis_title || 'Χωρίς τίτλο'}</h5>
                                 <p class="card-text">${invitation.thesis_summary || 'Δεν υπάρχει περιγραφή'}</p>
-                                <p class="text-muted">Κατάσταση: ${invitation.invitation_status || 'Μη διαθέσιμη'}</p>
+                                <p><strong>Φοιτητής:</strong> ${invitation.student_name || 'Μη διαθέσιμος'} (AM: ${invitation.student_number || 'Μη διαθέσιμος'})</p>
                                 <button class="btn btn-primary btn-sm accept-btn" data-id="${invitation.invitation_id}">Αποδοχή</button>
                                 <button class="btn btn-outline-danger btn-sm reject-btn" data-id="${invitation.invitation_id}">Απόρριψη</button>
                             </div>
