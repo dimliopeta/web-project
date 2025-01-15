@@ -53,8 +53,8 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 
 
 
-
-//--------------------------------------------- DASHBOARD & THESIS CONFIGURATION PAGE ---------------------------------------------
+//--------------------------------------------- DASHBOARD ---------------------------------------------
+//------------------------------ Functions to Load Thesis and helper functions ------------------------------
 //------------------------------ Load Thesis Function ------------------------------
 function loadStudentThesis() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
@@ -89,7 +89,7 @@ function loadStudentThesis() {
                     case 'completed':
                         status = 'Περατωμένη';
                         break;
-                    case 'canceled':
+                    case 'cancelled':
                         status = 'Ακυρωμένη.';
 
                 }
@@ -175,7 +175,6 @@ function sortThreeStrings(input1, input2, input3) {
     inputs.sort();
     return inputs;
 }
-
 //---------------Helper function to calculate the Final Grade (average of 3 committee members' grades)
 function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
     const grade1 = parseFloat(committeeMember1Grade) || null;
@@ -219,6 +218,50 @@ function updateDataField(dataField, value, errorMessage = 'Error - no data') {
 
 
 
+//--------------------------------------------- THESIS CONFIGURATION PAGE ---------------------------------------------
+// ------------------------------ Functions for Thesis Management handling ------------------------------
+//--------------- Main func that pulls thesis data and helper funcs ---------------
+function setupThesisManagement() {
+    const token = localStorage.getItem('token')
+
+    fetch('/api/theses', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch thesis data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.theses.length > 0) {
+                const thesis = data.theses[0];
+
+                // If Nimertis Link exists in the thesis table, then 
+                const nimertisLinkButton = document.getElementById('configurationCompletedFilesNimertisLink');
+                if (thesis.nimertis_link) {
+                    nimertisLinkButton.addEventListener('click', () => {
+                        window.open(thesis.nimertis_link, '_blank');
+                    });
+
+                } else {
+                    nimertisLinkButton.addEventListener('click', () => {
+                        alert('Ο σύνδεσμος Νημερτή δεν είναι ακόμα διαθέσιμος.')
+                    });
+
+                }
+
+                setupEventListeners(thesis);
+                fetchAndDisplayAttachments(thesis);
+                fetchAndDisplayNimertisLink(thesis);
+                fetchAndDisplayExaminations(thesis);
+                loadThesisInvitations(thesis.thesis_id);
+            }
+        })
+}
 //------------------------------ Show/Hide Configuration Page parts based on status ------------------------------
 function loadSectionsBasedOnStatus() {
     const token = localStorage.getItem('token');
@@ -323,7 +366,7 @@ function loadSectionsBasedOnStatus() {
                         managementSection.style.display = "block";
                         datesSection.style.display = "block";
                         break;
-                    case 'canceled':
+                    case 'cancelled':
                         infoSection.style.display = "block";
                         configurationBody.style.display = "none";
                         configurationFooter.style.display = "none";
@@ -370,8 +413,6 @@ function loadSectionsBasedOnStatus() {
             console.error('Error loading thesis data:', error);
         });
 }
-
-
 //------------------------------ Functions for Committee Assignment and Professor Search Bar ------------------------------
 //------------------------------ Professor List creation, data load ------------------------------
 document.querySelector('#search-professor').addEventListener('input', function () {
@@ -436,7 +477,7 @@ document.getElementById('changeProfessorButton').addEventListener('click', funct
 
     delete document.getElementById('sendInviteButton').dataset.professorId;
 });
-// Get the "Ορισμός" button to open the professor Search Bar
+//--------------- Get the "Ορισμός" button to open the professor Search Bar
 document.querySelectorAll('.inviteCommitteeButton').forEach(button => {
     button.addEventListener('click', function () {
         // Show the professor search bar
@@ -478,51 +519,57 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
         })
         .catch(err => console.error('Error sending invitation:', err));
 });
+ //--------------- Function for loading Invitations associated with the students Thesis ---------------
+ function loadThesisInvitations(thesis_id) {
+    const token = localStorage.getItem('token');
 
-
-// ------------------------------ Functions for Thesis Management handling ------------------------------
-//--------------- Main func that pulls thesis data and helper funcs ---------------
-function setupThesisManagement() {
-    const token = localStorage.getItem('token')
-
-    fetch('/api/theses', {
-        method: 'GET',
+    fetch('/api/invitations-for-thesis', {
+        method: 'POST',
         headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ thesis_id: thesis_id }) // Send thesis_id in the request body
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Data from API:', data);
+
+        const container = document.querySelector('#invitationCardSection .row');
+        container.innerHTML = ''; // Clear previous content
+
+        if (data.success && data.invitations.length > 0) {
+            data.invitations.forEach(invitation => {
+                const card = document.createElement('div');
+                card.classList.add('col-lg-6', 'mb-3');
+                card.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            Ημερομηνία Πρόσκλησης: ${invitation.invitation_date || 'Μη διαθέσιμη'}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Καθηγητής: ${invitation.professor_name || 'Μη διαθέσιμος'} ${invitation.professor_surname || ''}</h5>
+                            <p><strong>Κατάσταση Πρόσκλησης:</strong> ${invitation.invitation_status === 'pending' ? 'Εκκρεμής' : invitation.invitation_status === 'accepted' ? 'Αποδεκτή' : 'Ανακληθείσα / Απορριφθείσα'}</p>
+                            <p><strong>Ημερομηνία Απόκρισης:</strong> ${invitation.response_date || ''}</p>
+                            <button class="btn btn-danger" id="cancelCommitteInvitation">Ακύρωση Πρόσκλησης</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } else {
+            console.warn('No invitations found or API error.');
+            container.innerHTML = '<h5 class="text-center">Δεν υπάρχουν προσκλήσεις για τη συγκεκριμένη διπλωματική!</h5>';
         }
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch thesis data');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success && data.theses.length > 0) {
-                const thesis = data.theses[0];
-
-                // If Nimertis Link exists in the thesis table, then 
-                const nimertisLinkButton = document.getElementById('configurationCompletedFilesNimertisLink');
-                if (thesis.nimertis_link) {
-                    nimertisLinkButton.addEventListener('click', () => {
-                        window.open(thesis.nimertis_link, '_blank');
-                    });
-
-                } else {
-                    nimertisLinkButton.addEventListener('click', () => {
-                        alert('Ο σύνδεσμος Νημερτή δεν είναι ακόμα διαθέσιμος.')
-                    });
-
-                }
-
-                setupEventListeners(thesis);
-                fetchAndDisplayAttachments(thesis);
-                fetchAndDisplayNimertisLink(thesis);
-                fetchAndDisplayExaminations(thesis);
-            }
-        })
+    .catch(error => {
+        console.error('Σφάλμα κατά τη φόρτωση των προσκλήσεων:', error);
+    });
 }
-//--------------- Functions for upload buttons click Event Listeners ---------------
+//--------------- Function for cancelling an invitation ---------------
+
+
+//------------------------------ Functions for upload buttons click Event Listeners ------------------------------
 function setupEventListeners(thesis) {
     // File upload button
     document.getElementById('configurationUploadFileButton').addEventListener('click', function () {
@@ -639,7 +686,6 @@ function uploadLink(link, thesis) {
             alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση:');
         });
 }
-
 //--------------- Nimertis Link upload
 function uploadNimertisLink(link, thesis) {
     if (!link.startsWith('https://nemertes.library.upatras.gr/')) {
@@ -706,6 +752,20 @@ function uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, th
             alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση.');
         });
 }
+//--------------- Helper function to add a link to the list of uploaded links ---------------
+function addLinkToList(link) {
+    const linkList = document.getElementById('configurationUploadedLinksList');
+    const newLinkElement = document.createElement('div');
+    newLinkElement.classList.add('link-item');
+
+    const linkText = document.createElement('span');
+    linkText.textContent = link;
+
+    newLinkElement.appendChild(linkText);
+    linkList.appendChild(newLinkElement);
+}
+
+
 //------------------------------ Helper functions to Fetch and Display Attachments-Nimertis link-Examination Details ------------------------------
 //--------------- Fetch and Display File&Links
 function fetchAndDisplayAttachments(thesis) {
@@ -823,6 +883,25 @@ function fetchAndDisplayExaminations(thesis) {
         });
 }
 
+
+//------------------------------ Functions for the Completed Files Section ------------------------------
+//------------------------------ Completed Files Section Event Listeners  ------------------------------
+//--------------- Examination Report button Event Listener  ---------------
+document.getElementById('configurationCompletedFilesExamReportButton').addEventListener('click', function () {
+    loadExamReportData();
+    const examReportSection = document.getElementById('examReportHTMLSection');
+    // Toggle visibility of the section
+    if (examReportSection.style.display === 'none' || examReportSection.style.display === '') {
+        examReportSection.style.display = 'block';
+    } else {
+        examReportSection.style.display = 'none';
+    }
+});
+//--------------- Helper function to get the day-name of a date ---------------
+function getDayName(dateStr, locale) {
+    var date = new Date(dateStr);
+    return date.toLocaleDateString(locale, { weekday: 'long' });
+}
 //------------------------------ Load Exam Report Data Function ------------------------------
 function loadExamReportData() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
@@ -899,7 +978,9 @@ function loadExamReportData() {
         });
 
 }
-//------------------------------ Function to Load Logs Data ------------------------------
+
+
+//------------------------------ Function to Load Logs Data for Status Change Section ------------------------------
 function loadLogsData() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
 
@@ -928,7 +1009,7 @@ function loadLogsData() {
                     'active': 'Ενεργή',
                     'to-be-reviewed': 'Προς Εξέταση',
                     'completed': 'Ολοκληρωμένη',
-                    'canceled': 'Ακυρωμένη'
+                    'cancelled': 'Ακυρωμένη'
                 };
 
                 logData = logData.map(log => {
@@ -962,6 +1043,7 @@ function loadLogsData() {
 
 }
 
+
 //------------------------------ Show/Hide Management Sections based on section clicked on ------------------------------
 document.getElementById('configurationButtonUploadFile').addEventListener('click', function () {
     showSection('configurationUploadFileSection');
@@ -990,36 +1072,6 @@ function showSection(sectionId) {
         }
     });
 }
-//--------------- Helper function to get the day-name of a date ---------------
-function getDayName(dateStr, locale) {
-    var date = new Date(dateStr);
-    return date.toLocaleDateString(locale, { weekday: 'long' });
-}
-
-//--------------- Helper function to add a link to the list of uploaded links ---------------
-function addLinkToList(link) {
-    const linkList = document.getElementById('configurationUploadedLinksList');
-    const newLinkElement = document.createElement('div');
-    newLinkElement.classList.add('link-item');
-
-    const linkText = document.createElement('span');
-    linkText.textContent = link;
-
-    newLinkElement.appendChild(linkText);
-    linkList.appendChild(newLinkElement);
-}
-//------------------------------ Completed Files Section Event Listeners  ------------------------------
-//--------------- Examination Report button Event Listener  ---------------
-document.getElementById('configurationCompletedFilesExamReportButton').addEventListener('click', function () {
-    loadExamReportData();
-    const examReportSection = document.getElementById('examReportHTMLSection');
-    // Toggle visibility of the section
-    if (examReportSection.style.display === 'none' || examReportSection.style.display === '') {
-        examReportSection.style.display = 'block';
-    } else {
-        examReportSection.style.display = 'none';
-    }
-});
 
 
 
@@ -1068,7 +1120,6 @@ function loadStudentProfile() {
             console.error('Error loading student data:', error);
         });
 }
-
 //------------------------------ Event Listener for clicks on the edit buttons in Student Profile ------------------------------
 document.querySelector('#student_profile').addEventListener('click', function (event) {
     // Check if the clicked element is a toggle button
@@ -1126,6 +1177,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 });
 
 
+
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
 //------------------------------ Load the student profile after DOM is loaded ------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -1136,7 +1188,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadExamReportData();
     loadLogsData();
 });
-
 //------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------
 window.addEventListener('DOMContentLoaded', () => {
     const defaultTab = document.querySelector('a[href="#dashboard"]');

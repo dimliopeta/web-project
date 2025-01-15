@@ -740,7 +740,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
               SELECT DISTINCT student_id
               FROM theses
               WHERE student_id IS NOT NULL
-              AND theses.status != 'canceled'
+              AND theses.status != 'cancelled'
           );
     `;
     const searchInput = `%${input}%`;
@@ -979,7 +979,28 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
         res.json({ success: true, invitations: results });
     });
 });
+//----------------- API for cancelling a sent Invitation as student -----------------
+app.post('/api/cancel-invitation', authenticateJWT, (req, res) => {
+    const student_id = req.user.id;
 
+    const query = `
+        UPDATE Invitations i
+        JOIN Theses T ON I.thesis_id = T.thesis_id
+        JOIN Students S ON T.student_id = S.id
+        SET I.status = 'cancelled'
+        WHERE S.id = ? AND I.status = 'pending' AND T.status NOT IN ('completed', 'cancelled');
+    `;
+
+    db.query(query, [student_id], (err, results) => {
+        if (err) {
+            console.error('Error executing combined query:', err);
+            return res.status(500).json({ success: false, message: 'Server error while canceling invitations.' });
+        }
+
+        console.log('Cancelled Invitations from DB:', results);
+        res.json({ success: true, cancelled_invitation: results });
+    });
+});
 
 
 //----------------- API for Invitation Acceptance/Rejection -----------------
@@ -1270,7 +1291,7 @@ app.post('/api/add-note', authenticateJWT, (req, res) => {
 });
 
 //-------------Endpoint for loading the info of a cancelled thesis-------
-app.post('/api/canceled-thesis', authenticateJWT, (req, res) => {
+app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
 
     if (!thesis_id) {
@@ -1283,7 +1304,7 @@ app.post('/api/canceled-thesis', authenticateJWT, (req, res) => {
             l.cancellation_reason,
             l.date_of_change
         FROM Logs l
-        WHERE l.thesis_id = ? AND l.new_state = 'canceled'
+        WHERE l.thesis_id = ? AND l.new_state = 'cancelled'
         ORDER BY l.date_of_change DESC
         LIMIT 1;
     `;
@@ -1463,7 +1484,7 @@ app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     });
 });
 
-//------Endpoint for changing an active thesis to canceled status---------------
+//------Endpoint for changing an active thesis to cancelled status---------------
 app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     const { thesis_id, cancellationNumber, cancellationDate, cancellationReasonText } = req.body;
     console.log('Received data:', req.body); // Προσθήκη για debugging
@@ -1474,11 +1495,11 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     }
 
     const thesisQuery = `UPDATE THESES
-                         SET status = 'canceled'
+                         SET status = 'cancelled'
                          WHERE thesis_id = ?`;
 
     const logQuery = `INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
-                         VALUES (?, ?, 'active', 'canceled', ?, ?)`;
+                         VALUES (?, ?, 'active', 'cancelled', ?, ?)`;
 
 
 

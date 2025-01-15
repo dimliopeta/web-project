@@ -380,7 +380,7 @@ function showInfoSection(thesis) {
         case "to-be-reviewed":
             addToBeReviewedSection(thesis, statusSection);
             break;
-        case "canceled":
+        case "cancelled":
             addCanceledSection(thesis, statusSection);
             break;
 
@@ -403,17 +403,17 @@ function showInfoSection(thesis) {
 
 //--------------Function for Presenting a Canceled Thesis Info-------------
 function addCanceledSection(thesis, container) {
-    const canceledSection = document.createElement('section');
+    const cancelledSection = document.createElement('section');
 
-    const canceledTitle = document.createElement('h4');
-    canceledTitle.textContent = 'Ακυρωμένη Διπλωματική';
-    canceledSection.appendChild(canceledTitle);
+    const cancelledTitle = document.createElement('h4');
+    cancelledTitle.textContent = 'Ακυρωμένη Διπλωματική';
+    cancelledSection.appendChild(cancelledTitle);
 
     const detailsParagraph = document.createElement('p');
     detailsParagraph.textContent = 'Φόρτωση λεπτομερειών...';
-    canceledSection.appendChild(detailsParagraph);
+    cancelledSection.appendChild(detailsParagraph);
 
-    fetch(`/api/canceled-thesis`, {
+    fetch(`/api/cancelled-thesis`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -442,10 +442,10 @@ function addCanceledSection(thesis, container) {
             detailsParagraph.innerHTML = '<p class="text-danger">Σφάλμα κατά τη φόρτωση λεπτομερειών.</p>';
         });
 
-    const canceledHr = document.createElement('hr');
-    canceledSection.appendChild(canceledHr);
+    const cancelledHr = document.createElement('hr');
+    cancelledSection.appendChild(cancelledHr);
 
-    container.appendChild(canceledSection);
+    container.appendChild(cancelledSection);
 }
 
 //---------------Function to create Buttons more easily------------ 
@@ -1382,7 +1382,7 @@ function loadTheses() {
                         case 'assigned':
                             status = 'Υπό Ανάθεση';
                             break;
-                        case 'canceled':
+                        case 'cancelled':
                             status = 'Ακυρωμένη';
                     }
 
