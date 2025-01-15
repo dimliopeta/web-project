@@ -498,7 +498,6 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
         body: JSON.stringify({ professorId })
     })
         .then(response => {
-            console.log('Raw response:', response);
             return response.json();
         })
         .then(data => {
@@ -513,6 +512,7 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
                 document.getElementById('professorSearchBar').style.display = 'none';
 
                 delete document.getElementById('sendInviteButton').dataset.professorId;
+                loadThesisInvitations(data.thesis_id);
             } else {
                 alert('Σφάλμα κατά την αποστολή της πρόσκλησης ' + data.message);
             }
@@ -551,7 +551,7 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
                             <h5 class="card-title">Καθηγητής: ${invitation.professor_name || 'Μη διαθέσιμος'} ${invitation.professor_surname || ''}</h5>
                             <p><strong>Κατάσταση Πρόσκλησης:</strong> ${invitation.invitation_status === 'pending' ? 'Εκκρεμής' : invitation.invitation_status === 'accepted' ? 'Αποδεκτή' : 'Ανακληθείσα / Απορριφθείσα'}</p>
                             <p><strong>Ημερομηνία Απόκρισης:</strong> ${invitation.response_date || ''}</p>
-                            <button class="btn btn-danger" id="cancelCommitteInvitation">Ακύρωση Πρόσκλησης</button>
+                            <button class="btn btn-danger cancelCommitteInvitation">Ακύρωση Πρόσκλησης</button>
                         </div>
                     </div>
                 `;
@@ -567,21 +567,26 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
     });
 }
 //--------------- Function for cancelling an invitation ---------------
-document.querySelectorAll('#cancelCommitteInvitation').forEach(button => {
-    button.addEventListener('click', function (event) {
+document.querySelector('#invitationCardSection .row').addEventListener('click', function (event) {
+    if (event.target && event.target.classList.contains('cancelCommitteInvitation')) {
         const invitationCard = event.target.closest('.card');
         const token = localStorage.getItem('token');
-        
+        console.log('Token:', token); // Log the token here to ensure it's correct
+       // const invitationId = event.target.dataset.invitationId; // Assuming you add invitationId to each button if needed
+       console.log('vagin3');
         fetch('/api/cancel-invitation', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {
+            console.log('vagin4');
             if (data.success) {
+                console.log('vagin5');
                 invitationCard.remove();
             } else {
                 alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
@@ -591,9 +596,8 @@ document.querySelectorAll('#cancelCommitteInvitation').forEach(button => {
             console.error('Error while canceling invitation:', error);
             alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
         });
-    });
+    }
 });
-
 //------------------------------ Functions for upload buttons click Event Listeners ------------------------------
 function setupEventListeners(thesis) {
     // File upload button

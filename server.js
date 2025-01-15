@@ -823,6 +823,7 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
     });
 });
 
+
 //----------------- API to Create Invitation for Thesis Committee -----------------
 app.post('/api/invitation_create', authenticateJWT, (req, res) => {
     const { professorId } = req.body;
@@ -845,14 +846,23 @@ app.post('/api/invitation_create', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Failed to create the invitation.' });
         }
 
-        // Check if an invitation was actually created
-        if (results.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: 'No thesis found for the user.' });
-        }
+        // Fetch the thesis_id
+        const thesisQuery = `
+            SELECT thesis_id
+            FROM Theses t
+            WHERE t.student_id = ?;
+        `;
 
+        db.query(thesisQuery, [userId], (err, thesisResults) => {
+            if (err) {
+                console.error('Error fetching thesis_id:', err);
+                return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
+            }
+            const thesis_id = thesisResults[0]?.thesis_id;
 
-            console.log('Invitation send succesfully:', results);
-            res.json({ success: true, invitation: results });
+            console.log('Invitation sent successfully:', results);
+            res.json({ success: true, invitation: results, thesis_id: thesis_id });
+        });
     });
 });
 
@@ -998,15 +1008,20 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
 });
 //----------------- API for cancelling a sent Invitation as student -----------------
 app.post('/api/cancel-invitation', authenticateJWT, (req, res) => {
+    console.log('vagin1');
     const student_id = req.user.id;
+    console.log('vagi2n');
+    console.log(student_id);
 
     const query = `
-        UPDATE Invitations i
-        JOIN Theses T ON I.thesis_id = T.thesis_id
-        JOIN Students S ON T.student_id = S.id
-        SET I.status = 'cancelled'
-        WHERE S.id = ? AND I.status = 'pending' AND T.status NOT IN ('completed', 'cancelled');
-    `;
+    UPDATE Invitations I
+    JOIN Theses T ON I.thesis_id = T.thesis_id
+    JOIN Students S ON T.student_id = S.id
+    SET I.status = 'cancelled'
+    WHERE S.id = ? 
+      AND I.status = 'pending'
+      AND T.status NOT IN ('completed', 'cancelled', 'active', 'unassigned', 'to-be-reviewed');
+`;
 
     db.query(query, [student_id], (err, results) => {
         if (err) {
