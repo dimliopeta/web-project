@@ -755,6 +755,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
     });
 });
 
+
 //----------------- API for Professor Search Bar for thesis assignment -----------------
 app.get('/api/professor-search', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -1208,7 +1209,7 @@ app.post('/api/get-notes', authenticateJWT, (req, res) => {
 
 //-------------Endpoint for adding a note associated with a specific thesis-------
 app.post('/api/add-note', authenticateJWT, (req, res) => {
-    const { thesis_id,  content } = req.body;
+    const { thesis_id, content } = req.body;
     const professor_id = req.user.userId;
 
     if (!thesis_id || !professor_id || !content) {
@@ -1257,6 +1258,69 @@ app.post('/api/canceled-thesis', authenticateJWT, (req, res) => {
         res.json({ success: true, details: results[0] });
     });
 });
+
+app.post('/api/thesis/to-be-reviewed', authenticateJWT, (req, res) => {
+    const { thesis_id, changeNumber, changeDate } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
+
+    if (!thesis_id) {
+        return res.status(400).json({ success: false, message: 'Απαιτείται το thesis_id.' });
+    }
+
+    const thQuery = `UPDATE THESES
+                         SET status = 'to-be-reviewed'
+                         WHERE thesis_id = ?`;
+
+    const logQuery = `INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state, gen_assembly_session)
+                      VALUES (?, ?, 'active', 'to-be-reviewed', ?)`;
+
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error('Σφάλμα κατά την εκκίνηση της συναλλαγής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        db.query(thQuery, [thesis_id], (thErr, thResult) => {
+            if (thErr) {
+                console.error('Σφάλμα κατά την μετατροπή της διπλωματικής σε υπό εξέταση:', thErr);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Σφάλμα κατά την ενημέρωση της διπλωματικής.' });
+                });
+            }
+
+            if (thResult.affectedRows === 0) {
+                return db.rollback(() => {
+                    res.status(400).json({ success: false, message: 'Η διπλωματική δεν βρέθηκε.' });
+                });
+            }
+            
+            db.query(logQuery, [thesis_id, changeDate, changeNumber], (logErr) => {
+                if (logErr) {
+                    console.error('Σφάλμα κατά την καταχώρηση στο LOGS:', logErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση στο LOGS.' });
+                    });
+                }
+
+                db.commit((commitErr) => {
+                    if (commitErr) {
+                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Σφάλμα κατά την επικύρωση της συναλλαγής.' });
+                        });
+                    }
+
+                    // Επιτυχής ολοκλήρωση
+                    res.status(200).json({
+                        success: true,
+                        message: 'Η διπλωματική μετατράπηκε σε υπό εξέταση και η καταχώρηση στο LOGS ολοκληρώθηκε!'
+                    });
+                });
+            });
+
+        });
+
+    });
+})
 
 
 //------Endpoint for checking if a committee is full----------

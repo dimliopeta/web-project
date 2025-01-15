@@ -402,50 +402,50 @@ function showInfoSection(thesis) {
 }
 
 //--------------Function for Presenting a Canceled Thesis Info-------------
-function addCanceledSection(thesis, container){
+function addCanceledSection(thesis, container) {
     const canceledSection = document.createElement('section');
 
-            const canceledTitle = document.createElement('h4');
-            canceledTitle.textContent = 'Ακυρωμένη Διπλωματική';
-            canceledSection.appendChild(canceledTitle);
+    const canceledTitle = document.createElement('h4');
+    canceledTitle.textContent = 'Ακυρωμένη Διπλωματική';
+    canceledSection.appendChild(canceledTitle);
 
-            const detailsParagraph = document.createElement('p');
-            detailsParagraph.textContent = 'Φόρτωση λεπτομερειών...';
-            canceledSection.appendChild(detailsParagraph);
+    const detailsParagraph = document.createElement('p');
+    detailsParagraph.textContent = 'Φόρτωση λεπτομερειών...';
+    canceledSection.appendChild(detailsParagraph);
 
-            fetch(`/api/canceled-thesis`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({
-                    thesis_id: thesis.thesis_id
-                })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const details = data.details;
+    fetch(`/api/canceled-thesis`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            thesis_id: thesis.thesis_id
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const details = data.details;
 
-                        detailsParagraph.innerHTML = `
+                detailsParagraph.innerHTML = `
                                 <strong>Αριθμός Τμήματος:</strong> ${details.gen_assembly_session || 'Δεν υπάρχει διαθέσιμη πληροφορία'}<br>
                                 <strong>Ημερομηνία Απόφασης:</strong> ${details.date_of_change || 'Δεν υπάρχει διαθέσιμη πληροφορία'}<br>
                                 <strong>Λόγος Ακύρωσης:</strong> ${details.cancellation_reason || 'Δεν υπάρχει διαθέσιμη πληροφορία'}
                             `;
-                    } else {
-                        detailsParagraph.innerHTML = '<p class="text-danger">Αδυναμία φόρτωσης λεπτομερειών.</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Σφάλμα κατά την ανάκτηση των λεπτομερειών ακύρωσης:', error);
-                    detailsParagraph.innerHTML = '<p class="text-danger">Σφάλμα κατά τη φόρτωση λεπτομερειών.</p>';
-                });
+            } else {
+                detailsParagraph.innerHTML = '<p class="text-danger">Αδυναμία φόρτωσης λεπτομερειών.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την ανάκτηση των λεπτομερειών ακύρωσης:', error);
+            detailsParagraph.innerHTML = '<p class="text-danger">Σφάλμα κατά τη φόρτωση λεπτομερειών.</p>';
+        });
 
-            const canceledHr = document.createElement('hr');
-            canceledSection.appendChild(canceledHr);
+    const canceledHr = document.createElement('hr');
+    canceledSection.appendChild(canceledHr);
 
-            container.appendChild(canceledSection);
+    container.appendChild(canceledSection);
 }
 
 //---------------Function to create Buttons more easily------------ 
@@ -831,17 +831,77 @@ function addActiveSection(thesis, container) {
         const changeStatusSection = document.createElement('section');
 
         const changeStatusTitle = document.createElement('h4');
-        changeStatusTitle.textContent = 'Αλλαγή Κατάστασης';
+        changeStatusTitle.textContent = 'Μετατροπή σε υπό Εξέταση';
         changeStatusSection.appendChild(changeStatusTitle);
 
+        const changeToUnderReviewButton = createButton('change-to-under-review-button', 'Αλλαγή σε Υπό Εξέταση', ['btn', 'btn-warning'], () => {
+            changeToUnderReviewButton.remove();
 
-        const changeStatusButton = createButton('change-to-under-review-button', 'Αλλαγή σε Υπό Εξέταση', ['btn', 'btn-warning']);
-        changeStatusSection.appendChild(changeStatusButton);
+            const existingForm = document.getElementById('change-thesis-form');
+            if (existingForm) {
+                existingForm.remove();
+            }
+
+            const changeThesisForm = document.createElement('div');
+            changeThesisForm.id = 'change-thesis-form';
+            changeThesisForm.classList.add('mt-3');
+
+            const changeNumberInput = document.createElement('input');
+            changeNumberInput.type = 'number';
+            changeNumberInput.classList.add('form-control', 'mb-2');
+            changeNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
+            changeThesisForm.appendChild(changeNumberInput);
+
+            const changeDateInput = document.createElement('input');
+            changeDateInput.type = 'date';
+            changeDateInput.classList.add('form-control', 'mb-2');
+            changeDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
+            changeThesisForm.appendChild(changeDateInput);
+
+            const confirmChangeButton = createButton('confirm-change-button', 'Επιβεβαίωση Μετατροπής σε Υπό Εξέταση', ['btn', 'btn-primary'], () => {
+                const changeNumber = changeNumberInput.value;
+                const changeDate = changeDateInput.value;
+
+                if (!changeNumber || !changeDate) {
+                    alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
+                    return;
+                }
+
+                fetch('/api/thesis/to-be-reviewed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ thesis_id: thesis.thesis_id, changeNumber, changeDate })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Η διπλωματική μετατράπηκε σε υπό εξέταση επιτυχώς!');
+                            loadTheses();
+                            resetInfoSection();
+                        } else {
+                            alert(`Σφάλμα: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Σφάλμα κατά την μετατροπή:', error);
+                        alert('Κάτι πήγε στραβά κατά την μετατροπή σε υπό εξέταση!');
+                    });
+            });
+
+            changeThesisForm.appendChild(confirmChangeButton);
+            changeStatusSection.appendChild(changeThesisForm);
+        });
+
+        changeStatusSection.appendChild(changeToUnderReviewButton);
 
         const changeStatusHr = document.createElement('hr');
         changeStatusSection.appendChild(changeStatusHr);
 
         container.appendChild(changeStatusSection);
+
     }
 
 }
