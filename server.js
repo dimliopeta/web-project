@@ -1270,10 +1270,6 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
-        if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'Δεν βρέθηκαν προσκλήσεις για τη συγκεκριμένη διπλωματική.' });
-        }
-
         res.status(200).json({ success: true, invitations: results });
     });
 });
