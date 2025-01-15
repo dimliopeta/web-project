@@ -740,6 +740,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
               SELECT DISTINCT student_id
               FROM theses
               WHERE student_id IS NOT NULL
+              AND theses.status != 'canceled'
           );
     `;
     const searchInput = `%${input}%`;
