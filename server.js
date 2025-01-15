@@ -754,8 +754,6 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, students: results });
     });
 });
-
-
 //----------------- API for Professor Search Bar for thesis assignment -----------------
 app.get('/api/professor-search', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -786,7 +784,13 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
                         FROM Committees C
                         WHERE C.member2_id IS NOT NULL
                         AND C.thesis_id IN (SELECT thesis_id FROM Theses WHERE student_id = ?)
-                                    );
+                                    )
+                    AND P.id NOT IN (
+                        SELECT I.professor_id
+                        FROM Invitations I
+                        WHERE I.status IN ('pending', 'accepted')
+                        AND I.thesis_id IN (SELECT thesis_id FROM Theses WHERE student_id = ?)
+        );
 
                 `;
 
@@ -801,6 +805,40 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, professors: results });
     });
 });
+
+//----------------- API to Create Invitation for Thesis Committee -----------------
+app.post('/api/invitation_create', authenticateJWT, (req, res) => {
+    const { professorId } = req.body;
+    const userId = req.user.userId;
+
+    if (!professorId) {
+        return res.status(400).json({ success: false, message: 'Professor ID is required.' });
+    }
+
+    const query = `
+        INSERT INTO Invitations (thesis_id, professor_id, status)
+        SELECT t.thesis_id, ?, 'pending'
+        FROM Theses t
+        WHERE t.student_id = ?;
+    `;
+
+    db.query(query, [professorId, userId], (err, results) => {
+        if (err) {
+            console.error('Error creating invitation:', err);
+            return res.status(500).json({ success: false, message: 'Failed to create the invitation.' });
+        }
+
+        // Check if an invitation was actually created
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'No thesis found for the user.' });
+        }
+
+
+            console.log('Invitation send succesfully:', results);
+            res.json({ success: true, invitation: results });
+    });
+});
+
 
 //----------------- API to Create New Thesis -----------------
 app.post('/api/theses/new', authenticateJWT, uploadPDFOnly.single('pdf'), (req, res) => {

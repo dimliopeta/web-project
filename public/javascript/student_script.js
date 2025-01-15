@@ -145,6 +145,12 @@ function loadStudentThesis() {
                     //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
                     //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
                 }
+
+                // Hide the Committee Invitation button in thesis Management if committee is full
+                if (thesis.committee_member1_name && thesis.committee_member2_name) {
+                    document.querySelector('.inviteCommitteeButton').style.display = 'none';
+                }
+
             } else if (data.success && data.theses.length == 0) {
                 console.error('No thesis found for this student');
                 updateDataField('thesis_status', "Δεν έχει εκκινήσει");
@@ -391,7 +397,7 @@ document.querySelector('#search-professor').addEventListener('input', function (
 
                     listItem.addEventListener('click', function () {
                         document.getElementById('professorNameInput').value = `${professor.name} ${professor.surname}`;
-                        document.getElementById('assignCommitteeButton').dataset.professorId = professor.id;
+                        document.getElementById('sendInviteButton').dataset.professorId = professor.id;
                         document.getElementById('professorListWrapper').style.display = 'none';
                     });
 
@@ -413,14 +419,14 @@ document.querySelector('#professor-list').addEventListener('click', function (ev
         document.getElementById('chosenProfessor').style.display = 'block';
 
         document.getElementById('professorNameInput').value = professorName;
-        document.getElementById('assignCommitteeButton').dataset.professorId = professorId;
+        document.getElementById('sendInviteButton').dataset.professorId = professorId;
         // Hide the list
         document.getElementById('professorListWrapper').style.display = 'none';
     }
 });
-//--------------- EventListener for changing chosed professor ---------------
+//--------------- EventListener for changing chosen professor ---------------
 document.getElementById('changeProfessorButton').addEventListener('click', function () {
-    //Show the list again, hide the chosen professoer section
+    //Show the list again, hide the chosen professor section
     document.getElementById('professorListWrapper').style.display = 'block';
     document.getElementById('chosenProfessor').style.display = 'none';
 
@@ -428,14 +434,49 @@ document.getElementById('changeProfessorButton').addEventListener('click', funct
     document.getElementById('professor-list').innerHTML = '';
     document.getElementById('professorNameInput').value = '';
 
-    delete document.getElementById('assignCommitteeButton').dataset.professorId;
+    delete document.getElementById('sendInviteButton').dataset.professorId;
 });
-// Get the "Ορισμός" button to Show the professor Search Bar
-document.querySelectorAll('.assignCommittee').forEach(button => {
+// Get the "Ορισμός" button to open the professor Search Bar
+document.querySelectorAll('.inviteCommitteeButton').forEach(button => {
     button.addEventListener('click', function () {
         // Show the professor search bar
         document.getElementById('professorSearchBar').style.display = 'block';
     });
+});
+//--------------- EventListener for inviting a Professor to a Committee via the "Πρόσκληση Καθηγητή" button ---------------
+document.getElementById('sendInviteButton').addEventListener('click', function () {
+    const token = localStorage.getItem('token');
+    const professorId = this.dataset.professorId;
+
+    fetch('/api/invitation_create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ professorId })
+    })
+        .then(response => {
+            console.log('Raw response:', response);
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Η πρόσκληση στάλθηκε.');
+                document.getElementById('professorListWrapper').style.display = 'block';
+                document.getElementById('chosenProfessor').style.display = 'none';
+
+                document.getElementById('search-professor').value = ''; // Clears
+                document.getElementById('professor-list').innerHTML = '';
+                document.getElementById('professorNameInput').value = '';
+                document.getElementById('professorSearchBar').style.display = 'none';
+
+                delete document.getElementById('sendInviteButton').dataset.professorId;
+            } else {
+                alert('Σφάλμα κατά την αποστολή της πρόσκλησης ' + data.message);
+            }
+        })
+        .catch(err => console.error('Error sending invitation:', err));
 });
 
 
