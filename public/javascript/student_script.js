@@ -33,6 +33,7 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
         }
     });
 });
+console.log('Hello fellow web user. Congratulations for finding this message! You win a mediocre sense of accomplishment.')
 
 //--------------- Logout Function ---------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
@@ -519,8 +520,8 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
         })
         .catch(err => console.error('Error sending invitation:', err));
 });
- //--------------- Function for loading Invitations associated with the students Thesis ---------------
- function loadThesisInvitations(thesis_id) {
+//--------------- Function for loading Invitations associated with the students Thesis ---------------
+function loadThesisInvitations(thesis_id) {
     const token = localStorage.getItem('token');
 
     fetch('/api/invitations-for-thesis', {
@@ -531,50 +532,62 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
         },
         body: JSON.stringify({ thesis_id: thesis_id }) // Send thesis_id in the request body
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Data from API:', data);
-        const container = document.querySelector('#invitationCardSection .row');
-        container.innerHTML = ''; // Clear previous content
+        .then(response => response.json())
+        .then(data => {
+            const container = document.querySelector('#invitationCardSection .row');
+            container.innerHTML = ''; // Clear previous content
 
-        if (data.success && data.invitations.length > 0) {
-            document.querySelector('#invitationCardSection').style.display = 'block';
-            data.invitations.forEach(invitation => {
-                const card = document.createElement('div');
-                card.classList.add('col-lg-6', 'mb-3');
-                card.innerHTML = `
-                    <div class="card">
-                        <div class="card-header">
-                            Ημερομηνία Πρόσκλησης: ${invitation.invitation_date || 'Μη διαθέσιμη'}
+            if (data.success && data.invitations.length > 0) {
+                document.querySelector('#invitationCardSection').style.display = 'block';
+
+                data.invitations.forEach(invitation => {
+                    const card = document.createElement('div');
+                    card.classList.add('col-lg-6', 'mb-3');
+                    // Set up the status message
+                    const statusText = invitation.invitation_status === 'pending' ? 'Εκκρεμής'
+                        : invitation.invitation_status === 'accepted' ? 'Αποδεκτή'
+                            : 'Ακυρώθηκε';
+                    // Set up the status message color
+                    const statusColor = invitation.invitation_status === 'accepted' ? 'text-success'
+                        : invitation.invitation_status === 'cancelled' ? 'text-danger'
+                            : '';
+
+                    // Build the card content dynamically
+                    card.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">
+                                Ημερομηνία Πρόσκλησης: ${invitation.invitation_date || 'Μη διαθέσιμη'}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">Καθηγητής: ${invitation.professor_name || 'Μη διαθέσιμος'} ${invitation.professor_surname || ''}</h5>
+                                <p class="card-text ${statusColor}"><strong>Κατάσταση Πρόσκλησης:</strong> ${statusText}</p>
+                                ${invitation.invitation_status === 'cancelled' ? '' : `
+                                    <p><strong>Ημερομηνία Απόκρισης:</strong> ${invitation.response_date || ''}</p>
+                                `}
+                                ${invitation.invitation_status === 'pending' ? `
+                                    <button class="btn btn-outline-danger cancelCommitteInvitation">Ακύρωση Πρόσκλησης</button>
+                                ` : ''}
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <h5 class="card-title">Καθηγητής: ${invitation.professor_name || 'Μη διαθέσιμος'} ${invitation.professor_surname || ''}</h5>
-                            <p><strong>Κατάσταση Πρόσκλησης:</strong> ${invitation.invitation_status === 'pending' ? 'Εκκρεμής' : invitation.invitation_status === 'accepted' ? 'Αποδεκτή' : 'Ανακληθείσα / Απορριφθείσα'}</p>
-                            <p><strong>Ημερομηνία Απόκρισης:</strong> ${invitation.response_date || ''}</p>
-                            <button class="btn btn-danger cancelCommitteInvitation">Ακύρωση Πρόσκλησης</button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        } else {
-            console.warn('No invitations found or API error.');
-            container.innerHTML = '<h5 class="text-center">Δεν υπάρχουν προσκλήσεις για τη συγκεκριμένη διπλωματική!</h5>';
-        }
-    })
-    .catch(error => {
-        console.error('Σφάλμα κατά τη φόρτωση των προσκλήσεων:', error);
-    });
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                console.warn('No invitations found or API error.');
+                container.innerHTML = '<h5 class="text-center">Δεν υπάρχουν προσκλήσεις για τη συγκεκριμένη διπλωματική!</h5>';
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά τη φόρτωση των προσκλήσεων:', error);
+        });
 }
 //--------------- Function for cancelling an invitation ---------------
 document.querySelector('#invitationCardSection .row').addEventListener('click', function (event) {
     if (event.target && event.target.classList.contains('cancelCommitteInvitation')) {
         const invitationCard = event.target.closest('.card');
         const token = localStorage.getItem('token');
-        console.log('Token:', token); // Log the token here to ensure it's correct
-       // const invitationId = event.target.dataset.invitationId; // Assuming you add invitationId to each button if needed
-       console.log('vagin3');
-        fetch('/api/cancel-invitation', {
+
+        fetch('/api/invitation_cancel', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -582,21 +595,24 @@ document.querySelector('#invitationCardSection .row').addEventListener('click', 
             },
             credentials: 'include'
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('vagin4');
-            if (data.success) {
-                console.log('vagin5');
-                invitationCard.remove();
-            } else {
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadThesisInvitations(data.thesis_id)
+                } else {
+                    alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
+                }
+            })
+            .catch(error => {
+                console.error('Error while canceling invitation:', error);
                 alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
-            }
-        })
-        .catch(error => {
-            console.error('Error while canceling invitation:', error);
-            alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
-        });
+            });
     }
+});
+//--------------- EventListener for the student to Show/Hide the invitation section ---------------
+document.getElementById('HideInvitesButton').addEventListener('click', function () {
+    const invitationCardSection = document.getElementById('invitationCardSection');
+    invitationCardSection.style.display = 'none';
 });
 //------------------------------ Functions for upload buttons click Event Listeners ------------------------------
 function setupEventListeners(thesis) {

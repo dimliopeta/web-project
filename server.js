@@ -418,21 +418,21 @@ app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
     });
 });
 
-app.post('/api/thesis/logs',authenticateJWT,(req,res) =>{
-    const {thesis_id} = req.body;
+app.post('/api/thesis/logs', authenticateJWT, (req, res) => {
+    const { thesis_id } = req.body;
 
-    let query=` SELECT * FROM LOGS
+    let query = ` SELECT * FROM LOGS
     WHERE thesis_id = ?`;
 
-    db.query(query, [thesis_id], (err,results) =>{
-        if(err){
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των δεδομένων των καταγραφών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
         }
         res.status(200).json({ success: true, log: results });
     }
     );
-} 
+}
 );
 
 //----------------- API to Fetch all data to complete the Exam Report -----------------
@@ -1007,11 +1007,8 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
     });
 });
 //----------------- API for cancelling a sent Invitation as student -----------------
-app.post('/api/cancel-invitation', authenticateJWT, (req, res) => {
-    console.log('vagin1');
-    const student_id = req.user.id;
-    console.log('vagi2n');
-    console.log(student_id);
+app.post('/api/invitation_cancel', authenticateJWT, (req, res) => {
+    const student_id = req.user.userId;
 
     const query = `
     UPDATE Invitations I
@@ -1029,8 +1026,24 @@ app.post('/api/cancel-invitation', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Server error while canceling invitations.' });
         }
 
-        console.log('Cancelled Invitations from DB:', results);
-        res.json({ success: true, cancelled_invitation: results });
+
+
+          // Fetch the thesis_id
+          const thesisQuery = `
+          SELECT thesis_id
+          FROM Theses T
+          WHERE T.student_id = ?;
+      `;
+
+      db.query(thesisQuery, [student_id], (err, thesisResults) => {
+          if (err) {
+              console.error('Error fetching thesis_id:', err);
+              return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
+          }
+          const thesis_id = thesisResults[0]?.thesis_id;
+          console.log('Cancelled Invitations from DB:', results);
+          res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
+        });
     });
 });
 
@@ -1251,8 +1264,8 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
     const query = `
         SELECT 
             i.id,
-            i.invitation_date,
-            i.response_date,
+            DATE_FORMAT(i.invitation_date, '%Y-%m-%d') AS invitation_date,
+            DATE_FORMAT(i.response_date, '%Y-%m-%d') AS response_date,
             i.status AS invitation_status,
             p.name AS professor_name,
             p.surname AS professor_surname
