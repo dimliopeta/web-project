@@ -418,6 +418,23 @@ app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
     });
 });
 
+app.post('/api/thesis/logs',authenticateJWT,(req,res) =>{
+    const {thesis_id} = req.body;
+
+    let query=` SELECT * FROM LOGS
+    WHERE thesis_id = ?`;
+
+    db.query(query, [thesis_id], (err,results) =>{
+        if(err){
+            console.error('Σφάλμα κατά την ανάκτηση των δεδομένων των καταγραφών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+        res.status(200).json({ success: true, log: results });
+    }
+    );
+} 
+);
+
 //----------------- API to Fetch all data to complete the Exam Report -----------------
 app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -988,12 +1005,12 @@ app.post('/api/cancel-invitation', authenticateJWT, (req, res) => {
         JOIN Theses T ON I.thesis_id = T.thesis_id
         JOIN Students S ON T.student_id = S.id
         SET I.status = 'cancelled'
-        WHERE S.id = ? AND I.status = 'pending' AND T.status NOT IN ('completed', 'cancelled', 'active', 'unassigned', 'to-be-reviewed');
+        WHERE S.id = ? AND I.status = 'pending' AND T.status NOT IN ('completed', 'cancelled');
     `;
 
     db.query(query, [student_id], (err, results) => {
         if (err) {
-            console.error('Error executing query:', err);
+            console.error('Error executing combined query:', err);
             return res.status(500).json({ success: false, message: 'Server error while canceling invitations.' });
         }
 
@@ -1236,6 +1253,10 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
         if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των προσκλήσεων:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκαν προσκλήσεις για τη συγκεκριμένη διπλωματική.' });
         }
 
         res.status(200).json({ success: true, invitations: results });
