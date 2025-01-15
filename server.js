@@ -988,12 +988,12 @@ app.post('/api/cancel-invitation', authenticateJWT, (req, res) => {
         JOIN Theses T ON I.thesis_id = T.thesis_id
         JOIN Students S ON T.student_id = S.id
         SET I.status = 'cancelled'
-        WHERE S.id = ? AND I.status = 'pending' AND T.status NOT IN ('completed', 'cancelled');
+        WHERE S.id = ? AND I.status = 'pending' AND T.status NOT IN ('completed', 'cancelled', 'active', 'unassigned', 'to-be-reviewed');
     `;
 
     db.query(query, [student_id], (err, results) => {
         if (err) {
-            console.error('Error executing combined query:', err);
+            console.error('Error executing query:', err);
             return res.status(500).json({ success: false, message: 'Server error while canceling invitations.' });
         }
 
@@ -1236,10 +1236,6 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
         if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των προσκλήσεων:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'Δεν βρέθηκαν προσκλήσεις για τη συγκεκριμένη διπλωματική.' });
         }
 
         res.status(200).json({ success: true, invitations: results });

@@ -477,7 +477,7 @@ document.getElementById('changeProfessorButton').addEventListener('click', funct
 
     delete document.getElementById('sendInviteButton').dataset.professorId;
 });
-//--------------- Get the "Ορισμός" button to open the professor Search Bar
+//--------------- Get the "Πρόσκληση" button to open the professor Search Bar
 document.querySelectorAll('.inviteCommitteeButton').forEach(button => {
     button.addEventListener('click', function () {
         // Show the professor search bar
@@ -534,11 +534,11 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
     .then(response => response.json())
     .then(data => {
         console.log('Data from API:', data);
-
         const container = document.querySelector('#invitationCardSection .row');
         container.innerHTML = ''; // Clear previous content
 
         if (data.success && data.invitations.length > 0) {
+            document.querySelector('#invitationCardSection').style.display = 'block';
             data.invitations.forEach(invitation => {
                 const card = document.createElement('div');
                 card.classList.add('col-lg-6', 'mb-3');
@@ -567,7 +567,32 @@ document.getElementById('sendInviteButton').addEventListener('click', function (
     });
 }
 //--------------- Function for cancelling an invitation ---------------
-
+document.querySelectorAll('#cancelCommitteInvitation').forEach(button => {
+    button.addEventListener('click', function (event) {
+        const invitationCard = event.target.closest('.card');
+        const token = localStorage.getItem('token');
+        
+        fetch('/api/cancel-invitation', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                invitationCard.remove();
+            } else {
+                alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
+            }
+        })
+        .catch(error => {
+            console.error('Error while canceling invitation:', error);
+            alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
+        });
+    });
+});
 
 //------------------------------ Functions for upload buttons click Event Listeners ------------------------------
 function setupEventListeners(thesis) {
