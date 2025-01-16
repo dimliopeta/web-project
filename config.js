@@ -86,6 +86,35 @@ function insertData() {
         });
     });
 
+     // Εισαγωγή φοιτητών
+     data.administrators.forEach(administrator => {
+        const query = `SELECT * FROM ADMINISTRATORS WHERE email=?;`;
+        db.query(query, [administrator.email], (err, results) => {
+            if (err) {
+                console.error('Error checking for duplicate administrators:', err);
+                return;
+            }
+            if (results.length === 0) {
+                const insertQuery = `
+                    INSERT INTO administrators (name, surname, email, password)
+                    VALUES (?, ?, ?, ?);
+                `;
+                db.query(insertQuery, [
+                    administrator.name,
+                    administrator.surname,
+                    administrator.email,
+                    'defaultpassword' // Προσωρινός κωδικός
+                ], (insertErr) => {
+                    if (insertErr) {
+                        console.error('Error inserting administrator:', insertErr);
+                    } else {
+                        console.log(`Administrator ${administrator.email} added successfully.`);
+                    }
+                });
+            }
+        });
+    });
+
     // Εισαγωγή διπλωματικών
     data.theses.forEach(thesis => {
         const query = `SELECT * FROM THESES WHERE thesis_id=?;`;

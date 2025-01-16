@@ -33,6 +33,7 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
         }
     });
 });
+console.log('Hello fellow web user. Congratulations for finding this message! You win a mediocre sense of accomplishment.')
 
 //--------------- Logout Function ---------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
@@ -45,7 +46,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
             if (response.ok) {
                 window.location.href = '/'; // Ανακατεύθυνση στο index
             } else {
-                alert('Logout failed');
+                alert('Η αποσύνδεση απέτυχε.');
             }
         })
         .catch(err => console.error('Error:', err));
@@ -53,8 +54,8 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 
 
 
-
-//--------------------------------------------- DASHBOARD & THESIS CONFIGURATION PAGE ---------------------------------------------
+//--------------------------------------------- DASHBOARD ---------------------------------------------
+//------------------------------ Functions to Load Thesis and helper functions ------------------------------
 //------------------------------ Load Thesis Function ------------------------------
 function loadStudentThesis() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
@@ -89,7 +90,7 @@ function loadStudentThesis() {
                     case 'completed':
                         status = 'Περατωμένη';
                         break;
-                    case 'canceled':
+                    case 'cancelled':
                         status = 'Ακυρωμένη.';
 
                 }
@@ -100,7 +101,8 @@ function loadStudentThesis() {
                 updateDataField('professor_name', thesis.professor_name);
                 updateDataField('professor_surname', thesis.professor_surname);
                 updateDataField('thesis_start_date', thesis.start_date || 'Δεν έχει εκκινήσει');
-                updateDataField('thesis_exam_date', thesis.exam_date || 'Δεν');
+                updateDataField('thesis_exam_date', thesis.exam_date || '');
+                updateDataField('thesis_end_date', thesis.exam_date || '');
                 updateDataField('thesis_nimertis_link', thesis.nimertis_link);
                 updateDataField('committee_member1_name', thesis.committee_member1_name || 'Δεν έχει οριστεί');
                 updateDataField('committee_member1_surname', thesis.committee_member1_surname || ' ');
@@ -117,18 +119,27 @@ function loadStudentThesis() {
                 const dashboardDuration = document.querySelector('[data-field="dashboardDuration"]');
                 const dashboardStartDate = document.querySelector('[data-field="dashboardStartDate"]');
                 const dashboardExamDate = document.querySelector('[data-field="dashboardExamDate"]');
+                const dashboardEndDate = document.querySelector('[data-field="dashboardEndDate"]');
 
                 if (thesis.start_date && thesis.status === "active") {
                     dashboardDuration.style.display = 'inline';
                     dashboardExamDate.style.display = 'none';
+                    dashboardEndDate.style.display = 'none';
                     const duration = calculateDuration(thesis.start_date);
                     updateDataField('thesis_duration', duration);
-                } else if (thesis.start_date && (thesis.status === "to-be-reviewed" || thesis.status === "completed")) {
+                } else if (thesis.start_date && (thesis.status === "to-be-reviewed")) {
                     dashboardDuration.style.display = 'none';
                     dashboardExamDate.style.display = 'inline';
+                    dashboardEndDate.style.display = 'none';
+
+                } else if (thesis.start_date && (thesis.status === "completed")) {
+                    dashboardDuration.style.display = 'none';
+                    dashboardExamDate.style.display = 'none';
+                    dashboardEndDate.style.display = 'inline';
                 } else {
                     dashboardDuration.style.display = 'none';
                     dashboardExamDate.style.display = 'none';
+                    dashboardEndDate.style.display = 'none';
                 }
 
                 // Handle the PDF download button
@@ -139,12 +150,18 @@ function loadStudentThesis() {
                     });
                 } else {
                     pdfButton.addEventListener('click', () => {
-                        alert('No PDF available for this thesis.');
+                        alert('Δεν υπάρχει PDF διαθέσιμο γι αυτή τη διπλωματική.');
                     });
 
                     //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
                     //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
                 }
+
+                // Hide the Committee Invitation button in thesis Management if committee is full
+                if (thesis.committee_member1_name && thesis.committee_member2_name) {
+                    document.querySelector('.inviteCommitteeButton').style.display = 'none';
+                }
+
             } else if (data.success && data.theses.length == 0) {
                 console.error('No thesis found for this student');
                 updateDataField('thesis_status', "Δεν έχει εκκινήσει");
@@ -169,7 +186,6 @@ function sortThreeStrings(input1, input2, input3) {
     inputs.sort();
     return inputs;
 }
-
 //---------------Helper function to calculate the Final Grade (average of 3 committee members' grades)
 function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
     const grade1 = parseFloat(committeeMember1Grade) || null;
@@ -195,11 +211,16 @@ function calculateDuration(startDate) {
     // Adjust for negative days (crossed into a new month)
     if (days < 0) {
         totalMonths--; // Subtract one month
-        const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
-        days += previousMonth;
+        const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
+        days += previousMonthDays;
     }
-    const monthText = totalMonths > 0 ? `${totalMonths} μήνες` : '';
-    const dayText = days > 0 ? `${days} ημέρες` : '';
+    const monthText = totalMonths > 0
+        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+        : '';
+
+    const dayText = days > 0
+        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+        : '';
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
@@ -207,12 +228,57 @@ function calculateDuration(startDate) {
 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
     const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
     elements.forEach(element => {
-        element.textContent = (value && value !== null) ? value : errorMessage;
+        // Ensure valid strings (e.g., '0 ημέρες') are not replaced by errorMessage
+        element.textContent = (value !== undefined && value !== null && value !== '') ? value : errorMessage;
     });
 }
 
 
 
+//--------------------------------------------- THESIS CONFIGURATION PAGE ---------------------------------------------
+// ------------------------------ Functions for Thesis Management handling ------------------------------
+//--------------- Main func that pulls thesis data and helper funcs ---------------
+function setupThesisManagement() {
+    const token = localStorage.getItem('token')
+
+    fetch('/api/theses', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch thesis data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.theses.length > 0) {
+                const thesis = data.theses[0];
+
+                // If Nimertis Link exists in the thesis table, then 
+                const nimertisLinkButton = document.getElementById('configurationCompletedFilesNimertisLink');
+                if (thesis.nimertis_link) {
+                    nimertisLinkButton.addEventListener('click', () => {
+                        window.open(thesis.nimertis_link, '_blank');
+                    });
+
+                } else {
+                    nimertisLinkButton.addEventListener('click', () => {
+                        alert('Ο σύνδεσμος Νημερτή δεν είναι ακόμα διαθέσιμος.')
+                    });
+
+                }
+
+                setupEventListeners(thesis);
+                fetchAndDisplayAttachments(thesis);
+                fetchAndDisplayNimertisLink(thesis);
+                fetchAndDisplayExaminations(thesis);
+                loadThesisInvitations(thesis.thesis_id);
+            }
+        })
+}
 //------------------------------ Show/Hide Configuration Page parts based on status ------------------------------
 function loadSectionsBasedOnStatus() {
     const token = localStorage.getItem('token');
@@ -305,6 +371,11 @@ function loadSectionsBasedOnStatus() {
                         completedFilesSection.style.display = "none";
                         managementSection.style.display = "block";
                         datesSection.style.display = "block";
+
+                        if(thesis.committee_member1_grade != null && thesis.committee_member2_grade != null && thesis.supervisor_grade != null){
+                            completedFilesSection.style.display = "block";
+                            document.getElementById("configurationCompletedFilesNimertisLink").style.display = 'none';
+                        }
                         break;
                     case 'completed':
                         infoSection.style.display = "block";
@@ -314,10 +385,10 @@ function loadSectionsBasedOnStatus() {
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "block";
-                        managementSection.style.display = "block";
+                        managementSection.style.display = "none";
                         datesSection.style.display = "block";
                         break;
-                    case 'canceled':
+                    case 'cancelled':
                         infoSection.style.display = "block";
                         configurationBody.style.display = "none";
                         configurationFooter.style.display = "none";
@@ -364,8 +435,6 @@ function loadSectionsBasedOnStatus() {
             console.error('Error loading thesis data:', error);
         });
 }
-
-
 //------------------------------ Functions for Committee Assignment and Professor Search Bar ------------------------------
 //------------------------------ Professor List creation, data load ------------------------------
 document.querySelector('#search-professor').addEventListener('input', function () {
@@ -391,7 +460,7 @@ document.querySelector('#search-professor').addEventListener('input', function (
 
                     listItem.addEventListener('click', function () {
                         document.getElementById('professorNameInput').value = `${professor.name} ${professor.surname}`;
-                        document.getElementById('assignCommitteeButton').dataset.professorId = professor.id;
+                        document.getElementById('sendInviteButton').dataset.professorId = professor.id;
                         document.getElementById('professorListWrapper').style.display = 'none';
                     });
 
@@ -413,14 +482,14 @@ document.querySelector('#professor-list').addEventListener('click', function (ev
         document.getElementById('chosenProfessor').style.display = 'block';
 
         document.getElementById('professorNameInput').value = professorName;
-        document.getElementById('assignCommitteeButton').dataset.professorId = professorId;
+        document.getElementById('sendInviteButton').dataset.professorId = professorId;
         // Hide the list
         document.getElementById('professorListWrapper').style.display = 'none';
     }
 });
-//--------------- EventListener for changing chosed professor ---------------
+//--------------- EventListener for changing chosen professor ---------------
 document.getElementById('changeProfessorButton').addEventListener('click', function () {
-    //Show the list again, hide the chosen professoer section
+    //Show the list again, hide the chosen professor section
     document.getElementById('professorListWrapper').style.display = 'block';
     document.getElementById('chosenProfessor').style.display = 'none';
 
@@ -428,60 +497,145 @@ document.getElementById('changeProfessorButton').addEventListener('click', funct
     document.getElementById('professor-list').innerHTML = '';
     document.getElementById('professorNameInput').value = '';
 
-    delete document.getElementById('assignCommitteeButton').dataset.professorId;
+    delete document.getElementById('sendInviteButton').dataset.professorId;
 });
-// Get the "Ορισμός" button to Show the professor Search Bar
-document.querySelectorAll('.assignCommittee').forEach(button => {
+//--------------- Get the "Πρόσκληση" button to open the professor Search Bar
+document.querySelectorAll('.inviteCommitteeButton').forEach(button => {
     button.addEventListener('click', function () {
         // Show the professor search bar
         document.getElementById('professorSearchBar').style.display = 'block';
     });
 });
+//--------------- EventListener for inviting a Professor to a Committee via the "Πρόσκληση Καθηγητή" button ---------------
+document.getElementById('sendInviteButton').addEventListener('click', function () {
+    const token = localStorage.getItem('token');
+    const professorId = this.dataset.professorId;
 
-
-// ------------------------------ Functions for Thesis Management handling ------------------------------
-//--------------- Main func that pulls thesis data and helper funcs ---------------
-function setupThesisManagement() {
-    const token = localStorage.getItem('token')
-
-    fetch('/api/theses', {
-        method: 'GET',
+    fetch('/api/invitation_create', {
+        method: 'POST',
         headers: {
-            'Authorization': `Bearer ${token}`
-        }
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ professorId })
     })
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch thesis data');
-            }
             return response.json();
         })
         .then(data => {
-            if (data.success && data.theses.length > 0) {
-                const thesis = data.theses[0];
+            if (data.success) {
+                alert('Η πρόσκληση στάλθηκε.');
+                document.getElementById('professorListWrapper').style.display = 'block';
+                document.getElementById('chosenProfessor').style.display = 'none';
 
-                // If Nimertis Link exists in the thesis table, then 
-                const nimertisLinkButton = document.getElementById('configurationCompletedFilesNimertisLink');
-                if (thesis.nimertis_link) {
-                    nimertisLinkButton.addEventListener('click', () => {
-                        window.open(thesis.nimertis_link, '_blank');
-                    });
+                document.getElementById('search-professor').value = ''; // Clears
+                document.getElementById('professor-list').innerHTML = '';
+                document.getElementById('professorNameInput').value = '';
+                document.getElementById('professorSearchBar').style.display = 'none';
 
-                } else {
-                    nimertisLinkButton.addEventListener('click', () => {
-                        alert('Ο σύνδεσμος Νημερτή δεν είναι ακόμα διαθέσιμος.')
-                    });
-
-                }
-
-                setupEventListeners(thesis);
-                fetchAndDisplayAttachments(thesis);
-                fetchAndDisplayNimertisLink(thesis);
-                fetchAndDisplayExaminations(thesis);
+                delete document.getElementById('sendInviteButton').dataset.professorId;
+                loadThesisInvitations(data.thesis_id);
+            } else {
+                alert('Σφάλμα κατά την αποστολή της πρόσκλησης ' + data.message);
             }
         })
+        .catch(err => console.error('Error sending invitation:', err));
+});
+//--------------- Function for loading Invitations associated with the students Thesis ---------------
+function loadThesisInvitations(thesis_id) {
+    const token = localStorage.getItem('token');
+
+    fetch('/api/invitations-for-thesis', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ thesis_id: thesis_id }) // Send thesis_id in the request body
+    })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.querySelector('#invitationCardSection .row');
+            container.innerHTML = ''; // Clear previous content
+
+            if (data.success && data.invitations.length > 0) {
+                document.querySelector('#invitationCardSection').style.display = 'block';
+
+                data.invitations.forEach(invitation => {
+                    const card = document.createElement('div');
+                    card.classList.add('col-lg-6', 'mb-3');
+                    // Set up the status message
+                    const statusText = invitation.invitation_status === 'pending' ? 'Εκκρεμής'
+                        : invitation.invitation_status === 'accepted' ? 'Αποδεκτή'
+                            : 'Ακυρώθηκε';
+                    // Set up the status message color
+                    const statusColor = invitation.invitation_status === 'accepted' ? 'text-success'
+                        : invitation.invitation_status === 'cancelled' ? 'text-danger'
+                            : '';
+
+                    // Build the card content dynamically
+                    card.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">
+                                Ημερομηνία Πρόσκλησης: ${invitation.invitation_date || 'Μη διαθέσιμη'}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">Καθηγητής: ${invitation.professor_name || 'Μη διαθέσιμος'} ${invitation.professor_surname || ''}</h5>
+                                <p class="card-text ${statusColor}"><strong>Κατάσταση Πρόσκλησης:</strong> ${statusText}</p>
+                                ${invitation.invitation_status === 'cancelled' ? '' : `
+                                    <p><strong>Ημερομηνία Απόκρισης:</strong> ${invitation.response_date || ''}</p>
+                                `}
+                                ${invitation.invitation_status === 'pending' ? `
+                                    <button class="btn btn-outline-danger cancelCommitteInvitation">Ακύρωση Πρόσκλησης</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                console.warn('No invitations found or API error.');
+                container.innerHTML = '<h5 class="text-center">Δεν υπάρχουν προσκλήσεις για τη συγκεκριμένη διπλωματική!</h5>';
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά τη φόρτωση των προσκλήσεων:', error);
+        });
 }
-//--------------- Functions for upload button click Event Listeners ---------------
+//--------------- Function for cancelling an invitation ---------------
+document.querySelector('#invitationCardSection .row').addEventListener('click', function (event) {
+    if (event.target && event.target.classList.contains('cancelCommitteInvitation')) {
+        const invitationCard = event.target.closest('.card');
+        const token = localStorage.getItem('token');
+
+        fetch('/api/invitation_cancel', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadThesisInvitations(data.thesis_id)
+                } else {
+                    alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
+                }
+            })
+            .catch(error => {
+                console.error('Error while canceling invitation:', error);
+                alert('Σφάλμα κατά την ακύρωση της πρόσκλησης.');
+            });
+    }
+});
+//--------------- EventListener for the student to Show/Hide the invitation section ---------------
+document.getElementById('HideInvitesButton').addEventListener('click', function () {
+    const invitationCardSection = document.getElementById('invitationCardSection');
+    invitationCardSection.style.display = 'none';
+});
+//------------------------------ Functions for upload buttons click Event Listeners ------------------------------
 function setupEventListeners(thesis) {
     // File upload button
     document.getElementById('configurationUploadFileButton').addEventListener('click', function () {
@@ -490,10 +644,10 @@ function setupEventListeners(thesis) {
             if (thesis) {
                 uploadFile(configurationUploadFileInputBox, thesis);  // Pass thesis to the uploadFile function
             } else {
-                alert('Thesis information is not available.');
+                alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
         } else {
-            alert('Please select a file to upload.');
+            alert('Παρακαλώ επιλέξτε ένα αρχείο προς ανάρτηση.');
         }
     });
     // Link upload button event listener
@@ -503,10 +657,10 @@ function setupEventListeners(thesis) {
             if (thesis) {
                 uploadLink(configurationUploadLinkInputBox, thesis);  // Pass thesis to the uploadLink function
             } else {
-                alert('Thesis information is not available.');
+                alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
         } else {
-            alert('Please enter a link.');
+            alert('Παρακαλώ εισάγετε ένα σύνδεσμο προς ανάρτηση.');
         }
     });
 
@@ -517,10 +671,10 @@ function setupEventListeners(thesis) {
             if (thesis) {
                 uploadNimertisLink(configurationUploadNimertisInputBox, thesis);
             } else {
-                alert('Thesis information is not available.');
+                alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
         } else {
-            alert('Please enter a Nimertis link.');
+            alert('Παρακαλώ εισάγετε έναν σύνδεσμο προς το αποθετήριο Νημερτή.');
         }
     });
 
@@ -560,14 +714,14 @@ function uploadFile(fileInput, thesis) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('File uploaded successfully. Any previous file has been replaced.');
+                alert('Το αρχείο αναρτήθηκε. Αν υπήρχε προηγούμενο αρχείο έχει αντικατασταθεί.');
                 fetchAndDisplayAttachments(thesis); // Refresh the displayed file on every upload
             } else {
-                alert('Error uploading file: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Error uploading file:', error);
+            console.error('Παρουσιάστηκε πρόβλημα στην ανάρτηση:', error);
             alert('Error uploading file.');
         });
 }
@@ -590,19 +744,18 @@ function uploadLink(link, thesis) {
                 document.getElementById('configurationUploadLinkInputBox').value = '';
                 fetchAndDisplayAttachments(thesis);
             } else {
-                alert('Error uploading link: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error uploading link:', error);
-            alert('Error uploading link');
+            alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση:');
         });
 }
-
 //--------------- Nimertis Link upload
 function uploadNimertisLink(link, thesis) {
     if (!link.startsWith('https://nemertes.library.upatras.gr/')) {
-        alert('Invalid Nimertis link. It must start with https://nemertes.library.upatras.gr/');
+        alert('Λανθασμένη μορφή συνδέσμου. Ένας σύνδεσμος προς το αποθετήριο Νημερτή πρέπει να ξεκινά με: https://nemertes.library.upatras.gr/');
         return;
     }
 
@@ -625,12 +778,12 @@ function uploadNimertisLink(link, thesis) {
                 thesis.nimertis_link = link;
                 fetchAndDisplayNimertisLink(thesis); // Refresh the displayed Nimertis link
             } else {
-                alert('Error uploading Nimertis link: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error uploading Nimertis link:', error);
-            alert('Error uploading Nimertis link.');
+            alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση.');
         });
 }
 //--------------- Examination Details upload
@@ -657,14 +810,28 @@ function uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, th
                 fetchAndDisplayExaminations(thesis); // Refresh exam details display
                 //document.getElementById('examDateSection').style.display = 'block';
             } else {
-                alert('Failed to save exam details: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error saving exam details:', error);
-            alert('Error saving exam details.');
+            alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση.');
         });
 }
+//--------------- Helper function to add a link to the list of uploaded links ---------------
+function addLinkToList(link) {
+    const linkList = document.getElementById('configurationUploadedLinksList');
+    const newLinkElement = document.createElement('div');
+    newLinkElement.classList.add('link-item');
+
+    const linkText = document.createElement('span');
+    linkText.textContent = link;
+
+    newLinkElement.appendChild(linkText);
+    linkList.appendChild(newLinkElement);
+}
+
+
 //------------------------------ Helper functions to Fetch and Display Attachments-Nimertis link-Examination Details ------------------------------
 //--------------- Fetch and Display File&Links
 function fetchAndDisplayAttachments(thesis) {
@@ -718,12 +885,12 @@ function fetchAndDisplayAttachments(thesis) {
                     configurationUploadedLinksList.innerHTML = '<li class="no-bullet">Δεν έχουν αναρτηθεί σύνδεσμοι</li>';
                 }
             } else {
-                alert('Failed to fetch attachments: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην ανεύρευση των αρχείων: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Error fetching attachments:', error);
-            alert('Error fetching attachments.');
+            console.error('Error fetching files:', error);
+            alert('Παρουσιάστηκε πρόβλημα στην ανεύρευση των αρχείων.');
         });
 }
 //--------------- Fetch and Display Nimertis Links
@@ -758,30 +925,50 @@ function fetchAndDisplayExaminations(thesis) {
             if (data.success) {
                 // Translate type of exam
                 const examData = data.examination;
-                if (examData.type_of_exam === "in-person") {
-                    examData.type_of_exam = "Δια ζώσης";
-                } else if (examData.type_of_exam === "online") {
-                    examData.type_of_exam = "Εξ αποστάσως";
-                }
-                // Format the date properly
-                const [year, month, day] = examData.date.split("-");
-                examData.date = `${day}-${month}-${year}`;
+                examData.type_of_exam =
+                    examData.type_of_exam === "in-person"
+                        ? "Δια ζώσης"
+                        : examData.type_of_exam === "online"
+                            ? "Εξ αποστάσως"
+                            : 'Δεν έχει οριστεί.';
 
-                document.getElementById('configurationExamDateInfo').innerHTML = `${examData.date || 'Δεν έχει οριστεί.'}`;
+                // Format the date properly
+                let formattedDate = 'Δεν έχει οριστεί.';
+                if (examData.date) {
+                    const [year, month, day] = examData.date.split("-");
+                    formattedDate = `${day}-${month}-${year}`;
+                }
+
+                document.getElementById('configurationExamDateInfo').innerHTML = formattedDate;
                 document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
                 document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
-
-
             } else {
-                alert('Failed to fetch exam details: ' + data.message);
+                alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error fetching exam details:', error);
-            alert('Error fetching exam details.');
+            alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης:');
         });
 }
-
+//------------------------------ Functions for the Completed Files Section ------------------------------
+//------------------------------ Completed Files Section Event Listeners  ------------------------------
+//--------------- Examination Report button Event Listener  ---------------
+document.getElementById('configurationCompletedFilesExamReportButton').addEventListener('click', function () {
+    loadExamReportData();
+    const examReportSection = document.getElementById('examReportHTMLSection');
+    // Toggle visibility of the section
+    if (examReportSection.style.display === 'none' || examReportSection.style.display === '') {
+        examReportSection.style.display = 'block';
+    } else {
+        examReportSection.style.display = 'none';
+    }
+});
+//--------------- Helper function to get the day-name of a date ---------------
+function getDayName(dateStr, locale) {
+    var date = new Date(dateStr);
+    return date.toLocaleDateString(locale, { weekday: 'long' });
+}
 //------------------------------ Load Exam Report Data Function ------------------------------
 function loadExamReportData() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
@@ -858,7 +1045,9 @@ function loadExamReportData() {
         });
 
 }
-//------------------------------ Function to Load Logs Data ------------------------------
+
+
+//------------------------------ Function to Load Logs Data for Status Change Section ------------------------------
 function loadLogsData() {
     const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
 
@@ -887,7 +1076,7 @@ function loadLogsData() {
                     'active': 'Ενεργή',
                     'to-be-reviewed': 'Προς Εξέταση',
                     'completed': 'Ολοκληρωμένη',
-                    'canceled': 'Ακυρωμένη'
+                    'cancelled': 'Ακυρωμένη'
                 };
 
                 logData = logData.map(log => {
@@ -921,6 +1110,7 @@ function loadLogsData() {
 
 }
 
+
 //------------------------------ Show/Hide Management Sections based on section clicked on ------------------------------
 document.getElementById('configurationButtonUploadFile').addEventListener('click', function () {
     showSection('configurationUploadFileSection');
@@ -937,7 +1127,7 @@ document.getElementById('configurationButtonSetExamDate').addEventListener('clic
 document.getElementById('configurationButtonNimertisSubmission').addEventListener('click', function () {
     showSection('nimertisSection');
 });
-//--------------- Helper function to show a specific section and hide the others ---------------
+//--------------- Helper function to show a specific section and hide the others in Management Sections ---------------
 function showSection(sectionId) {
     const sections = ['configurationUploadFileSection', 'linkSection', 'examDateSection', 'nimertisSection'];
     sections.forEach(function (section) {
@@ -949,36 +1139,6 @@ function showSection(sectionId) {
         }
     });
 }
-//--------------- Helper function to get the day-name of a date ---------------
-function getDayName(dateStr, locale) {
-    var date = new Date(dateStr);
-    return date.toLocaleDateString(locale, { weekday: 'long' });
-}
-
-//--------------- Helper function to add a link to the list of uploaded links ---------------
-function addLinkToList(link) {
-    const linkList = document.getElementById('configurationUploadedLinksList');
-    const newLinkElement = document.createElement('div');
-    newLinkElement.classList.add('link-item');
-
-    const linkText = document.createElement('span');
-    linkText.textContent = link;
-
-    newLinkElement.appendChild(linkText);
-    linkList.appendChild(newLinkElement);
-}
-//------------------------------ Completed Files Section Event Listeners  ------------------------------
-//--------------- Examination Report button Event Listener  ---------------
-document.getElementById('configurationCompletedFilesExamReportButton').addEventListener('click', function () {
-    loadExamReportData();
-    const examReportSection = document.getElementById('examReportHTMLSection');
-    // Toggle visibility of the section
-    if (examReportSection.style.display === 'none' || examReportSection.style.display === '') {
-        examReportSection.style.display = 'block';
-    } else {
-        examReportSection.style.display = 'none';
-    }
-});
 
 
 
@@ -1027,7 +1187,6 @@ function loadStudentProfile() {
             console.error('Error loading student data:', error);
         });
 }
-
 //------------------------------ Event Listener for clicks on the edit buttons in Student Profile ------------------------------
 document.querySelector('#student_profile').addEventListener('click', function (event) {
     // Check if the clicked element is a toggle button
@@ -1085,6 +1244,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 });
 
 
+
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
 //------------------------------ Load the student profile after DOM is loaded ------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -1095,7 +1255,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadExamReportData();
     loadLogsData();
 });
-
 //------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------
 window.addEventListener('DOMContentLoaded', () => {
     const defaultTab = document.querySelector('a[href="#dashboard"]');
@@ -1105,6 +1264,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 //If exam dates exists and status completed , end_date=exam date. Also create end date as null.
-
+//fix buttons for inv
 //API Naming scheme.
 

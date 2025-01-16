@@ -145,8 +145,12 @@
                             <span class="pe-4" data-field="thesis_start_date"> </span>
                         </span>
                         <span data-field="dashboardExamDate">
-                            <span class="ps-5">Ημερομηνία περάτωσης:</span>
+                            <span class="ps-5">Ημερομηνία εξέτασης:</span>
                             <span class="pe-4" data-field="thesis_exam_date"> </span>
+                        </span>
+                        <span data-field="dashboardEndDate">
+                            <span class="ps-5">Ημερομηνία περάτωσης:</span>
+                            <span class="pe-4" data-field="thesis_end_date"> </span>
                         </span>
                         <span data-field="dashboardDuration">
                             <span class="ps-5">Διάρκεια:</span>
@@ -211,11 +215,6 @@
                                     <span class="my-2" data-field="committee_member1_name"> </span>&nbsp;
                                     <span class="my-2" data-field="committee_member1_surname"> </span>
                                 </span>
-                                <span class="col-sm-2">
-                                    <!-- "assign committee" added to class since ids must be unique -->
-                                    <button type="button"
-                                        class="btn btn-outline-primary btn-sm mt-2 assignCommittee">Ορισμός</button>
-                                </span>
                                 <span class="col-sm-5 d-flex justify-content-end">
                                     <span class="my-2"> 3ο μέλος Τριμελούς Επιτροπής:</span>
                                 </span>
@@ -226,7 +225,7 @@
                                 <span class="col-sm-2">
                                     <!-- "assign committee" added to class since ids must be unique -->
                                     <button type="button"
-                                        class="btn btn-outline-primary btn-sm mt-2 assignCommittee">Ορισμός</button>
+                                        class="btn btn-outline-primary btn-sm mt-2 inviteCommitteeButton">Πρόσκληση</button>
                                 </span>
                             </div>
                             <!-- Searh bar for Professors -->
@@ -254,7 +253,7 @@
                                         <!-- Invite Button -->
                                         <div class="row mt-4">
                                             <div class="col text-center">
-                                                <button class="btn btn-primary" id="assignCommitteeButton">Πρόσκληση
+                                                <button class="btn btn-primary" id="sendInviteButton">Πρόσκληση
                                                     Καθηγητή</button>
                                             </div>
                                         </div>
@@ -262,6 +261,16 @@
                                 </div>
                             </div>
                         </section>
+                        <!-- Invitation Card Section-->
+                        <div id="invitationCardSection" class="container mt-4" style="display:none;">
+                            <h3 class="text-center mb-4">Προσκλήσεις για τη Διπλωματική</h3>
+                            <div class="row">
+                                <!-- Invitations cards will be appended here dynamically -->
+                            </div>
+                            <button class="btn btn-outline-secondary" id="HideInvitesButton">
+                                Κρύψε</button>
+                        </div>
+
 
                         <!-- Grades -->
                         <section id="gradesSection">
@@ -462,7 +471,7 @@
                                 διπλωματούχο του Προγράμματος Σπουδών του «ΤΜΗΜΑΤΟΣ ΜΗΧΑΝΙΚΩΝ, ΗΛΕΚΤΡΟΝΙΚΩΝ
                                 ΥΠΟΛΟΓΙΣΤΩΝ
                                 ΚΑΙ ΠΛΗΡΟΦΟΡΙΚΗΣ ΠΑΝΕΠΙΣΤΗΜΙΟΥ ΠΑΤΡΩΝ» και να του απονέμει το Δίπλωμα
-                                Μηχανικού Η / Υ το οποίο αναγνωρίζεται ως Ενιαίος Τίτλος Σπουδών Μεταπτυχιακού
+                                Μηχανικού Η/Υ το οποίο αναγνωρίζεται ως Ενιαίος Τίτλος Σπουδών Μεταπτυχιακού
                                 Επιπέδου.
                             </span>
 

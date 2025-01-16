@@ -60,11 +60,6 @@ const authenticateJWT = (req, res, next) => {
     });
 };
 
-
-
-
-
-
 const authorizeRole = (requiredRole) => {
     return (req, res, next) => {
         if (req.user.role !== requiredRole) {
@@ -73,8 +68,6 @@ const authorizeRole = (requiredRole) => {
         next();
     };
 };
-
-
 
 app.get('/api/check-auth', (req, res) => {
     const token = req.cookies?.token;
@@ -91,11 +84,6 @@ app.get('/api/check-auth', (req, res) => {
     });
 });
 
-
-
-
-
-
 // Route for /login and /login.html
 app.get('/login', (req, res) => {
     const token = req.cookies?.token;
@@ -104,7 +92,11 @@ app.get('/login', (req, res) => {
         jwt.verify(token, SECRET_KEY, (err, user) => {
             if (!err && user) {
                 // If valid user
-                return res.redirect(user.role === 'professor' ? '/professor' : '/student');
+                return res.redirect(user.role === 'professor' 
+                    ? '/professor' 
+                    : user.role === 'administrator' 
+                        ? '/administrator' 
+                        : '/student');
             }
             // If not
             res.setHeader('Cache-Control', 'no-store');
@@ -119,12 +111,6 @@ app.get('/login', (req, res) => {
     }
 });
 
-
-
-
-
-
-
 // Login endpoint
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -134,12 +120,14 @@ app.post('/login', (req, res) => {
     }
 
     const query = `
-        SELECT * FROM (
-            SELECT id, email, password, 'student' AS role FROM students
-            UNION ALL
-            SELECT id, email, password, 'professor' AS role FROM professors
-        ) AS users
-        WHERE email = ? AND password = ?;
+            SELECT * FROM (
+                SELECT id, email, password, 'student' AS role FROM students
+                UNION ALL
+                SELECT id, email, password, 'professor' AS role FROM professors
+                UNION ALL
+                SELECT id, email, password, 'administrator' AS role FROM administrators
+            ) AS users
+            WHERE email = ? AND password = ?;
     `;
 
     db.query(query, [email, password], (err, results) => {
@@ -164,6 +152,8 @@ app.post('/login', (req, res) => {
                 return res.redirect('/professor');
             } else if (user.role === 'student') {
                 return res.redirect('/student');
+            } else if (user.role === 'administrator') {
+                return res.redirect('/administrator');
             }
         } else {
             res.status(401).send('Invalid credentials');
@@ -180,6 +170,10 @@ app.get('/professor', authenticateJWT, authorizeRole('professor'), (req, res) =>
 
 app.get('/student', authenticateJWT, authorizeRole('student'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'student.html'));
+});
+
+app.get('/administrator', authenticateJWT, authorizeRole('administrator'), (req, res) => {
+    res.sendFile(path.join(__dirname, 'protected_views', 'administrator.html'));
 });
 
 // Logout endpoint
@@ -387,6 +381,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, theses: results });
     });
 });
+
 //----------------- API to Fetch Logs -----------------
 app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -416,6 +411,24 @@ app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, log: results });
     });
 });
+
+app.post('/api/thesis/logs', authenticateJWT, (req, res) => {
+    const { thesis_id } = req.body;
+
+    let query = ` SELECT * FROM LOGS
+    WHERE thesis_id = ?`;
+
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των δεδομένων των καταγραφών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+        res.status(200).json({ success: true, log: results });
+    }
+    );
+}
+);
+
 //----------------- API to Fetch all data to complete the Exam Report -----------------
 app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -481,7 +494,6 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, examReport: results });
     });
 });
-
 
 //----------------- API to Fetch Exam Date-Type-Location-Report -----------------
 app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
@@ -650,6 +662,7 @@ app.post('/api/upload_attachment', authenticateJWT, UploadAttachments.single('at
         return res.status(400).json({ success: false, message: 'Invalid attachment type' });
     }
 });
+
 //----------------- API to handle Nimertis Link Upload in Configuration page Management Section -----------------
 app.post('/api/update_nimertis_link', authenticateJWT, (req, res) => {
     const { thesis_id, nimertis_link } = req.body;
@@ -738,6 +751,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
               SELECT DISTINCT student_id
               FROM theses
               WHERE student_id IS NOT NULL
+              AND theses.status != 'cancelled'
           );
     `;
     const searchInput = `%${input}%`;
@@ -751,7 +765,6 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, students: results });
     });
 });
-
 //----------------- API for Professor Search Bar for thesis assignment -----------------
 app.get('/api/professor-search', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -782,7 +795,13 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
                         FROM Committees C
                         WHERE C.member2_id IS NOT NULL
                         AND C.thesis_id IN (SELECT thesis_id FROM Theses WHERE student_id = ?)
-                                    );
+                                    )
+                    AND P.id NOT IN (
+                        SELECT I.professor_id
+                        FROM Invitations I
+                        WHERE I.status IN ('pending', 'accepted')
+                        AND I.thesis_id IN (SELECT thesis_id FROM Theses WHERE student_id = ?)
+        );
 
                 `;
 
@@ -797,6 +816,50 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, professors: results });
     });
 });
+
+
+//----------------- API to Create Invitation for Thesis Committee -----------------
+app.post('/api/invitation_create', authenticateJWT, (req, res) => {
+    const { professorId } = req.body;
+    const userId = req.user.userId;
+
+    if (!professorId) {
+        return res.status(400).json({ success: false, message: 'Professor ID is required.' });
+    }
+
+    const query = `
+        INSERT INTO Invitations (thesis_id, professor_id, status)
+        SELECT t.thesis_id, ?, 'pending'
+        FROM Theses t
+        WHERE t.student_id = ?;
+    `;
+
+    db.query(query, [professorId, userId], (err, results) => {
+        if (err) {
+            console.error('Error creating invitation:', err);
+            return res.status(500).json({ success: false, message: 'Failed to create the invitation.' });
+        }
+
+        // Fetch the thesis_id
+        const thesisQuery = `
+            SELECT thesis_id
+            FROM Theses t
+            WHERE t.student_id = ?;
+        `;
+
+        db.query(thesisQuery, [userId], (err, thesisResults) => {
+            if (err) {
+                console.error('Error fetching thesis_id:', err);
+                return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
+            }
+            const thesis_id = thesisResults[0]?.thesis_id;
+
+            console.log('Invitation sent successfully:', results);
+            res.json({ success: true, invitation: results, thesis_id: thesis_id });
+        });
+    });
+});
+
 
 //----------------- API to Create New Thesis -----------------
 app.post('/api/theses/new', authenticateJWT, uploadPDFOnly.single('pdf'), (req, res) => {
@@ -912,13 +975,18 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
         i.invitation_date,
         i.response_date,
         t.title AS thesis_title,
-        t.summary AS thesis_summary
-        FROM 
-            Invitations i
-        JOIN 
-            Theses t ON i.thesis_id = t.thesis_id
-        WHERE 
-            i.professor_id = ? and i.status = 'pending';
+        t.summary AS thesis_summary,
+        CONCAT(s.name, ' ', s.surname) AS student_name,
+        s.student_number AS student_number
+    FROM 
+        Invitations i
+    JOIN 
+        Theses t ON i.thesis_id = t.thesis_id
+    LEFT JOIN 
+        Students s ON t.student_id = s.id
+    WHERE 
+        i.professor_id = ? 
+        AND i.status = 'pending';
 
     `;
 
@@ -932,7 +1000,46 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
         res.json({ success: true, invitations: results });
     });
 });
+//----------------- API for cancelling a sent Invitation as student -----------------
+app.post('/api/invitation_cancel', authenticateJWT, (req, res) => {
+    const student_id = req.user.userId;
 
+    const query = `
+    UPDATE Invitations I
+    JOIN Theses T ON I.thesis_id = T.thesis_id
+    JOIN Students S ON T.student_id = S.id
+    SET I.status = 'cancelled'
+    WHERE S.id = ? 
+      AND I.status = 'pending'
+      AND T.status NOT IN ('completed', 'cancelled', 'active', 'unassigned', 'to-be-reviewed');
+`;
+
+    db.query(query, [student_id], (err, results) => {
+        if (err) {
+            console.error('Error executing combined query:', err);
+            return res.status(500).json({ success: false, message: 'Server error while canceling invitations.' });
+        }
+
+
+
+          // Fetch the thesis_id
+          const thesisQuery = `
+          SELECT thesis_id
+          FROM Theses T
+          WHERE T.student_id = ?;
+      `;
+
+      db.query(thesisQuery, [student_id], (err, thesisResults) => {
+          if (err) {
+              console.error('Error fetching thesis_id:', err);
+              return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
+          }
+          const thesis_id = thesisResults[0]?.thesis_id;
+          console.log('Cancelled Invitations from DB:', results);
+          res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
+        });
+    });
+});
 
 
 //----------------- API for Invitation Acceptance/Rejection -----------------
@@ -1100,7 +1207,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
 });
 
 
-
+//----------------- API for loading Past Invitations associated with a specific professor-----------------
 app.get('/api/invitation-history', authenticateJWT, (req, res) => {
     console.log('Endpoint /api/invitation-history hit');
     const professorId = req.user.userId;
@@ -1151,8 +1258,8 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
     const query = `
         SELECT 
             i.id,
-            i.invitation_date,
-            i.response_date,
+            DATE_FORMAT(i.invitation_date, '%Y-%m-%d') AS invitation_date,
+            DATE_FORMAT(i.response_date, '%Y-%m-%d') AS response_date,
             i.status AS invitation_status,
             p.name AS professor_name,
             p.surname AS professor_surname
@@ -1170,14 +1277,149 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
-        if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'Δεν βρέθηκαν προσκλήσεις για τη συγκεκριμένη διπλωματική.' });
-        }
-
         res.status(200).json({ success: true, invitations: results });
     });
 });
 
+//-------------Endpoint for loading all the notes of a professor associated with a specific thesis-------
+app.post('/api/get-notes', authenticateJWT, (req, res) => {
+    const { thesis_id } = req.body;
+    const professor_id = req.user.userId; // Από το JWT payload
+
+    if (!thesis_id || !professor_id) {
+        return res.status(400).json({ success: false, message: 'Απαιτούνται τα thesis_id και professor_id.' });
+    }
+
+    const query = `
+        SELECT n.content, n.date, p.name AS professor_name
+        FROM Notes n
+        JOIN Professors p ON n.professor_id = p.id
+        WHERE n.thesis_id = ? AND n.professor_id = ?;
+    `;
+
+    db.query(query, [thesis_id, professor_id], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά τη φόρτωση σημειώσεων.' });
+        }
+        res.json({ success: true, notes: results });
+    });
+});
+
+//-------------Endpoint for adding a note associated with a specific thesis-------
+app.post('/api/add-note', authenticateJWT, (req, res) => {
+    const { thesis_id, content } = req.body;
+    const professor_id = req.user.userId;
+
+    if (!thesis_id || !professor_id || !content) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `INSERT INTO Notes (thesis_id, professor_id, content) VALUES (?, ?, ?)`;
+    db.query(query, [thesis_id, professor_id, content], (err) => {
+        if (err) {
+            console.error('Σφάλμα κατά την καταχώρηση σημείωσης:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση σημείωσης.' });
+        }
+        res.status(200).json({ success: true, message: 'Η σημείωση καταχωρήθηκε επιτυχώς!' });
+    });
+});
+
+//-------------Endpoint for loading the info of a cancelled thesis-------
+app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
+    const { thesis_id } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
+
+    if (!thesis_id) {
+        return res.status(400).json({ success: false, message: 'Απαιτείται το thesis_id.' });
+    }
+
+    const query = `
+        SELECT 
+            l.gen_assembly_session,
+            l.cancellation_reason,
+            l.date_of_change
+        FROM Logs l
+        WHERE l.thesis_id = ? AND l.new_state = 'cancelled'
+        ORDER BY l.date_of_change DESC
+        LIMIT 1;
+    `;
+
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των λεπτομερειών ακύρωσης:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκαν λεπτομέρειες για την ακυρωμένη διπλωματική.' });
+        }
+
+        res.json({ success: true, details: results[0] });
+    });
+});
+
+app.post('/api/thesis/to-be-reviewed', authenticateJWT, (req, res) => {
+    const { thesis_id, changeNumber, changeDate } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
+
+    if (!thesis_id) {
+        return res.status(400).json({ success: false, message: 'Απαιτείται το thesis_id.' });
+    }
+
+    const thQuery = `UPDATE THESES
+                         SET status = 'to-be-reviewed'
+                         WHERE thesis_id = ?`;
+
+    const logQuery = `INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state, gen_assembly_session)
+                      VALUES (?, ?, 'active', 'to-be-reviewed', ?)`;
+
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error('Σφάλμα κατά την εκκίνηση της συναλλαγής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        db.query(thQuery, [thesis_id], (thErr, thResult) => {
+            if (thErr) {
+                console.error('Σφάλμα κατά την μετατροπή της διπλωματικής σε υπό εξέταση:', thErr);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Σφάλμα κατά την ενημέρωση της διπλωματικής.' });
+                });
+            }
+
+            if (thResult.affectedRows === 0) {
+                return db.rollback(() => {
+                    res.status(400).json({ success: false, message: 'Η διπλωματική δεν βρέθηκε.' });
+                });
+            }
+
+            db.query(logQuery, [thesis_id, changeDate, changeNumber], (logErr) => {
+                if (logErr) {
+                    console.error('Σφάλμα κατά την καταχώρηση στο LOGS:', logErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση στο LOGS.' });
+                    });
+                }
+
+                db.commit((commitErr) => {
+                    if (commitErr) {
+                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Σφάλμα κατά την επικύρωση της συναλλαγής.' });
+                        });
+                    }
+
+                    // Επιτυχής ολοκλήρωση
+                    res.status(200).json({
+                        success: true,
+                        message: 'Η διπλωματική μετατράπηκε σε υπό εξέταση και η καταχώρηση στο LOGS ολοκληρώθηκε!'
+                    });
+                });
+            });
+
+        });
+
+    });
+})
 
 
 //------Endpoint for checking if a committee is full----------
@@ -1211,7 +1453,7 @@ app.post('/api/committee-status', authenticateJWT, (req, res) => {
     });
 });
 
-
+//------Endpoint for changing an assigned thesis to active status---------------
 app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     const { thesisId, startNumber, startDate } = req.body;
 
@@ -1277,6 +1519,7 @@ app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     });
 });
 
+//------Endpoint for changing an active thesis to cancelled status---------------
 app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     const { thesis_id, cancellationNumber, cancellationDate, cancellationReasonText } = req.body;
     console.log('Received data:', req.body); // Προσθήκη για debugging
@@ -1287,11 +1530,11 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     }
 
     const thesisQuery = `UPDATE THESES
-                         SET status = 'canceled'
+                         SET status = 'cancelled'
                          WHERE thesis_id = ?`;
 
     const logQuery = `INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
-                         VALUES (?, ?, 'active', 'canceled', ?, ?)`;
+                         VALUES (?, ?, 'active', 'cancelled', ?, ?)`;
 
 
 
@@ -1350,6 +1593,8 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
 app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     const studentId = parseInt(req.body.studentId, 10);
     const thesisId = parseInt(req.body.thesisId, 10);
+    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Τρέχουσα ημερομηνία σε μορφή MySQL
+
 
     console.log('Request Body:', req.body);
     console.log('Student ID:', req.body.studentId);
@@ -1369,6 +1614,11 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     const insertQuery = `
         INSERT INTO Committees (thesis_id, member1_id, member2_id)
         VALUES (?, NULL, NULL);
+    `;
+
+    const inslogQuery = `
+        INSERT INTO LOGS(thesis_id, date_of_change, old_state, new_state)
+        VALUES (?, ?, 'unassigned', 'assigned');
     `;
 
     // Ξεκινάμε μια συναλλαγή για να διασφαλίσουμε συνοχή δεδομένων
@@ -1401,16 +1651,26 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
                 }
 
                 // Επιτυχία και για τα δύο queries, κάνουμε commit
-                db.commit((commitErr) => {
-                    if (commitErr) {
-                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                db.query(inslogQuery, [thesisId, currentDate], (insLogErr) => {
+
+                    if (insLogErr) {
+                        console.error('Σφάλμα κατά τη καταχώρηση στα LOGS:', insLogErr);
                         return db.rollback(() => {
                             res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
                         });
                     }
 
-                    res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε και η καταχώρηση τριμελούς δημιουργήθηκε επιτυχώς!' });
-                });
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                            });
+                        }
+
+                        res.status(200).json({ success: true, message: 'Η διπλωματική ανατέθηκε και η καταχώρηση τριμελούς δημιουργήθηκε επιτυχώς!' });
+                    });
+                })
             });
         });
     });
@@ -1421,6 +1681,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
 //----------------API for Unassigning a Thesis Theme -----------------
 app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     const thesisId = parseInt(req.body.thesisId, 10);
+
 
     if (isNaN(thesisId)) {
         return res.status(400).json({ success: false, message: 'Μη έγκυρο thesis ID.' });
@@ -1441,6 +1702,11 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
 
     const deleteInvitationsQuery = `
         DELETE FROM INVITATIONS
+        WHERE thesis_id = ?;
+    `;
+
+    const deleteLogsQuery = `
+        DELETE FROM Logs
         WHERE thesis_id = ?;
     `;
 
@@ -1483,14 +1749,23 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
                         });
                     }
                     // Επικύρωση της συναλλαγής
-                    db.commit((commitErr) => {
-                        if (commitErr) {
-                            console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                    db.query(deleteLogsQuery, [thesisId], (deletelogErr) => {
+                        if (deletelogErr) {
+                            console.error('Σφάλμα κατά τη διαγραφή των Logs:', deletelogErr);
                             return db.rollback(() => {
                                 res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
                             });
                         }
-                        res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς, οι προσκλήσεις και η επιτροπή διαγράφηκαν!' });
+
+                        db.commit((commitErr) => {
+                            if (commitErr) {
+                                console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                                return db.rollback(() => {
+                                    res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                                });
+                            }
+                            res.status(200).json({ success: true, message: 'Η ανάθεση αφαιρέθηκε επιτυχώς, οι προσκλήσεις και η επιτροπή διαγράφηκαν!' });
+                        });
                     });
                 });
             });

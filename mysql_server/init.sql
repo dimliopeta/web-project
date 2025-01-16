@@ -32,13 +32,21 @@ CREATE TABLE `Professors`(
     `password` VARCHAR(20) NULL
 );
 
+CREATE TABLE `Administrator`(
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(50) NULL,
+    `surname` VARCHAR(50) NULL,
+    `email` VARCHAR(100) NULL UNIQUE,
+    `password` VARCHAR(20) NULL
+);
+
 CREATE TABLE `Theses`(
     `thesis_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `professor_id` INT NOT NULL,
 	`student_id` INT NULL,
     `title` VARCHAR(200) NULL,
     `summary` TEXT NULL,
-    `status` ENUM('unassigned', 'assigned','active','to-be-reviewed','completed','canceled') DEFAULT 'unassigned', 
+    `status` ENUM('unassigned', 'assigned','active','to-be-reviewed','completed','cancelled') DEFAULT 'unassigned', 
 	`pdf_path` VARCHAR(200) NULL,
 	`start_date` DATE NULL DEFAULT NULL,
 	`nimertis_link` VARCHAR(200) NULL,
@@ -100,18 +108,19 @@ CREATE TABLE `Logs`(
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `thesis_id` INT NOT NULL,
     `date_of_change` date,
-    `old_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','canceled') NULL,
-    `new_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','canceled') NULL,
+    `old_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','cancelled') NULL,
+    `new_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','cancelled') NULL,
     `gen_assembly_session` INT NULL,
     `cancellation_reason` TEXT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 
 CREATE TABLE `Notes`(
-	`id` INT NOT NULL PRIMARY KEY,
+	`id` INT NOT NULL auto_increment PRIMARY KEY,
     `thesis_id` INT NOT NULL,
     `professor_id` INT NOT NULL,
     `date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `content` TEXT NOT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
 	FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`)
 );

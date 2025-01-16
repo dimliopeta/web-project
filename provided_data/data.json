@@ -1186,18 +1186,18 @@
       "student_id": "1",
       "title": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks",
       "summary": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks is very important so we have to do it.",
-      "status": "completed",
+      "status": "active",
       "pdf_path": "",
-      "start_date": "2024-01-01",
-      "exam_date": "2025-01-02"
+      "start_date": "2025-1-12",
+      "exam_date": null
     },
     {
       "thesis_id": "2",
       "professor_id": "1",
-      "student_id": "",
+      "student_id": "22",
       "title": "The Role of Normal Software Behavior in Ensuring System Reliability and Security",
       "summary": "The Role of Normal Software Behavior in Ensuring System Reliability and Security is enormous so we have to study it.",
-      "status": "unassigned",
+      "status": "assigned",
       "pdf_path": "",
       "start_date": null,
       "exam_date": null
@@ -1205,7 +1205,7 @@
     {
       "thesis_id": "3",
       "professor_id": "1",
-      "student_id": "",
+      "student_id": "22",
       "title": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design",
       "summary": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design is can be great so we have to do it.",
       "status": "active",
@@ -1239,21 +1239,24 @@
   "invitations": [
     {
       "id": "1",
-      "thesis_id": "1",
+      "thesis_id": "2",
       "professor_id": "1"
     },
     {
       "id": "2",
-      "thesis_id": "1",
+      "thesis_id": "2",
       "professor_id": "2"
     },
     {
       "id": "3",
-      "thesis_id": "1",
+      "thesis_id": "2",
       "professor_id": "3"
     }
   ],
   "committees": [
+    {
+      "thesis_id": "2"
+    },
     {
       "thesis_id": "1"
     }
@@ -1261,7 +1264,7 @@
   "examinations": [
     {
       "thesis_id": "1",
-      "date": "2025-03-01",
+      "date": null,
       "type_of_exam": "in-person",
       "location": "E4",
       "exam_report": null
@@ -1303,6 +1306,14 @@
       "new_state": "completed",
       "gen_assembly_session": null,
       "cancellation_reason": null
+    }
+  ],
+  "administrators": [
+    {
+      "id": "1",
+      "name": "kyria",
+      "surname": "iwanna",
+      "email": "iwanna@ceid.upatras.gr"
     }
   ]
 }
