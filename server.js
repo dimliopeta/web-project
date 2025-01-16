@@ -92,10 +92,10 @@ app.get('/login', (req, res) => {
         jwt.verify(token, SECRET_KEY, (err, user) => {
             if (!err && user) {
                 // If valid user
-                return res.redirect(user.role === 'professor' 
-                    ? '/professor' 
-                    : user.role === 'administrator' 
-                        ? '/administrator' 
+                return res.redirect(user.role === 'professor'
+                    ? '/professor'
+                    : user.role === 'administrator'
+                        ? '/administrator'
                         : '/student');
             }
             // If not
@@ -276,6 +276,64 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
         res.status(200).json({ success: true, theses: results });
+    });
+});
+
+//----------------- API to fetch All Theses Data for administrators -----------------
+app.get('/api/thesesAll', authenticateJWT, (req, res) => {
+
+    const query = `
+            SELECT 
+                T.thesis_id,
+                T.title,
+                T.summary,
+                T.status,
+                T.pdf_path,
+                T.start_date,
+                T.nimertis_link,
+                S.id AS student_id,
+                S.name AS student_name,
+                S.surname AS student_surname,
+                S.email AS student_email,
+                S.student_number,
+                P.id AS professor_id,
+                P.name AS professor_name,
+                P.surname AS professor_surname,
+                P.email AS professor_email,
+                C.member1_id AS committee_member1_id,
+                CM1.name AS committee_member1_name,
+                CM1.surname AS committee_member1_surname,
+                CM1.email AS committee_member1_email,
+                C.member2_id AS committee_member2_id,
+                CM2.name AS committee_member2_name,
+                CM2.surname AS committee_member2_surname,
+                CM2.email AS committee_member2_email
+            FROM 
+                Theses T
+            LEFT JOIN 
+                Students S ON T.student_id = S.id
+            LEFT JOIN 
+                Professors P ON T.professor_id = P.id
+            LEFT JOIN 
+                Committees C ON T.thesis_id = C.thesis_id
+            LEFT JOIN 
+                Professors CM1 ON C.member1_id = CM1.id
+            LEFT JOIN 
+                Professors CM2 ON C.member2_id = CM2.id;
+
+
+`;
+
+
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+
+
+        res.status(200).json({ success: true, thesesAll: results });
     });
 });
 
@@ -1018,21 +1076,21 @@ app.post('/api/invitation_cancel', authenticateJWT, (req, res) => {
 
 
 
-          // Fetch the thesis_id
-          const thesisQuery = `
+        // Fetch the thesis_id
+        const thesisQuery = `
           SELECT thesis_id
           FROM Theses T
           WHERE T.student_id = ?;
       `;
 
-      db.query(thesisQuery, [student_id], (err, thesisResults) => {
-          if (err) {
-              console.error('Error fetching thesis_id:', err);
-              return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
-          }
-          const thesis_id = thesisResults[0]?.thesis_id;
-          console.log('Cancelled Invitations from DB:', results);
-          res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
+        db.query(thesisQuery, [student_id], (err, thesisResults) => {
+            if (err) {
+                console.error('Error fetching thesis_id:', err);
+                return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
+            }
+            const thesis_id = thesisResults[0]?.thesis_id;
+            console.log('Cancelled Invitations from DB:', results);
+            res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
         });
     });
 });
@@ -1584,15 +1642,15 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     });
 });
 
-app.post('/api/enable-grading',authenticateJWT, (req,res) =>{
+app.post('/api/enable-grading', authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
     if (!thesisId) {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
     }
-    const thesisQuery =` UPDATE THESES
+    const thesisQuery = ` UPDATE THESES
         SET grading_enabled = TRUE
-        WHERE thesis_id = ?;`; 
-    db.query(thesisQuery,[thesisId], (thErr, thResults) => {
+        WHERE thesis_id = ?;`;
+    db.query(thesisQuery, [thesisId], (thErr, thResults) => {
         if (thErr) {
             console.error('Σφάλμα κατά την ενεργοποίηση της βαθμολόγησης:', thErr);
             return res.status(500).json({ success: false, message: 'Σφάλμα κατά την ενεργοποίηση της βαθμολόγησης.' });
@@ -1607,16 +1665,16 @@ app.post('/api/enable-grading',authenticateJWT, (req,res) =>{
     });
 });
 
-app.post(`/api/thesis-status/`, authenticateJWT, (req,res) => {
+app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
     if (!thesisId) {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
     }
 
-    const query =`SELECT grading_enabled FROM THESES
+    const query = `SELECT grading_enabled FROM THESES
     WHERE thesis_id = ?;`;
 
-    db.query(query,[thesisId], (err, results) => {
+    db.query(query, [thesisId], (err, results) => {
         if (err) {
             console.error('Σφάλμα κατά την εύρεση της διπλωματικής:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα κατά την εύρεση της διπλωματικής.' });
@@ -1627,7 +1685,7 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req,res) => {
         }
 
         const { grading_enabled } = results[0];
-        res.status(200).json({ success: true, gradingEnabled: grading_enabled});
+        res.status(200).json({ success: true, gradingEnabled: grading_enabled });
     });
 });
 

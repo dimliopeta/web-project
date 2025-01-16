@@ -79,11 +79,9 @@
         </button>
         <div class="collapse navbar-collapse" id="mainnav">
             <div class="navbar-nav fs-5">
-                <a class="nav-item nav-link" href="#theses-section">Θέματα Διπλωματικών</a>
-                <a class="nav-item nav-link" href="#assign">Ανάθεση σε Φοιτητή</a>
-                <a class="nav-item nav-link" href="#list">Λίστα Διπλωματικών</a>
-                <a class="nav-item nav-link" href="#invitations">Προσκλήσεις Τριμελών</a>
-                <a class="nav-item nav-link" href="#stats">Στατιστικά</a>
+                <a class="nav-item nav-link" href="#administratorFullThesisList">Λίστα Διπλωματικών</a>
+                <a class="nav-item nav-link" href="#invitations">Διαχείρηση Διπλωματικών</a>
+                <a class="nav-item nav-link" href="#stats">Εισαγωγή Δεδομένων</a>
             </div>
             <button type="button" class="nav-item btn btn-outline-secondary ms-auto"
                 data-target="professor_profile">Λογαριασμός</button>
@@ -93,6 +91,176 @@
     </nav>
 
     <div class="main-content">
+
+        <!-- Λίστα Διπλωματικών -->
+        <div id="administratorFullThesisList" class="content-section" style="display:none;">
+            <h3 class="text-center mt-5 pt-5 pb-3">Λίστα Διπλωματικών</h3>
+
+            <!-- Κεντρικό layout -->
+            <div class="container">
+                <div class="row">
+                    <!-- Λίστα Διπλωματικών -->
+
+                    <div id="theses-compartment" class="col-lg-12 mx-auto">
+                        <div class="border p-3 rounded">
+                            <div class="btn-group">
+                                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Φιλτράρισμα
+                                </button>
+                                <div class="dropdown-menu">
+                                    <p>Κατάσταση Διπλωματικής</p>
+                                    <a class="dropdown-item" href="#"
+                                        onclick="applyFilter('status', 'to-be-reviewed')">Υπό Εξέταση</a>
+                                    <a class="dropdown-item" href="#"
+                                        onclick="applyFilter('status', 'completed')">Περατωμένες</a>
+                                    <a class="dropdown-item" href="#"
+                                        onclick="applyFilter('status', 'cancelled')">Ακυρωμένες</a>
+                                    <a class="dropdown-item" href="#"
+                                        onclick="applyFilter('status', 'active')">Ενεργές</a>
+                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'assigned')">Υπό
+                                        Ανάθεση</a>
+                                    <div class="dropdown-divider"></div>
+                                    <p>Ρόλος</p>
+                                    <a class="dropdown-item" href="#"
+                                        onclick="applyFilter('role', 'Επιβλέπων')">Επιβλέπων</a>
+                                    <a class="dropdown-item" href="#"
+                                        onclick="applyFilter('role', 'Μέλος Τριμελούς')">Μέλος Τριμελούς</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#" onclick="clearFilters()">Αναίρεση Φίλτρου</a>
+                                </div>
+
+
+                            </div>
+                            <table id="theses" class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Τίτλος</th>
+                                        <th scope="col">Επιβλέπων</th>
+                                        <th scope="col">Κατάσταση</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Βασικές Πληροφορίες Διπλωματικής -->
+                    <div id="info-compartment" class="col-md-6 d-none border p-3 rounded"">
+                            <h5 class=" text-primary">Βασικές Πληροφορίες</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <button id="export-csv" class="btn btn-primary btn-sm"
+                        style="padding: 0.2rem 0.5rem; font-size: 1rem; width: auto; height: auto;">
+                        Εξαγωγή σε CSV
+                    </button>
+
+                    <button id="export-json" class="btn btn-secondary btn-sm"
+                        style="padding: 0.2rem 0.5rem; font-size: 1rem; width: auto; height: auto;">
+                        Εξαγωγή σε JSON
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="invitations" class="content-section" style="display:none;">
+            <h3 class="text-center mt-5 pt-5 pb-3">Προσκλήσεις Τριμελών</h3>
+            <div class="container">
+                <div class="row">
+                    <!-- Οι κάρτες των προσκλήσεων θα φορτώνονται εδώ -->
+                </div>
+
+                <h3 class="text-center  pt-4 pb-3">Ιστορικό Απαντήσεων</h3>
+                <table id="invitation-history" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Τίτλος</th>
+                            <th>Επιβλέπων Καθηγητής</th>
+                            <th>Φοιτητής</th>
+                            <th>ΑΜ Φοιτητή</th>
+                            <th>Απάντηση</th>
+                            <th>Ημερομηνία λήψης</th>
+                            <th>Ημερομηνία Απάντησης</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <!-- DashBoard -->
         <div id="dashboard" class="content-section" style="display:block;">
             <!-- Header -->
@@ -298,98 +466,7 @@
         </div>
 
 
-        <!-- Λίστα Διπλωματικών -->
-        <div id="list" class="content-section" style="display:none;">
-            <h3 class="text-center mt-5 pt-5 pb-3">Λίστα Διπλωματικών</h3>
 
-            <!-- Κεντρικό layout -->
-            <div class="container">
-                <div class="row">
-                    <!-- Λίστα Διπλωματικών -->
-
-                    <div id="theses-compartment" class="col-lg-8 mx-auto">
-                        <div class="border p-3 rounded">
-                            <div class="btn-group">
-                                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Φιλτράρισμα
-                                </button>
-                                <div class="dropdown-menu">
-                                    <p>Κατάσταση Διπλωματικής</p>
-                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'to-be-reviewed')">Υπό Εξέταση</a>
-                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'completed')">Περατωμένες</a>
-                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'cancelled')">Ακυρωμένες</a>
-                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'active')">Ενεργές</a>
-                                    <a class="dropdown-item" href="#" onclick="applyFilter('status', 'assigned')">Υπό Ανάθεση</a>
-                                    <div class="dropdown-divider"></div>
-                                    <p>Ρόλος</p>
-                                    <a class="dropdown-item" href="#" onclick="applyFilter('role', 'Επιβλέπων')">Επιβλέπων</a>
-                                    <a class="dropdown-item" href="#" onclick="applyFilter('role', 'Μέλος Τριμελούς')">Μέλος Τριμελούς</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="#" onclick="clearFilters()">Αναίρεση Φίλτρου</a>
-                                </div>
-                                
-
-                            </div>
-                            <table id="theses" class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Τίτλος</th>
-                                        <th scope="col">Id</th>
-                                        <th scope="col">Ρόλος</th>
-                                        <th scope="col">Κατάσταση</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Βασικές Πληροφορίες Διπλωματικής -->
-                    <div id="info-compartment" class="col-md-6 d-none border p-3 rounded"">
-                            <h5 class="text-primary">Βασικές Πληροφορίες</h5>
-                    </div>
-                </div>
-                <div class="row">
-                    <button id="export-csv" class="btn btn-primary btn-sm"
-                        style="padding: 0.2rem 0.5rem; font-size: 1rem; width: auto; height: auto;">
-                        Εξαγωγή σε CSV
-                    </button>
-
-                    <button id="export-json" class="btn btn-secondary btn-sm"
-                        style="padding: 0.2rem 0.5rem; font-size: 1rem; width: auto; height: auto;">
-                        Εξαγωγή σε JSON
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="invitations" class="content-section" style="display:none;">
-            <h3 class="text-center mt-5 pt-5 pb-3">Προσκλήσεις Τριμελών</h3>
-            <div class="container">
-                <div class="row">
-                    <!-- Οι κάρτες των προσκλήσεων θα φορτώνονται εδώ -->
-                </div>
-
-                <h3 class="text-center  pt-4 pb-3">Ιστορικό Απαντήσεων</h3>
-                <table id="invitation-history" class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Τίτλος</th>
-                            <th>Επιβλέπων Καθηγητής</th>
-                            <th>Φοιτητής</th>
-                            <th>ΑΜ Φοιτητή</th>
-                            <th>Απάντηση</th>
-                            <th>Ημερομηνία λήψης</th>
-                            <th>Ημερομηνία Απάντησης</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
 
 

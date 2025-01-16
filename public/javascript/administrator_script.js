@@ -18,14 +18,14 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
 
             if (targetId === 'theses-section') {
                 loadUnassignedTheses();
-            } else if (targetId === 'list') {
-                loadTheses();
+            } else if (targetId === 'administratorFullThesisList') {
+                loadAllTheses();
             } else if (targetId === 'assign') {
-                loadUnassignedTheses();
-                loadAssignedTheses();
+                // loadUnassignedTheses();
+                //loadAssignedTheses();
             } else if (targetId === 'invitations') {
-                loadInvitations();
-                loadInvitationHistory();
+                //loadInvitations();
+                //loadInvitationHistory();
             }
         }
 
@@ -59,6 +59,252 @@ window.addEventListener('DOMContentLoaded', () => {
         defaultTab.click();
     }
 });
+
+
+
+
+
+
+
+//--------------- Function for Loading the Full Theses List ---------------
+function loadAllTheses() {
+    const token = localStorage.getItem('token');
+
+    fetch('/api/thesesAll', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const thesesTableBody = document.querySelector('#theses tbody');
+                if (!thesesTableBody) {
+                    console.error('Element with selector #theses tbody not found.');
+                    return;
+                }
+
+                thesesTableBody.innerHTML = ''; // Clear existing table rows
+
+                if (data.thesesAll.length === 0) {
+                    thesesTableBody.innerHTML = '<tr><td colspan="4">No theses found.</td></tr>';
+                    return;
+                }
+
+                data.thesesAll.forEach(thesis => {
+                    // Translate status
+                    let status;
+                    switch (thesis.status) {
+                        case 'active':
+                            status = 'Ενεργή';
+                            break;
+                        case 'to-be-reviewed':
+                            status = 'Υπό Εξέταση';
+                            break;
+                        case 'completed':
+                            status = 'Περατωμένη';
+                            break;
+                        case 'unassigned':
+                            status = 'Ανατεθείσα';
+                            break;
+                        case 'cancelled':
+                            status = 'Ακυρωμένη';
+                            break;
+                        default:
+                            status = 'Άγνωστη';
+                    }
+
+                    // Construct table row
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${thesis.thesis_id || 'Χωρίς ID'}</td>
+                        <td>${thesis.title || 'Χωρίς Τίτλο'}</td>
+                        <td>${(thesis.professor_surname && thesis.professor_name) ? `${thesis.professor_surname} ${thesis.professor_name}` : 'Χωρίς Καθηγητή'}</td>
+                        <td>${status}</td>
+                    `;
+
+                    // Add a click event for additional actions if needed
+                    row.addEventListener('click', () => {
+                        showInfoSection(thesis); // Ensure this function is implemented
+                    });
+
+                    thesesTableBody.appendChild(row);
+                });
+            } else {
+                console.error('API Error:', data.message);
+            }
+        })
+        .catch(err => console.error('Error loading theses:', err));
+}
+
+
+
+
+//----------------Frontend For Showing Info of a Thesis based on its status --------------
+function showInfoSection(thesis) {
+    const infoSection = document.getElementById('info-compartment');
+    const thesesCompartment = document.getElementById('theses-compartment');
+
+    // Ενημέρωση διαστάσεων του info-compartment
+    thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
+    thesesCompartment.classList.add('col-md-6');
+
+    infoSection.classList.remove('d-none');
+    infoSection.innerHTML = ''; // Καθαρισμός προηγούμενου περιεχομένου
+
+    // Τίτλος Διπλωματικής
+    const titleSection = document.createElement('section');
+    titleSection.classList.add('text-center', 'mb-4');
+    titleSection.innerHTML = `
+        <h3 class="text-primary">${thesis.title || 'Χωρίς τίτλο'}</h3>
+        <hr>
+    `;
+    infoSection.appendChild(titleSection);
+
+    // Βασικές Πληροφορίες
+    const basicInfoSection = document.createElement('section');
+    basicInfoSection.innerHTML = `
+        <h4>Βασικές Πληροφορίες</h4>
+        <p>Περιγραφή: ${thesis.summary || 'Χωρίς περιγραφή'}</p>
+        <p>Φοιτητής: ${thesis.student_name || 'Χωρίς φοιτητή'} (ΑΜ: ${thesis.student_number || 'Χωρίς ΑΜ'})</p>
+        <p>Email: ${thesis.student_email || 'Χωρίς email'}</p>
+        <p>Κατάσταση: ${thesis.status || 'Άγνωστη'}</p>
+        <hr>
+    `;
+    infoSection.appendChild(basicInfoSection);
+
+    // Δημιουργία του Status Change Section
+    const statusChangeSection = document.createElement('section');
+    statusChangeSection.id = 'statusChangeSection';
+    statusChangeSection.innerHTML = '<h4>Αλλαγές Καταστάσεων</h4>';
+    const statusChangeContainer = document.createElement('div');
+    statusChangeContainer.id = 'statusChangeContainer';
+    statusChangeSection.appendChild(statusChangeContainer);
+    infoSection.appendChild(statusChangeSection);
+
+
+    // Κλήση της loadLogs για να γεμίσει το statusChangeSection
+    loadLogs(thesis.thesis_id);
+
+    // Τριμελής Επιτροπή (εμφανίζεται μόνο για `active` και `to-be-reviewed`)
+    if (thesis.status === 'active' || thesis.status === 'to-be-reviewed') {
+        const committeeSection = document.createElement('section');
+        committeeSection.innerHTML = `
+            <h4>Μέλη Τριμελούς Επιτροπής</h4>
+            <p>Επιβλέπων: ${thesis.professor_name || 'Χωρίς επιβλέποντα'}</p>
+            <p>Μέλος 1: ${thesis.committee_member1_name || 'Χωρίς μέλος'}</p>
+            <p>Μέλος 2: ${thesis.committee_member2_name || 'Χωρίς μέλος'}</p>
+            <hr>
+        `;
+        infoSection.appendChild(committeeSection);
+    }
+    const statusSection = document.createElement('section');
+    statusSection.innerHTML = `<h4 class="text-center">Διαχείριση Διπλωματικής</h4>`;
+    // Κατάσταση και Δράσεις
+
+    switch (thesis.status) {
+        case 'assigned':
+            addAssignedSection(thesis, statusSection);
+            break;
+
+        case "active":
+            addActiveSection(thesis, statusSection);
+            break;
+
+        case "to-be-reviewed":
+            addToBeReviewedSection(thesis, statusSection);
+            break;
+        case "cancelled":
+            addCanceledSection(thesis, statusSection);
+            break;
+
+    }
+
+
+    infoSection.appendChild(statusSection);
+
+    // Footer με Ημερομηνίες
+    const footer = document.createElement('section');
+    footer.classList.add('text-center');
+    footer.innerHTML = `
+        <h4>Ημερομηνίες</h4>
+        <p>Ημερομηνία Έναρξης: ${thesis.start_date || 'Χωρίς ημερομηνία'}</p>
+        <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || 'Χωρίς ημερομηνία'}</p>
+        <hr>
+    `;
+    infoSection.appendChild(footer);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -319,100 +565,7 @@ function resetInfoSection() {
 
 
 
-//----------------Frontend For Showing Info of a Thesis based on its status --------------
-function showInfoSection(thesis) {
-    const infoSection = document.getElementById('info-compartment');
-    const thesesCompartment = document.getElementById('theses-compartment');
 
-    // Ενημέρωση διαστάσεων του info-compartment
-    thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
-    thesesCompartment.classList.add('col-md-6');
-
-    infoSection.classList.remove('d-none');
-    infoSection.innerHTML = ''; // Καθαρισμός προηγούμενου περιεχομένου
-
-    // Τίτλος Διπλωματικής
-    const titleSection = document.createElement('section');
-    titleSection.classList.add('text-center', 'mb-4');
-    titleSection.innerHTML = `
-        <h3 class="text-primary">${thesis.title || 'Χωρίς τίτλο'}</h3>
-        <hr>
-    `;
-    infoSection.appendChild(titleSection);
-
-    // Βασικές Πληροφορίες
-    const basicInfoSection = document.createElement('section');
-    basicInfoSection.innerHTML = `
-        <h4>Βασικές Πληροφορίες</h4>
-        <p>Περιγραφή: ${thesis.summary || 'Χωρίς περιγραφή'}</p>
-        <p>Φοιτητής: ${thesis.student_name || 'Χωρίς φοιτητή'} (ΑΜ: ${thesis.student_number || 'Χωρίς ΑΜ'})</p>
-        <p>Email: ${thesis.student_email || 'Χωρίς email'}</p>
-        <p>Κατάσταση: ${thesis.status || 'Άγνωστη'}</p>
-        <hr>
-    `;
-    infoSection.appendChild(basicInfoSection);
-
-    // Δημιουργία του Status Change Section
-    const statusChangeSection = document.createElement('section');
-    statusChangeSection.id = 'statusChangeSection';
-    statusChangeSection.innerHTML = '<h4>Αλλαγές Καταστάσεων</h4>';
-    const statusChangeContainer= document.createElement('div');
-    statusChangeContainer.id ='statusChangeContainer';
-    statusChangeSection.appendChild(statusChangeContainer);
-    infoSection.appendChild(statusChangeSection);
-
-
-    // Κλήση της loadLogs για να γεμίσει το statusChangeSection
-    loadLogs(thesis.thesis_id);
-
-    // Τριμελής Επιτροπή (εμφανίζεται μόνο για `active` και `to-be-reviewed`)
-    if (thesis.status === 'active' || thesis.status === 'to-be-reviewed') {
-        const committeeSection = document.createElement('section');
-        committeeSection.innerHTML = `
-            <h4>Μέλη Τριμελούς Επιτροπής</h4>
-            <p>Επιβλέπων: ${thesis.professor_name || 'Χωρίς επιβλέποντα'}</p>
-            <p>Μέλος 1: ${thesis.committee_member1_name || 'Χωρίς μέλος'}</p>
-            <p>Μέλος 2: ${thesis.committee_member2_name || 'Χωρίς μέλος'}</p>
-            <hr>
-        `;
-        infoSection.appendChild(committeeSection);
-    }
-    const statusSection = document.createElement('section');
-    statusSection.innerHTML = `<h4 class="text-center">Διαχείριση Διπλωματικής</h4>`;
-    // Κατάσταση και Δράσεις
-
-    switch (thesis.status) {
-        case 'assigned':
-            addAssignedSection(thesis, statusSection);
-            break;
-
-        case "active":
-            addActiveSection(thesis, statusSection);
-            break;
-
-        case "to-be-reviewed":
-            addToBeReviewedSection(thesis, statusSection);
-            break;
-        case "cancelled":
-            addCanceledSection(thesis, statusSection);
-            break;
-
-    }
-
-
-    infoSection.appendChild(statusSection);
-
-    // Footer με Ημερομηνίες
-    const footer = document.createElement('section');
-    footer.classList.add('text-center');
-    footer.innerHTML = `
-        <h4>Ημερομηνίες</h4>
-        <p>Ημερομηνία Έναρξης: ${thesis.start_date || 'Χωρίς ημερομηνία'}</p>
-        <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || 'Χωρίς ημερομηνία'}</p>
-        <hr>
-    `;
-    infoSection.appendChild(footer);
-}
 
 //--------------Function for Presenting a Canceled Thesis Info-------------
 function addCanceledSection(thesis, container) {
@@ -1411,87 +1564,6 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
             alert('Σφάλμα: Κάτι πήγε στραβά!');
         });
 });
-
-
-//---------Function for Loading the Theses List of the professor-------
-function loadTheses() {
-    const token = localStorage.getItem('token');
-
-    fetch('/api/theses', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                const thesesTableBody = document.querySelector('#list #theses tbody');
-                if (!thesesTableBody) {
-                    console.error('Δεν βρέθηκε το στοιχείο #theses tbody.');
-                    return;
-                }
-
-                thesesTableBody.innerHTML = ''; // Καθαρισμός του πίνακα
-
-                if (data.theses.length === 0) {
-                    thesesTableBody.innerHTML = '<tr><td colspan="4">Δεν βρέθηκαν δεδομένα.</td></tr>';
-                    return;
-                }
-
-                data.theses.forEach(thesis => {
-                    console.log('Προσθήκη θέματος:', thesis);
-
-                    let status;
-                    switch (thesis.status) {
-                        case 'active':
-                            status = 'Ενεργή';
-                            break;
-                        case 'to-be-reviewed':
-                            status = 'Υπό Εξέταση';
-                            break;
-                        case 'completed':
-                            status = 'Περατωμένη';
-                            break;
-                        case 'assigned':
-                            status = 'Υπό Ανάθεση';
-                            break;
-                        case 'cancelled':
-                            status = 'Ακυρωμένη';
-                    }
-
-                    const roleText = thesis.role === 'Επιβλέπων' ? 'Επιβλέπων Καθηγητής'
-                        : thesis.role === 'Μέλος Τριμελούς' ? 'Μέλος Τριμελούς Επιτροπής'
-                            : 'Άγνωστος Ρόλος';
-
-
-                    // Δημιουργία γραμμής πίνακα
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${thesis.title || 'Χωρίς τίτλο'}</td>
-                        <td>${thesis.thesis_id || 'Χωρίς ID'}</td>
-                        <td>${roleText}</td>
-                        <td>${status}</td>
-                    `;
-
-                    // Ενεργοποίηση εμφάνισης πληροφοριών κατά το κλικ
-                    row.addEventListener('click', (event) => {
-                        showInfoSection(thesis);
-                        console.log('clicked!');
-                    });
-
-                    thesesTableBody.appendChild(row);
-                });
-            } else {
-                console.error('Σφάλμα API:', data.message);
-            }
-        })
-        .catch(err => console.error('Σφάλμα φόρτωσης:', err));
-}
 
 
 //------------Event Listener for export to csv button------- 
