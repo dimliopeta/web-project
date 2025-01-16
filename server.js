@@ -311,8 +311,6 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
                 t.start_date,
                 e.date,
-                g.grade AS supervisor_grade,
-                g.comments AS supervisor_comments,
                 GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
                 CASE
                     WHEN t.professor_id = ? THEN 'Επιβλέπων'
@@ -326,15 +324,13 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
             LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
             LEFT JOIN Professors c1 ON c.member1_id = c1.id
             LEFT JOIN Professors c2 ON c.member2_id = c2.id
-            LEFT JOIN Grades g ON g.thesis_id = t.thesis_id AND g.professor_id = t.professor_id
             LEFT JOIN Invitations i ON i.thesis_id = t.thesis_id
             WHERE (p.id = ? OR c.member1_id = ? OR c.member2_id = ?) AND t.status != 'unassigned'
             GROUP BY 
                 t.thesis_id, t.title, t.summary, t.status, t.start_date, e.date,
                 s.name, s.surname, s.student_number, s.contact_email,
                 p.name, p.surname, p.email,
-                c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname, 
-                g.grade, g.comments;
+                c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname ;
 
 `;
         queryParams = [userId, userId, userId, userId, userId, userId];
@@ -1593,6 +1589,77 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
         });
     });
 });
+
+app.post('/api/enable-grading',authenticateJWT, (req,res) =>{
+    const { thesisId } = req.body;
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+    const thesisQuery =` UPDATE THESES
+        SET grading_enabled = TRUE
+        WHERE thesis_id = ?;`; 
+    db.query(thesisQuery,[thesisId], (thErr, thResults) => {
+        if (thErr) {
+            console.error('Σφάλμα κατά την ενεργοποίηση της βαθμολόγησης:', thErr);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την ενεργοποίηση της βαθμολόγησης.' });
+        }
+
+        if (thResults.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκε η συγκεκριμένη διπλωματική.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Η βαθμολόγηση ενεργοποιήθηκε!' });
+
+    });
+});
+
+app.post(`/api/thesis-status/`, authenticateJWT, (req,res) => {
+    const { thesisId } = req.body;
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query =`SELECT grading_enabled FROM THESES
+    WHERE thesis_id = ?;`;
+
+    db.query(query,[thesisId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την εύρεση της διπλωματικής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την εύρεση της διπλωματικής.' });
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκε η συγκεκριμένη διπλωματική.' });
+        }
+
+        const { grading_enabled } = results[0];
+        res.status(200).json({ success: true, gradingEnabled: grading_enabled});
+    });
+});
+
+app.post('/api/submit-grades', authenticateJWT, (req, res) => {
+    const { thesisId, grades } = req.body;
+    const professorId = req.user.userId; // Από το JWT, υποθέτοντας ότι το ID του καθηγητή είναι στο token
+
+    if (!thesisId || !grades || grades.length !== 4) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `
+        INSERT INTO Grades (thesis_id, professor_id, grade1, grade2, grade3, grade4, finalized)
+        VALUES (?, ?, ?, ?, ?, ?, FALSE)
+    `;
+
+    db.query(query, [thesisId, professorId, ...grades], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Οι βαθμοί καταχωρήθηκαν επιτυχώς!' });
+    });
+});
+
 
 
 //----------------- API to Assign Thesis to Students -----------------
