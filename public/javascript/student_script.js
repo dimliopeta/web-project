@@ -201,11 +201,16 @@ function calculateDuration(startDate) {
     // Adjust for negative days (crossed into a new month)
     if (days < 0) {
         totalMonths--; // Subtract one month
-        const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
-        days += previousMonth;
+        const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
+        days += previousMonthDays;
     }
-    const monthText = totalMonths > 0 ? `${totalMonths} μήνες` : '';
-    const dayText = days > 0 ? `${days} ημέρες` : '';
+    const monthText = totalMonths > 0
+        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+        : '';
+
+    const dayText = days > 0
+        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+        : '';
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
@@ -213,7 +218,8 @@ function calculateDuration(startDate) {
 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
     const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
     elements.forEach(element => {
-        element.textContent = (value && value !== null) ? value : errorMessage;
+        // Ensure valid strings (e.g., '0 ημέρες') are not replaced by errorMessage
+        element.textContent = (value !== undefined && value !== null && value !== '') ? value : errorMessage;
     });
 }
 
