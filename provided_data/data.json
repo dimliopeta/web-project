@@ -1186,9 +1186,9 @@
       "student_id": "1",
       "title": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks",
       "summary": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks is very important so we have to do it.",
-      "status": "assigned",
+      "status": "active",
       "pdf_path": "",
-      "start_date": null,
+      "start_date": "2025-1-12",
       "exam_date": null
     },
     {
@@ -1264,7 +1264,7 @@
   "examinations": [
     {
       "thesis_id": "1",
-      "date": "2025-03-01",
+      "date": null,
       "type_of_exam": "in-person",
       "location": "E4",
       "exam_report": null

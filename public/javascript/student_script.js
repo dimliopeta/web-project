@@ -101,7 +101,8 @@ function loadStudentThesis() {
                 updateDataField('professor_name', thesis.professor_name);
                 updateDataField('professor_surname', thesis.professor_surname);
                 updateDataField('thesis_start_date', thesis.start_date || 'Δεν έχει εκκινήσει');
-                updateDataField('thesis_exam_date', thesis.exam_date || 'Δεν');
+                updateDataField('thesis_exam_date', thesis.exam_date || '');
+                updateDataField('thesis_end_date', thesis.exam_date || '');
                 updateDataField('thesis_nimertis_link', thesis.nimertis_link);
                 updateDataField('committee_member1_name', thesis.committee_member1_name || 'Δεν έχει οριστεί');
                 updateDataField('committee_member1_surname', thesis.committee_member1_surname || ' ');
@@ -118,18 +119,27 @@ function loadStudentThesis() {
                 const dashboardDuration = document.querySelector('[data-field="dashboardDuration"]');
                 const dashboardStartDate = document.querySelector('[data-field="dashboardStartDate"]');
                 const dashboardExamDate = document.querySelector('[data-field="dashboardExamDate"]');
+                const dashboardEndDate = document.querySelector('[data-field="dashboardEndDate"]');
 
                 if (thesis.start_date && thesis.status === "active") {
                     dashboardDuration.style.display = 'inline';
                     dashboardExamDate.style.display = 'none';
+                    dashboardEndDate.style.display = 'none';
                     const duration = calculateDuration(thesis.start_date);
                     updateDataField('thesis_duration', duration);
-                } else if (thesis.start_date && (thesis.status === "to-be-reviewed" || thesis.status === "completed")) {
+                } else if (thesis.start_date && (thesis.status === "to-be-reviewed")) {
                     dashboardDuration.style.display = 'none';
                     dashboardExamDate.style.display = 'inline';
+                    dashboardEndDate.style.display = 'none';
+
+                } else if (thesis.start_date && (thesis.status === "completed")) {
+                    dashboardDuration.style.display = 'none';
+                    dashboardExamDate.style.display = 'none';
+                    dashboardEndDate.style.display = 'inline';
                 } else {
                     dashboardDuration.style.display = 'none';
                     dashboardExamDate.style.display = 'none';
+                    dashboardEndDate.style.display = 'none';
                 }
 
                 // Handle the PDF download button
@@ -361,6 +371,11 @@ function loadSectionsBasedOnStatus() {
                         completedFilesSection.style.display = "none";
                         managementSection.style.display = "block";
                         datesSection.style.display = "block";
+
+                        if(thesis.committee_member1_grade != null && thesis.committee_member2_grade != null && thesis.supervisor_grade != null){
+                            completedFilesSection.style.display = "block";
+                            document.getElementById("configurationCompletedFilesNimertisLink").style.display = 'none';
+                        }
                         break;
                     case 'completed':
                         infoSection.style.display = "block";
@@ -370,7 +385,7 @@ function loadSectionsBasedOnStatus() {
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "block";
-                        managementSection.style.display = "block";
+                        managementSection.style.display = "none";
                         datesSection.style.display = "block";
                         break;
                     case 'cancelled':
@@ -910,20 +925,23 @@ function fetchAndDisplayExaminations(thesis) {
             if (data.success) {
                 // Translate type of exam
                 const examData = data.examination;
-                if (examData.type_of_exam === "in-person") {
-                    examData.type_of_exam = "Δια ζώσης";
-                } else if (examData.type_of_exam === "online") {
-                    examData.type_of_exam = "Εξ αποστάσως";
-                }
-                // Format the date properly
-                const [year, month, day] = examData.date.split("-");
-                examData.date = `${day}-${month}-${year}`;
+                examData.type_of_exam =
+                    examData.type_of_exam === "in-person"
+                        ? "Δια ζώσης"
+                        : examData.type_of_exam === "online"
+                            ? "Εξ αποστάσως"
+                            : 'Δεν έχει οριστεί.';
 
-                document.getElementById('configurationExamDateInfo').innerHTML = `${examData.date || 'Δεν έχει οριστεί.'}`;
+                // Format the date properly
+                let formattedDate = 'Δεν έχει οριστεί.';
+                if (examData.date) {
+                    const [year, month, day] = examData.date.split("-");
+                    formattedDate = `${day}-${month}-${year}`;
+                }
+
+                document.getElementById('configurationExamDateInfo').innerHTML = formattedDate;
                 document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
                 document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
-
-
             } else {
                 alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης: ' + data.message);
             }
@@ -933,8 +951,6 @@ function fetchAndDisplayExaminations(thesis) {
             alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης:');
         });
 }
-
-
 //------------------------------ Functions for the Completed Files Section ------------------------------
 //------------------------------ Completed Files Section Event Listeners  ------------------------------
 //--------------- Examination Report button Event Listener  ---------------
@@ -1111,7 +1127,7 @@ document.getElementById('configurationButtonSetExamDate').addEventListener('clic
 document.getElementById('configurationButtonNimertisSubmission').addEventListener('click', function () {
     showSection('nimertisSection');
 });
-//--------------- Helper function to show a specific section and hide the others ---------------
+//--------------- Helper function to show a specific section and hide the others in Management Sections ---------------
 function showSection(sectionId) {
     const sections = ['configurationUploadFileSection', 'linkSection', 'examDateSection', 'nimertisSection'];
     sections.forEach(function (section) {
