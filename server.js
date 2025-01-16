@@ -60,11 +60,6 @@ const authenticateJWT = (req, res, next) => {
     });
 };
 
-
-
-
-
-
 const authorizeRole = (requiredRole) => {
     return (req, res, next) => {
         if (req.user.role !== requiredRole) {
@@ -73,8 +68,6 @@ const authorizeRole = (requiredRole) => {
         next();
     };
 };
-
-
 
 app.get('/api/check-auth', (req, res) => {
     const token = req.cookies?.token;
@@ -91,11 +84,6 @@ app.get('/api/check-auth', (req, res) => {
     });
 });
 
-
-
-
-
-
 // Route for /login and /login.html
 app.get('/login', (req, res) => {
     const token = req.cookies?.token;
@@ -104,7 +92,11 @@ app.get('/login', (req, res) => {
         jwt.verify(token, SECRET_KEY, (err, user) => {
             if (!err && user) {
                 // If valid user
-                return res.redirect(user.role === 'professor' ? '/professor' : '/student');
+                return res.redirect(user.role === 'professor' 
+                    ? '/professor' 
+                    : user.role === 'administrator' 
+                        ? '/administrator' 
+                        : '/student');
             }
             // If not
             res.setHeader('Cache-Control', 'no-store');
@@ -119,12 +111,6 @@ app.get('/login', (req, res) => {
     }
 });
 
-
-
-
-
-
-
 // Login endpoint
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -134,12 +120,14 @@ app.post('/login', (req, res) => {
     }
 
     const query = `
-        SELECT * FROM (
-            SELECT id, email, password, 'student' AS role FROM students
-            UNION ALL
-            SELECT id, email, password, 'professor' AS role FROM professors
-        ) AS users
-        WHERE email = ? AND password = ?;
+            SELECT * FROM (
+                SELECT id, email, password, 'student' AS role FROM students
+                UNION ALL
+                SELECT id, email, password, 'professor' AS role FROM professors
+                UNION ALL
+                SELECT id, email, password, 'administrator' AS role FROM administrators
+            ) AS users
+            WHERE email = ? AND password = ?;
     `;
 
     db.query(query, [email, password], (err, results) => {
@@ -164,6 +152,8 @@ app.post('/login', (req, res) => {
                 return res.redirect('/professor');
             } else if (user.role === 'student') {
                 return res.redirect('/student');
+            } else if (user.role === 'administrator') {
+                return res.redirect('/administrator');
             }
         } else {
             res.status(401).send('Invalid credentials');
@@ -180,6 +170,10 @@ app.get('/professor', authenticateJWT, authorizeRole('professor'), (req, res) =>
 
 app.get('/student', authenticateJWT, authorizeRole('student'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'student.html'));
+});
+
+app.get('/administrator', authenticateJWT, authorizeRole('administrator'), (req, res) => {
+    res.sendFile(path.join(__dirname, 'protected_views', 'administrator.html'));
 });
 
 // Logout endpoint

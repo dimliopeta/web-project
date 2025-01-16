@@ -32,6 +32,14 @@ CREATE TABLE `Professors`(
     `password` VARCHAR(20) NULL
 );
 
+CREATE TABLE `Administrator`(
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(50) NULL,
+    `surname` VARCHAR(50) NULL,
+    `email` VARCHAR(100) NULL UNIQUE,
+    `password` VARCHAR(20) NULL
+);
+
 CREATE TABLE `Theses`(
     `thesis_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `professor_id` INT NOT NULL,

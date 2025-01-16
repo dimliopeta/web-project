@@ -1307,5 +1307,13 @@
       "gen_assembly_session": null,
       "cancellation_reason": null
     }
+  ],
+  "administrators": [
+    {
+      "id": "1",
+      "name": "kyria",
+      "surname": "iwanna",
+      "email": "iwanna@ceid.upatras.gr"
+    }
   ]
 }
