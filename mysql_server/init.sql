@@ -32,7 +32,7 @@ CREATE TABLE `Professors`(
     `password` VARCHAR(20) NULL
 );
 
-CREATE TABLE `Administrator`(
+CREATE TABLE `Administrators`(
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(50) NULL,
     `surname` VARCHAR(50) NULL,
@@ -81,7 +81,7 @@ CREATE TABLE `Grades`(
     `grade_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `thesis_id` INT NOT NULL,
     `professor_id` INT NOT NULL,
-    `grade1` DECIMAL(5,2) NOT NULL,
+    `grade` DECIMAL(5,2) NOT NULL,
 	`grade2` DECIMAL(5,2) NOT NULL,
     `grade3` DECIMAL(5,2) NOT NULL,
     `grade4` DECIMAL(5,2) NOT NULL,
