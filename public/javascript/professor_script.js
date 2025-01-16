@@ -1010,8 +1010,9 @@ function loadGradeSection(thesisId, container) {
         .then(response => response.json())
         .then(data => {
             if (data.success && !data.gradingEnabled) {
-                // Εμφάνισε το κουμπί αν grading_enabled είναι false
-                gradeEnableButton(thesisId, container);
+                if (data.role === 'Επιβλέπων') {
+                    gradeEnableButton(thesisId, container);
+                }
             }
             else if (data.success && data.gradingEnabled) {
                 renderGradeSection(thesisId, container);
@@ -1022,29 +1023,43 @@ function loadGradeSection(thesisId, container) {
         });
 }
 
-function renderGradeSection(thesisId, container) {
-    const criteria = [
-        'Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%)',
-        'Χρονικό διάστημα εκπόνησής της (15%)',
-        'Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%)',
-        'Συνολική εικόνα της παρουσίασης (10%)'
-    ];
+function renderGradeSection(thesisId, container){
+    fetch(`/api/get-grades/${thesisId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        container.innerHTML='';
+        const criteria = [
+            'Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%)',
+            'Χρονικό διάστημα εκπόνησής της (15%)',
+            'Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%)',
+            'Συνολική εικόνα της παρουσίασης (10%)'
+        ];
 
-    criteria.forEach((criterion, index) => {
-        const label = document.createElement('label');
-        label.textContent = criterion;
-        label.classList.add('form-label', 'mt-3');
-        container.appendChild(label);
+        const grades = data.grades || {}; // Αν δεν υπάρχουν βαθμοί, θα είναι άδειο αντικείμενο
+         
+         criteria.forEach((criterion, index) => {
+                const label = document.createElement('label');
+                label.textContent = criterion;
+                label.classList.add('form-label', 'mt-3');
+                container.appendChild(label);
 
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.id = `grade-criterion-${index + 1}`;
-        input.classList.add('form-control');
-        input.placeholder = `Βαθμός (0-10)`;
-        container.appendChild(input);
-    });
-
-    const submitGradeButton = createButton('submit-grade-button', 'Καταχώρηση Βαθμού', ['btn', 'btn-success', 'mt-3', 'mb-3'], () => {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.id = `grade-criterion-${index + 1}`;
+                input.classList.add('form-control');
+                input.placeholder = `Βαθμός (0-10)`;
+                if (index === 0) {
+                    input.value = grades.grade || ''; // Πρώτος βαθμός
+                } else {
+                    input.value = grades[`grade${index + 1}`] || ''; // Υπόλοιποι βαθμοί
+                }                container.appendChild(input);
+            });
+            const submitGradeButton = createButton('submit-grade-button', 'Καταχώρηση Βαθμού', ['btn', 'btn-success', 'mt-3', 'mb-3'], () => {
         const grades = [];
         for (let i = 1; i <= 4; i++) {
             const input = document.getElementById(`grade-criterion-${i}`);
@@ -1116,6 +1131,7 @@ function renderGradeSection(thesisId, container) {
 
     const gradeHr = document.createElement('hr');
     container.appendChild(gradeHr);
+    })
 }
 
 

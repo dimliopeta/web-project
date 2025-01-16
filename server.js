@@ -1698,7 +1698,7 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        INSERT INTO Grades (thesis_id, professor_id, grade1, grade2, grade3, grade4, finalized)
+        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, finalized)
         VALUES (?, ?, ?, ?, ?, ?, FALSE)
     `;
 
@@ -1712,6 +1712,30 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
     });
 });
 
+
+app.get('/api/get-grades/:thesisId', authenticateJWT, (req, res) => {
+    const { thesisId } = req.params;
+    const professorId = req.user.userId; // Από το JWT
+
+    const query = `
+        SELECT grade, grade2, grade3, grade4, finalized
+        FROM Grades
+        WHERE thesis_id = ? AND professor_id = ?
+    `;
+
+    db.query(query, [thesisId, professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση βαθμολογίας:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την ανάκτηση βαθμολογίας.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: true, grades: null });
+        }
+
+        res.status(200).json({ success: true, grades: results[0] });
+    });
+});
 
 
 //----------------- API to Assign Thesis to Students -----------------
