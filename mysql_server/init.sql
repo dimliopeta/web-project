@@ -79,8 +79,8 @@ CREATE TABLE `Committees`(
 
 CREATE TABLE `Grades`(
     `grade_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `thesis_id` INT NOT NULL,
-    `professor_id` INT NOT NULL,
+    `thesis_id` INT NOT NULL UNIQUE,
+    `professor_id` INT NOT NULL UNIQUE,
     `grade` DECIMAL(5,2) NOT NULL,
 	`grade2` DECIMAL(5,2) NOT NULL,
     `grade3` DECIMAL(5,2) NOT NULL,
