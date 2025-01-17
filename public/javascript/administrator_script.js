@@ -70,7 +70,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function loadAllTheses() {
     const token = localStorage.getItem('token');
 
-    fetch('/api/thesesAll', {
+    fetch('/api/thesesAdministrator', {
         headers: {
             'Authorization': `Bearer ${token}`
         }

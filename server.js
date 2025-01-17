@@ -280,7 +280,7 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
 });
 
 //----------------- API to fetch All Theses Data for administrators -----------------
-app.get('/api/thesesAll', authenticateJWT, (req, res) => {
+app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
 
     const query = `
             SELECT 
@@ -319,7 +319,8 @@ app.get('/api/thesesAll', authenticateJWT, (req, res) => {
             LEFT JOIN 
                 Professors CM1 ON C.member1_id = CM1.id
             LEFT JOIN 
-                Professors CM2 ON C.member2_id = CM2.id;
+                Professors CM2 ON C.member2_id = CM2.id
+            WHERE (T.status = 'active' OR T.status = 'to-be-reviewed');
 
 
 `;
@@ -822,7 +823,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
 //----------------- API for Professor Search Bar for Administration -----------------
 app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
     const input = req.query.search;
-    
+
     const query = `
         SELECT *
         FROM Professors P
