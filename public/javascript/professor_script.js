@@ -1081,26 +1081,8 @@ function renderGradeSection(thesisId, container) {
             const submitGradeButton = createButton(
                 'submit-grade-button',
                 grades.grade !== undefined ? 'Αλλαγή Καταχώρησης Βαθμού' : 'Καταχώρηση Βαθμού',
-                ['btn', 'btn-success']
+                ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId,container)
             );
-
-            submitGradeButton.onclick = () => {
-                const grades = [];
-                for (let i = 1; i <= 4; i++) {
-                    const input = document.getElementById(`grade-criterion-${i}`);
-                    const value = parseFloat(input.value);
-
-                    if (isNaN(value) || value < 0 || value > 10) {
-                        alert(`Ο βαθμός ${i} πρέπει να είναι μεταξύ 0 και 10.`);
-                        return;
-                    }
-
-                    grades.push(value);
-                }
-
-                alert('Η καταχώρηση βαθμού ενημερώθηκε επιτυχώς!');
-                // Στο σημείο αυτό γίνεται η υποβολή.
-            };
 
             buttonContainer.appendChild(submitGradeButton);
 
@@ -1125,6 +1107,52 @@ function renderGradeSection(thesisId, container) {
         });
 }
 
+function handleSubmitGradeButtonClick(thesisId, container) {
+    const grades = [];
+
+    // Συλλογή βαθμών από τα input πεδία
+    for (let i = 1; i <= 4; i++) {
+        const input = document.getElementById(`grade-criterion-${i}`);
+        const value = parseFloat(input.value);
+
+        if (isNaN(value) || value < 0 || value > 10) {
+            alert(`Ο βαθμός ${i} πρέπει να είναι μεταξύ 0 και 10.`);
+            return;
+        }
+
+        grades.push(value);
+    }
+
+    // Συλλογή σχολίων
+    const comments = document.getElementById('grade-comments')?.value || '';
+
+    // Αποστολή δεδομένων στο API
+    fetch('/api/submit-grades', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            thesisId,
+            grades,
+            comments // Προσθήκη σχολίων στο αίτημα
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
+            renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+        } else {
+            alert(`Σφάλμα: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Σφάλμα κατά την καταχώρηση βαθμών:', error);
+        alert('Κάτι πήγε στραβά!');
+    });
+}
 
 
 
@@ -1145,7 +1173,7 @@ function gradeEnableButton(thesisId, container) {
                     alert('Ενεργοποιήθηκε η βαθμολόγηση επιτυχώς!');
                     if (gradeThesisButton.parentNode) {
                         gradeThesisButton.remove();
-                    }                    
+                    }
                     loadGradeSection(thesisId, container);
                 } else {
                     alert(`Σφάλμα: ${data.message}`);

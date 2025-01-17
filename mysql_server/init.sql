@@ -79,8 +79,8 @@ CREATE TABLE `Committees`(
 
 CREATE TABLE `Grades`(
     `grade_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `thesis_id` INT NOT NULL UNIQUE,
-    `professor_id` INT NOT NULL UNIQUE,
+    `thesis_id` INT NOT NULL,
+    `professor_id` INT NOT NULL,
     `grade` DECIMAL(5,2) NOT NULL,
 	`grade2` DECIMAL(5,2) NOT NULL,
     `grade3` DECIMAL(5,2) NOT NULL,
@@ -88,7 +88,8 @@ CREATE TABLE `Grades`(
     `comments` TEXT,
     `finalized` BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
-    FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`)
+    FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`),
+    UNIQUE (`thesis_id`, `professor_id`)
 );
 
 CREATE TABLE `Attachments`(
