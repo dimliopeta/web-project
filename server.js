@@ -819,8 +819,28 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, students: results });
     });
 });
+//----------------- API for Professor Search Bar for Administration -----------------
+app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
+    const input = req.query.search;
+    
+    const query = `
+        SELECT *
+        FROM Professors P
+        WHERE P.name LIKE ? OR P.surname LIKE ?
+    `;
+    const searchInput = `%${input}%`;
+
+    db.query(query, [searchInput, searchInput], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        res.status(200).json({ success: true, professors: results });
+    });
+});
 //----------------- API for Professor Search Bar for thesis assignment -----------------
-app.get('/api/professor-search', authenticateJWT, (req, res) => {
+app.get('/api/professor_search_by_student', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
     const { input } = req.query;
 
