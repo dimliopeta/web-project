@@ -120,7 +120,7 @@ function loadAllTheses() {
 
                     // Add a click event for additional actions if needed
                     row.addEventListener('click', () => {
-                        showInfoSection(thesis); // Ensure this function is implemented
+                        showInfoSection(thesis);
                     });
 
                     thesesTableBody.appendChild(row);
@@ -135,9 +135,13 @@ function loadAllTheses() {
 
 
 
-//--------------- Frontend For Showing Info of a Thesis based on its status ---------------
+//--------------- Function for Showing Info of a Thesis ---------------
 function showInfoSection(thesis) {
-    const infoSection = document.getElementById('info-compartment');
+
+    const infoSection = document.getElementById('administratorThesesInfoSection');
+    const managementSection = document.getElementById('administratorThesesManagementSection');
+    infoSection.style.display = 'block';
+    managementSection.style.display = 'block';
     const thesesCompartment = document.getElementById('theses-compartment');
 
     thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
@@ -174,49 +178,143 @@ function showInfoSection(thesis) {
         default:
             status = 'Άγνωστη';
     }
-    // Basic Information Section
-    const basicInfoSection = document.createElement('section');
-    basicInfoSection.innerHTML = `
-        <h4>Βασικές Πληροφορίες</h4>
-        <p>Περιγραφή: ${thesis.summary || 'Χωρίς περιγραφή'}</p>
-        <p>Φοιτητής: ${thesis.student_name +' ' + thesis.student_surname|| 'Χωρίς φοιτητή'} (ΑΜ: ${thesis.student_number || 'Χωρίς ΑΜ'})</p>
-        <p>Κατάσταση: ${status || 'Άγνωστη'}</p>
-        <hr>
-    `;
-    infoSection.appendChild(basicInfoSection);
-    // Committee Section
-    if (thesis.status === 'active' || thesis.status === 'to-be-reviewed') {
-        const committeeSection = document.createElement('section');
-        committeeSection.innerHTML = `
-            <h4>Μέλη Τριμελούς Επιτροπής</h4>
-            <p>Επιβλέπων: ${thesis.professor_name || 'Χωρίς επιβλέποντα'}</p>
-            <p>Μέλος 1: ${thesis.committee_member1_name || 'Δεν έχει οριστεί'}</p>
-            <p>Μέλος 2: ${thesis.committee_member2_name || 'Δεν έχει οριστεί'}</p>
-            <hr>
+
+    const duration = calculateDuration(thesis.start_date);
+
+
+    infoSection.innerHTML = `
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h3 class="text-primary">${thesis.title || 'Χωρίς τίτλο'}</h3>
+                    </div>
+                    <div class="card-body">
+                        <section>
+                            <h4>Βασικές Πληροφορίες</h4>
+                            <p>Περιγραφή: ${thesis.summary || 'Χωρίς περιγραφή'}</p>
+                            <p>Φοιτητής: ${thesis.student_name || 'Χωρίς φοιτητή'} ${thesis.student_surname || ''}
+                                (ΑΜ: ${thesis.student_number || 'Χωρίς ΑΜ'})</p>
+                            <p>Κατάσταση: ${status}</p>
+                            <hr>
+                        </section>
+                        ${thesis.status === 'active' || thesis.status === 'to-be-reviewed' ? `
+                        <section>
+                            <h4>Μέλη Τριμελούς Επιτροπής</h4>
+                            <p>Επιβλέπων: ${thesis.professor_name + ' ' + thesis.professor_surname || 'Χωρίς επιβλέποντα'}</p>
+                            <p>Μέλος 1: ${thesis.committee_member1_name + ' ' + thesis.committee_member1_surname || 'Δεν έχει οριστεί'}
+                            </p>
+                            <p>Μέλος 2: ${thesis.committee_member2_name + ' ' + thesis.committee_member2_surname || 'Δεν έχει οριστεί'}
+                            </p>
+                        </section>` : ''}
+                    </div>
+                    <div class="card-footer text-muted">
+                        <span data-field="dashboardStartDate">
+                            <span class="ps-5">Ημερομηνία έναρξης:</span>
+                            <span class="pe-4" data-field="thesis_start_date">${thesis.start_date || 'Χωρίς ημερομηνία'}</span>
+                        </span>
+                        <span data-field="dashboardDuration">
+                            <span class="ps-5">Διάρκεια:</span>
+                            <span class="pe-4" data-field="thesis_duration">${duration || 'Άγνωστη Διάρκεια'}</span>
+                        </span>
+                    </div>
+                </div>
+            `;
+            if(thesis.status = "active"){     
+            managementSection.innerHTML = `
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="text-dark">Διαχείρηση Διπλωματικής</h3>
+                </div>
+                <div class="card-body">
+                    <section>
+                        <div class="row">
+                            <!-- Submit AP Area -->
+                            <div class="d-flex flex-column align-items-center w-50" id="APSection">
+                                <h5 class="my-1">Καταχώριση ΑΠ έγκρισης</h5>
+                                <p id="APSavedData" class="text-success"></p>
+                                <label class="">ΑΠ:</label>
+                                <input type="text" id="APInputBox" class="form-control mt-1" placeholder="Αριθμός πρωτοκόλλου">
+                                <button class="btn btn-secondary w-100 my-3" id="submitAPButton">
+                                    Καταχώρηση
+                                </button>
+                            </div>
+                            
+                            <!-- Cancel Thesis Area -->
+                            <div class="d-flex flex-column align-items-center w-50" id="cancelThesisArea">
+                                <h5 class="my-1">Ακύρωση ανάθεσης θέματος</h5>
+                                <p id="cancelThesisSavedInput" class="text-danger"></p>
+                                <label class="">Α/Α ΓΣΤ:</label>
+                                <input type="text" id="GSTInputBox" class="form-control mt-1 mb-2">
+                                <label class="">Έτος:</label>
+                                <input type="text" id="yearInputBox" class="form-control mt-1 mb-2">
+                                <label class="">Λόγος:</label>
+                                <textarea id="reasonInputBox" class="form-control mb-3 mt-1">Μετά από αίτηση του/της φοιτητή/φοιτήτριας</textarea>
+                                <button class="btn btn-danger w-100" id="cancelThesisButton">
+                                    Ακύρωση
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="card-footer text-muted">
+                </div>
+            </div>
         `;
-        infoSection.appendChild(committeeSection);
+    } else if (thesis.status = "to-be-reviewed"){
+    managementSection.innerHTML = `
+    <h4>vagin</h4>
+    `;
     }
-    // Dates Section
-    const duration = calculateDuration (thesis.start_date);
-    const footer = document.createElement('section');
-    footer.classList.add('text-center');
-    footer.innerHTML = `
-    <div class="card-footer text-muted">
-        <span data-field="dashboardStartDate">
-            <span class="ps-5">Ημερομηνία έναρξης:</span>
-            <span class="pe-4" data-field="thesis_start_date">${thesis.start_date || 'Χωρίς ημερομηνία'}</span>
-        </span>
-
-        <span data-field="dashboardDuration">
-            <span class="ps-5">Διάρκεια:</span>
-            <span class="pe-4" data-field="thesis_duration">${duration || 'Άγνωστη Διάρκεια'}</span>
-        </span>
-    </div>
-`;
-
-    // Append the footer to the info section
-    infoSection.appendChild(footer);
+        
 }
+
+//--------------- Event Listener for Submit AP Button ---------------
+const submitAPButton = document.getElementById('submitAPButton');
+submitAPButton.addEventListener('click', () => {
+    const APInputBox = document.getElementById('APInput').value.trim();
+    if (APInput) {
+
+        fetch('/api/AP_save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ apNumber: APInput })
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('APSavedData').innerText = `Αριθμός Πρωτοκόλλου: ${APInput}`;
+                document.getElementById('APInput').value = '';
+            })
+            .catch(error => console.error('Error saving AP:', error));
+    }
+});
+
+//--------------- Event Listener for Cancel Thesis Button ---------------
+const cancelThesisButton = document.getElementById('cancelThesisButton');
+cancelThesisButton.addEventListener('click', () => {
+    const GSTInput = document.getElementById('GSTInputBox').value.trim();
+    const yearInput = document.getElementById('yearInputBox').value.trim();
+    const reasonInput = document.getElementById('reasonInputBox').value.trim();
+
+    if (GSTInput && yearInput && reasonInput) {
+
+        fetch('/api/Thesis_cancel_admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ gstNumber: GSTInput, year: yearInput, reason: reasonInput })
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('cancelThesisSavedInput').innerHTML = `
+                    <p>Α/Α ΓΣΤ: ${GSTInput}</p>
+                    <p>Έτος: ${yearInput}</p>
+                    <p>Λόγος: ${reasonInput}</p>
+                `;
+                document.getElementById('GSTInput').value = '';
+                document.getElementById('yearInput').value = '';
+                document.getElementById('reasonInput').value = 'Μετά από αίτηση του/της φοιτητή/φοιτήτριας';
+            })
+            .catch(error => console.error('Error cancelling thesis:', error));
+    }
+});
 
 //--------------- Event Listener for Filter dropdown ---------------
 document.querySelectorAll('.dropdown-item').forEach(item => {
@@ -401,6 +499,21 @@ function calculateDuration(startDate) {
         : '';
 
     return [monthText, dayText].filter(Boolean).join(' και ');
+}
+
+function resetInfoSection() {
+    const infoSection = document.getElementById('administratorThesesInfoSection');
+    const thesesCompartment = document.getElementById('theses-compartment');
+
+    if (infoSection) {
+        infoSection.classList.add('d-none');
+        infoSection.innerHTML = '';
+    }
+
+    if (thesesCompartment) {
+        thesesCompartment.classList.remove('col-md-6');
+        thesesCompartment.classList.add('col-lg-8', 'mx-auto');
+    }
 }
 
 
