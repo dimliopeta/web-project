@@ -289,7 +289,7 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
                 T.summary,
                 T.status,
                 T.pdf_path,
-                T.start_date,
+                DATE_FORMAT(T.start_date, '%Y-%m-%d') AS start_date,
                 T.nimertis_link,
                 S.id AS student_id,
                 S.name AS student_name,
