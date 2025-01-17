@@ -228,26 +228,26 @@ function showInfoSection(thesis) {
                     <section>
                         <div class="row">
                             <!-- Submit AP Area -->
-                            <div class="d-flex flex-column align-items-center w-50" id="apArea">
+                            <div class="d-flex flex-column align-items-center w-50" id="APSection">
                                 <h5 class="my-1">Καταχώριση ΑΠ έγκρισης</h5>
-                                <p id="apSavedData" class="text-success"></p>
+                                <p id="APSavedData" class="text-success"></p>
                                 <label class="">ΑΠ:</label>
-                                <input type="text" id="apInput" class="form-control mt-1" placeholder="Αριθμός πρωτοκόλλου">
+                                <input type="text" id="APInputBox" class="form-control mt-1" placeholder="Αριθμός πρωτοκόλλου">
                                 <button class="btn btn-secondary w-100 my-3" id="submitAPButton">
                                     Καταχώρηση
                                 </button>
                             </div>
                             
                             <!-- Cancel Thesis Area -->
-                            <div class="d-flex flex-column align-items-center w-50" id="cancelArea">
+                            <div class="d-flex flex-column align-items-center w-50" id="cancelThesisArea">
                                 <h5 class="my-1">Ακύρωση ανάθεσης θέματος</h5>
-                                <p id="cancelSavedData" class="text-danger"></p>
+                                <p id="cancelThesisSavedInput" class="text-danger"></p>
                                 <label class="">Α/Α ΓΣΤ:</label>
-                                <input type="text" id="gstInput" class="form-control mt-1 mb-2">
+                                <input type="text" id="GSTInputBox" class="form-control mt-1 mb-2">
                                 <label class="">Έτος:</label>
-                                <input type="text" id="yearInput" class="form-control mt-1 mb-2">
+                                <input type="text" id="yearInputBox" class="form-control mt-1 mb-2">
                                 <label class="">Λόγος:</label>
-                                <textarea id="reasonInput" class="form-control mb-3 mt-1">Μετά από αίτηση του/της φοιτητή/φοιτήτριας</textarea>
+                                <textarea id="reasonInputBox" class="form-control mb-3 mt-1">Μετά από αίτηση του/της φοιτητή/φοιτήτριας</textarea>
                                 <button class="btn btn-danger w-100" id="cancelThesisButton">
                                     Ακύρωση
                                 </button>
@@ -266,6 +266,55 @@ function showInfoSection(thesis) {
     }
         
 }
+
+//--------------- Event Listener for Submit AP Button ---------------
+const submitAPButton = document.getElementById('submitAPButton');
+submitAPButton.addEventListener('click', () => {
+    const APInputBox = document.getElementById('APInput').value.trim();
+    if (APInput) {
+
+        fetch('/api/AP_save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ apNumber: APInput })
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('APSavedData').innerText = `Αριθμός Πρωτοκόλλου: ${APInput}`;
+                document.getElementById('APInput').value = '';
+            })
+            .catch(error => console.error('Error saving AP:', error));
+    }
+});
+
+//--------------- Event Listener for Cancel Thesis Button ---------------
+const cancelThesisButton = document.getElementById('cancelThesisButton');
+cancelThesisButton.addEventListener('click', () => {
+    const GSTInput = document.getElementById('GSTInputBox').value.trim();
+    const yearInput = document.getElementById('yearInputBox').value.trim();
+    const reasonInput = document.getElementById('reasonInputBox').value.trim();
+
+    if (GSTInput && yearInput && reasonInput) {
+
+        fetch('/api/Thesis_cancel_admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ gstNumber: GSTInput, year: yearInput, reason: reasonInput })
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('cancelThesisSavedInput').innerHTML = `
+                    <p>Α/Α ΓΣΤ: ${GSTInput}</p>
+                    <p>Έτος: ${yearInput}</p>
+                    <p>Λόγος: ${reasonInput}</p>
+                `;
+                document.getElementById('GSTInput').value = '';
+                document.getElementById('yearInput').value = '';
+                document.getElementById('reasonInput').value = 'Μετά από αίτηση του/της φοιτητή/φοιτήτριας';
+            })
+            .catch(error => console.error('Error cancelling thesis:', error));
+    }
+});
 
 //--------------- Event Listener for Filter dropdown ---------------
 document.querySelectorAll('.dropdown-item').forEach(item => {
