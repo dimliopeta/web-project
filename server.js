@@ -819,28 +819,8 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, students: results });
     });
 });
-//----------------- API for Professor Search Bar for Administration -----------------
-app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
-    const input = req.query.search;
-    
-    const query = `
-        SELECT *
-        FROM Professors P
-        WHERE P.name LIKE ? OR P.surname LIKE ?
-    `;
-    const searchInput = `%${input}%`;
-
-    db.query(query, [searchInput, searchInput], (err, results) => {
-        if (err) {
-            console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
-        }
-
-        res.status(200).json({ success: true, professors: results });
-    });
-});
 //----------------- API for Professor Search Bar for thesis assignment -----------------
-app.get('/api/professor_search_by_student', authenticateJWT, (req, res) => {
+app.get('/api/professor-search', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
     const { input } = req.query;
 
@@ -1687,27 +1667,41 @@ app.post('/api/enable-grading', authenticateJWT, (req, res) => {
 
 app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
+    const professorId = req.user.userId; // Από το JWT
+
     if (!thesisId) {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
     }
 
-    const query = `SELECT grading_enabled FROM THESES
-    WHERE thesis_id = ?;`;
+    const query = `
+        SELECT 
+            Theses.grading_enabled,
+            CASE
+                WHEN Theses.professor_id = ? THEN 'Επιβλέπων'
+                WHEN Committees.member1_id = ? OR Committees.member2_id = ? THEN 'Μέλος Τριμελούς'
+                ELSE 'Χωρίς Σχέση'
+            END AS role
+        FROM Theses
+        LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
+        WHERE Theses.thesis_id = ?;
+    `;
 
-    db.query(query, [thesisId], (err, results) => {
+    db.query(query, [professorId, professorId, professorId, thesisId], (err, results) => {
         if (err) {
             console.error('Σφάλμα κατά την εύρεση της διπλωματικής:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα κατά την εύρεση της διπλωματικής.' });
         }
 
-        if (results.affectedRows === 0) {
+        if (results.length === 0) {
             return res.status(404).json({ success: false, message: 'Δεν βρέθηκε η συγκεκριμένη διπλωματική.' });
         }
 
-        const { grading_enabled } = results[0];
-        res.status(200).json({ success: true, gradingEnabled: grading_enabled });
+        const { grading_enabled, role } = results[0];
+        res.status(200).json({ success: true, gradingEnabled: grading_enabled, role });
     });
 });
+
+
 
 app.post('/api/submit-grades', authenticateJWT, (req, res) => {
     const { thesisId, grades } = req.body;
@@ -1720,6 +1714,12 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
     const query = `
         INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, finalized)
         VALUES (?, ?, ?, ?, ?, ?, FALSE)
+        ON DUPLICATE KEY UPDATE 
+        grade = VALUES(grade), 
+        grade2 = VALUES(grade2), 
+        grade3 = VALUES(grade3), 
+        grade4 = VALUES(grade4),
+        finalized = FALSE;
     `;
 
     db.query(query, [thesisId, professorId, ...grades], (err, result) => {
@@ -1728,7 +1728,37 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
         }
 
-        res.status(200).json({ success: true, message: 'Οι βαθμοί καταχωρήθηκαν επιτυχώς!' });
+        res.status(200).json({ success: true, message: 'Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!' });
+    });
+});
+
+
+app.post('api/finalize-submitted-grades', authenticateJWT, (req,res) => {
+    const { thesisId, grades } = req.body;
+    const professorId = req.user.userId; 
+
+    if (!thesisId || !grades || grades.length !== 4) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `
+        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, finalized)
+        VALUES (?, ?, ?, ?, ?, ?, TRUE)
+        ON DUPLICATE KEY UPDATE 
+        grade = VALUES(grade), 
+        grade2 = VALUES(grade2), 
+        grade3 = VALUES(grade3), 
+        grade4 = VALUES(grade4),
+        finalized = TRUE;
+    `;
+
+    db.query(query, [thesisId, professorId, ...grades], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Η οριστική καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!' });
     });
 });
 
