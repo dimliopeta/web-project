@@ -1028,6 +1028,11 @@ function loadGradeSection(thesisId, container) {
             if (data.success && !data.gradingEnabled) {
                 if (data.role === 'Επιβλέπων') {
                     gradeEnableButton(thesisId, gradeContent);
+                } else {
+                    const message = document.createElement('p');
+                    message.textContent = 'Η βαθμολόγηση δεν έχει ενεργοποιηθεί από τον επιβλέποντα διδάσκοντα.';
+                    message.classList.add('text-warning', 'mt-3'); // Προσθήκη κάποιου στυλ για έμφαση
+                    gradeContent.appendChild(message);
                 }
             } else if (data.success && data.gradingEnabled) {
                 renderGradeSection(thesisId, gradeContent);
@@ -1081,7 +1086,7 @@ function renderGradeSection(thesisId, container) {
             const submitGradeButton = createButton(
                 'submit-grade-button',
                 grades.grade !== undefined ? 'Αλλαγή Καταχώρησης Βαθμού' : 'Καταχώρηση Βαθμού',
-                ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId,container)
+                ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId, container)
             );
 
             buttonContainer.appendChild(submitGradeButton);
@@ -1090,13 +1095,8 @@ function renderGradeSection(thesisId, container) {
             const finalizeButton = createButton(
                 'finalize-grade-button',
                 'Οριστική Υποβολή',
-                ['btn', 'btn-danger']
+                ['btn', 'btn-danger'], () => handleFinalizeButtonClick(thesisId, container)
             );
-
-            finalizeButton.onclick = () => {
-                alert('Οι βαθμοί υποβλήθηκαν οριστικά!');
-                // Στο σημείο αυτό μπορεί να υλοποιηθεί η οριστική υποβολή.
-            };
 
             buttonContainer.appendChild(finalizeButton);
 
@@ -1139,19 +1139,63 @@ function handleSubmitGradeButtonClick(thesisId, container) {
             comments // Προσθήκη σχολίων στο αίτημα
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
-            renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
-        } else {
-            alert(`Σφάλμα: ${data.message}`);
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
+                renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+            } else {
+                alert(`Σφάλμα: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την καταχώρηση βαθμών:', error);
+            alert('Κάτι πήγε στραβά!');
+        });
+}
+
+
+function handleFinalizeButtonClick(thesisId, container) {
+    const grades = [];
+
+    // Συλλογή βαθμών από τα input πεδία
+    for (let i = 1; i <= 4; i++) {
+        const input = document.getElementById(`grade-criterion-${i}`);
+        const value = parseFloat(input.value);
+
+        if (isNaN(value) || value < 0 || value > 10) {
+            alert(`Ο βαθμός ${i} πρέπει να είναι μεταξύ 0 και 10.`);
+            return;
         }
+
+        grades.push(value);
+    }
+
+    // Αποστολή δεδομένων στο API για οριστική υποβολή
+    fetch('/api/finalize-submitted-grades', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            thesisId,
+            grades
+        })
     })
-    .catch(error => {
-        console.error('Σφάλμα κατά την καταχώρηση βαθμών:', error);
-        alert('Κάτι πήγε στραβά!');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Η οριστική καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
+                renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+            } else {
+                alert(`Σφάλμα: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την οριστική υποβολή βαθμών:', error);
+            alert('Κάτι πήγε στραβά!');
+        });
 }
 
 

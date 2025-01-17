@@ -1753,7 +1753,7 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
 });
 
 
-app.post('api/finalize-submitted-grades', authenticateJWT, (req,res) => {
+app.post('/api/finalize-submitted-grades', authenticateJWT, (req,res) => {
     const { thesisId, grades } = req.body;
     const professorId = req.user.userId; 
 
