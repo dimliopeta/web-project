@@ -288,7 +288,7 @@ app.post('/api/AP_save', (req, res) => {
 
     const query = `
         UPDATE Logs 
-        SET gen_assembly_session = ? 
+        SET ap = ? 
         WHERE thesis_id = ? AND new_state = 'assigned'
     `;
 
@@ -305,7 +305,60 @@ app.post('/api/AP_save', (req, res) => {
         res.json({ success: true, message: 'AP number saved successfully.' });
     });
 });
+//----------------- API to Cancel Thesis for administrators -----------------
+app.post('/api/Thesis_cancel_admin', (req, res) => {
+    const { thesis_id, date, gstNumber, reason } = req.body;
 
+    if (!thesis_id || !date || !gstNumber || !reason ) {
+        return res.status(400).json({ error: 'Missing thesis id, gstNumber, date, or reason' });
+    }
+    db.beginTransaction((transactionError) => {
+        if (transactionError) {
+            console.error('Error starting transaction:', transactionError);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        const logQuery = `
+            INSERT INTO logs (thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
+            VALUES (?, ?, 'active', 'cancelled', ?, ?)
+        `;
+        db.execute(logQuery, [thesis_id, date, gstNumber, reason], (logError) => {
+            if (logError) {
+                console.error('Error inserting cancellation log:', logError);
+                return db.rollback(() => {
+                    res.status(500).json({ error: 'Internal server error' });
+                });
+            }
+
+
+            const updateQuery = `
+                UPDATE theses
+                SET status = 'cancelled'
+                WHERE thesis_id = ?
+            `;
+            db.execute(updateQuery, [thesis_id], (updateError) => {
+                if (updateError) {
+                    console.error('Error updating thesis status:', updateError);
+                    return db.rollback(() => {
+                        res.status(500).json({ error: 'Internal server error' });
+                    });
+                }
+
+                db.commit((commitError) => {
+                    if (commitError) {
+                        console.error('Error committing transaction:', commitError);
+                        return db.rollback(() => {
+                            res.status(500).json({ error: 'Internal server error' });
+                        });
+                    }
+
+                    res.status(200).json({
+                        message: 'Thesis cancellation logged and status updated successfully',
+                    });
+                });
+            });
+        });
+    });
+});
 //----------------- API to fetch All Theses Data for administrators -----------------
 app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
 

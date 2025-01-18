@@ -245,8 +245,8 @@ function showInfoSection(thesis) {
                                 <p id="cancelThesisSavedInput" class="text-danger"></p>
                                 <label class="">Α/Α ΓΣΤ:</label>
                                 <input type="text" id="GSTInputBox" class="form-control mt-1 mb-2">
-                                <label class="">Έτος:</label>
-                                <input type="text" id="yearInputBox" class="form-control mt-1 mb-2">
+                                <label class="">Ημερομηνία:</label>
+                                <input type="date" id="dateInputBox" class="form-control mt-1 mb-2">
                                 <label class="">Λόγος:</label>
                                 <textarea id="reasonInputBox" class="form-control mb-3 mt-1">Μετά από αίτηση του/της φοιτητή/φοιτήτριας</textarea>
                                 <button class="btn btn-danger w-100" id="cancelThesisButton">
@@ -294,24 +294,24 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
 administratorThesesManagementSection.addEventListener('click', (event) => {
     if (event.target && event.target.id === 'cancelThesisButton') {
         const GSTInput = document.getElementById('GSTInputBox').value.trim();
-        const yearInput = document.getElementById('yearInputBox').value.trim();
-        const reasonInput = document.getElementById('reasonInputBox').value.trim();
+        const dateInput = document.getElementById('dateInputBox').value.trim();
+        const reasonInput = document.getElementById('reasonInputBox').value;
 
-        if (GSTInput && yearInput && reasonInput) {
+        if (GSTInput && dateInput && reasonInput) {
             fetch('/api/Thesis_cancel_admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ gstNumber: GSTInput, year: yearInput, reason: reasonInput })
+                body: JSON.stringify({thesis_id: selectedThesisId , date: dateInput, gstNumber: GSTInput, reason: reasonInput})
             })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('cancelThesisSavedInput').innerHTML = `
                         <p>Α/Α ΓΣΤ: ${GSTInput}</p>
-                        <p>Έτος: ${yearInput}</p>
+                        <p>Ημερομηνία: ${dateInput}</p>
                         <p>Λόγος: ${reasonInput}</p>
                     `;
                     document.getElementById('GSTInputBox').value = '';
-                    document.getElementById('yearInputBox').value = '';
+                    document.getElementById('dateInputBox').value = '';
                     document.getElementById('reasonInputBox').value = 'Μετά από αίτηση του/της φοιτητή/φοιτήτριας';
                 })
                 .catch(error => console.error('Error cancelling thesis:', error));
