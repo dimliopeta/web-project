@@ -1055,52 +1055,59 @@ function renderGradeSection(thesisId, container) {
     })
         .then(response => response.json())
         .then(data => {
-            const criteria = [
-                'Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%)',
-                'Χρονικό διάστημα εκπόνησής της (15%)',
-                'Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%)',
-                'Συνολική εικόνα της παρουσίασης (10%)'
-            ];
-
             const grades = data.grades || {};
 
-            criteria.forEach((criterion, index) => {
-                const label = document.createElement('label');
-                label.textContent = criterion;
-                label.classList.add('form-label', 'mt-3');
-                container.appendChild(label);
+            if (!grades.finalized) {
 
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.id = `grade-criterion-${index + 1}`;
-                input.classList.add('form-control');
-                input.placeholder = `Βαθμός (0-10)`;
-                input.value = index === 0 ? grades.grade || '' : grades[`grade${index + 1}`] || '';
-                container.appendChild(input);
-            });
+                const criteria = [
+                    'Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%)',
+                    'Χρονικό διάστημα εκπόνησής της (15%)',
+                    'Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%)',
+                    'Συνολική εικόνα της παρουσίασης (10%)'
+                ];
 
-            // Δημιουργία button container
-            const buttonContainer = document.createElement('div');
-            buttonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4'); // Χρήση Bootstrap classes για στοίχιση
+                criteria.forEach((criterion, index) => {
+                    const label = document.createElement('label');
+                    label.textContent = criterion;
+                    label.classList.add('form-label', 'mt-3');
+                    container.appendChild(label);
 
-            const submitGradeButton = createButton(
-                'submit-grade-button',
-                grades.grade !== undefined ? 'Αλλαγή Καταχώρησης Βαθμού' : 'Καταχώρηση Βαθμού',
-                ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId, container)
-            );
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.id = `grade-criterion-${index + 1}`;
+                    input.classList.add('form-control');
+                    input.placeholder = `Βαθμός (0-10)`;
+                    const gradeKey = index === 0 ? 'grade' : `grade${index + 1}`;
+                    input.value = grades[gradeKey] !== undefined ? grades[gradeKey] : '';
+                    container.appendChild(input);
+                });
 
-            buttonContainer.appendChild(submitGradeButton);
+                // Δημιουργία button container
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4'); // Χρήση Bootstrap classes για στοίχιση
 
-            // Δημιουργία κουμπιού "Οριστική Υποβολή"
-            const finalizeButton = createButton(
-                'finalize-grade-button',
-                'Οριστική Υποβολή',
-                ['btn', 'btn-danger'], () => handleFinalizeButtonClick(thesisId, container)
-            );
+                const submitGradeButton = createButton(
+                    'submit-grade-button',
+                    grades.grade !== undefined ? 'Αλλαγή Καταχώρησης Βαθμού' : 'Καταχώρηση Βαθμού',
+                    ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId, container)
+                );
 
-            buttonContainer.appendChild(finalizeButton);
+                buttonContainer.appendChild(submitGradeButton);
 
-            container.appendChild(buttonContainer);
+                // Δημιουργία κουμπιού "Οριστική Υποβολή"
+                const finalizeButton = createButton(
+                    'finalize-grade-button',
+                    'Οριστική Υποβολή',
+                    ['btn', 'btn-danger'], () => handleFinalizeButtonClick(thesisId, container)
+                );
+
+                buttonContainer.appendChild(finalizeButton);
+
+                container.appendChild(buttonContainer);
+            } else {
+                // Μήνυμα αν η βαθμολογία είναι οριστικοποιημένη
+                container.innerHTML = '<p class="text-danger text-center">Οι βαθμοί έχουν ήδη υποβληθεί οριστικά και δεν μπορούν να τροποποιηθούν.</p>';
+            }
         })
         .catch(error => {
             console.error('Σφάλμα κατά την ανάκτηση βαθμολογίας:', error);
