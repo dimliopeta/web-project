@@ -182,7 +182,6 @@ function showInfoSection(thesis) {
 
     const duration = calculateDuration(thesis.start_date);
 
-
     infoSection.innerHTML = `
                 <div class="card">
                     <div class="card-header text-center">
@@ -210,16 +209,16 @@ function showInfoSection(thesis) {
                     <div class="card-footer text-muted">
                         <span data-field="dashboardStartDate">
                             <span class="ps-5">Ημερομηνία έναρξης:</span>
-                            <span class="pe-4" data-field="thesis_start_date">${thesis.start_date || 'Χωρίς ημερομηνία'}</span>
+                            <span class="pe-4" data-field="thesis_start_date">${thesis.start_date || 'err'}</span>
                         </span>
                         <span data-field="dashboardDuration">
                             <span class="ps-5">Διάρκεια:</span>
-                            <span class="pe-4" data-field="thesis_duration">${duration || 'Άγνωστη Διάρκεια'}</span>
+                            <span class="pe-4" data-field="thesis_duration">${duration || 'err'}</span>
                         </span>
                     </div>
                 </div>
             `;
-    if (thesis.status = "active") {
+    if (thesis.status === "active") {
         managementSection.innerHTML = `
             <div class="card">
                 <div class="card-header text-center">
@@ -243,11 +242,11 @@ function showInfoSection(thesis) {
                             <div class="d-flex flex-column align-items-center w-50" id="cancelThesisArea">
                                 <h5 class="my-1">Ακύρωση ανάθεσης θέματος</h5>
                                 <p id="cancelThesisSavedInput" class="text-danger"></p>
-                                <label class="">Α/Α ΓΣΤ:</label>
+                                <label id="GSTLabel">Α/Α ΓΣΤ:</label>
                                 <input type="text" id="GSTInputBox" class="form-control mt-1 mb-2">
-                                <label class="">Ημερομηνία:</label>
+                                <label id="dateLabel">Ημερομηνία:</label>
                                 <input type="date" id="dateInputBox" class="form-control mt-1 mb-2">
-                                <label class="">Λόγος:</label>
+                                <label id="reasonLabel">Λόγος:</label>
                                 <textarea id="reasonInputBox" class="form-control mb-3 mt-1">Μετά από αίτηση του/της φοιτητή/φοιτήτριας</textarea>
                                 <button class="btn btn-danger w-100" id="cancelThesisButton">
                                     Ακύρωση
@@ -260,7 +259,7 @@ function showInfoSection(thesis) {
                 </div>
             </div>
         `;
-    } else if (thesis.status = "to-be-reviewed") {
+    } else if (thesis.status === "to-be-reviewed") {
         managementSection.innerHTML = `
     <h4>vagin</h4>
     `;
@@ -305,11 +304,13 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
             })
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('cancelThesisSavedInput').innerHTML = `
-                        <p>Α/Α ΓΣΤ: ${GSTInput}</p>
-                        <p>Ημερομηνία: ${dateInput}</p>
-                        <p>Λόγος: ${reasonInput}</p>
-                    `;
+                    
+                    // Insert the saved values next to the labels
+                    document.getElementById('GSTLabel').innerHTML = `Α/Α ΓΣΤ: ${GSTInput}`;
+                    document.getElementById('dateLabel').innerHTML = `Ημερομηνία: ${dateInput}`;
+                    document.getElementById('reasonLabel').innerHTML = `Λόγος: ${reasonInput}`;
+
+                    // Clear the input fields
                     document.getElementById('GSTInputBox').value = '';
                     document.getElementById('dateInputBox').value = '';
                     document.getElementById('reasonInputBox').value = 'Μετά από αίτηση του/της φοιτητή/φοιτήτριας';
@@ -484,6 +485,7 @@ function clearFilters() {
 
 //--------------- Helper function to calculate the thesis duration in months and days --------------- 
 function calculateDuration(startDate) {
+    if(startDate !== null){
     const currentDate = new Date();
     const start = new Date(startDate);
 
@@ -505,6 +507,9 @@ function calculateDuration(startDate) {
         : '';
 
     return [monthText, dayText].filter(Boolean).join(' και ');
+}else {
+    return 'err';
+}
 }
 
 function resetInfoSection() {
