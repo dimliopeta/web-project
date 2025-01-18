@@ -976,15 +976,17 @@ function addToBeReviewedSection(thesis, container) {
     container.appendChild(downloadSection);
 
     // Τμήμα για δημιουργία ανακοίνωσης
-    const announcementSection = document.createElement('section');
+    if (thesis.role === 'Επιβλέπων ') {
+        const announcementSection = document.createElement('section');
 
-    const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3']);
-    announcementSection.appendChild(announcementButton);
+        const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3']);
+        announcementSection.appendChild(announcementButton);
 
-    const announcementHr = document.createElement('hr');
-    announcementSection.appendChild(announcementHr);
+        const announcementHr = document.createElement('hr');
+        announcementSection.appendChild(announcementHr);
 
-    container.appendChild(announcementSection);
+        container.appendChild(announcementSection);
+    }
 
     // Τμήμα για καταχώρηση βαθμού
     const gradeSection = document.createElement('section');
@@ -1036,6 +1038,7 @@ function loadGradeSection(thesisId, container) {
                 }
             } else if (data.success && data.gradingEnabled) {
                 renderGradeSection(thesisId, gradeContent);
+                loadGradeList(thesisId, gradeContent);
             }
             container.appendChild(gradeContent); // Προσθήκη περιεχομένου βαθμολογίας
         })
@@ -1047,7 +1050,7 @@ function loadGradeSection(thesisId, container) {
 
 function renderGradeSection(thesisId, container) {
     container.innerHTML = '';
-    fetch(`/api/get-grades/${thesisId}`, {
+    fetch(`/api/get-professor-grades/${thesisId}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1114,6 +1117,61 @@ function renderGradeSection(thesisId, container) {
         });
 }
 
+function loadGradeList(thesisId, container) {
+    fetch(`/api/get-grades-list/${thesisId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            const gradeListSection = document.createElement('div');
+            gradeListSection.classList.add('grade-list', 'mt-4');
+
+            const gradeListTitle = document.createElement('h5');
+            gradeListTitle.textContent = 'Καταχωρηθέντες Βαθμοί';
+            gradeListSection.appendChild(gradeListTitle);
+
+            const gradeList = document.createElement('div');
+
+            // Ελέγχουμε αν το 'grades' είναι αντικείμενο και έχει δεδομένα
+            if (data.success && data.grades && Object.keys(data.grades).length > 0) {
+                const gradeList = document.createElement('ul');
+                gradeList.classList.add('list-group');
+
+                // Χειριζόμαστε το αντικείμενο ως λίστα με ένα στοιχείο
+                const grade = data.grades;  // Υποθέτουμε ότι το grades είναι ένα αντικείμενο με ένα στοιχείο
+
+                const gradeItem = document.createElement('li');
+                gradeItem.classList.add('list-group-item');
+
+                gradeItem.innerHTML = `
+                    Καθηγητής:<strong> ${grade.professor_name} ${grade.professor_surname} </strong> <br>
+                    Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%): <strong>  ${grade.grade1} </strong><br>
+                    Χρονικό διάστημα εκπόνησής της (15%): <strong>  ${grade.grade2} </strong> <br>
+                    Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%): <strong>  ${grade.grade3} </strong> <br>
+                    Συνολική εικόνα της παρουσίασης (10%): <strong>  ${grade.grade4} </strong><br>
+                    Οριστικοποιημένο: <strong> ${grade.is_finalized ? 'Ναι' : 'Όχι'} </strong>
+                `;
+
+                gradeList.appendChild(gradeItem);
+                gradeListSection.appendChild(gradeList);
+            } else {
+                const noGradesMessage = document.createElement('p');
+                noGradesMessage.textContent = 'Δεν υπάρχουν βαθμολογίες.';
+                gradeListSection.appendChild(noGradesMessage);
+            }
+
+            container.appendChild(gradeListSection);
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την φόρτωση βαθμολογιών:', error);
+            container.innerHTML = '<p>Προέκυψε σφάλμα κατά την φόρτωση των βαθμολογιών.</p>';
+        });
+}
+
+
 function handleSubmitGradeButtonClick(thesisId, container) {
     const grades = [];
 
@@ -1151,6 +1209,7 @@ function handleSubmitGradeButtonClick(thesisId, container) {
             if (data.success) {
                 alert('Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
                 renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+                loadGradeList(thesisId, container);
             } else {
                 alert(`Σφάλμα: ${data.message}`);
             }
@@ -1195,6 +1254,8 @@ function handleFinalizeButtonClick(thesisId, container) {
             if (data.success) {
                 alert('Η οριστική καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
                 renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+                loadGradeList(thesisId, container);
+
             } else {
                 alert(`Σφάλμα: ${data.message}`);
             }
