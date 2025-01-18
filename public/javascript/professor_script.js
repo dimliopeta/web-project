@@ -966,7 +966,33 @@ function addToBeReviewedSection(thesis, container) {
     // Τμήμα για λήψη αρχείου διπλωματικής
     const downloadSection = document.createElement('section');
 
-    const downloadButton = createButton('download-thesis-button', 'Λήψη Αρχείου Διπλωματικής', ['btn', 'btn-primary', 'mb-3']);
+    const downloadButton = createButton('download-thesis-button', 'Λήψη Αρχείου Διπλωματικής', ['btn', 'btn-primary', 'mb-3'], () => {
+        const thesisId = thesis.thesis_id;  // ID της διπλωματικής
+
+        fetch(`/api/fetch_attachments?thesis_id=${thesisId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+        })
+            .then(response => response.json()) // Επιστρέφει το αρχείο ως blob
+            .then(data => {
+                if (data.success) {
+                    const file = data.attachments.find(attachment => attachment.type === 'file');
+                    if (file) {
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = file.file_path.replace('./', '/');
+                        downloadLink.textContent = file.file_path.split('/').pop();
+                        downloadLink.download = link.textContent; //Press to download
+                    }
+                } else {
+                    alert('Παρουσιάστηκε πρόβλημα στην ανεύρεση των αρχείων');
+                }
+            })
+            .catch(error => {
+                console.error('Download failed:', error);
+            });
+    });
 
     downloadSection.appendChild(downloadButton);
 
@@ -976,7 +1002,7 @@ function addToBeReviewedSection(thesis, container) {
     container.appendChild(downloadSection);
 
     // Τμήμα για δημιουργία ανακοίνωσης
-    if (thesis.role === 'Επιβλέπων ') {
+    if (thesis.role === 'Επιβλέπων') {
         const announcementSection = document.createElement('section');
 
         const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3']);
