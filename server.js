@@ -280,10 +280,7 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
 });
 //------------------ API for Thesis AP submit as Administrator --------------
 app.post('/api/AP_save', (req, res) => {
-    console.log(req.body);
-    const { apNumber, thesis_id } = req.body;
-    console.log(apNumber);
-    console.log(thesis_id);
+    const { thesis_id, apNumber } = req.body;
 
     if (!thesis_id || !apNumber) {
         return res.status(400).json({ success: false, message: 'Thesis ID and AP number are required.' });
@@ -306,46 +303,6 @@ app.post('/api/AP_save', (req, res) => {
         }
 
         res.json({ success: true, message: 'AP number saved successfully.' });
-    });
-});
-//----------------- API for cancelling a sent Invitation as student -----------------
-app.post('/api/invitation_cancel', authenticateJWT, (req, res) => {
-    const student_id = req.user.userId;
-
-    const query = `
-    UPDATE Invitations I
-    JOIN Theses T ON I.thesis_id = T.thesis_id
-    JOIN Students S ON T.student_id = S.id
-    SET I.status = 'cancelled'
-    WHERE S.id = ? 
-      AND I.status = 'pending'
-      AND T.status NOT IN ('completed', 'cancelled', 'active', 'unassigned', 'to-be-reviewed');
-`;
-
-    db.query(query, [student_id], (err, results) => {
-        if (err) {
-            console.error('Error executing combined query:', err);
-            return res.status(500).json({ success: false, message: 'Server error while canceling invitations.' });
-        }
-
-
-
-        // Fetch the thesis_id
-        const thesisQuery = `
-          SELECT thesis_id
-          FROM Theses T
-          WHERE T.student_id = ?;
-      `;
-
-        db.query(thesisQuery, [student_id], (err, thesisResults) => {
-            if (err) {
-                console.error('Error fetching thesis_id:', err);
-                return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
-            }
-            const thesis_id = thesisResults[0]?.thesis_id;
-            console.log('Cancelled Invitations from DB:', results);
-            res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
-        });
     });
 });
 
@@ -1144,6 +1101,47 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
         res.json({ success: true, invitations: results });
     });
 });
+//----------------- API for cancelling a sent Invitation as student -----------------
+app.post('/api/invitation_cancel', authenticateJWT, (req, res) => {
+    const student_id = req.user.userId;
+
+    const query = `
+    UPDATE Invitations I
+    JOIN Theses T ON I.thesis_id = T.thesis_id
+    JOIN Students S ON T.student_id = S.id
+    SET I.status = 'cancelled'
+    WHERE S.id = ? 
+      AND I.status = 'pending'
+      AND T.status NOT IN ('completed', 'cancelled', 'active', 'unassigned', 'to-be-reviewed');
+`;
+
+    db.query(query, [student_id], (err, results) => {
+        if (err) {
+            console.error('Error executing combined query:', err);
+            return res.status(500).json({ success: false, message: 'Server error while canceling invitations.' });
+        }
+
+
+
+        // Fetch the thesis_id
+        const thesisQuery = `
+          SELECT thesis_id
+          FROM Theses T
+          WHERE T.student_id = ?;
+      `;
+
+        db.query(thesisQuery, [student_id], (err, thesisResults) => {
+            if (err) {
+                console.error('Error fetching thesis_id:', err);
+                return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
+            }
+            const thesis_id = thesisResults[0]?.thesis_id;
+            console.log('Cancelled Invitations from DB:', results);
+            res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
+        });
+    });
+});
+
 
 //----------------- API for Invitation Acceptance/Rejection -----------------
 app.post('/api/invitations/action', authenticateJWT, (req, res) => {
@@ -1691,6 +1689,7 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     });
 });
 
+
 app.post('/api/enable-grading', authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
     if (!thesisId) {
@@ -1713,6 +1712,7 @@ app.post('/api/enable-grading', authenticateJWT, (req, res) => {
 
     });
 });
+
 
 app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
@@ -1749,7 +1749,6 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, gradingEnabled: grading_enabled, role });
     });
 });
-
 
 
 app.post('/api/submit-grades', authenticateJWT, (req, res) => {
@@ -1811,8 +1810,46 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req,res) => {
     });
 });
 
+app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req,res) => {
+    const { thesisId} = req.params;
+    const professorId = req.user.userId; 
 
-app.get('/api/get-grades/:thesisId', authenticateJWT, (req, res) => {
+    if (!thesisId || !professorId) {
+        return res.status(400).json({ success: false, message: 'Ανεπαρκή δεδομένα.' });
+    }
+
+    const query =`SELECT 
+        p.name AS professor_name,
+        p.surname AS professor_surname,
+        g.grade AS grade1,
+        g.grade2 AS grade2,
+        g.grade3 AS grade3,
+        g.grade4 AS grade4,
+        g.finalized AS is_finalized
+    FROM 
+        Grades g
+    JOIN 
+        Professors p ON g.professor_id = p.id
+    WHERE 
+            g.thesis_id = ?;
+    `;
+
+    db.query(query, [thesisId, professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση βαθμολογίας:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την ανάκτηση βαθμολογίας.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({ success: true, grades: null });
+        }
+
+        const grades = results[0];
+        res.status(200).json({ success: true, grades });
+    });
+} );
+
+app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
     const { thesisId } = req.params;
     const professorId = req.user.userId; // Από το JWT
 
@@ -1840,6 +1877,8 @@ app.get('/api/get-grades/:thesisId', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, grades });
     });
 });
+
+
 
 
 
