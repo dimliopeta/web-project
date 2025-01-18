@@ -219,8 +219,8 @@ function showInfoSection(thesis) {
                     </div>
                 </div>
             `;
-            if(thesis.status = "active"){     
-            managementSection.innerHTML = `
+    if (thesis.status = "active") {
+        managementSection.innerHTML = `
             <div class="card">
                 <div class="card-header text-center">
                     <h3 class="text-dark">Διαχείρηση Διπλωματικής</h3>
@@ -260,12 +260,12 @@ function showInfoSection(thesis) {
                 </div>
             </div>
         `;
-    } else if (thesis.status = "to-be-reviewed"){
-    managementSection.innerHTML = `
+    } else if (thesis.status = "to-be-reviewed") {
+        managementSection.innerHTML = `
     <h4>vagin</h4>
     `;
     }
-        
+
 }
 
 //--------------- Event Listener for Submit AP Button (Delegated since the APButton wasnt loaded in the DOM in time) ---------------
@@ -276,7 +276,7 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
             fetch('/api/AP_save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ apNumber: APInput, thesisId: selectedThesisId })
+                body: JSON.stringify({ apNumber: APInput, thesis_id: selectedThesisId })
             })
                 .then(response => response.json())
                 .then(data => {

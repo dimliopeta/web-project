@@ -280,7 +280,10 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
 });
 //------------------ API for Thesis AP submit as Administrator --------------
 app.post('/api/AP_save', (req, res) => {
-    const { thesis_id, apNumber } = req.body;
+    console.log(req.body);
+    const { apNumber, thesis_id } = req.body;
+    console.log(apNumber);
+    console.log(thesis_id);
 
     if (!thesis_id || !apNumber) {
         return res.status(400).json({ success: false, message: 'Thesis ID and AP number are required.' });
