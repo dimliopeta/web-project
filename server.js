@@ -254,7 +254,7 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
     });
 });
 
-//------------------API for loading Assigned Theses--------------
+//------------------ API for loading Assigned Theses --------------
 app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
     const professor_id = req.user.userId;
     const query = `
@@ -276,6 +276,33 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
         res.status(200).json({ success: true, theses: results });
+    });
+});
+//------------------ API for Thesis AP submit as Administrator --------------
+app.post('/api/AP_save', (req, res) => {
+    const { thesis_id, apNumber } = req.body;
+
+    if (!thesis_id || !apNumber) {
+        return res.status(400).json({ success: false, message: 'Thesis ID and AP number are required.' });
+    }
+
+    const query = `
+        UPDATE Logs 
+        SET gen_assembly_session = ? 
+        WHERE thesis_id = ? AND new_state = 'assigned'
+    `;
+
+    db.query(query, [apNumber, thesis_id], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'No matching log found for the given thesis ID with state "assigned".' });
+        }
+
+        res.json({ success: true, message: 'AP number saved successfully.' });
     });
 });
 

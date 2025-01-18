@@ -134,15 +134,16 @@ function loadAllTheses() {
 
 
 
-
-//--------------- Function for Showing Info of a Thesis ---------------
+let selectedThesisId = null;
+//--------------- Function for Showing Info of clicked Thesis ---------------
 function showInfoSection(thesis) {
 
     const infoSection = document.getElementById('administratorThesesInfoSection');
     const managementSection = document.getElementById('administratorThesesManagementSection');
+    const thesesCompartment = document.getElementById('theses-compartment');
     infoSection.style.display = 'block';
     managementSection.style.display = 'block';
-    const thesesCompartment = document.getElementById('theses-compartment');
+    selectedThesisId = thesis.thesis_id;
 
     thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
     thesesCompartment.classList.add('col-md-6');
@@ -267,54 +268,59 @@ function showInfoSection(thesis) {
         
 }
 
-//--------------- Event Listener for Submit AP Button ---------------
-const submitAPButton = document.getElementById('submitAPButton');
-submitAPButton.addEventListener('click', () => {
-    const APInputBox = document.getElementById('APInput').value.trim();
-    if (APInput) {
-
-        fetch('/api/AP_save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ apNumber: APInput })
-        })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('APSavedData').innerText = `Αριθμός Πρωτοκόλλου: ${APInput}`;
-                document.getElementById('APInput').value = '';
+//--------------- Event Listener for Submit AP Button (Delegated since the APButton wasnt loaded in the DOM in time) ---------------
+administratorThesesManagementSection.addEventListener('click', (event) => {
+    if (event.target && event.target.id === 'submitAPButton') {
+        const APInput = document.getElementById('APInputBox').value.trim();
+        if (APInput && selectedThesisId) {
+            fetch('/api/AP_save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ apNumber: APInput, thesisId: selectedThesisId })
             })
-            .catch(error => console.error('Error saving AP:', error));
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('APSavedData').innerText = `Αριθμός Πρωτοκόλλου: ${APInput}`;
+                    document.getElementById('APInputBox').value = '';
+                })
+                .catch(error => console.error('Error saving AP:', error));
+        } else {
+            console.error('AP Number or Thesis ID is missing.');
+        }
     }
 });
 
 //--------------- Event Listener for Cancel Thesis Button ---------------
-const cancelThesisButton = document.getElementById('cancelThesisButton');
-cancelThesisButton.addEventListener('click', () => {
-    const GSTInput = document.getElementById('GSTInputBox').value.trim();
-    const yearInput = document.getElementById('yearInputBox').value.trim();
-    const reasonInput = document.getElementById('reasonInputBox').value.trim();
+administratorThesesManagementSection.addEventListener('click', (event) => {
+    if (event.target && event.target.id === 'cancelThesisButton') {
+        const GSTInput = document.getElementById('GSTInputBox').value.trim();
+        const yearInput = document.getElementById('yearInputBox').value.trim();
+        const reasonInput = document.getElementById('reasonInputBox').value.trim();
 
-    if (GSTInput && yearInput && reasonInput) {
-
-        fetch('/api/Thesis_cancel_admin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ gstNumber: GSTInput, year: yearInput, reason: reasonInput })
-        })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('cancelThesisSavedInput').innerHTML = `
-                    <p>Α/Α ΓΣΤ: ${GSTInput}</p>
-                    <p>Έτος: ${yearInput}</p>
-                    <p>Λόγος: ${reasonInput}</p>
-                `;
-                document.getElementById('GSTInput').value = '';
-                document.getElementById('yearInput').value = '';
-                document.getElementById('reasonInput').value = 'Μετά από αίτηση του/της φοιτητή/φοιτήτριας';
+        if (GSTInput && yearInput && reasonInput) {
+            fetch('/api/Thesis_cancel_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gstNumber: GSTInput, year: yearInput, reason: reasonInput })
             })
-            .catch(error => console.error('Error cancelling thesis:', error));
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cancelThesisSavedInput').innerHTML = `
+                        <p>Α/Α ΓΣΤ: ${GSTInput}</p>
+                        <p>Έτος: ${yearInput}</p>
+                        <p>Λόγος: ${reasonInput}</p>
+                    `;
+                    document.getElementById('GSTInputBox').value = '';
+                    document.getElementById('yearInputBox').value = '';
+                    document.getElementById('reasonInputBox').value = 'Μετά από αίτηση του/της φοιτητή/φοιτήτριας';
+                })
+                .catch(error => console.error('Error cancelling thesis:', error));
+        } else {
+            console.error('Missing input fields for canceling thesis.');
+        }
     }
 });
+
 
 //--------------- Event Listener for Filter dropdown ---------------
 document.querySelectorAll('.dropdown-item').forEach(item => {
