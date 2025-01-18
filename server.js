@@ -1783,7 +1783,7 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
 });
 
 
-app.post('api/finalize-submitted-grades', authenticateJWT, (req,res) => {
+app.post('/api/finalize-submitted-grades', authenticateJWT, (req,res) => {
     const { thesisId, grades } = req.body;
     const professorId = req.user.userId; 
 
@@ -1817,6 +1817,10 @@ app.get('/api/get-grades/:thesisId', authenticateJWT, (req, res) => {
     const { thesisId } = req.params;
     const professorId = req.user.userId; // Από το JWT
 
+    if (!thesisId || !professorId) {
+        return res.status(400).json({ success: false, message: 'Ανεπαρκή δεδομένα.' });
+    }
+    
     const query = `
         SELECT grade, grade2, grade3, grade4, finalized
         FROM Grades
@@ -1830,12 +1834,14 @@ app.get('/api/get-grades/:thesisId', authenticateJWT, (req, res) => {
         }
 
         if (results.length === 0) {
-            return res.status(404).json({ success: true, grades: null });
+            return res.status(200).json({ success: true, grades: null });
         }
 
-        res.status(200).json({ success: true, grades: results[0] });
+        const grades = results[0];
+        res.status(200).json({ success: true, grades });
     });
 });
+
 
 
 //----------------- API to Assign Thesis to Students -----------------
