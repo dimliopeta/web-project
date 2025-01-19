@@ -251,9 +251,45 @@ function showInfoSection(thesis) {
             </div>
         `;
     } else if (thesis.status === "to-be-reviewed") {
+        const nimertisLink = thesis.nimertis_link;
+        const allGradesFinalized = thesis.all_grades_finalized;
+
+        const nimertisBadge = nimertisLink ? '<span class="badge bg-success">Υπάρχει</span>' : '<span class="badge bg-danger">Δεν υπάρχει</span>';
+        const gradesBadge = allGradesFinalized ? '<span class="badge bg-success">Υπάρχει</span>' : '<span class="badge bg-danger">Δεν υπάρχει</span>';
+        
+        const completionButton = (nimertisLink && allGradesFinalized) 
+            ? '<button class="btn btn-success mt-3">Ολοκλήρωση</button>' 
+            : '';
+        
         managementSection.innerHTML = `
-    <h4>vagin</h4>
-    `;
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="text-dark">Διαχείρηση Διπλωματικής</h3>
+                </div>
+                <div class="card-body">
+                    <section>
+                        <h4 class="text-center mb-3">Ολοκλήρωση Διπλωματικής</h4>
+                        <div class="row">
+                            <!-- Submit AP Area -->
+                            <div class="d-flex flex-column align-items-center w-50" id="APSection">
+                                <h5 class="my-1 text-center">Βαθμολόγηση;</h5>
+                                ${gradesBadge}
+                            </div>
+                            
+                            <!-- Cancel Thesis Area -->
+                            <div class="d-flex flex-column align-items-center w-50" id="cancelThesisArea">
+                                <h5 class="my-1 text-center">Σύνδεσμος στο Νημερτή;</h5>
+                                ${nimertisBadge}
+                            </div>
+                        </div>
+                    </section>
+                    ${completionButton}
+                </div>
+                <div class="card-footer text-muted">
+                </div>
+            </div>
+        `;
+
     }
 
 }

@@ -387,7 +387,11 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
                 C.member2_id AS committee_member2_id,
                 CM2.name AS committee_member2_name,
                 CM2.surname AS committee_member2_surname,
-                CM2.email AS committee_member2_email
+                CM2.email AS committee_member2_email,
+                CASE 
+                    WHEN COUNT(G.grade_id) = 3 AND SUM(G.finalized) = 3 THEN TRUE
+                    ELSE FALSE
+                END AS all_grades_finalized
             FROM 
                 Theses T
             LEFT JOIN 
@@ -400,8 +404,15 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
                 Professors CM1 ON C.member1_id = CM1.id
             LEFT JOIN 
                 Professors CM2 ON C.member2_id = CM2.id
-            WHERE (T.status = 'active' OR T.status = 'to-be-reviewed');
-
+            LEFT JOIN 
+                Grades G ON T.thesis_id = G.thesis_id
+            WHERE 
+                T.status IN ('active', 'to-be-reviewed')
+            GROUP BY  
+                T.thesis_id, T.title, T.summary, T.status, T.pdf_path, T.start_date, T.nimertis_link, 
+                S.id, S.name, S.surname, S.email, S.student_number, 
+                P.id, P.name, P.surname, P.email, 
+                C.member1_id, CM1.name, CM1.surname, CM1.email, C.member2_id, CM2.name, CM2.surname, CM2.email;
 `;
 
 
