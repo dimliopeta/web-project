@@ -1188,13 +1188,13 @@
       "summary": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks is very important so we have to do it.",
       "status": "active",
       "pdf_path": "",
-      "start_date": "2025-1-12",
+      "start_date": "2025-01-12",
       "exam_date": null
     },
     {
       "thesis_id": "2",
       "professor_id": "1",
-      "student_id": "22",
+      "student_id": "2",
       "title": "The Role of Normal Software Behavior in Ensuring System Reliability and Security",
       "summary": "The Role of Normal Software Behavior in Ensuring System Reliability and Security is enormous so we have to study it.",
       "status": "assigned",
@@ -1204,8 +1204,8 @@
     },
     {
       "thesis_id": "3",
-      "professor_id": "1",
-      "student_id": "22",
+      "professor_id": "2",
+      "student_id": "3",
       "title": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design",
       "summary": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design is can be great so we have to do it.",
       "status": "active",
@@ -1216,7 +1216,7 @@
     {
       "thesis_id": "4",
       "professor_id": "1",
-      "student_id": "",
+      "student_id": "4",
       "title": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms",
       "summary": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms can really help with computers so we have to understand it.",
       "status": "to-be-reviewed",
@@ -1227,7 +1227,7 @@
     {
       "thesis_id": "5",
       "professor_id": "1",
-      "student_id": "",
+      "student_id": "5",
       "title": "Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science",
       "summary": "Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science is a great idea, so it's time we investigated.",
       "status": "completed",
@@ -1255,18 +1255,33 @@
   ],
   "committees": [
     {
-      "thesis_id": "2"
+      "thesis_id": "2",
+      "member1_id": "1",
+      "member2_id": "2"
     },
     {
-      "thesis_id": "1"
-    }
-  ],
+      "thesis_id": "1",
+      "member1_id": "4",
+      "member2_id": "5"
+    },
+    {
+      "thesis_id": "4",
+      "member1_id": "7",
+      "member2_id": "8"
+    }],
   "examinations": [
     {
       "thesis_id": "1",
       "date": null,
       "type_of_exam": "in-person",
       "location": "E4",
+      "exam_report": null
+    },
+    {
+      "thesis_id": 4,
+      "date": "2025-02-10",
+      "type_of_exam": "in-person",
+      "location": "Room 101, Engineering Building",
       "exam_report": null
     }
   ],
