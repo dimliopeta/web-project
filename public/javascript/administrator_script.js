@@ -18,16 +18,10 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
         if (targetSection) {
             targetSection.style.display = 'block';
 
-            if (targetId === 'theses-section') {
-                loadUnassignedTheses();
-            } else if (targetId === 'administratorFullThesisList') {
+            if (targetId === 'administratorDashboardSection') {
                 loadAllTheses();
-            } else if (targetId === 'assign') {
-                // loadUnassignedTheses();
-                //loadAssignedTheses();
-            } else if (targetId === 'invitations') {
-                //loadInvitations();
-                //loadInvitationHistory();
+            } else if (targetId === 'administratorInsertDataSection') {
+                insertData();
             }
         }
         // Hide the Info and Management section on navbar tab click  
@@ -293,6 +287,10 @@ function showInfoSection(thesis) {
         `;
 
     }
+
+}
+function insertData() {
+
 
 }
 
@@ -587,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 //-----------Load the Dashboard Tab as the Homepage-------------
 window.addEventListener('DOMContentLoaded', () => {
-    const defaultTab = document.querySelector('a[href="#administratorFullThesisList"]');
+    const defaultTab = document.querySelector('a[href="#administratorDashboardSection"]');
     if (defaultTab) {
         defaultTab.click();
     }
