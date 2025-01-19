@@ -18,16 +18,10 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
         if (targetSection) {
             targetSection.style.display = 'block';
 
-            if (targetId === 'theses-section') {
-                loadUnassignedTheses();
-            } else if (targetId === 'administratorFullThesisList') {
+            if (targetId === 'administratorDashboardSection') {
                 loadAllTheses();
-            } else if (targetId === 'assign') {
-                // loadUnassignedTheses();
-                //loadAssignedTheses();
-            } else if (targetId === 'invitations') {
-                //loadInvitations();
-                //loadInvitationHistory();
+            } else if (targetId === 'administratorInsertDataSection') {
+                insertData();
             }
         }
         // Hide the Info and Management section on navbar tab click  
@@ -251,10 +245,52 @@ function showInfoSection(thesis) {
             </div>
         `;
     } else if (thesis.status === "to-be-reviewed") {
+        const nimertisLink = thesis.nimertis_link;
+        const allGradesFinalized = thesis.all_grades_finalized;
+
+
+        const nimertisBadge = nimertisLink ? '<span class="m-2 badge bg-success" style="font-size: 14px;">Υπάρχει</span>' : '<span class="m-2 badge bg-danger" style="font-size: 14px;">Δεν υπάρχει</span>';
+        const gradesBadge = allGradesFinalized ? '<span class="m-2 badge bg-success" style="font-size: 14px;">Υπάρχει</span>' : '<span class="m-2 badge bg-danger" style="font-size: 14px;">Δεν υπάρχει</span>';
+
+        const completionButton = (nimertisLink && allGradesFinalized) 
+            ? '<button class="btn btn-success mt-3" style="display: block; margin: 0 auto;" id="completeThesisButton">Περάτωση</button>' 
+            : '';
+        
         managementSection.innerHTML = `
-    <h4>vagin</h4>
-    `;
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="text-dark">Διαχείρηση Διπλωματικής</h3>
+                </div>
+                <div class="card-body">
+                    <section>
+                        <h4 class="text-center mb-3">Περάτωση Διπλωματικής</h4>
+                        <p id="thesisCompletedData" class="text-center text-success"></p>
+                        <div class="row">
+                            <!-- Submit AP Area -->
+                            <div class="d-flex flex-column align-items-center w-50" id="APSection">
+                                <h5 class="my-1 text-center">Βαθμολόγηση;</h5>
+                                ${gradesBadge}
+                            </div>
+                            
+                            <!-- Cancel Thesis Area -->
+                            <div class="d-flex flex-column align-items-center w-50" id="cancelThesisArea">
+                                <h5 class="my-1 text-center">Σύνδεσμος στο Νημερτή;</h5>
+                                ${nimertisBadge}
+                            </div>
+                        </div>
+                    </section>
+                    ${completionButton}
+                </div>
+                <div class="card-footer text-muted">
+                </div>
+            </div>
+        `;
+
     }
+
+}
+function insertData() {
+
 
 }
 
@@ -309,6 +345,27 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
                 .catch(error => console.error('Error cancelling thesis:', error));
         } else {
             console.error('Missing input fields for canceling thesis.');
+        }
+    }
+});
+//--------------- Event Listener for Complete Thesis Button (Delegated since the Complete Thesis Button wasnt loaded in the DOM in time) ---------------
+administratorThesesManagementSection.addEventListener('click', (event) => {
+    if (event.target && event.target.id === 'completeThesisButton') {
+
+        if (selectedThesisId) {
+            fetch('/api/thesis_complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ thesis_id: selectedThesisId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('thesisCompletedData').innerText = `Η διπλωματική ολοκληρώθηκε!`;
+                    loadAllTheses();
+                })
+                .catch(error => console.error('Error setting thesis as completed:', error));
+        } else {
+            console.error('Thesis ID is missing.');
         }
     }
 });
@@ -528,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 //-----------Load the Dashboard Tab as the Homepage-------------
 window.addEventListener('DOMContentLoaded', () => {
-    const defaultTab = document.querySelector('a[href="#administratorFullThesisList"]');
+    const defaultTab = document.querySelector('a[href="#administratorDashboardSection"]');
     if (defaultTab) {
         defaultTab.click();
     }
