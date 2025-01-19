@@ -30,20 +30,11 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 //loadInvitationHistory();
             }
         }
-
-        // Απόκρυψη του παραθύρου επεξεργασίας
-        const editSection = document.getElementById('edit-section');
-        if (editSection && !editSection.classList.contains('d-none')) {
-            editSection.classList.add('d-none'); // Απόκρυψη
-        }
-
-        resetInfoSection();
-
-        const themesCompartment = document.getElementById('themes-compartment');
-        if (themesCompartment) {
-            themesCompartment.classList.remove('col-md-6');
-            themesCompartment.classList.add('col-lg-8', 'mx-auto'); // Επαναφορά
-        }
+        // Hide the Info and Management section on navbar tab click  
+        const infoSection = document.getElementById('administratorThesesInfoSection');
+        const managementSection = document.getElementById('administratorThesesManagementSection');
+        if (infoSection) infoSection.style.display = 'none';
+        if (managementSection) managementSection.style.display = 'none';
 
 
         document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
@@ -300,11 +291,11 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
             fetch('/api/Thesis_cancel_admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({thesis_id: selectedThesisId , date: dateInput, gstNumber: GSTInput, reason: reasonInput})
+                body: JSON.stringify({ thesis_id: selectedThesisId, date: dateInput, gstNumber: GSTInput, reason: reasonInput })
             })
                 .then(response => response.json())
                 .then(data => {
-                    
+
                     // Insert the saved values next to the labels
                     document.getElementById('GSTLabel').innerHTML = `Α/Α ΓΣΤ: ${GSTInput}`;
                     document.getElementById('dateLabel').innerHTML = `Ημερομηνία: ${dateInput}`;
@@ -485,50 +476,50 @@ function clearFilters() {
 
 //--------------- Helper function to calculate the thesis duration in months and days --------------- 
 function calculateDuration(startDate) {
-    if(startDate !== null){
-    const currentDate = new Date();
-    const start = new Date(startDate);
+    if (startDate !== null) {
+        const currentDate = new Date();
+        const start = new Date(startDate);
 
-    let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
-    let days = currentDate.getDate() - start.getDate();
+        let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
+        let days = currentDate.getDate() - start.getDate();
 
-    // Adjust for negative days (crossed into a new month)
-    if (days < 0) {
-        totalMonths--; // Subtract one month
-        const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
-        days += previousMonthDays;
+        // Adjust for negative days (crossed into a new month)
+        if (days < 0) {
+            totalMonths--; // Subtract one month
+            const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
+            days += previousMonthDays;
+        }
+        const monthText = totalMonths > 0
+            ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+            : '';
+
+        const dayText = days > 0
+            ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+            : '';
+
+        return [monthText, dayText].filter(Boolean).join(' και ');
+    } else {
+        return 'err';
     }
-    const monthText = totalMonths > 0
-        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
-        : '';
-
-    const dayText = days > 0
-        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
-        : '';
-
-    return [monthText, dayText].filter(Boolean).join(' και ');
-}else {
-    return 'err';
 }
-}
-
+//--------------- Helper function reset and hide the Info Section --------------- 
 function resetInfoSection() {
     const infoSection = document.getElementById('administratorThesesInfoSection');
-    const thesesCompartment = document.getElementById('theses-compartment');
 
     if (infoSection) {
         infoSection.classList.add('d-none');
         infoSection.innerHTML = '';
     }
+}
+//--------------- Helper function reset and hide the Management Section --------------- 
+function resetManagementSection() {
+    const managementSection = document.getElementById('administratorThesesManagementSection');
 
-    if (thesesCompartment) {
-        thesesCompartment.classList.remove('col-md-6');
-        thesesCompartment.classList.add('col-lg-8', 'mx-auto');
+    if (managementSection) {
+        managementSection.classList.add('d-none');
+        managementSection.innerHTML = '';
     }
 }
-
-
-
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
 
 document.addEventListener('DOMContentLoaded', function () {
