@@ -307,6 +307,29 @@ app.post('/api/AP_save', (req, res) => {
         res.json({ success: true, message: 'AP number saved successfully.' });
     });
 });
+//------------------ API for Thesis Completion for Admin --------------
+app.post('/api/thesis_complete', (req, res) => {
+    const { thesis_id } = req.body;
+
+    if (!thesis_id) {
+        return res.status(400).json({ success: false, message: 'Thesis ID and AP number are required.' });
+    }
+
+    const query = `
+        UPDATE Theses 
+        SET status = 'completed' 
+        WHERE thesis_id = ?
+    `;
+
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+
+        res.json({ success: true, message: 'Thesis set as completed successfully.' });
+    });
+});
 //----------------- API to Cancel Thesis for administrators -----------------
 app.post('/api/Thesis_cancel_admin', (req, res) => {
     const { thesis_id, date, gstNumber, reason } = req.body;

@@ -254,11 +254,12 @@ function showInfoSection(thesis) {
         const nimertisLink = thesis.nimertis_link;
         const allGradesFinalized = thesis.all_grades_finalized;
 
-        const nimertisBadge = nimertisLink ? '<span class="badge bg-success">Υπάρχει</span>' : '<span class="badge bg-danger">Δεν υπάρχει</span>';
-        const gradesBadge = allGradesFinalized ? '<span class="badge bg-success">Υπάρχει</span>' : '<span class="badge bg-danger">Δεν υπάρχει</span>';
-        
+
+        const nimertisBadge = nimertisLink ? '<span class="m-2 badge bg-success" style="font-size: 14px;">Υπάρχει</span>' : '<span class="m-2 badge bg-danger" style="font-size: 14px;">Δεν υπάρχει</span>';
+        const gradesBadge = allGradesFinalized ? '<span class="m-2 badge bg-success" style="font-size: 14px;">Υπάρχει</span>' : '<span class="m-2 badge bg-danger" style="font-size: 14px;">Δεν υπάρχει</span>';
+
         const completionButton = (nimertisLink && allGradesFinalized) 
-            ? '<button class="btn btn-success mt-3">Ολοκλήρωση</button>' 
+            ? '<button class="btn btn-success mt-3" style="display: block; margin: 0 auto;" id="completeThesisButton">Περάτωση</button>' 
             : '';
         
         managementSection.innerHTML = `
@@ -268,7 +269,8 @@ function showInfoSection(thesis) {
                 </div>
                 <div class="card-body">
                     <section>
-                        <h4 class="text-center mb-3">Ολοκλήρωση Διπλωματικής</h4>
+                        <h4 class="text-center mb-3">Περάτωση Διπλωματικής</h4>
+                        <p id="thesisCompletedData" class="text-center text-success"></p>
                         <div class="row">
                             <!-- Submit AP Area -->
                             <div class="d-flex flex-column align-items-center w-50" id="APSection">
@@ -345,6 +347,27 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
                 .catch(error => console.error('Error cancelling thesis:', error));
         } else {
             console.error('Missing input fields for canceling thesis.');
+        }
+    }
+});
+//--------------- Event Listener for Complete Thesis Button (Delegated since the Complete Thesis Button wasnt loaded in the DOM in time) ---------------
+administratorThesesManagementSection.addEventListener('click', (event) => {
+    if (event.target && event.target.id === 'completeThesisButton') {
+
+        if (selectedThesisId) {
+            fetch('/api/thesis_complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ thesis_id: selectedThesisId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('thesisCompletedData').innerText = `Η διπλωματική ολοκληρώθηκε!`;
+                    loadAllTheses();
+                })
+                .catch(error => console.error('Error setting thesis as completed:', error));
+        } else {
+            console.error('Thesis ID is missing.');
         }
     }
 });
