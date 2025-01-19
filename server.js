@@ -311,7 +311,7 @@ app.post('/api/AP_save', (req, res) => {
 app.post('/api/Thesis_cancel_admin', (req, res) => {
     const { thesis_id, date, gstNumber, reason } = req.body;
 
-    if (!thesis_id || !date || !gstNumber || !reason ) {
+    if (!thesis_id || !date || !gstNumber || !reason) {
         return res.status(400).json({ error: 'Missing thesis id, gstNumber, date, or reason' });
     }
     db.beginTransaction((transactionError) => {
@@ -1514,6 +1514,8 @@ app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
     });
 });
 
+
+
 app.post('/api/thesis/to-be-reviewed', authenticateJWT, (req, res) => {
     const { thesis_id, changeNumber, changeDate } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
 
@@ -1744,6 +1746,42 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     });
 });
 
+app.post('/api/check-exam', authenticateJWT, (req, res) => {
+    const { thesisId } = req.body;
+
+    // Έλεγχος αν υπάρχει thesisId στο request body
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesisId' });
+    }
+
+    const query = ` 
+        SELECT announced 
+        FROM EXAMINATIONS 
+        WHERE thesis_id = ?;
+    `;
+
+    db.query(query, [thesisId], (err, results) => {
+        if (err) {
+            console.error('Error fetching exam details:', err);
+            return res.status(500).json({ success: false, message: 'Server error' });
+        }
+
+        // Αν δεν υπάρχουν αποτελέσματα για το συγκεκριμένο thesisId
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'No exam found for the given thesisId' });
+        }
+
+        // Αν βρέθηκε το πεδίο announced
+        const { announced } = results[0];
+
+        return res.status(200).json({
+            success: true,
+            announced: announced,
+        });
+    });
+});
+
+
 app.post('/api/add-announcement', (req, res) => {
     const thesisId = req.body.thesisId;
 
@@ -1785,6 +1823,24 @@ app.post('/api/add-announcement', (req, res) => {
 
         const announcementDetails = results[0];
         console.log('Thesis details:', announcementDetails);  // Καταγραφή των αποτελεσμάτων της query
+
+        // Έλεγχος αν όλα τα πεδία είναι γεμάτα
+        const fieldsAreComplete = announcementDetails.thesis_id && 
+                                  announcementDetails.title && 
+                                  announcementDetails.name && 
+                                  announcementDetails.surname && 
+                                  announcementDetails.professor_name && 
+                                  announcementDetails.professor_surname && 
+                                  announcementDetails.examination_date && 
+                                  announcementDetails.type_of_exam && 
+                                  announcementDetails.examination_location;
+
+        if (!fieldsAreComplete) {
+            return res.status(400).json({
+                success: false,
+                message: 'Δεν έχουν συμπληρωθεί οι λεπτομέρειες εξέτασης της εν λόγω διπλωματικής.'
+            });
+        }
 
         // Δημιουργία JSON αρχείου
         const filePath = path.join(__dirname, `announcements.json`);
@@ -1895,7 +1951,7 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
 
 
 app.post('/api/submit-grades', authenticateJWT, (req, res) => {
-    const { thesisId, grades } = req.body;
+    const { thesisId, grades, comments } = req.body;
     const professorId = req.user.userId; // Από το JWT, υποθέτοντας ότι το ID του καθηγητή είναι στο token
 
     if (!thesisId || !grades || grades.length !== 4) {
@@ -1903,17 +1959,18 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, finalized)
-        VALUES (?, ?, ?, ?, ?, ?, FALSE)
+        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, comments, finalized)
+        VALUES (?, ?, ?, ?, ?, ?, ?, FALSE)
         ON DUPLICATE KEY UPDATE 
         grade = VALUES(grade), 
         grade2 = VALUES(grade2), 
         grade3 = VALUES(grade3), 
         grade4 = VALUES(grade4),
+        comments =VALUES(comments),
         finalized = FALSE;
     `;
 
-    db.query(query, [thesisId, professorId, ...grades], (err, result) => {
+    db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
         if (err) {
             console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
@@ -1924,26 +1981,27 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
 });
 
 
-app.post('/api/finalize-submitted-grades', authenticateJWT, (req,res) => {
-    const { thesisId, grades } = req.body;
-    const professorId = req.user.userId; 
+app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
+    const { thesisId, grades, comments } = req.body;
+    const professorId = req.user.userId;
 
     if (!thesisId || !grades || grades.length !== 4) {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
     }
 
     const query = `
-        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, finalized)
-        VALUES (?, ?, ?, ?, ?, ?, TRUE)
+        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, comments, finalized)
+        VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
         ON DUPLICATE KEY UPDATE 
         grade = VALUES(grade), 
         grade2 = VALUES(grade2), 
         grade3 = VALUES(grade3), 
         grade4 = VALUES(grade4),
+        comments = VALUES(comments),
         finalized = TRUE;
     `;
 
-    db.query(query, [thesisId, professorId, ...grades], (err, result) => {
+    db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
         if (err) {
             console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
@@ -1953,21 +2011,21 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req,res) => {
     });
 });
 
-app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req,res) => {
-    const { thesisId} = req.params;
-    const professorId = req.user.userId; 
+app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
+    const { thesisId } = req.params;
 
-    if (!thesisId || !professorId) {
+    if (!thesisId) {
         return res.status(400).json({ success: false, message: 'Ανεπαρκή δεδομένα.' });
     }
 
-    const query =`SELECT 
+    const query = `SELECT 
         p.name AS professor_name,
         p.surname AS professor_surname,
         g.grade AS grade1,
         g.grade2 AS grade2,
         g.grade3 AS grade3,
         g.grade4 AS grade4,
+        g.comments AS comments,
         g.finalized AS is_finalized
     FROM 
         Grades g
@@ -1977,20 +2035,21 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req,res) => {
             g.thesis_id = ?;
     `;
 
-    db.query(query, [thesisId, professorId], (err, results) => {
+    // Στο API
+    db.query(query, [thesisId], (err, results) => {
         if (err) {
             console.error('Σφάλμα κατά την ανάκτηση βαθμολογίας:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα κατά την ανάκτηση βαθμολογίας.' });
         }
 
         if (results.length === 0) {
-            return res.status(200).json({ success: true, grades: null });
+            return res.status(200).json({ success: true, grades: [] });  // Αν δεν υπάρχουν βαθμοί, στέλνουμε άδειο πίνακα
         }
 
-        const grades = results[0];
-        res.status(200).json({ success: true, grades });
+        res.status(200).json({ success: true, grades: results });  // Επιστρέφουμε όλους τους βαθμούς
     });
-} );
+
+});
 
 app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
     const { thesisId } = req.params;
@@ -1999,9 +2058,9 @@ app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
     if (!thesisId || !professorId) {
         return res.status(400).json({ success: false, message: 'Ανεπαρκή δεδομένα.' });
     }
-    
+
     const query = `
-        SELECT grade, grade2, grade3, grade4, finalized
+        SELECT grade, grade2, grade3, grade4, comments, finalized
         FROM Grades
         WHERE thesis_id = ? AND professor_id = ?
     `;

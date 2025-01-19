@@ -1005,7 +1005,7 @@ function addToBeReviewedSection(thesis, container) {
     if (thesis.role === 'Επιβλέπων') {
         const announcementSection = document.createElement('section');
 
-        const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesis.thesis_id) );
+        const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesis.thesis_id));
         announcementSection.appendChild(announcementButton);
 
         const announcementHr = document.createElement('hr');
@@ -1050,6 +1050,7 @@ function addToAnnouncements(thesisId) {
 
             // Ελέγχουμε αν υπάρχουν τα announcementDetails
             if (data.success && data.data) {
+
                 // Αφαίρεση του κουμπιού μετά την επιτυχή δημιουργία ανακοίνωσης
                 if (announcementButton) {
                     announcementButton.remove();
@@ -1058,7 +1059,7 @@ function addToAnnouncements(thesisId) {
                 // Δημιουργούμε ένα στοιχείο HTML (π.χ. div) για την ανακοίνωση
                 const announcementElement = document.createElement('div');
                 announcementElement.classList.add('announcement');
-                
+
                 // Αποθηκεύουμε τα δεδομένα ως dataset στο στοιχείο HTML
                 announcementElement.dataset.thesisId = data.data.thesis_id;
                 announcementElement.dataset.title = data.data.title;
@@ -1073,7 +1074,7 @@ function addToAnnouncements(thesisId) {
                 // Προσθήκη του στοιχείου ανακοίνωσης στην σελίδα (π.χ. μέσα σε κάποιο container)
                 document.querySelector('#announcement-container').appendChild(announcementElement);
             } else {
-                console.error('Announcement details are missing or malformed');
+                alert(data.message);            
             }
         })
         .catch((error) => {
@@ -1225,6 +1226,19 @@ function renderGradeSection(thesisId, container) {
                     container.appendChild(input);
                 });
 
+                const commentsLabel = document.createElement('label');
+                commentsLabel.textContent = 'Σχόλια:';
+                commentsLabel.classList.add('form-label', 'mt-3');
+                container.appendChild(commentsLabel);
+
+                const commentsTextarea = document.createElement('textarea');
+                commentsTextarea.id = 'grade-comments';
+                commentsTextarea.classList.add('form-control');
+                commentsTextarea.rows = 4; // Προαιρετικά για το ύψος
+                commentsTextarea.placeholder = 'Προσθέστε σχόλια...';
+                commentsTextarea.value = (data.grades && data.grades.comments) ? data.grades.comments : '';
+                container.appendChild(commentsTextarea);
+
                 // Δημιουργία button container
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4'); // Χρήση Bootstrap classes για στοίχιση
@@ -1266,6 +1280,8 @@ function loadGradeList(thesisId, container) {
     })
         .then(response => response.json())
         .then(data => {
+            console.log('API Response:', data);  // Ελέγχουμε τα δεδομένα που επιστρέφει το API
+
             const gradeListSection = document.createElement('div');
             gradeListSection.classList.add('grade-list', 'mt-4');
 
@@ -1273,30 +1289,29 @@ function loadGradeList(thesisId, container) {
             gradeListTitle.textContent = 'Καταχωρηθέντες Βαθμοί';
             gradeListSection.appendChild(gradeListTitle);
 
-            const gradeList = document.createElement('div');
+            const gradeListContainer = document.createElement('ul');
+            gradeListContainer.classList.add('list-group');
 
-            // Ελέγχουμε αν το 'grades' είναι αντικείμενο και έχει δεδομένα
-            if (data.success && data.grades && Object.keys(data.grades).length > 0) {
-                const gradeList = document.createElement('ul');
-                gradeList.classList.add('list-group');
+            // Ελέγχουμε αν το 'grades' είναι πίνακας και έχει δεδομένα
+            if (data.success && Array.isArray(data.grades) && data.grades.length > 0) {
+                // Διατρέχουμε τον πίνακα και δημιουργούμε ένα στοιχείο για κάθε βαθμό
+                data.grades.forEach(grade => {
+                    const gradeItem = document.createElement('li');
+                    gradeItem.classList.add('list-group-item');
 
-                // Χειριζόμαστε το αντικείμενο ως λίστα με ένα στοιχείο
-                const grade = data.grades;  // Υποθέτουμε ότι το grades είναι ένα αντικείμενο με ένα στοιχείο
+                    gradeItem.innerHTML = `
+                        Καθηγητής:<strong> ${grade.professor_name} ${grade.professor_surname} </strong> <br>
+                        Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%): <strong>  ${grade.grade1} </strong><br>
+                        Χρονικό διάστημα εκπόνησής της (15%): <strong>  ${grade.grade2} </strong> <br>
+                        Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%): <strong>  ${grade.grade3} </strong> <br>
+                        Συνολική εικόνα της παρουσίασης (10%): <strong>  ${grade.grade4} </strong><br>
+                        Σχόλια:<strong> ${grade.comments || 'Δεν υπάρχουν σχόλια'} </strong><br>
+                        Οριστικοποιημένο: <strong> ${grade.is_finalized ? 'Ναι' : 'Όχι'} </strong>
+                    `;
 
-                const gradeItem = document.createElement('li');
-                gradeItem.classList.add('list-group-item');
-
-                gradeItem.innerHTML = `
-                    Καθηγητής:<strong> ${grade.professor_name} ${grade.professor_surname} </strong> <br>
-                    Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%): <strong>  ${grade.grade1} </strong><br>
-                    Χρονικό διάστημα εκπόνησής της (15%): <strong>  ${grade.grade2} </strong> <br>
-                    Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%): <strong>  ${grade.grade3} </strong> <br>
-                    Συνολική εικόνα της παρουσίασης (10%): <strong>  ${grade.grade4} </strong><br>
-                    Οριστικοποιημένο: <strong> ${grade.is_finalized ? 'Ναι' : 'Όχι'} </strong>
-                `;
-
-                gradeList.appendChild(gradeItem);
-                gradeListSection.appendChild(gradeList);
+                    gradeListContainer.appendChild(gradeItem);
+                });
+                gradeListSection.appendChild(gradeListContainer);
             } else {
                 const noGradesMessage = document.createElement('p');
                 noGradesMessage.textContent = 'Δεν υπάρχουν βαθμολογίες.';
@@ -1310,6 +1325,8 @@ function loadGradeList(thesisId, container) {
             container.innerHTML = '<p>Προέκυψε σφάλμα κατά την φόρτωση των βαθμολογιών.</p>';
         });
 }
+
+
 
 
 function handleSubmitGradeButtonClick(thesisId, container) {
@@ -1377,6 +1394,8 @@ function handleFinalizeButtonClick(thesisId, container) {
         grades.push(value);
     }
 
+    const comments = document.getElementById('grade-comments')?.value || '';
+
     // Αποστολή δεδομένων στο API για οριστική υποβολή
     fetch('/api/finalize-submitted-grades', {
         method: 'POST',
@@ -1386,7 +1405,8 @@ function handleFinalizeButtonClick(thesisId, container) {
         },
         body: JSON.stringify({
             thesisId,
-            grades
+            grades,
+            comments
         })
     })
         .then(response => response.json())

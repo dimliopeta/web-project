@@ -107,6 +107,7 @@ CREATE TABLE `Examinations`(
     `type_of_exam` ENUM('online','in-person') DEFAULT 'in-person',
     `location` VARCHAR(200) NULL,
     `exam_report` VARCHAR(200) NULL,
+    `announced` BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 
