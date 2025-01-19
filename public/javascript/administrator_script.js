@@ -30,20 +30,11 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 //loadInvitationHistory();
             }
         }
-
-        // Απόκρυψη του παραθύρου επεξεργασίας
-        const editSection = document.getElementById('edit-section');
-        if (editSection && !editSection.classList.contains('d-none')) {
-            editSection.classList.add('d-none'); // Απόκρυψη
-        }
-
-        resetInfoSection();
-
-        const themesCompartment = document.getElementById('themes-compartment');
-        if (themesCompartment) {
-            themesCompartment.classList.remove('col-md-6');
-            themesCompartment.classList.add('col-lg-8', 'mx-auto'); // Επαναφορά
-        }
+        // Hide the Info and Management section on navbar tab click  
+        const infoSection = document.getElementById('administratorThesesInfoSection');
+        const managementSection = document.getElementById('administratorThesesManagementSection');
+        if (infoSection) infoSection.style.display = 'none';
+        if (managementSection) managementSection.style.display = 'none';
 
 
         document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
@@ -182,7 +173,6 @@ function showInfoSection(thesis) {
 
     const duration = calculateDuration(thesis.start_date);
 
-
     infoSection.innerHTML = `
                 <div class="card">
                     <div class="card-header text-center">
@@ -210,16 +200,16 @@ function showInfoSection(thesis) {
                     <div class="card-footer text-muted">
                         <span data-field="dashboardStartDate">
                             <span class="ps-5">Ημερομηνία έναρξης:</span>
-                            <span class="pe-4" data-field="thesis_start_date">${thesis.start_date || 'Χωρίς ημερομηνία'}</span>
+                            <span class="pe-4" data-field="thesis_start_date">${thesis.start_date || 'err'}</span>
                         </span>
                         <span data-field="dashboardDuration">
                             <span class="ps-5">Διάρκεια:</span>
-                            <span class="pe-4" data-field="thesis_duration">${duration || 'Άγνωστη Διάρκεια'}</span>
+                            <span class="pe-4" data-field="thesis_duration">${duration || 'err'}</span>
                         </span>
                     </div>
                 </div>
             `;
-    if (thesis.status = "active") {
+    if (thesis.status === "active") {
         managementSection.innerHTML = `
             <div class="card">
                 <div class="card-header text-center">
@@ -243,11 +233,11 @@ function showInfoSection(thesis) {
                             <div class="d-flex flex-column align-items-center w-50" id="cancelThesisArea">
                                 <h5 class="my-1">Ακύρωση ανάθεσης θέματος</h5>
                                 <p id="cancelThesisSavedInput" class="text-danger"></p>
-                                <label class="">Α/Α ΓΣΤ:</label>
+                                <label id="GSTLabel">Α/Α ΓΣΤ:</label>
                                 <input type="text" id="GSTInputBox" class="form-control mt-1 mb-2">
-                                <label class="">Ημερομηνία:</label>
+                                <label id="dateLabel">Ημερομηνία:</label>
                                 <input type="date" id="dateInputBox" class="form-control mt-1 mb-2">
-                                <label class="">Λόγος:</label>
+                                <label id="reasonLabel">Λόγος:</label>
                                 <textarea id="reasonInputBox" class="form-control mb-3 mt-1">Μετά από αίτηση του/της φοιτητή/φοιτήτριας</textarea>
                                 <button class="btn btn-danger w-100" id="cancelThesisButton">
                                     Ακύρωση
@@ -260,7 +250,7 @@ function showInfoSection(thesis) {
                 </div>
             </div>
         `;
-    } else if (thesis.status = "to-be-reviewed") {
+    } else if (thesis.status === "to-be-reviewed") {
         managementSection.innerHTML = `
     <h4>vagin</h4>
     `;
@@ -301,15 +291,17 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
             fetch('/api/Thesis_cancel_admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({thesis_id: selectedThesisId , date: dateInput, gstNumber: GSTInput, reason: reasonInput})
+                body: JSON.stringify({ thesis_id: selectedThesisId, date: dateInput, gstNumber: GSTInput, reason: reasonInput })
             })
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('cancelThesisSavedInput').innerHTML = `
-                        <p>Α/Α ΓΣΤ: ${GSTInput}</p>
-                        <p>Ημερομηνία: ${dateInput}</p>
-                        <p>Λόγος: ${reasonInput}</p>
-                    `;
+
+                    // Insert the saved values next to the labels
+                    document.getElementById('GSTLabel').innerHTML = `Α/Α ΓΣΤ: ${GSTInput}`;
+                    document.getElementById('dateLabel').innerHTML = `Ημερομηνία: ${dateInput}`;
+                    document.getElementById('reasonLabel').innerHTML = `Λόγος: ${reasonInput}`;
+
+                    // Clear the input fields
                     document.getElementById('GSTInputBox').value = '';
                     document.getElementById('dateInputBox').value = '';
                     document.getElementById('reasonInputBox').value = 'Μετά από αίτηση του/της φοιτητή/φοιτήτριας';
@@ -484,46 +476,50 @@ function clearFilters() {
 
 //--------------- Helper function to calculate the thesis duration in months and days --------------- 
 function calculateDuration(startDate) {
-    const currentDate = new Date();
-    const start = new Date(startDate);
+    if (startDate !== null) {
+        const currentDate = new Date();
+        const start = new Date(startDate);
 
-    let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
-    let days = currentDate.getDate() - start.getDate();
+        let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
+        let days = currentDate.getDate() - start.getDate();
 
-    // Adjust for negative days (crossed into a new month)
-    if (days < 0) {
-        totalMonths--; // Subtract one month
-        const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
-        days += previousMonthDays;
+        // Adjust for negative days (crossed into a new month)
+        if (days < 0) {
+            totalMonths--; // Subtract one month
+            const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
+            days += previousMonthDays;
+        }
+        const monthText = totalMonths > 0
+            ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+            : '';
+
+        const dayText = days > 0
+            ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+            : '';
+
+        return [monthText, dayText].filter(Boolean).join(' και ');
+    } else {
+        return 'err';
     }
-    const monthText = totalMonths > 0
-        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
-        : '';
-
-    const dayText = days > 0
-        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
-        : '';
-
-    return [monthText, dayText].filter(Boolean).join(' και ');
 }
-
+//--------------- Helper function reset and hide the Info Section --------------- 
 function resetInfoSection() {
     const infoSection = document.getElementById('administratorThesesInfoSection');
-    const thesesCompartment = document.getElementById('theses-compartment');
 
     if (infoSection) {
         infoSection.classList.add('d-none');
         infoSection.innerHTML = '';
     }
+}
+//--------------- Helper function reset and hide the Management Section --------------- 
+function resetManagementSection() {
+    const managementSection = document.getElementById('administratorThesesManagementSection');
 
-    if (thesesCompartment) {
-        thesesCompartment.classList.remove('col-md-6');
-        thesesCompartment.classList.add('col-lg-8', 'mx-auto');
+    if (managementSection) {
+        managementSection.classList.add('d-none');
+        managementSection.innerHTML = '';
     }
 }
-
-
-
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
 
 document.addEventListener('DOMContentLoaded', function () {
