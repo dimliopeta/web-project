@@ -157,14 +157,18 @@ function insertData() {
             }
             if (results.length === 0) {
                 const insertQuery = `
-                    INSERT INTO committees (thesis_id)
-                    VALUES (?);
+                    INSERT INTO committees (thesis_id, member1_id, member2_id)
+                    VALUES (?, ?, ?);
                 `;
-                db.query(insertQuery,[committee.thesis_id], (insertErr) =>{
+                db.query(insertQuery, [
+                    committee.thesis_id,
+                    committee.member1_id,  // Καθηγητής 1
+                    committee.member2_id   // Καθηγητής 2
+                ], (insertErr) => {
                     if (insertErr) {
-                        console.error('Error inserting thesis:', insertErr);
+                        console.error('Error inserting committee:', insertErr);
                     } else {
-                        console.log(`Committee ${committee.thesis_id} added successfully.`);
+                        console.log(`Committee for Thesis ${committee.thesis_id} added successfully.`);
                     }
                 });
             }

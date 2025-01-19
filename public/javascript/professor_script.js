@@ -1005,7 +1005,7 @@ function addToBeReviewedSection(thesis, container) {
     if (thesis.role === 'Επιβλέπων') {
         const announcementSection = document.createElement('section');
 
-        const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3']);
+        const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesis.thesis_id) );
         announcementSection.appendChild(announcementButton);
 
         const announcementHr = document.createElement('hr');
@@ -1030,6 +1030,120 @@ function addToBeReviewedSection(thesis, container) {
 
     container.appendChild(gradeSection);
 }
+
+function addToAnnouncements(thesisId) {
+    const announcementButton = document.querySelector('#create-announcement-button');
+
+    fetch('/api/add-announcement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thesisId: thesisId }) // Sending thesisId, not thesis.id
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Failed to add announcement');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log('Received data:', data); // Προσθήκη log για να δούμε τα δεδομένα
+
+            // Ελέγχουμε αν υπάρχουν τα announcementDetails
+            if (data.success && data.data) {
+                // Αφαίρεση του κουμπιού μετά την επιτυχή δημιουργία ανακοίνωσης
+                if (announcementButton) {
+                    announcementButton.remove();
+                }
+
+                // Δημιουργούμε ένα στοιχείο HTML (π.χ. div) για την ανακοίνωση
+                const announcementElement = document.createElement('div');
+                announcementElement.classList.add('announcement');
+                
+                // Αποθηκεύουμε τα δεδομένα ως dataset στο στοιχείο HTML
+                announcementElement.dataset.thesisId = data.data.thesis_id;
+                announcementElement.dataset.title = data.data.title;
+                announcementElement.dataset.name = data.data.name;
+                announcementElement.dataset.surname = data.data.surname;
+                announcementElement.dataset.examinationDate = data.data.examination_date;
+                announcementElement.dataset.examinationLocation = data.data.examination_location;
+
+                // Εμφάνιση Modal με τα δεδομένα της ανακοίνωσης
+                showModal(data.message, announcementElement);
+
+                // Προσθήκη του στοιχείου ανακοίνωσης στην σελίδα (π.χ. μέσα σε κάποιο container)
+                document.querySelector('#announcement-container').appendChild(announcementElement);
+            } else {
+                console.error('Announcement details are missing or malformed');
+            }
+        })
+        .catch((error) => {
+            console.error('Error creating announcement:', error);
+        });
+}
+
+function showModal(message, announcementElement) {
+    // Ανάκτηση των δεδομένων από το dataset του στοιχείου HTML
+    const thesisId = announcementElement.dataset.thesisId;
+    const title = announcementElement.dataset.title;
+    const name = announcementElement.dataset.name;
+    const surname = announcementElement.dataset.surname;
+    const examinationDate = announcementElement.dataset.examinationDate;
+    const examinationLocation = announcementElement.dataset.examinationLocation;
+
+    // Δημιουργία στοιχείων του Modal
+    const modalOverlay = document.createElement('div');
+    Object.assign(modalOverlay.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        background: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: '1000'
+    });
+
+    const modalContent = document.createElement('div');
+    Object.assign(modalContent.style, {
+        background: 'white',
+        padding: '20px',
+        borderRadius: '5px',
+        width: '400px',
+        textAlign: 'center'
+    });
+
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'Κλείσιμο';
+    Object.assign(closeButton.style, {
+        marginTop: '20px',
+        padding: '10px 20px',
+        background: '#6c757d',
+        color: 'white',
+        border: 'none',
+        borderRadius: '3px',
+        cursor: 'pointer'
+    });
+    closeButton.addEventListener('click', () => modalOverlay.remove());
+
+    // Περιεχόμενο της ανακοίνωσης
+    modalContent.innerHTML = `
+        <h2 style="margin-top: 0;">ΑΝΑΚΟΙΝΩΣΗ</h2>
+        <p><strong>Τίτλος:</strong> ${title}</p>
+        <p><strong>Ημερομηνία:</strong> ${new Date(examinationDate).toLocaleDateString()}</p>
+        <p><strong>Τοποθεσία:</strong> ${examinationLocation}</p>
+        <p><strong>Φοιτητής:</strong> ${name} ${surname}</p>
+        <p><strong>Επιβλέπων:</strong> ${name} ${surname}</p>
+        <p>${message}</p>
+    `;
+
+    // Προσθήκη του κουμπιού στο modal
+    modalContent.appendChild(closeButton);
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
+}
+
 
 function loadGradeSection(thesisId, container) {
     // Δημιουργία wrapper για το περιεχόμενο βαθμολογίας

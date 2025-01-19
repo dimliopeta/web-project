@@ -1,6 +1,8 @@
 const express = require('express');
 const db = require('./config');
 const path = require('path');
+const fs = require('fs');
+
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -1750,6 +1752,94 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
                 });
             });
         });
+    });
+});
+
+app.post('/api/add-announcement', (req, res) => {
+    const thesisId = req.body.thesisId;
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesis_id parameter' });
+    }
+
+    const query = `
+        SELECT 
+        t.thesis_id,
+        t.title,
+        s.name,
+        s.surname,
+        p.name,
+        p.surname,
+        e.date AS examination_date,
+        e.type_of_exam,
+        e.location AS examination_location
+    FROM Theses t
+    LEFT JOIN Examinations e
+        ON t.thesis_id = e.thesis_id
+    LEFT JOIN Students s
+        ON t.student_id = s.id
+    LEFT JOIN Professors p 
+        ON t.professor_id = p.id
+    WHERE t.thesis_id = ?;
+    `;
+
+    console.log('Query:', query);  // Καταγραφή της query για έλεγχο
+    db.query(query, [thesisId], (err, results) => {
+        if (err) {
+            console.error('Error fetching thesis details:', err);
+            return res.status(500).json({ success: false, message: 'Server error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'No data found for the given thesis_id' });
+        }
+
+        const announcementDetails = results[0];
+        console.log('Thesis details:', announcementDetails);  // Καταγραφή των αποτελεσμάτων της query
+
+        // Δημιουργία JSON αρχείου
+        const filePath = path.join(__dirname, `announcements.json`);
+        fs.writeFile(filePath, JSON.stringify(announcementDetails, null, 2), (err) => {
+            if (err) {
+                console.error('Error writing to file:', err);
+                return res.status(500).json({ success: false, message: 'Failed to save data to file' });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: `Thesis details saved to file: announcements.json`,
+                data: announcementDetails,
+                file_path: filePath,
+            });
+        });
+    });
+});
+
+
+
+app.get('/api/announcements', (req, res) => {
+    const { startDate, endDate } = req.query; // Παράμετροι για εύρος χρόνου
+
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ success: false, message: 'Failed to read data.' });
+        }
+
+        let announcements = JSON.parse(data);
+
+        // Φιλτράρισμα κατά εύρος ημερομηνιών αν δοθούν
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            announcements = announcements.filter(announcement => {
+                const examDate = new Date(announcement.examination.date);
+                return examDate >= start && examDate <= end;
+            });
+        }
+
+        res.json(announcements);
     });
 });
 
