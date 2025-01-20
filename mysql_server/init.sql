@@ -51,6 +51,7 @@ CREATE TABLE `Theses`(
 	`start_date` DATE NULL DEFAULT NULL,
 	`nimertis_link` VARCHAR(200) NULL,
     `grading_enabled` BOOLEAN DEFAULT FALSE,
+    `final_grade` DECIMAL(5,2) NULL,
     FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`),
     FOREIGN KEY (`student_id`) REFERENCES `Students`(`id`)
 

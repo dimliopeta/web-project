@@ -237,7 +237,7 @@ const StorageAdminData = multer.diskStorage({
         cb(null, 'files/admin_data_json');
     },
     filename: (req, file, cb) => {
-        const timeStamp = new Date().toISOString().replace(/[-T:.]/g, ''); 
+        const timeStamp = new Date().toISOString().replace(/[-T:.]/g, '');
         const originalName = file.originalname.replace(/\s+/g, '_');
         const fileName = `${timeStamp}-${originalName}`;
         cb(null, fileName);
@@ -365,7 +365,7 @@ app.post('/uploadAdminData', uploadAdminData.single('file'), (req, res) => {
     }
 
     const filePath = path.join(__dirname, 'files/admin_data_json', req.file.filename);
-    
+
     try {
         insertData(filePath);
         res.status(200).send({ message: 'Admin data successfully inserted.' });
@@ -428,6 +428,7 @@ app.post('/api/Thesis_cancel_admin', (req, res) => {
         });
     });
 });
+
 //----------------- API to fetch All Theses Data for administrators -----------------
 app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
 
@@ -1051,6 +1052,9 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
     });
 });
 
+app.get('/api/get-final-grades', authenticateJWT, (req, res) => {
+
+});
 
 //----------------- API to Create Invitation for Thesis Committee -----------------
 app.post('/api/invitation_create', authenticateJWT, (req, res) => {
@@ -2151,15 +2155,59 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
         finalized = TRUE;
     `;
 
-    db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
+    const countQuery = `
+        SELECT COUNT(*) AS finalized_count
+        FROM Grades
+        WHERE thesis_id = ? AND finalized = TRUE;
+    `;
+
+    db.beginTransaction((err) => {
         if (err) {
-            console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
+            console.error('Σφάλμα κατά την εκκίνηση της συναλλαγής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
-        res.status(200).json({ success: true, message: 'Η οριστική καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!' });
+        // Εκτέλεση του query για την καταχώρηση ή ενημέρωση βαθμών
+        db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
+            if (err) {
+                console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
+                });
+            }
+
+            // Εκτέλεση του query για την καταμέτρηση των finalized βαθμών
+            db.query(countQuery, [thesisId], (countErr, countRes) => {
+                if (countErr) {
+                    console.error('Σφάλμα κατά την καταμέτρηση των οριστικών βαθμών:', countErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                    });
+                }
+
+                const finalizedCount = countRes[0].finalized_count;
+
+                // Επικύρωση της συναλλαγής
+                db.commit((commitErr) => {
+                    if (commitErr) {
+                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                        });
+                    }
+
+                    // Επιστροφή επιτυχούς απάντησης μαζί με το count
+                    res.status(200).json({
+                        success: true,
+                        message: 'Οι βαθμοί καταχωρήθηκαν επιτυχώς.',
+                        finalizedCount: finalizedCount
+                    });
+                });
+            });
+        });
     });
 });
+
 
 //-----------------API for loading the grades of the other professors----
 app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
