@@ -1867,72 +1867,94 @@ app.post('/api/add-announcement', (req, res) => {
         return res.status(400).json({ success: false, message: 'Missing thesis_id parameter' });
     }
 
-    const query = `
+    const selectQuery = `
         SELECT 
-        t.thesis_id,
-        t.title,
-        s.name,
-        s.surname,
-        p.name,
-        p.surname,
-        e.date AS examination_date,
-        e.type_of_exam,
-        e.location AS examination_location
-    FROM Theses t
-    LEFT JOIN Examinations e
-        ON t.thesis_id = e.thesis_id
-    LEFT JOIN Students s
-        ON t.student_id = s.id
-    LEFT JOIN Professors p 
-        ON t.professor_id = p.id
-    WHERE t.thesis_id = ?;
+            t.thesis_id,
+            t.title,
+            s.name AS student_name,
+            s.surname AS student_surname,
+            p.name AS professor_name,
+            p.surname AS professor_surname,
+            e.date AS examination_date,
+            e.type_of_exam,
+            e.location AS examination_location
+        FROM Theses t
+        LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
+        LEFT JOIN Students s ON t.student_id = s.id
+        LEFT JOIN Professors p ON t.professor_id = p.id
+        WHERE t.thesis_id = ?;
     `;
 
-    console.log('Query:', query);  // Καταγραφή της query για έλεγχο
-    db.query(query, [thesisId], (err, results) => {
+    const updateQuery = `
+        UPDATE EXAMINATIONS 
+        SET announced = TRUE 
+        WHERE thesis_id = ?;
+    `;
+
+    db.beginTransaction((err) => {
         if (err) {
-            console.error('Error fetching thesis details:', err);
-            return res.status(500).json({ success: false, message: 'Server error' });
+            console.error('Error starting transaction:', err);
+            return res.status(500).json({ success: false, message: 'Server error starting transaction.' });
         }
 
-        if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'No data found for the given thesis_id' });
-        }
-
-        const announcementDetails = results[0];
-        console.log('Thesis details:', announcementDetails);  // Καταγραφή των αποτελεσμάτων της query
-
-        // Έλεγχος αν όλα τα πεδία είναι γεμάτα
-        const fieldsAreComplete = announcementDetails.thesis_id && 
-                                  announcementDetails.title && 
-                                  announcementDetails.name && 
-                                  announcementDetails.surname && 
-                                  announcementDetails.professor_name && 
-                                  announcementDetails.professor_surname && 
-                                  announcementDetails.examination_date && 
-                                  announcementDetails.type_of_exam && 
-                                  announcementDetails.examination_location;
-
-        if (!fieldsAreComplete) {
-            return res.status(400).json({
-                success: false,
-                message: 'Δεν έχουν συμπληρωθεί οι λεπτομέρειες εξέτασης της εν λόγω διπλωματικής.'
-            });
-        }
-
-        // Δημιουργία JSON αρχείου
-        const filePath = path.join(__dirname, `announcements.json`);
-        fs.writeFile(filePath, JSON.stringify(announcementDetails, null, 2), (err) => {
-            if (err) {
-                console.error('Error writing to file:', err);
-                return res.status(500).json({ success: false, message: 'Failed to save data to file' });
+        db.query(selectQuery, [thesisId], (selectErr, results) => {
+            if (selectErr) {
+                console.error('Error fetching thesis details:', selectErr);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Error fetching thesis details.' });
+                });
             }
 
-            res.status(200).json({
-                success: true,
-                message: `Thesis details saved to file: announcements.json`,
-                data: announcementDetails,
-                file_path: filePath,
+            if (results.length === 0) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'No presentation details provided by the student.'
+                });
+            }
+
+            const announcementDetails = results[0];
+            const fieldsAreComplete = Object.values(announcementDetails).every(field => field !== null);
+
+            if (!fieldsAreComplete) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'Some presentation details are missing.'
+                });
+            }
+
+            db.query(updateQuery, [thesisId], (updateErr) => {
+                if (updateErr) {
+                    console.error('Error updating thesis:', updateErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Error updating thesis.' });
+                    });
+                }
+
+                const filePath = path.join(__dirname, 'announcements.json');
+                fs.writeFile(filePath, JSON.stringify(announcementDetails, null, 2), (fileErr) => {
+                    if (fileErr) {
+                        console.error('Error writing to file:', fileErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Failed to save data to file.' });
+                        });
+                    }
+
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            console.error('Error committing transaction:', commitErr);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Error committing transaction.' });
+                            });
+                        }
+
+                        res.status(200).json({
+                            success: true,
+                            message: 'Thesis details saved to file: announcements.json',
+                            data: announcementDetails,
+                            file_path: filePath,
+                        });
+                    });
+                });
             });
         });
     });
