@@ -433,58 +433,64 @@ app.post('/api/Thesis_cancel_admin', (req, res) => {
 app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
 
     const query = `
-            SELECT 
-                T.thesis_id,
-                T.title,
-                T.summary,
-                T.status,
-                T.pdf_path,
-                DATE_FORMAT(T.start_date, '%Y-%m-%d') AS start_date,
-                T.nimertis_link,
-                S.id AS student_id,
-                S.name AS student_name,
-                S.surname AS student_surname,
-                S.email AS student_email,
-                S.student_number,
-                P.id AS professor_id,
-                P.name AS professor_name,
-                P.surname AS professor_surname,
-                P.email AS professor_email,
-                C.member1_id AS committee_member1_id,
-                CM1.name AS committee_member1_name,
-                CM1.surname AS committee_member1_surname,
-                CM1.email AS committee_member1_email,
-                C.member2_id AS committee_member2_id,
-                CM2.name AS committee_member2_name,
-                CM2.surname AS committee_member2_surname,
-                CM2.email AS committee_member2_email,
-                CASE 
-                    WHEN COUNT(G.grade_id) = 3 AND SUM(G.finalized) = 3 THEN TRUE
-                    ELSE FALSE
-                END AS all_grades_finalized
-            FROM 
-                Theses T
-            LEFT JOIN 
-                Students S ON T.student_id = S.id
-            LEFT JOIN 
-                Professors P ON T.professor_id = P.id
-            LEFT JOIN 
-                Committees C ON T.thesis_id = C.thesis_id
-            LEFT JOIN 
-                Professors CM1 ON C.member1_id = CM1.id
-            LEFT JOIN 
-                Professors CM2 ON C.member2_id = CM2.id
-            LEFT JOIN 
-                Grades G ON T.thesis_id = G.thesis_id
-            WHERE 
-                T.status IN ('active', 'to-be-reviewed')
-            GROUP BY  
-                T.thesis_id, T.title, T.summary, T.status, T.pdf_path, T.start_date, T.nimertis_link, 
-                S.id, S.name, S.surname, S.email, S.student_number, 
-                P.id, P.name, P.surname, P.email, 
-                C.member1_id, CM1.name, CM1.surname, CM1.email, C.member2_id, CM2.name, CM2.surname, CM2.email;
+    SELECT 
+        T.thesis_id,
+        T.title,
+        T.summary,
+        T.status,
+        T.pdf_path,
+        DATE_FORMAT(T.start_date, '%Y-%m-%d') AS start_date,
+        T.nimertis_link,
+        S.id AS student_id,
+        S.name AS student_name,
+        S.surname AS student_surname,
+        S.email AS student_email,
+        S.student_number,
+        P.id AS professor_id,
+        P.name AS professor_name,
+        P.surname AS professor_surname,
+        P.email AS professor_email,
+        C.member1_id AS committee_member1_id,
+        CM1.name AS committee_member1_name,
+        CM1.surname AS committee_member1_surname,
+        CM1.email AS committee_member1_email,
+        C.member2_id AS committee_member2_id,
+        CM2.name AS committee_member2_name,
+        CM2.surname AS committee_member2_surname,
+        CM2.email AS committee_member2_email,
+        G.professor_id AS grade_professor_id,
+        G.grade1,
+        G.grade2,
+        G.grade3,
+        G.grade4,
+        CASE 
+            WHEN COUNT(G.grade_id) = 3 AND SUM(G.finalized) = 3 THEN TRUE
+            ELSE FALSE
+        END AS all_grades_finalized
+    FROM 
+        Theses T
+    LEFT JOIN 
+        Students S ON T.student_id = S.id
+    LEFT JOIN 
+        Professors P ON T.professor_id = P.id
+    LEFT JOIN 
+        Committees C ON T.thesis_id = C.thesis_id
+    LEFT JOIN 
+        Professors CM1 ON C.member1_id = CM1.id
+    LEFT JOIN 
+        Professors CM2 ON C.member2_id = CM2.id
+    LEFT JOIN 
+        Grades G ON T.thesis_id = G.thesis_id
+    WHERE 
+        T.status IN ('active', 'to-be-reviewed')
+    GROUP BY  
+        T.thesis_id, T.title, T.summary, T.status, T.pdf_path, T.start_date, T.nimertis_link, 
+        S.id, S.name, S.surname, S.email, S.student_number, 
+        P.id, P.name, P.surname, P.email, 
+        C.member1_id, CM1.name, CM1.surname, CM1.email, 
+        C.member2_id, CM2.name, CM2.surname, CM2.email,
+        G.professor_id, G.grade1, G.grade2, G.grade3, G.grade4;
 `;
-
 
 
     db.query(query, (err, results) => {
@@ -550,38 +556,46 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
 
     } else if (role === 'student') {
         query = `
-            SELECT
-                Theses.*,
-                Examinations.*,
-                DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
-                DATE_FORMAT(Examinations.date, '%Y-%m-%d') AS exam_date,
-                Professors.name AS professor_name, 
-                Professors.surname AS professor_surname, 
-                Committee1.name AS committee_member1_name,
-                Committee1.surname AS committee_member1_surname,
-                Committee2.name AS committee_member2_name,
-                Committee2.surname AS committee_member2_surname,
-                SupervisorGrade.grade AS supervisor_grade,
-                SupervisorGrade.comments AS supervisor_comments,
-                Committee1Grade.grade AS committee_member1_grade,
-                Committee1Grade.comments AS committee_member1_comments,
-                Committee2Grade.grade AS committee_member2_grade,
-                Committee2Grade.comments AS committee_member2_comments
-
-            FROM Theses
-            LEFT JOIN Professors ON Theses.professor_id = Professors.id
-            LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
-            LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
-            LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
-            LEFT JOIN Examinations ON Theses.thesis_id = Examinations.thesis_id
-            LEFT JOIN Grades AS SupervisorGrade ON Theses.thesis_id = SupervisorGrade.thesis_id 
-                AND Theses.professor_id = SupervisorGrade.professor_id
-            LEFT JOIN Grades AS Committee1Grade ON Theses.thesis_id = Committee1Grade.thesis_id 
-                AND Committees.member1_id = Committee1Grade.professor_id
-            LEFT JOIN Grades AS Committee2Grade ON Theses.thesis_id = Committee2Grade.thesis_id 
-                AND Committees.member2_id = Committee2Grade.professor_id
-            WHERE Theses.student_id = ?;
-        `;
+                SELECT
+                    Theses.*,
+                    Examinations.*,
+                    DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
+                    DATE_FORMAT(Examinations.date, '%Y-%m-%d') AS exam_date,
+                    Professors.name AS professor_name, 
+                    Professors.surname AS professor_surname, 
+                    Committee1.name AS committee_member1_name,
+                    Committee1.surname AS committee_member1_surname,
+                    Committee2.name AS committee_member2_name,
+                    Committee2.surname AS committee_member2_surname,
+                    SupervisorGrade.grade1 AS supervisor_grade1,
+                    SupervisorGrade.grade2 AS supervisor_grade2,
+                    SupervisorGrade.grade3 AS supervisor_grade3,
+                    SupervisorGrade.grade4 AS supervisor_grade4,
+                    SupervisorGrade.finalized AS supervisor_finalized,
+                    Committee1Grade.grade1 AS committee_member1_grade1,
+                    Committee1Grade.grade2 AS committee_member1_grade2,
+                    Committee1Grade.grade3 AS committee_member1_grade3,
+                    Committee1Grade.grade4 AS committee_member1_grade4,
+                    Committee1Grade.finalized AS committee_member1_finalized,
+                    Committee2Grade.grade1 AS committee_member2_grade1,
+                    Committee2Grade.grade2 AS committee_member2_grade2,
+                    Committee2Grade.grade3 AS committee_member2_grade3,
+                    Committee2Grade.grade4 AS committee_member2_grade4,
+                    Committee2Grade.finalized AS committee_member2_finalized
+                FROM Theses
+                LEFT JOIN Professors ON Theses.professor_id = Professors.id
+                LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
+                LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
+                LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
+                LEFT JOIN Examinations ON Theses.thesis_id = Examinations.thesis_id
+                LEFT JOIN Grades AS SupervisorGrade ON Theses.thesis_id = SupervisorGrade.thesis_id 
+                    AND Theses.professor_id = SupervisorGrade.professor_id
+                LEFT JOIN Grades AS Committee1Grade ON Theses.thesis_id = Committee1Grade.thesis_id 
+                    AND Committees.member1_id = Committee1Grade.professor_id
+                LEFT JOIN Grades AS Committee2Grade ON Theses.thesis_id = Committee2Grade.thesis_id 
+                    AND Committees.member2_id = Committee2Grade.professor_id
+                WHERE Theses.student_id = ?;
+`;
         queryParams = [userId];
     } else {
         return res.status(403).json({ success: false, message: 'Unauthorized access.' });
@@ -649,61 +663,69 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
     const role = req.user.role;
 
-    let queryParams = [];
-    const query = `
-    SELECT 
-        S.name AS student_name, 
-        S.surname AS student_surname, 
-        E.location AS exam_location,
-        E.type_of_exam AS type_of_exam,
-        DATE_FORMAT(E.date, '%Y-%m-%d') AS exam_date,
-        P.name AS professor_name, 
-        P.surname AS professor_surname, 
-        C1.name AS committee_member1_name,
-        C1.surname AS committee_member1_surname,
-        C2.name AS committee_member2_name,
-        C2.surname AS committee_member2_surname,
-        T.title AS thesis_title, 
-        T.summary AS thesis_summary,
-        GS.grade AS supervisor_grade,
-        GC1.grade AS committee_member1_grade,
-        GC2.grade AS committee_member2_grade,
-        L.gen_assembly_session as gen_assembly_session
+        let queryParams = [];
+        const query = `
+                SELECT 
+                    S.name AS student_name, 
+                    S.surname AS student_surname, 
+                    E.location AS exam_location,
+                    E.type_of_exam AS type_of_exam,
+                    DATE_FORMAT(E.date, '%Y-%m-%d') AS exam_date,
+                    P.name AS professor_name, 
+                    P.surname AS professor_surname, 
+                    C1.name AS committee_member1_name,
+                    C1.surname AS committee_member1_surname,
+                    C2.name AS committee_member2_name,
+                    C2.surname AS committee_member2_surname,
+                    T.title AS thesis_title, 
+                    T.summary AS thesis_summary,
+                    GS.grade1 AS supervisor_grade1,
+                    GS.grade2 AS supervisor_grade2,
+                    GS.grade3 AS supervisor_grade3,
+                    GS.grade4 AS supervisor_grade4,
+                    GC1.grade1 AS committee_member1_grade1,
+                    GC1.grade2 AS committee_member1_grade2,
+                    GC1.grade3 AS committee_member1_grade3,
+                    GC1.grade4 AS committee_member1_grade4,
+                    GC2.grade1 AS committee_member2_grade1,
+                    GC2.grade2 AS committee_member2_grade2,
+                    GC2.grade3 AS committee_member2_grade3,
+                    GC2.grade4 AS committee_member2_grade4,
+                    L.gen_assembly_session AS gen_assembly_session
+                FROM 
+                    Students S
+                JOIN 
+                    Theses T ON S.id = T.student_id
+                JOIN 
+                    Examinations E ON T.thesis_id = E.thesis_id
+                JOIN 
+                    Professors P ON T.professor_id = P.id
+                LEFT JOIN 
+                    Committees C ON T.thesis_id = C.thesis_id
+                LEFT JOIN 
+                    Professors C1 ON C.member1_id = C1.id
+                LEFT JOIN 
+                    Professors C2 ON C.member2_id = C2.id
+                LEFT JOIN 
+                    Grades AS GS ON T.thesis_id = GS.thesis_id 
+                        AND T.professor_id = GS.professor_id
+                LEFT JOIN 
+                    Grades AS GC1 ON T.thesis_id = GC1.thesis_id 
+                        AND C.member1_id = GC1.professor_id
+                LEFT JOIN 
+                    Grades AS GC2 ON T.thesis_id = GC2.thesis_id 
+                        AND C.member2_id = GC2.professor_id
+                LEFT JOIN
+                    Logs AS L ON T.thesis_id = L.thesis_id
+                WHERE 
+                    T.student_id = ?;
+                        `;
+            queryParams = [userId];
 
-
-    FROM 
-        Students S
-    JOIN 
-        Theses T ON S.id = T.student_id
-    JOIN 
-        Examinations E ON T.thesis_id = E.thesis_id
-    JOIN 
-        Professors P ON T.professor_id = P.id
-    LEFT JOIN Committees C ON T.thesis_id = C.thesis_id
-    LEFT JOIN 
-        Professors C1 ON C.member1_id = C1.id
-    LEFT JOIN 
-        Professors C2 ON C.member2_id = C2.id
-    LEFT JOIN 
-        Grades AS GS ON T.thesis_id = GS.thesis_id 
-                AND T.professor_id = GS.professor_id
-    LEFT JOIN 
-        Grades AS GC1 ON T.thesis_id = GC1.thesis_id 
-                AND C.member1_id = GC1.professor_id
-    LEFT JOIN 
-        Grades AS GC2 ON T.thesis_id = GC2.thesis_id 
-                AND C.member2_id = GC2.professor_id
-    LEFT JOIN
-        Logs as L ON T.Thesis_id = L.thesis_id
-    WHERE 
-         T.student_id = ?;
-        `;
-    queryParams = [userId];
-
-    db.query(query, queryParams, (err, results) => {
-        if (err) {
-            console.error('Σφάλμα κατά την ανάκτηση των δεδομένων του πρακτικού εξέτασης:', err);
-            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+            db.query(query, queryParams, (err, results) => {
+            if (err) {
+                console.error('Σφάλμα κατά την ανάκτηση των δεδομένων του πρακτικού εξέτασης:', err);
+                return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
         }
 
         res.status(200).json({ success: true, examReport: results });
@@ -2113,10 +2135,10 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, comments, finalized)
+        INSERT INTO Grades (thesis_id, professor_id, grade1, grade2, grade3, grade4, comments, finalized)
         VALUES (?, ?, ?, ?, ?, ?, ?, FALSE)
         ON DUPLICATE KEY UPDATE 
-        grade = VALUES(grade), 
+        grade1 = VALUES(grade), 
         grade2 = VALUES(grade2), 
         grade3 = VALUES(grade3), 
         grade4 = VALUES(grade4),
@@ -2144,10 +2166,10 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, comments, finalized)
+        INSERT INTO Grades (thesis_id, professor_id, grade1, grade2, grade3, grade4, comments, finalized)
         VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
         ON DUPLICATE KEY UPDATE 
-        grade = VALUES(grade), 
+        grade1 = VALUES(grade1), 
         grade2 = VALUES(grade2), 
         grade3 = VALUES(grade3), 
         grade4 = VALUES(grade4),
@@ -2220,7 +2242,7 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
     const query = `SELECT 
         p.name AS professor_name,
         p.surname AS professor_surname,
-        g.grade AS grade1,
+        g.grade1 AS grade1,
         g.grade2 AS grade2,
         g.grade3 AS grade3,
         g.grade4 AS grade4,
@@ -2260,7 +2282,7 @@ app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        SELECT grade, grade2, grade3, grade4, comments, finalized
+        SELECT grade1, grade2, grade3, grade4, comments, finalized
         FROM Grades
         WHERE thesis_id = ? AND professor_id = ?
     `;

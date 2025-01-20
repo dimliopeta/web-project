@@ -34,7 +34,7 @@ function insertData(filePath = './provided_data/data.json') {
     const data = loadData(filePath); // Load data from the specified file
     if (data !== null) {
 
-        // Εισαγωγή καθηγητών
+        // Insert Professors
         if (data.professors) {
             data.professors.forEach(professor => {
 
@@ -74,7 +74,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No professors data found in the file.');
         }
 
-        // Εισαγωγή φοιτητών
+        // Insert Students
         if (data.students) {
             data.students.forEach(student => {
                 const query = `SELECT * FROM STUDENTS WHERE email=?;`;
@@ -116,7 +116,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No students data found in the file.');
         }
 
-        // Εισαγωγή Γραμματείας
+        // Insert Administrators
         if (data.administrators) {
             data.administrators.forEach(administrator => {
                 const query = `SELECT * FROM ADMINISTRATORS WHERE email=?;`;
@@ -149,7 +149,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No administrators data found in the file.');
         }
 
-        // Εισαγωγή διπλωματικών
+        // Insert Thesis
         if (data.theses) {
             data.theses.forEach(thesis => {
 
@@ -186,7 +186,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No theses data found in the file.');
         }
 
-        //Εισαγωγή Τριμελών
+        //Insert Committees
         if (data.committees) {
             data.committees.forEach(committee => {
                 const query = `SELECT * FROM COMMITTEES WHERE thesis_id=?;`;
@@ -218,7 +218,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No committees data found in the file.');
         }
 
-        //Εισαγωγή Προσκλήσεων
+        //Insert Invites
         if (data.invitations) {
             data.invitations.forEach(invitation => {
                 const query = `SELECT * FROM INVITATIONS WHERE id=?;`;
@@ -246,7 +246,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No invitations data found in the file.');
         }
 
-        // Εισαγωγή Εξετάσεων
+        // Insert Examinations
         if (data.examinations) {
             data.examinations.forEach(examination => {
                 const query = `SELECT * FROM EXAMINATIONS WHERE thesis_id=?;`;
@@ -270,7 +270,7 @@ function insertData(filePath = './provided_data/data.json') {
                             if (insertErr) {
                                 console.error('Error inserting examination:', insertErr);
                             } else {
-                                console.log(`Examination ${examination.thesis_id} added successfully.`);
+                                console.log(`Examination for thesis ${examination.thesis_id} added successfully.`);
                             }
                         });
                     }
@@ -280,7 +280,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No examinations data found in the file.');
         }
 
-        // Εισαγωγή Logs
+        // Insert Logs
         if (data.logs) {
             data.logs.forEach(log => {
                 const query = `SELECT * FROM LOGS WHERE logs.id=?;`;
@@ -312,6 +312,44 @@ function insertData(filePath = './provided_data/data.json') {
             });
         } else {
             console.warn('No logs data found in the file.');
+        }
+
+        // Insert Grades
+        if (data.grades) {
+            data.grades.forEach(grade => {
+                const query = `SELECT * FROM GRADES WHERE thesis_id=?;`;
+                db.query(query, [grade.thesis_id], (err, results) => {
+                    if (err) {
+                        console.error('Error checking for duplicate grades: ', err);
+                        return;
+                    }
+                    if (results.length === 0) {
+                        const insertQuery = `
+                            INSERT INTO GRADES (grade_id, thesis_id, professor_id, grade1, grade2, grade3, grade4, comments, finalized)
+                            VALUES (?, ?, ?, ?, ?, ? , ?, ?, ?);
+                        `;
+                        db.query(insertQuery, [
+                            grade.grade_id,
+                            grade.thesis_id,
+                            grade.professor_id,
+                            grade.grade1,
+                            grade.grade2,
+                            grade.grade3,
+                            grade.grade4,
+                            grade.comments,
+                            grade.finalized
+                        ], (insertErr) => {
+                            if (insertErr) {
+                                console.error('Error inserting grades:', insertErr);
+                            } else {
+                                console.log(`Grade ${grade.grade_id} added successfully.`);
+                            }
+                        });
+                    }
+                });
+            });
+        } else {
+            console.warn('No grades data found in the file.');
         }
 
         console.log(`Database updated!`);

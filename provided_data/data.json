@@ -1186,10 +1186,10 @@
       "student_id": "1",
       "title": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks",
       "summary": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks is very important so we have to do it.",
-      "status": "active",
+      "status": "completed",
       "pdf_path": "",
       "start_date": "2025-01-12",
-      "exam_date": null
+      "exam_date": "2025-01-19"
     },
     {
       "thesis_id": "2",
@@ -1255,12 +1255,12 @@
   ],
   "committees": [
     {
-      "thesis_id": "2",
-      "member1_id": "1",
-      "member2_id": "2"
+      "thesis_id": "1",
+      "member1_id": "2",
+      "member2_id": "3"
     },
     {
-      "thesis_id": "1",
+      "thesis_id": "2",
       "member1_id": "4",
       "member2_id": "5"
     },
@@ -1272,7 +1272,7 @@
   "examinations": [
     {
       "thesis_id": "1",
-      "date": null,
+      "date": "2025-02-10",
       "type_of_exam": "in-person",
       "location": "E4",
       "exam_report": null
@@ -1330,5 +1330,41 @@
       "surname": "iwanna",
       "email": "iwanna@ceid.upatras.gr"
     }
+  ],
+  "grades": [
+    {
+      "grade_id": "1",
+      "thesis_id" : "1",
+      "professor_id": "1", 
+      "grade1" : "8",
+      "grade2" : "8",
+      "grade3" : "7",
+      "grade4" : "7",
+      "comments" : null,
+      "finalized" : true
+    },
+    {
+      "grade_id": "2",
+      "thesis_id" : "1",
+      "professor_id": "2", 
+      "grade1" : "5",
+      "grade2" : "5",
+      "grade3" : "8",
+      "grade4" : "8",
+      "comments" : null,
+      "finalized" : true
+    },
+    {
+      "grade_id": "3",
+      "thesis_id" : "1",
+      "professor_id": "3", 
+      "grade1" : "10",
+      "grade2" : "10",
+      "grade3" : "8",
+      "grade4" : "8",
+      "comments" : null,
+      "finalized" : true
+    }
   ]
+  
 }
