@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('./config');
+const { db, insertData } = require('./config');
 const path = require('path');
 const fs = require('fs');
 
@@ -185,6 +185,8 @@ app.post('/logout', authenticateJWT, (req, res) => {
     // Return to index
     res.redirect('/');
 });
+
+
 //----------------------------- MULTER DECLARATIONS -----------------------------
 //----------------- Multer declaration/setup for Theses' PDFs -----------------
 const StoragePDFOnly = multer.diskStorage({
@@ -227,6 +229,32 @@ const StorageAttachments = multer.diskStorage({
 const UploadAttachments = multer({
     storage: StorageAttachments,
     limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
+});
+
+//----------------- Multer declaration/setup for Admin Data JSON -----------------
+const StorageAdminData = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'files/admin_data_json');
+    },
+    filename: (req, file, cb) => {
+        const timeStamp = new Date().toISOString().replace(/[-T:.]/g, ''); 
+        const originalName = file.originalname.replace(/\s+/g, '_');
+        const fileName = `${timeStamp}-${originalName}`;
+        cb(null, fileName);
+    }
+});
+
+// Filter to ensure only JSON files are uploaded
+const uploadAdminData = multer({
+    storage: StorageAdminData,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/json') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only JSON files are allowed'), false);
+        }
+    },
+    limits: { fileSize: 25 * 1024 * 1024 }
 });
 
 
@@ -329,6 +357,22 @@ app.post('/api/thesis_complete', (req, res) => {
 
         res.json({ success: true, message: 'Thesis set as completed successfully.' });
     });
+});
+//----------------- API to Upload JSON Data for administrators -----------------
+app.post('/uploadAdminData', uploadAdminData.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).send({ message: 'No file uploaded.' });
+    }
+
+    const filePath = path.join(__dirname, 'files/admin_data_json', req.file.filename);
+    
+    try {
+        insertData(filePath);
+        res.status(200).send({ message: 'Admin data successfully inserted.' });
+    } catch (err) {
+        console.error('Error inserting admin data:', err);
+        res.status(500).send({ message: 'Error inserting admin data into the database.' });
+    }
 });
 //----------------- API to Cancel Thesis for administrators -----------------
 app.post('/api/Thesis_cancel_admin', (req, res) => {

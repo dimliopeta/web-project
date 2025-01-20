@@ -315,8 +315,31 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
         }
     }
 });
+//--------------- Event Listener for Upload Data Button ---------------
+document.getElementById("adminUploadDataButton").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (file && file.type === "application/json") {
+        const formData = new FormData();
+        formData.append("file", file);
 
-//--------------- Event Listener for Cancel Thesis Button ---------------
+        fetch('/uploadAdminData', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("File uploaded successfully", data);
+        })
+        .catch(error => {
+            console.error("Error uploading file", error);
+            alert("There was an error uploading the file.");
+        });
+    } else {
+        alert("Please upload a valid JSON file.");
+    }
+});
+
+//--------------- Event Listener for Cancel Thesis Button (Delegated) ---------------
 administratorThesesManagementSection.addEventListener('click', (event) => {
     if (event.target && event.target.id === 'cancelThesisButton') {
         const GSTInput = document.getElementById('GSTInputBox').value.trim();
