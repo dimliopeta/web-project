@@ -1960,6 +1960,52 @@ app.post('/api/add-announcement', (req, res) => {
     });
 });
 
+app.get('/api/get-announcement-details/', (req, res) => {
+    const thesisId = req.query.thesisId;
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesis_id parameter' });
+    }
+
+    const selectQuery = `
+        SELECT 
+            t.thesis_id,
+            t.title,
+            s.name AS student_name,
+            s.surname AS student_surname,
+            p.name AS professor_name,
+            p.surname AS professor_surname,
+            e.date AS examination_date,
+            e.type_of_exam,
+            e.location AS examination_location
+        FROM Theses t
+        LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
+        LEFT JOIN Students s ON t.student_id = s.id
+        LEFT JOIN Professors p ON t.professor_id = p.id
+        WHERE t.thesis_id = ?;
+    `;
+
+    db.query(selectQuery, [thesisId], (err, results) => {
+        if (err) {
+            console.error('Error fetching thesis details:', err);
+            return res.status(500).json({ success: false, message: 'Error fetching thesis details.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: 'No presentation details found.'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: results[0]
+        });
+    });
+});
+
+
 
 
 app.get('/api/announcements', (req, res) => {
