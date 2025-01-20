@@ -329,6 +329,7 @@ document.getElementById("adminUploadDataButton").addEventListener("change", func
         .then(response => response.json())
         .then(data => {
             console.log("File uploaded successfully", data);
+            document.getElementById('adminUploadDataLabelArea').innerText = `Τα δεδομένα αναρτήθηκαν στη βάση!`;
         })
         .catch(error => {
             console.error("Error uploading file", error);
