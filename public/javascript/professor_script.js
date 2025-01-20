@@ -1839,7 +1839,7 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
 
     const title = document.getElementById('title').value;
     const summary = document.getElementById('summary').value;
-    const pdf = document.getElementById('pdf').files[0]; h
+    const pdf = document.getElementById('pdf').files[0]; 
     const token = localStorage.getItem('token');
 
 

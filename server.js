@@ -1443,7 +1443,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
 
 //----------------- API for loading Past Invitations associated with a specific professor-----------------
 app.get('/api/invitation-history', authenticateJWT, (req, res) => {
-    console.log('Endpoint /api/invitation-history hit');
+    console.log('API /api/invitation-history hit');
     const professorId = req.user.userId;
     console.log('Professor ID from JWT:', req.user.userId);
 
@@ -1481,7 +1481,7 @@ app.get('/api/invitation-history', authenticateJWT, (req, res) => {
 });
 
 
-//-------------Endpoint for loading all the invitations associated with a specific thesis-------
+//-----------------API for loading all the invitations associated with a specific thesis-------
 app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
 
@@ -1515,7 +1515,7 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
     });
 });
 
-//-------------Endpoint for loading all the notes of a professor associated with a specific thesis-------
+//-----------------API for loading all the notes of a professor associated with a specific thesis-------
 app.post('/api/get-notes', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
     const professor_id = req.user.userId; // Από το JWT payload
@@ -1540,7 +1540,7 @@ app.post('/api/get-notes', authenticateJWT, (req, res) => {
     });
 });
 
-//-------------Endpoint for adding a note associated with a specific thesis-------
+//-----------------API for adding a note associated with a specific thesis-------
 app.post('/api/add-note', authenticateJWT, (req, res) => {
     const { thesis_id, content } = req.body;
     const professor_id = req.user.userId;
@@ -1559,7 +1559,7 @@ app.post('/api/add-note', authenticateJWT, (req, res) => {
     });
 });
 
-//-------------Endpoint for loading the info of a cancelled thesis-------
+//-----------------API for loading the info of a cancelled thesis-------
 app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
 
@@ -1593,7 +1593,7 @@ app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
 });
 
 
-
+//-----------------API for changing an active thesis to to-be-reviewed status-----
 app.post('/api/thesis/to-be-reviewed', authenticateJWT, (req, res) => {
     const { thesis_id, changeNumber, changeDate } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
 
@@ -1658,7 +1658,7 @@ app.post('/api/thesis/to-be-reviewed', authenticateJWT, (req, res) => {
 })
 
 
-//------Endpoint for checking if a committee is full----------
+//-----------------API for checking if a committee is full----------
 app.post('/api/committee-status', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
 
@@ -1689,7 +1689,7 @@ app.post('/api/committee-status', authenticateJWT, (req, res) => {
     });
 });
 
-//------Endpoint for changing an assigned thesis to active status---------------
+//-----------------API for changing an assigned thesis to active status---------------
 app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     const { thesisId, startNumber, startDate } = req.body;
 
@@ -1755,7 +1755,7 @@ app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     });
 });
 
-//------Endpoint for changing an active thesis to cancelled status---------------
+//-----------------API for changing an active thesis to cancelled status---------------
 app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     const { thesis_id, cancellationNumber, cancellationDate, cancellationReasonText } = req.body;
     console.log('Received data:', req.body); // Προσθήκη για debugging
@@ -1824,6 +1824,7 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     });
 });
 
+//-----------------API for checking if an examination is announced----
 app.post('/api/check-exam', authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
 
@@ -1859,7 +1860,7 @@ app.post('/api/check-exam', authenticateJWT, (req, res) => {
     });
 });
 
-
+//-----------------API for creating an announcement of an examination----
 app.post('/api/add-announcement', (req, res) => {
     const thesisId = req.body.thesisId;
 
@@ -1960,6 +1961,8 @@ app.post('/api/add-announcement', (req, res) => {
     });
 });
 
+
+//-----------------API for viewing an announcement of an examination----
 app.get('/api/get-announcement-details/', (req, res) => {
     const thesisId = req.query.thesisId;
 
@@ -2007,7 +2010,7 @@ app.get('/api/get-announcement-details/', (req, res) => {
 
 
 
-
+//-----------------API for fetching all the exam announcements----
 app.get('/api/announcements', (req, res) => {
     const { startDate, endDate } = req.query; // Παράμετροι για εύρος χρόνου
 
@@ -2035,6 +2038,7 @@ app.get('/api/announcements', (req, res) => {
 });
 
 
+//-----------------API for enabling the grading of an examination----
 app.post('/api/enable-grading', authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
     if (!thesisId) {
@@ -2058,7 +2062,7 @@ app.post('/api/enable-grading', authenticateJWT, (req, res) => {
     });
 });
 
-
+//-----------------API for checking if a thesis has grading enabled----
 app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
     const professorId = req.user.userId; // Από το JWT
@@ -2095,7 +2099,7 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     });
 });
 
-
+//-----------------API for submitting a temporary grade for a specific thesis----
 app.post('/api/submit-grades', authenticateJWT, (req, res) => {
     const { thesisId, grades, comments } = req.body;
     const professorId = req.user.userId; // Από το JWT, υποθέτοντας ότι το ID του καθηγητή είναι στο token
@@ -2126,7 +2130,7 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
     });
 });
 
-
+//-----------------API for finalizing the grade of a professor for a specific thesis----
 app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
     const { thesisId, grades, comments } = req.body;
     const professorId = req.user.userId;
@@ -2157,6 +2161,7 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
     });
 });
 
+//-----------------API for loading the grades of the other professors----
 app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
     const { thesisId } = req.params;
 
@@ -2197,6 +2202,7 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
 
 });
 
+//-----------------API for loading the temporary grades of a professor for a specific thesis----
 app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
     const { thesisId } = req.params;
     const professorId = req.user.userId; // Από το JWT
