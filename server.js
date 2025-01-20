@@ -1,6 +1,8 @@
 const express = require('express');
-const db = require('./config');
+const { db, insertData } = require('./config');
 const path = require('path');
+const fs = require('fs');
+
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -92,10 +94,10 @@ app.get('/login', (req, res) => {
         jwt.verify(token, SECRET_KEY, (err, user) => {
             if (!err && user) {
                 // If valid user
-                return res.redirect(user.role === 'professor' 
-                    ? '/professor' 
-                    : user.role === 'administrator' 
-                        ? '/administrator' 
+                return res.redirect(user.role === 'professor'
+                    ? '/professor'
+                    : user.role === 'administrator'
+                        ? '/administrator'
                         : '/student');
             }
             // If not
@@ -183,6 +185,8 @@ app.post('/logout', authenticateJWT, (req, res) => {
     // Return to index
     res.redirect('/');
 });
+
+
 //----------------------------- MULTER DECLARATIONS -----------------------------
 //----------------- Multer declaration/setup for Theses' PDFs -----------------
 const StoragePDFOnly = multer.diskStorage({
@@ -227,6 +231,32 @@ const UploadAttachments = multer({
     limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
 });
 
+//----------------- Multer declaration/setup for Admin Data JSON -----------------
+const StorageAdminData = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'files/admin_data_json');
+    },
+    filename: (req, file, cb) => {
+        const timeStamp = new Date().toISOString().replace(/[-T:.]/g, ''); 
+        const originalName = file.originalname.replace(/\s+/g, '_');
+        const fileName = `${timeStamp}-${originalName}`;
+        cb(null, fileName);
+    }
+});
+
+// Filter to ensure only JSON files are uploaded
+const uploadAdminData = multer({
+    storage: StorageAdminData,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/json') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only JSON files are allowed'), false);
+        }
+    },
+    limits: { fileSize: 25 * 1024 * 1024 }
+});
+
 
 
 
@@ -254,7 +284,7 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
     });
 });
 
-//------------------API for loading Assigned Theses--------------
+//------------------ API for loading Assigned Theses --------------
 app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
     const professor_id = req.user.userId;
     const query = `
@@ -276,6 +306,194 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
         res.status(200).json({ success: true, theses: results });
+    });
+});
+//------------------ API for Thesis AP submit as Administrator --------------
+app.post('/api/AP_save', (req, res) => {
+    const { thesis_id, apNumber } = req.body;
+
+    if (!thesis_id || !apNumber) {
+        return res.status(400).json({ success: false, message: 'Thesis ID and AP number are required.' });
+    }
+
+    const query = `
+        UPDATE Logs 
+        SET ap = ? 
+        WHERE thesis_id = ? AND new_state = 'assigned'
+    `;
+
+    db.query(query, [apNumber, thesis_id], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'No matching log found for the given thesis ID with state "assigned".' });
+        }
+
+        res.json({ success: true, message: 'AP number saved successfully.' });
+    });
+});
+//------------------ API for Thesis Completion for Admin --------------
+app.post('/api/thesis_complete', (req, res) => {
+    const { thesis_id } = req.body;
+
+    if (!thesis_id) {
+        return res.status(400).json({ success: false, message: 'Thesis ID and AP number are required.' });
+    }
+
+    const query = `
+        UPDATE Theses 
+        SET status = 'completed' 
+        WHERE thesis_id = ?
+    `;
+
+    db.query(query, [thesis_id], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ success: false, message: 'Database error.' });
+        }
+
+        res.json({ success: true, message: 'Thesis set as completed successfully.' });
+    });
+});
+//----------------- API to Upload JSON Data for administrators -----------------
+app.post('/uploadAdminData', uploadAdminData.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).send({ message: 'No file uploaded.' });
+    }
+
+    const filePath = path.join(__dirname, 'files/admin_data_json', req.file.filename);
+    
+    try {
+        insertData(filePath);
+        res.status(200).send({ message: 'Admin data successfully inserted.' });
+    } catch (err) {
+        console.error('Error inserting admin data:', err);
+        res.status(500).send({ message: 'Error inserting admin data into the database.' });
+    }
+});
+//----------------- API to Cancel Thesis for administrators -----------------
+app.post('/api/Thesis_cancel_admin', (req, res) => {
+    const { thesis_id, date, gstNumber, reason } = req.body;
+
+    if (!thesis_id || !date || !gstNumber || !reason) {
+        return res.status(400).json({ error: 'Missing thesis id, gstNumber, date, or reason' });
+    }
+    db.beginTransaction((transactionError) => {
+        if (transactionError) {
+            console.error('Error starting transaction:', transactionError);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        const logQuery = `
+            INSERT INTO logs (thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
+            VALUES (?, ?, 'active', 'cancelled', ?, ?)
+        `;
+        db.execute(logQuery, [thesis_id, date, gstNumber, reason], (logError) => {
+            if (logError) {
+                console.error('Error inserting cancellation log:', logError);
+                return db.rollback(() => {
+                    res.status(500).json({ error: 'Internal server error' });
+                });
+            }
+
+
+            const updateQuery = `
+                UPDATE theses
+                SET status = 'cancelled'
+                WHERE thesis_id = ?
+            `;
+            db.execute(updateQuery, [thesis_id], (updateError) => {
+                if (updateError) {
+                    console.error('Error updating thesis status:', updateError);
+                    return db.rollback(() => {
+                        res.status(500).json({ error: 'Internal server error' });
+                    });
+                }
+
+                db.commit((commitError) => {
+                    if (commitError) {
+                        console.error('Error committing transaction:', commitError);
+                        return db.rollback(() => {
+                            res.status(500).json({ error: 'Internal server error' });
+                        });
+                    }
+
+                    res.status(200).json({
+                        message: 'Thesis cancellation logged and status updated successfully',
+                    });
+                });
+            });
+        });
+    });
+});
+//----------------- API to fetch All Theses Data for administrators -----------------
+app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
+
+    const query = `
+            SELECT 
+                T.thesis_id,
+                T.title,
+                T.summary,
+                T.status,
+                T.pdf_path,
+                DATE_FORMAT(T.start_date, '%Y-%m-%d') AS start_date,
+                T.nimertis_link,
+                S.id AS student_id,
+                S.name AS student_name,
+                S.surname AS student_surname,
+                S.email AS student_email,
+                S.student_number,
+                P.id AS professor_id,
+                P.name AS professor_name,
+                P.surname AS professor_surname,
+                P.email AS professor_email,
+                C.member1_id AS committee_member1_id,
+                CM1.name AS committee_member1_name,
+                CM1.surname AS committee_member1_surname,
+                CM1.email AS committee_member1_email,
+                C.member2_id AS committee_member2_id,
+                CM2.name AS committee_member2_name,
+                CM2.surname AS committee_member2_surname,
+                CM2.email AS committee_member2_email,
+                CASE 
+                    WHEN COUNT(G.grade_id) = 3 AND SUM(G.finalized) = 3 THEN TRUE
+                    ELSE FALSE
+                END AS all_grades_finalized
+            FROM 
+                Theses T
+            LEFT JOIN 
+                Students S ON T.student_id = S.id
+            LEFT JOIN 
+                Professors P ON T.professor_id = P.id
+            LEFT JOIN 
+                Committees C ON T.thesis_id = C.thesis_id
+            LEFT JOIN 
+                Professors CM1 ON C.member1_id = CM1.id
+            LEFT JOIN 
+                Professors CM2 ON C.member2_id = CM2.id
+            LEFT JOIN 
+                Grades G ON T.thesis_id = G.thesis_id
+            WHERE 
+                T.status IN ('active', 'to-be-reviewed')
+            GROUP BY  
+                T.thesis_id, T.title, T.summary, T.status, T.pdf_path, T.start_date, T.nimertis_link, 
+                S.id, S.name, S.surname, S.email, S.student_number, 
+                P.id, P.name, P.surname, P.email, 
+                C.member1_id, CM1.name, CM1.surname, CM1.email, C.member2_id, CM2.name, CM2.surname, CM2.email;
+`;
+
+
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+        }
+
+
+        res.status(200).json({ success: true, thesesAll: results });
     });
 });
 
@@ -305,8 +523,6 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
                 t.start_date,
                 e.date,
-                g.grade AS supervisor_grade,
-                g.comments AS supervisor_comments,
                 GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
                 CASE
                     WHEN t.professor_id = ? THEN 'Επιβλέπων'
@@ -320,15 +536,13 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
             LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
             LEFT JOIN Professors c1 ON c.member1_id = c1.id
             LEFT JOIN Professors c2 ON c.member2_id = c2.id
-            LEFT JOIN Grades g ON g.thesis_id = t.thesis_id AND g.professor_id = t.professor_id
             LEFT JOIN Invitations i ON i.thesis_id = t.thesis_id
             WHERE (p.id = ? OR c.member1_id = ? OR c.member2_id = ?) AND t.status != 'unassigned'
             GROUP BY 
                 t.thesis_id, t.title, t.summary, t.status, t.start_date, e.date,
                 s.name, s.surname, s.student_number, s.contact_email,
                 p.name, p.surname, p.email,
-                c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname, 
-                g.grade, g.comments;
+                c.member1_id, c.member2_id, c1.name, c1.surname, c2.name, c2.surname ;
 
 `;
         queryParams = [userId, userId, userId, userId, userId, userId];
@@ -765,6 +979,26 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
         res.status(200).json({ success: true, students: results });
     });
 });
+//----------------- API for Professor Search Bar for Administration -----------------
+app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
+    const input = req.query.search;
+
+    const query = `
+        SELECT *
+        FROM Professors P
+        WHERE P.name LIKE ? OR P.surname LIKE ?
+    `;
+    const searchInput = `%${input}%`;
+
+    db.query(query, [searchInput, searchInput], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        res.status(200).json({ success: true, professors: results });
+    });
+});
 //----------------- API for Professor Search Bar for thesis assignment -----------------
 app.get('/api/professor-search', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -1022,21 +1256,21 @@ app.post('/api/invitation_cancel', authenticateJWT, (req, res) => {
 
 
 
-          // Fetch the thesis_id
-          const thesisQuery = `
+        // Fetch the thesis_id
+        const thesisQuery = `
           SELECT thesis_id
           FROM Theses T
           WHERE T.student_id = ?;
       `;
 
-      db.query(thesisQuery, [student_id], (err, thesisResults) => {
-          if (err) {
-              console.error('Error fetching thesis_id:', err);
-              return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
-          }
-          const thesis_id = thesisResults[0]?.thesis_id;
-          console.log('Cancelled Invitations from DB:', results);
-          res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
+        db.query(thesisQuery, [student_id], (err, thesisResults) => {
+            if (err) {
+                console.error('Error fetching thesis_id:', err);
+                return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
+            }
+            const thesis_id = thesisResults[0]?.thesis_id;
+            console.log('Cancelled Invitations from DB:', results);
+            res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
         });
     });
 });
@@ -1209,7 +1443,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
 
 //----------------- API for loading Past Invitations associated with a specific professor-----------------
 app.get('/api/invitation-history', authenticateJWT, (req, res) => {
-    console.log('Endpoint /api/invitation-history hit');
+    console.log('API /api/invitation-history hit');
     const professorId = req.user.userId;
     console.log('Professor ID from JWT:', req.user.userId);
 
@@ -1247,7 +1481,7 @@ app.get('/api/invitation-history', authenticateJWT, (req, res) => {
 });
 
 
-//-------------Endpoint for loading all the invitations associated with a specific thesis-------
+//-----------------API for loading all the invitations associated with a specific thesis-------
 app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
 
@@ -1281,7 +1515,7 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
     });
 });
 
-//-------------Endpoint for loading all the notes of a professor associated with a specific thesis-------
+//-----------------API for loading all the notes of a professor associated with a specific thesis-------
 app.post('/api/get-notes', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
     const professor_id = req.user.userId; // Από το JWT payload
@@ -1306,7 +1540,7 @@ app.post('/api/get-notes', authenticateJWT, (req, res) => {
     });
 });
 
-//-------------Endpoint for adding a note associated with a specific thesis-------
+//-----------------API for adding a note associated with a specific thesis-------
 app.post('/api/add-note', authenticateJWT, (req, res) => {
     const { thesis_id, content } = req.body;
     const professor_id = req.user.userId;
@@ -1325,7 +1559,7 @@ app.post('/api/add-note', authenticateJWT, (req, res) => {
     });
 });
 
-//-------------Endpoint for loading the info of a cancelled thesis-------
+//-----------------API for loading the info of a cancelled thesis-------
 app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
 
@@ -1358,6 +1592,8 @@ app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
     });
 });
 
+
+//-----------------API for changing an active thesis to to-be-reviewed status-----
 app.post('/api/thesis/to-be-reviewed', authenticateJWT, (req, res) => {
     const { thesis_id, changeNumber, changeDate } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
 
@@ -1422,7 +1658,7 @@ app.post('/api/thesis/to-be-reviewed', authenticateJWT, (req, res) => {
 })
 
 
-//------Endpoint for checking if a committee is full----------
+//-----------------API for checking if a committee is full----------
 app.post('/api/committee-status', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
 
@@ -1453,7 +1689,7 @@ app.post('/api/committee-status', authenticateJWT, (req, res) => {
     });
 });
 
-//------Endpoint for changing an assigned thesis to active status---------------
+//-----------------API for changing an assigned thesis to active status---------------
 app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     const { thesisId, startNumber, startDate } = req.body;
 
@@ -1519,7 +1755,7 @@ app.post('/api/start-thesis', authenticateJWT, (req, res) => {
     });
 });
 
-//------Endpoint for changing an active thesis to cancelled status---------------
+//-----------------API for changing an active thesis to cancelled status---------------
 app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
     const { thesis_id, cancellationNumber, cancellationDate, cancellationReasonText } = req.body;
     console.log('Received data:', req.body); // Προσθήκη για debugging
@@ -1587,6 +1823,417 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
         });
     });
 });
+
+//-----------------API for checking if an examination is announced----
+app.post('/api/check-exam', authenticateJWT, (req, res) => {
+    const { thesisId } = req.body;
+
+    // Έλεγχος αν υπάρχει thesisId στο request body
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesisId' });
+    }
+
+    const query = ` 
+        SELECT announced 
+        FROM EXAMINATIONS 
+        WHERE thesis_id = ?;
+    `;
+
+    db.query(query, [thesisId], (err, results) => {
+        if (err) {
+            console.error('Error fetching exam details:', err);
+            return res.status(500).json({ success: false, message: 'Server error' });
+        }
+
+        // Αν δεν υπάρχουν αποτελέσματα για το συγκεκριμένο thesisId
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'No exam found for the given thesisId' });
+        }
+
+        // Αν βρέθηκε το πεδίο announced
+        const { announced } = results[0];
+
+        return res.status(200).json({
+            success: true,
+            announced: announced,
+        });
+    });
+});
+
+//-----------------API for creating an announcement of an examination----
+app.post('/api/add-announcement', (req, res) => {
+    const thesisId = req.body.thesisId;
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesis_id parameter' });
+    }
+
+    const selectQuery = `
+        SELECT 
+            t.thesis_id,
+            t.title,
+            s.name AS student_name,
+            s.surname AS student_surname,
+            p.name AS professor_name,
+            p.surname AS professor_surname,
+            e.date AS examination_date,
+            e.type_of_exam,
+            e.location AS examination_location
+        FROM Theses t
+        LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
+        LEFT JOIN Students s ON t.student_id = s.id
+        LEFT JOIN Professors p ON t.professor_id = p.id
+        WHERE t.thesis_id = ?;
+    `;
+
+    const updateQuery = `
+        UPDATE EXAMINATIONS 
+        SET announced = TRUE 
+        WHERE thesis_id = ?;
+    `;
+
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error('Error starting transaction:', err);
+            return res.status(500).json({ success: false, message: 'Server error starting transaction.' });
+        }
+
+        db.query(selectQuery, [thesisId], (selectErr, results) => {
+            if (selectErr) {
+                console.error('Error fetching thesis details:', selectErr);
+                return db.rollback(() => {
+                    res.status(500).json({ success: false, message: 'Error fetching thesis details.' });
+                });
+            }
+
+            if (results.length === 0) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'No presentation details provided by the student.'
+                });
+            }
+
+            const announcementDetails = results[0];
+            const fieldsAreComplete = Object.values(announcementDetails).every(field => field !== null);
+
+            if (!fieldsAreComplete) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'Some presentation details are missing.'
+                });
+            }
+
+            db.query(updateQuery, [thesisId], (updateErr) => {
+                if (updateErr) {
+                    console.error('Error updating thesis:', updateErr);
+                    return db.rollback(() => {
+                        res.status(500).json({ success: false, message: 'Error updating thesis.' });
+                    });
+                }
+
+                const filePath = path.join(__dirname, 'announcements.json');
+                fs.writeFile(filePath, JSON.stringify(announcementDetails, null, 2), (fileErr) => {
+                    if (fileErr) {
+                        console.error('Error writing to file:', fileErr);
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, message: 'Failed to save data to file.' });
+                        });
+                    }
+
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            console.error('Error committing transaction:', commitErr);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Error committing transaction.' });
+                            });
+                        }
+
+                        res.status(200).json({
+                            success: true,
+                            message: 'Thesis details saved to file: announcements.json',
+                            data: announcementDetails,
+                            file_path: filePath,
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+
+//-----------------API for viewing an announcement of an examination----
+app.get('/api/get-announcement-details/', (req, res) => {
+    const thesisId = req.query.thesisId;
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesis_id parameter' });
+    }
+
+    const selectQuery = `
+        SELECT 
+            t.thesis_id,
+            t.title,
+            s.name AS student_name,
+            s.surname AS student_surname,
+            p.name AS professor_name,
+            p.surname AS professor_surname,
+            e.date AS examination_date,
+            e.type_of_exam,
+            e.location AS examination_location
+        FROM Theses t
+        LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
+        LEFT JOIN Students s ON t.student_id = s.id
+        LEFT JOIN Professors p ON t.professor_id = p.id
+        WHERE t.thesis_id = ?;
+    `;
+
+    db.query(selectQuery, [thesisId], (err, results) => {
+        if (err) {
+            console.error('Error fetching thesis details:', err);
+            return res.status(500).json({ success: false, message: 'Error fetching thesis details.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: 'No presentation details found.'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: results[0]
+        });
+    });
+});
+
+
+
+//-----------------API for fetching all the exam announcements----
+app.get('/api/announcements', (req, res) => {
+    const { startDate, endDate } = req.query; // Παράμετροι για εύρος χρόνου
+
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ success: false, message: 'Failed to read data.' });
+        }
+
+        let announcements = JSON.parse(data);
+
+        // Φιλτράρισμα κατά εύρος ημερομηνιών αν δοθούν
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            announcements = announcements.filter(announcement => {
+                const examDate = new Date(announcement.examination.date);
+                return examDate >= start && examDate <= end;
+            });
+        }
+
+        res.json(announcements);
+    });
+});
+
+
+//-----------------API for enabling the grading of an examination----
+app.post('/api/enable-grading', authenticateJWT, (req, res) => {
+    const { thesisId } = req.body;
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+    const thesisQuery = ` UPDATE THESES
+        SET grading_enabled = TRUE
+        WHERE thesis_id = ?;`;
+    db.query(thesisQuery, [thesisId], (thErr, thResults) => {
+        if (thErr) {
+            console.error('Σφάλμα κατά την ενεργοποίηση της βαθμολόγησης:', thErr);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την ενεργοποίηση της βαθμολόγησης.' });
+        }
+
+        if (thResults.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκε η συγκεκριμένη διπλωματική.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Η βαθμολόγηση ενεργοποιήθηκε!' });
+
+    });
+});
+
+//-----------------API for checking if a thesis has grading enabled----
+app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
+    const { thesisId } = req.body;
+    const professorId = req.user.userId; // Από το JWT
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `
+        SELECT 
+            Theses.grading_enabled,
+            CASE
+                WHEN Theses.professor_id = ? THEN 'Επιβλέπων'
+                WHEN Committees.member1_id = ? OR Committees.member2_id = ? THEN 'Μέλος Τριμελούς'
+                ELSE 'Χωρίς Σχέση'
+            END AS role
+        FROM Theses
+        LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
+        WHERE Theses.thesis_id = ?;
+    `;
+
+    db.query(query, [professorId, professorId, professorId, thesisId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την εύρεση της διπλωματικής:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την εύρεση της διπλωματικής.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: 'Δεν βρέθηκε η συγκεκριμένη διπλωματική.' });
+        }
+
+        const { grading_enabled, role } = results[0];
+        res.status(200).json({ success: true, gradingEnabled: grading_enabled, role });
+    });
+});
+
+//-----------------API for submitting a temporary grade for a specific thesis----
+app.post('/api/submit-grades', authenticateJWT, (req, res) => {
+    const { thesisId, grades, comments } = req.body;
+    const professorId = req.user.userId; // Από το JWT, υποθέτοντας ότι το ID του καθηγητή είναι στο token
+
+    if (!thesisId || !grades || grades.length !== 4) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `
+        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, comments, finalized)
+        VALUES (?, ?, ?, ?, ?, ?, ?, FALSE)
+        ON DUPLICATE KEY UPDATE 
+        grade = VALUES(grade), 
+        grade2 = VALUES(grade2), 
+        grade3 = VALUES(grade3), 
+        grade4 = VALUES(grade4),
+        comments =VALUES(comments),
+        finalized = FALSE;
+    `;
+
+    db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!' });
+    });
+});
+
+//-----------------API for finalizing the grade of a professor for a specific thesis----
+app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
+    const { thesisId, grades, comments } = req.body;
+    const professorId = req.user.userId;
+
+    if (!thesisId || !grades || grades.length !== 4) {
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `
+        INSERT INTO Grades (thesis_id, professor_id, grade, grade2, grade3, grade4, comments, finalized)
+        VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
+        ON DUPLICATE KEY UPDATE 
+        grade = VALUES(grade), 
+        grade2 = VALUES(grade2), 
+        grade3 = VALUES(grade3), 
+        grade4 = VALUES(grade4),
+        comments = VALUES(comments),
+        finalized = TRUE;
+    `;
+
+    db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Η οριστική καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!' });
+    });
+});
+
+//-----------------API for loading the grades of the other professors----
+app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
+    const { thesisId } = req.params;
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Ανεπαρκή δεδομένα.' });
+    }
+
+    const query = `SELECT 
+        p.name AS professor_name,
+        p.surname AS professor_surname,
+        g.grade AS grade1,
+        g.grade2 AS grade2,
+        g.grade3 AS grade3,
+        g.grade4 AS grade4,
+        g.comments AS comments,
+        g.finalized AS is_finalized
+    FROM 
+        Grades g
+    JOIN 
+        Professors p ON g.professor_id = p.id
+    WHERE 
+            g.thesis_id = ?;
+    `;
+
+    // Στο API
+    db.query(query, [thesisId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση βαθμολογίας:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την ανάκτηση βαθμολογίας.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({ success: true, grades: [] });  // Αν δεν υπάρχουν βαθμοί, στέλνουμε άδειο πίνακα
+        }
+
+        res.status(200).json({ success: true, grades: results });  // Επιστρέφουμε όλους τους βαθμούς
+    });
+
+});
+
+//-----------------API for loading the temporary grades of a professor for a specific thesis----
+app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
+    const { thesisId } = req.params;
+    const professorId = req.user.userId; // Από το JWT
+
+    if (!thesisId || !professorId) {
+        return res.status(400).json({ success: false, message: 'Ανεπαρκή δεδομένα.' });
+    }
+
+    const query = `
+        SELECT grade, grade2, grade3, grade4, comments, finalized
+        FROM Grades
+        WHERE thesis_id = ? AND professor_id = ?
+    `;
+
+    db.query(query, [thesisId, professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση βαθμολογίας:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την ανάκτηση βαθμολογίας.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({ success: true, grades: null });
+        }
+
+        const grades = results[0];
+        res.status(200).json({ success: true, grades });
+    });
+});
+
+
+
 
 
 //----------------- API to Assign Thesis to Students -----------------

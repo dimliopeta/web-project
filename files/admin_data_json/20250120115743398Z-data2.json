@@ -1,0 +1,37 @@
+{
+  "students": [
+    {
+      "id": "70",
+      "name": "Giannis00",
+      "surname": "Molotof00",
+      "student_number": "1043406000",
+      "street": "Ermou00",
+      "number": "3400",
+      "city": "Patras00",
+      "postcode": "2943800",
+      "father_name": "Giorgos00",
+      "landline_telephone": "26102500",
+      "mobile_telephone": "694310",
+      "email": "st1043406000@upnet.gr",
+      "contact_email": "giannis00@contact.com", 
+      "password": "defaultpassword"
+    },
+    {
+      "id": "770",
+      "name": "Giannis00",
+      "surname": "Molotof00",
+      "student_number": "1043406000",
+      "street": "Ermou00",
+      "number": "3400",
+      "city": "Patras00",
+      "postcode": "2943800",
+      "father_name": "Giorgos00",
+      "landline_telephone": "2000",
+      "mobile_telephone": "692676700",
+      "email": "st10434060dd00@upnet.gr",
+      "contact_email": "giannisdfdfd00@contact.com", 
+      "password": "defaultpassword"
+    }
+
+  ]
+}

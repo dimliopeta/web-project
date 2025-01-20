@@ -356,8 +356,8 @@ function showInfoSection(thesis) {
     const statusChangeSection = document.createElement('section');
     statusChangeSection.id = 'statusChangeSection';
     statusChangeSection.innerHTML = '<h4>Αλλαγές Καταστάσεων</h4>';
-    const statusChangeContainer= document.createElement('div');
-    statusChangeContainer.id ='statusChangeContainer';
+    const statusChangeContainer = document.createElement('div');
+    statusChangeContainer.id = 'statusChangeContainer';
     statusChangeSection.appendChild(statusChangeContainer);
     infoSection.appendChild(statusChangeSection);
 
@@ -966,7 +966,33 @@ function addToBeReviewedSection(thesis, container) {
     // Τμήμα για λήψη αρχείου διπλωματικής
     const downloadSection = document.createElement('section');
 
-    const downloadButton = createButton('download-thesis-button', 'Λήψη Αρχείου Διπλωματικής', ['btn', 'btn-primary', 'mb-3']);
+    const downloadButton = createButton('download-thesis-button', 'Λήψη Αρχείου Διπλωματικής', ['btn', 'btn-primary', 'mb-3'], () => {
+        const thesisId = thesis.thesis_id;  // ID της διπλωματικής
+
+        fetch(`/api/fetch_attachments?thesis_id=${thesisId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+        })
+            .then(response => response.json()) // Επιστρέφει το αρχείο ως blob
+            .then(data => {
+                if (data.success) {
+                    const file = data.attachments.find(attachment => attachment.type === 'file');
+                    if (file) {
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = file.file_path.replace('./', '/');
+                        downloadLink.textContent = file.file_path.split('/').pop();
+                        downloadLink.download = link.textContent; //Press to download
+                    }
+                } else {
+                    alert('Παρουσιάστηκε πρόβλημα στην ανεύρεση των αρχείων');
+                }
+            })
+            .catch(error => {
+                console.error('Download failed:', error);
+            });
+    });
 
     downloadSection.appendChild(downloadButton);
 
@@ -976,15 +1002,22 @@ function addToBeReviewedSection(thesis, container) {
     container.appendChild(downloadSection);
 
     // Τμήμα για δημιουργία ανακοίνωσης
-    const announcementSection = document.createElement('section');
+    if (thesis.role === 'Επιβλέπων') {
+        const announcementSection = document.createElement('section'); // Δηλώνουμε ρητά το announcementSection
 
-    const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3']);
-    announcementSection.appendChild(announcementButton);
+        // Εδώ δημιουργούμε το κουμπί και το πρόσθετο περιεχόμενο για την ανακοίνωση
+        announcementButtonController(thesis.thesis_id, announcementSection);
 
-    const announcementHr = document.createElement('hr');
-    announcementSection.appendChild(announcementHr);
+        let announcementContainer = document.querySelector('#announcement-container');
+        if (!announcementContainer) {
+            announcementContainer = document.createElement('div');
+            announcementContainer.id = 'announcement-container';
+            announcementContainer.classList.add('container', 'mt-4');
+            document.body.appendChild(announcementContainer); // Εδώ μπορείς να προσαρμόσεις το σημείο εισαγωγής
+        }
 
-    container.appendChild(announcementSection);
+        container.appendChild(announcementSection); // Προσθέτουμε το announcementSection στο container
+    }
 
     // Τμήμα για καταχώρηση βαθμού
     const gradeSection = document.createElement('section');
@@ -993,60 +1026,495 @@ function addToBeReviewedSection(thesis, container) {
     gradeTitle.textContent = 'Καταχώρηση Βαθμού';
     gradeSection.appendChild(gradeTitle);
 
-    const criteria = [
-        'Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%)',
-        'Χρονικό διάστημα εκπόνησής της (15%)',
-        'Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%)',
-        'Συνολική εικόνα της παρουσίασης (10%)'
-    ];
+    // Δημιουργία wrapper για δυναμικό περιεχόμενο
+    const gradeContent = document.createElement('div');
+    gradeContent.id = 'grade-content';
+    gradeSection.appendChild(gradeContent);
 
-    criteria.forEach((criterion, index) => {
-        const label = document.createElement('label');
-        label.textContent = criterion;
-        label.classList.add('form-label', 'mt-3');
-        gradeSection.appendChild(label);
-
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.id = `grade-criterion-${index + 1}`;
-        input.classList.add('form-control');
-        input.placeholder = `Βαθμός (0-10)`;
-        gradeSection.appendChild(input);
-    });
-
-    const submitGradeButton = createButton('submit-grade-button', 'Καταχώρηση Βαθμού', ['btn', 'btn-success', 'mt-3', 'mb-3']);
-    gradeSection.appendChild(submitGradeButton);
-
-    // Εμφάνιση βαθμών άλλων μελών
-    const otherGradesTitle = document.createElement('h5');
-    otherGradesTitle.textContent = 'Βαθμοί άλλων μελών';
-    gradeSection.appendChild(otherGradesTitle);
-
-    const gradesList = document.createElement('div');
-    gradesList.id = 'grades-list';
-    gradesList.classList.add('border', 'p-3', 'mt-2');
-    gradesList.style.maxHeight = '150px';
-    gradesList.style.overflowY = 'auto';
-    gradesList.innerHTML = `
-            <p><strong>Καθηγητής Παπαδόπουλος:</strong></p>
-            <p>Ποιότητα Δ.Ε.: 8</p>
-            <p>Χρονικό διάστημα: 9</p>
-            <p>Ποιότητα κειμένου: 7</p>
-            <p>Παρουσίαση: 8</p>
-            <hr>
-            <p><strong>Καθηγητής Ιωάννου:</strong></p>
-            <p>Ποιότητα Δ.Ε.: 7</p>
-            <p>Χρονικό διάστημα: 8</p>
-            <p>Ποιότητα κειμένου: 8</p>
-            <p>Παρουσίαση: 9</p>
-        `;
-    gradeSection.appendChild(gradesList);
-
-    const gradeHr = document.createElement('hr');
-    gradeSection.appendChild(gradeHr);
+    loadGradeSection(thesis.thesis_id, gradeContent);
 
     container.appendChild(gradeSection);
 }
+
+function announcementButtonController(thesisId, container) {
+    fetch('/api/check-exam', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thesisId: thesisId })
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error('Failed to add announcement');
+        }
+        return response.json();
+    })
+    .then((data) => {
+        if (!data.announced) {
+            const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesisId));
+            container.appendChild(announcementButton);
+            const announcementHr = document.createElement('hr');
+            container.appendChild(announcementHr);
+        } else {
+            const showAnnouncementButton = createButton('show-announcement-button', 'Προβολή Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => {
+                fetchAnnouncementDetails(thesisId);
+            });
+            container.appendChild(showAnnouncementButton);
+
+            const announcementHr = document.createElement('hr');
+            container.appendChild(announcementHr);
+        }
+    });
+}
+
+function fetchAnnouncementDetails(thesisId) {
+    fetch(`/api/get-announcement-details?thesisId=${thesisId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAnnouncementModal(data.data);
+        } else {
+            alert('Πρόβλημα στην ανάκτηση της ανακοίνωσης');
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching announcement details:', error);
+        alert('Κάτι πήγε στραβά κατά την ανάκτηση της ανακοίνωσης.');
+    });
+}
+
+function showAnnouncementModal(announcementDetails) {
+    // Δημιουργία του modal container
+    const modal = document.createElement('div');
+    modal.classList.add('modal', 'fade');
+    modal.id = 'announcementModal';
+    modal.tabIndex = -1;
+    modal.setAttribute('aria-labelledby', 'announcementModalLabel');
+    modal.setAttribute('aria-hidden', 'true');
+    
+    // Δημιουργία του modal dialog
+    const modalDialog = document.createElement('div');
+    modalDialog.classList.add('modal-dialog');
+    
+    // Δημιουργία του modal content
+    const modalContent = document.createElement('div');
+    modalContent.classList.add('modal-content');
+    
+    // Header
+    const modalHeader = document.createElement('div');
+    modalHeader.classList.add('modal-header');
+    
+    const modalTitle = document.createElement('h5');
+    modalTitle.classList.add('modal-title');
+    modalTitle.id = 'announcementModalLabel';
+    modalTitle.textContent = `Ανακοίνωση για την Διπλωματική: ${announcementDetails.title}`;
+    modalHeader.appendChild(modalTitle);
+
+    const closeButton = document.createElement('button');
+    closeButton.classList.add('btn-close');
+    closeButton.setAttribute('data-bs-dismiss', 'modal');
+    closeButton.setAttribute('aria-label', 'Close');
+    modalHeader.appendChild(closeButton);
+
+    modalContent.appendChild(modalHeader);
+
+    // Body
+    const modalBody = document.createElement('div');
+    modalBody.classList.add('modal-body');
+    
+    // Προσθήκη περιεχομένων ανακοίνωσης στο modal body
+    modalBody.innerHTML = `
+        <p><strong>Φοιτητής:</strong> ${announcementDetails.student_name} ${announcementDetails.student_surname}</p>
+        <p><strong>Επιβλέπων:</strong> ${announcementDetails.professor_name} ${announcementDetails.professor_surname}</p>
+        <p><strong>Ημερομηνία Εξέτασης:</strong> ${announcementDetails.examination_date}</p>
+        <p><strong>Τύπος Εξέτασης:</strong> ${announcementDetails.type_of_exam === 'online' ? 'Ηλεκτρονική' : announcementDetails.type_of_exam === 'in-person' ? 'Δια ζώσης' : 'Άγνωστος τύπος'}</p>
+        <p><strong>Τοποθεσία Εξέτασης:</strong> ${announcementDetails.examination_location}</p>
+    `;
+    
+    modalContent.appendChild(modalBody);
+    
+    // Footer
+    const modalFooter = document.createElement('div');
+    modalFooter.classList.add('modal-footer');
+    
+    const closeModalButton = document.createElement('button');
+    closeModalButton.classList.add('btn', 'btn-secondary');
+    closeModalButton.setAttribute('data-bs-dismiss', 'modal');
+    closeModalButton.textContent = 'Κλείσιμο';
+    modalFooter.appendChild(closeModalButton);
+    
+    modalContent.appendChild(modalFooter);
+    
+    modalDialog.appendChild(modalContent);
+    modal.appendChild(modalDialog);
+    
+    document.body.appendChild(modal);
+    
+    // Εμφάνιση του modal
+    const myModal = new bootstrap.Modal(modal);
+    myModal.show();
+    
+    // Καθαρισμός μετά το κλείσιμο
+    modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+    });
+}
+
+
+function addToAnnouncements(thesisId) {
+    const announcementButton = document.querySelector('#create-announcement-button');
+
+    fetch('/api/add-announcement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thesisId: thesisId }) // Sending thesisId, not thesis.id
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Failed to add announcement');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log('Received data:', data); // Προσθήκη log για να δούμε τα δεδομένα
+
+            // Ελέγχουμε αν υπάρχουν τα announcementDetails
+            if (data.success && data.data) {
+
+                // Αφαίρεση του κουμπιού μετά την επιτυχή δημιουργία ανακοίνωσης
+                if (announcementButton) {
+                    announcementButton.remove();
+                }
+
+                showAnnouncementModal(data.data);
+
+                // Προσθήκη του στοιχείου ανακοίνωσης στην σελίδα (π.χ. μέσα σε κάποιο container)
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error creating announcement:', error);
+        });
+}
+
+
+function loadGradeSection(thesisId, container) {
+    // Δημιουργία wrapper για το περιεχόμενο βαθμολογίας
+    const existingContent = document.getElementById('grade-content');
+    if (existingContent && container.contains(existingContent)) {
+        container.removeChild(existingContent);
+    }
+
+    const gradeContent = document.createElement('div');
+    gradeContent.id = 'grade-content';
+
+
+    // Αίτημα για την κατάσταση της διπλωματικής
+    fetch(`/api/thesis-status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ thesisId })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && !data.gradingEnabled) {
+                if (data.role === 'Επιβλέπων') {
+                    gradeEnableButton(thesisId, gradeContent);
+                } else {
+                    const message = document.createElement('p');
+                    message.textContent = 'Η βαθμολόγηση δεν έχει ενεργοποιηθεί από τον επιβλέποντα διδάσκοντα.';
+                    message.classList.add('text-warning', 'mt-3'); // Προσθήκη κάποιου στυλ για έμφαση
+                    gradeContent.appendChild(message);
+                }
+            } else if (data.success && data.gradingEnabled) {
+                renderGradeSection(thesisId, gradeContent);
+                loadGradeList(thesisId, gradeContent);
+            }
+            container.appendChild(gradeContent); // Προσθήκη περιεχομένου βαθμολογίας
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την ανάκτηση της κατάστασης:', error);
+        });
+}
+
+
+function renderGradeSection(thesisId, container) {
+    container.innerHTML = '';
+    fetch(`/api/get-professor-grades/${thesisId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            const grades = data.grades || {};
+
+            if (!grades.finalized) {
+
+                const criteria = [
+                    'Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%)',
+                    'Χρονικό διάστημα εκπόνησής της (15%)',
+                    'Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%)',
+                    'Συνολική εικόνα της παρουσίασης (10%)'
+                ];
+
+                criteria.forEach((criterion, index) => {
+                    const label = document.createElement('label');
+                    label.textContent = criterion;
+                    label.classList.add('form-label', 'mt-3');
+                    container.appendChild(label);
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.id = `grade-criterion-${index + 1}`;
+                    input.classList.add('form-control');
+                    input.placeholder = `Βαθμός (0-10)`;
+                    const gradeKey = index === 0 ? 'grade' : `grade${index + 1}`;
+                    input.value = grades[gradeKey] !== undefined ? grades[gradeKey] : '';
+                    container.appendChild(input);
+                });
+
+                const commentsLabel = document.createElement('label');
+                commentsLabel.textContent = 'Σχόλια:';
+                commentsLabel.classList.add('form-label', 'mt-3');
+                container.appendChild(commentsLabel);
+
+                const commentsTextarea = document.createElement('textarea');
+                commentsTextarea.id = 'grade-comments';
+                commentsTextarea.classList.add('form-control');
+                commentsTextarea.rows = 4; // Προαιρετικά για το ύψος
+                commentsTextarea.placeholder = 'Προσθέστε σχόλια...';
+                commentsTextarea.value = (data.grades && data.grades.comments) ? data.grades.comments : '';
+                container.appendChild(commentsTextarea);
+
+                // Δημιουργία button container
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4'); // Χρήση Bootstrap classes για στοίχιση
+
+                const submitGradeButton = createButton(
+                    'submit-grade-button',
+                    grades.grade !== undefined ? 'Αλλαγή Καταχώρησης Βαθμού' : 'Καταχώρηση Βαθμού',
+                    ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId, container)
+                );
+
+                buttonContainer.appendChild(submitGradeButton);
+
+                // Δημιουργία κουμπιού "Οριστική Υποβολή"
+                const finalizeButton = createButton(
+                    'finalize-grade-button',
+                    'Οριστική Υποβολή',
+                    ['btn', 'btn-danger'], () => handleFinalizeButtonClick(thesisId, container)
+                );
+
+                buttonContainer.appendChild(finalizeButton);
+
+                container.appendChild(buttonContainer);
+            } else {
+                // Μήνυμα αν η βαθμολογία είναι οριστικοποιημένη
+                container.innerHTML = '<p class="text-danger text-center">Οι βαθμοί έχουν ήδη υποβληθεί οριστικά και δεν μπορούν να τροποποιηθούν.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την ανάκτηση βαθμολογίας:', error);
+        });
+}
+
+function loadGradeList(thesisId, container) {
+    fetch(`/api/get-grades-list/${thesisId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('API Response:', data);  // Ελέγχουμε τα δεδομένα που επιστρέφει το API
+
+            const gradeListSection = document.createElement('div');
+            gradeListSection.classList.add('grade-list', 'mt-4');
+
+            const gradeListTitle = document.createElement('h5');
+            gradeListTitle.textContent = 'Καταχωρηθέντες Βαθμοί';
+            gradeListSection.appendChild(gradeListTitle);
+
+            const gradeListContainer = document.createElement('ul');
+            gradeListContainer.classList.add('list-group');
+
+            // Ελέγχουμε αν το 'grades' είναι πίνακας και έχει δεδομένα
+            if (data.success && Array.isArray(data.grades) && data.grades.length > 0) {
+                // Διατρέχουμε τον πίνακα και δημιουργούμε ένα στοιχείο για κάθε βαθμό
+                data.grades.forEach(grade => {
+                    const gradeItem = document.createElement('li');
+                    gradeItem.classList.add('list-group-item');
+
+                    gradeItem.innerHTML = `
+                        Καθηγητής:<strong> ${grade.professor_name} ${grade.professor_surname} </strong> <br>
+                        Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%): <strong>  ${grade.grade1} </strong><br>
+                        Χρονικό διάστημα εκπόνησής της (15%): <strong>  ${grade.grade2} </strong> <br>
+                        Ποιότητα και πληρότητα του κειμένου της εργασίας και των υπολοίπων παραδοτέων της (15%): <strong>  ${grade.grade3} </strong> <br>
+                        Συνολική εικόνα της παρουσίασης (10%): <strong>  ${grade.grade4} </strong><br>
+                        Σχόλια:<strong> ${grade.comments || 'Δεν υπάρχουν σχόλια'} </strong><br>
+                        Οριστικοποιημένο: <strong> ${grade.is_finalized ? 'Ναι' : 'Όχι'} </strong>
+                    `;
+
+                    gradeListContainer.appendChild(gradeItem);
+                });
+                gradeListSection.appendChild(gradeListContainer);
+            } else {
+                const noGradesMessage = document.createElement('p');
+                noGradesMessage.textContent = 'Δεν υπάρχουν βαθμολογίες.';
+                gradeListSection.appendChild(noGradesMessage);
+            }
+
+            container.appendChild(gradeListSection);
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την φόρτωση βαθμολογιών:', error);
+            container.innerHTML = '<p>Προέκυψε σφάλμα κατά την φόρτωση των βαθμολογιών.</p>';
+        });
+}
+
+
+function handleSubmitGradeButtonClick(thesisId, container) {
+    const grades = [];
+
+    // Συλλογή βαθμών από τα input πεδία
+    for (let i = 1; i <= 4; i++) {
+        const input = document.getElementById(`grade-criterion-${i}`);
+        const value = parseFloat(input.value);
+
+        if (isNaN(value) || value < 0 || value > 10) {
+            alert(`Ο βαθμός ${i} πρέπει να είναι μεταξύ 0 και 10.`);
+            return;
+        }
+
+        grades.push(value);
+    }
+
+    // Συλλογή σχολίων
+    const comments = document.getElementById('grade-comments')?.value || '';
+
+    // Αποστολή δεδομένων στο API
+    fetch('/api/submit-grades', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            thesisId,
+            grades,
+            comments // Προσθήκη σχολίων στο αίτημα
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
+                renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+                loadGradeList(thesisId, container);
+            } else {
+                alert(`Σφάλμα: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την καταχώρηση βαθμών:', error);
+            alert('Κάτι πήγε στραβά!');
+        });
+}
+
+
+function handleFinalizeButtonClick(thesisId, container) {
+    const grades = [];
+
+    // Συλλογή βαθμών από τα input πεδία
+    for (let i = 1; i <= 4; i++) {
+        const input = document.getElementById(`grade-criterion-${i}`);
+        const value = parseFloat(input.value);
+
+        if (isNaN(value) || value < 0 || value > 10) {
+            alert(`Ο βαθμός ${i} πρέπει να είναι μεταξύ 0 και 10.`);
+            return;
+        }
+
+        grades.push(value);
+    }
+
+    const comments = document.getElementById('grade-comments')?.value || '';
+
+    // Αποστολή δεδομένων στο API για οριστική υποβολή
+    fetch('/api/finalize-submitted-grades', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            thesisId,
+            grades,
+            comments
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Η οριστική καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
+                renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+                loadGradeList(thesisId, container);
+
+            } else {
+                alert(`Σφάλμα: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά την οριστική υποβολή βαθμών:', error);
+            alert('Κάτι πήγε στραβά!');
+        });
+}
+
+
+
+
+function gradeEnableButton(thesisId, container) {
+    const gradeThesisButton = createButton('grade-thesis-button', 'Ενεργοποίηση Βαθμολόγησης', ['btn', 'btn-success', 'mt-2'], () => {
+        fetch('/api/enable-grading', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ thesisId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Ενεργοποιήθηκε η βαθμολόγηση επιτυχώς!');
+                    if (gradeThesisButton.parentNode) {
+                        gradeThesisButton.remove();
+                    }
+                    loadGradeSection(thesisId, container);
+                } else {
+                    alert(`Σφάλμα: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('Σφάλμα κατά την εκκίνηση:', error);
+                alert('Κάτι πήγε στραβά κατά την εκκίνηση!');
+            });
+    });
+
+    container.appendChild(gradeThesisButton);
+}
+
 
 
 function loadLogs(thesis_id) {
@@ -1371,7 +1839,7 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
 
     const title = document.getElementById('title').value;
     const summary = document.getElementById('summary').value;
-    const pdf = document.getElementById('pdf').files[0]; h
+    const pdf = document.getElementById('pdf').files[0]; 
     const token = localStorage.getItem('token');
 
 
