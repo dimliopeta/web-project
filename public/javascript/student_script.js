@@ -95,6 +95,11 @@ function loadStudentThesis() {
 
                 }
                 // Update the data-fields in the dashboard
+                const finalGradeSupervisor = (thesis.supervisor_grade1*0.6 + thesis.supervisor_grade2*0.15 + thesis.supervisor_grade3*0.15 + thesis.supervisor_grade4*0.1);
+                const finalGradeCommittee1 = (thesis.committee_member1_grade1*0.6 + thesis.committee_member1_grade2*0.15 + thesis.committee_member1_grade3*0.15 + thesis.committee_member1_grade4*0.1);
+                const finalGradeCommittee2 =(thesis.committee_member2_grade1*0.6 + thesis.committee_member2_grade2*0.15 + thesis.committee_member2_grade3*0.15 + thesis.committee_member2_grade4*0.1);
+                const finalGrade = calculateFinalGrade(finalGradeSupervisor, finalGradeCommittee1, finalGradeCommittee2);
+                
                 updateDataField('thesis_status', status); // Declared above, used in switch
                 updateDataField('thesis_title', thesis.title);
                 updateDataField('thesis_summary', thesis.summary);
@@ -108,11 +113,11 @@ function loadStudentThesis() {
                 updateDataField('committee_member1_surname', thesis.committee_member1_surname || ' ');
                 updateDataField('committee_member2_name', thesis.committee_member2_name || 'Δεν έχει οριστεί');
                 updateDataField('committee_member2_surname', thesis.committee_member2_surname || ' ');
-                updateDataField('supervisor_grade', thesis.supervisor_grade || ' ');
-                updateDataField('committee_member1_grade', thesis.committee_member1_grade || ' ');
-                updateDataField('committee_member2_grade', thesis.committee_member2_grade || ' ');
+                updateDataField('supervisor_grade', finalGradeSupervisor || ' ');
+                updateDataField('committee_member1_grade', finalGradeCommittee1 || ' ');
+                updateDataField('committee_member2_grade', finalGradeCommittee2 || ' ');
 
-                const finalGrade = calculateFinalGrade(thesis.supervisor_grade, thesis.committee_member1_grade, thesis.committee_member2_grade);
+
                 updateDataField('final_grade', finalGrade);
 
                 // Display thesis start date, duration, end date based on status
@@ -194,11 +199,11 @@ function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMe
 
     if (grade1 === null || grade2 === null || grade3 === null) {
         return 'Η βαθμολόγιση δεν έχει ολοκληρωθεί.';
-    }
-
+    } else {
     const totalGrade = grade1 + grade2 + grade3;
     const finalGrade = totalGrade / 3;
     return finalGrade.toFixed(2);
+    }
 }
 //---------------Helper function to calculate the thesis duration in months and days
 function calculateDuration(startDate) {
@@ -372,7 +377,7 @@ function loadSectionsBasedOnStatus() {
                         managementSection.style.display = "block";
                         datesSection.style.display = "block";
 
-                        if(thesis.committee_member1_grade != null && thesis.committee_member2_grade != null && thesis.supervisor_grade != null){
+                        if(thesis.committee_member1_finalized === true && thesis.committee_member2_finalized === true && thesis.supervisor_finalized === true){
                             completedFilesSection.style.display = "block";
                             document.getElementById("configurationCompletedFilesNimertisLink").style.display = 'none';
                         }
@@ -971,7 +976,7 @@ function getDayName(dateStr, locale) {
 }
 //------------------------------ Load Exam Report Data Function ------------------------------
 function loadExamReportData() {
-    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
+    const token = localStorage.getItem('token');
 
     fetch('/api/examReportDetails_fetch', {
         method: 'GET',
@@ -989,8 +994,15 @@ function loadExamReportData() {
             if (data.success && data.examReport.length > 0) {
                 const reportData = data.examReport[0];
 
-                const finalGrade = calculateFinalGrade(reportData.supervisor_grade, reportData.committee_member1_grade, reportData.committee_member2_grade);
-                updateDataField('final_grade', finalGrade);
+                const finalGradeSupervisor = (reportData.supervisor_grade1*0.6 + reportData.supervisor_grade2*0.15 + reportData.supervisor_grade3*0.15 + reportData.supervisor_grade4*0.1);
+                const finalGradeCommittee1 = (reportData.committee_member1_grade1*0.6 + reportData.committee_member1_grade2*0.15 + reportData.committee_member1_grade3*0.15 + reportData.committee_member1_grade4*0.1);
+                const finalGradeCommittee2 =(reportData.committee_member2_grade1*0.6 + reportData.committee_member2_grade2*0.15 + reportData.committee_member2_grade3*0.15 + reportData.committee_member2_grade4*0.1);
+                const finalGrade = calculateFinalGrade(finalGradeSupervisor, finalGradeCommittee1, finalGradeCommittee2);
+
+                updateDataField('final_grade', finalGrade); // Grades calculated and passed to the grades section here
+                updateDataField('supervisor_finalgrade', finalGradeSupervisor); 
+                updateDataField('committee_member1_finalgrade', finalGradeCommittee1);
+                updateDataField('committee_member2_finalgrade', finalGradeCommittee2); 
 
                 const supervisorNameSurname = nameSurname(reportData.professor_name, reportData.professor_surname);
                 const committeeMember1NameSurname = nameSurname(reportData.committee_member1_name, reportData.committee_member1_surname);
@@ -1029,9 +1041,9 @@ function loadExamReportData() {
                 updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
                 updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
                 updateDataField('examReportFinalGrade', finalGrade);
-                updateDataField('examReportSupervisorGrade', reportData.supervisor_grade);
-                updateDataField('examReportCommittee1Grade', reportData.committee_member1_grade);
-                updateDataField('examReportCommittee2Grade', reportData.committee_member2_grade);
+                updateDataField('examReportSupervisorGrade', finalGradeSupervisor);
+                updateDataField('examReportCommitteeMember1Grade', finalGradeCommittee1);
+                updateDataField('examReportCommitteeMember2Grade', finalGradeCommittee2);
 
 
 
