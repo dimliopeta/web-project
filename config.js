@@ -314,7 +314,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No logs data found in the file.');
         }
 
-        console.log(`Database up-to-date!`);
+        console.log(`Database updated!`);
 
     } else {
         console.log("Skipping data insertion due to missing file.");
