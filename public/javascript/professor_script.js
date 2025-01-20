@@ -1384,8 +1384,6 @@ function loadGradeList(thesisId, container) {
 }
 
 
-
-
 function handleSubmitGradeButtonClick(thesisId, container) {
     const grades = [];
 
