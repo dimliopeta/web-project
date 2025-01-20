@@ -1,0 +1,18 @@
+{
+  "students": [
+    {
+      "id": "69",
+      "name": "Giannis00 ",
+      "surname": "Molotof00",
+      "student_number": "1043406000",
+      "street": "Ermou00",
+      "number": "3400",
+      "city": "Patras00",
+      "postcode": "2943800",
+      "father_name": "Giorgos00",
+      "landline_telephone": "261025439000",
+      "mobile_telephone": "694312676700",
+      "email": "st1043406000@upnet.gr"
+    }
+  ]
+}

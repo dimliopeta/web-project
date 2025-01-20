@@ -322,7 +322,7 @@ document.getElementById("adminUploadDataButton").addEventListener("change", func
         const formData = new FormData();
         formData.append("file", file);
 
-        fetch('/uploadData', {
+        fetch('/uploadAdminData', {
             method: 'POST',
             body: formData,
         })
