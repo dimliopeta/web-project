@@ -1074,10 +1074,6 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
     });
 });
 
-app.get('/api/get-final-grades', authenticateJWT, (req, res) => {
-
-});
-
 //----------------- API to Create Invitation for Thesis Committee -----------------
 app.post('/api/invitation_create', authenticateJWT, (req, res) => {
     const { professorId } = req.body;
