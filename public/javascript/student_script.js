@@ -504,7 +504,6 @@ document.getElementById('changeProfessorButton').addEventListener('click', funct
 //--------------- Get the "Πρόσκληση" button to open the professor Search Bar
 document.querySelectorAll('.inviteCommitteeButton').forEach(button => {
     button.addEventListener('click', function () {
-        // Show the professor search bar
         document.getElementById('professorSearchBar').style.display = 'block';
     });
 });
@@ -553,12 +552,12 @@ function loadThesisInvitations(thesis_id) {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ thesis_id: thesis_id }) // Send thesis_id in the request body
+        body: JSON.stringify({ thesis_id: thesis_id })
     })
         .then(response => response.json())
         .then(data => {
             const container = document.querySelector('#invitationCardSection .row');
-            container.innerHTML = ''; // Clear previous content
+            container.innerHTML = ''; 
 
             if (data.success && data.invitations.length > 0) {
                 document.querySelector('#invitationCardSection').style.display = 'block';
@@ -644,7 +643,7 @@ function setupEventListeners(thesis) {
         const configurationUploadFileInputBox = document.getElementById('configurationUploadFileInputBox').files[0];
         if (configurationUploadFileInputBox) {
             if (thesis) {
-                uploadFile(configurationUploadFileInputBox, thesis);  // Pass thesis to the uploadFile function
+                uploadFile(configurationUploadFileInputBox, thesis);
             } else {
                 alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
@@ -657,7 +656,7 @@ function setupEventListeners(thesis) {
         const configurationUploadLinkInputBox = document.getElementById('configurationUploadLinkInputBox').value;
         if (configurationUploadLinkInputBox) {
             if (thesis) {
-                uploadLink(configurationUploadLinkInputBox, thesis);  // Pass thesis to the uploadLink function
+                uploadLink(configurationUploadLinkInputBox, thesis);
             } else {
                 alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
@@ -711,7 +710,7 @@ function uploadFile(fileInput, thesis) {
     fetch('/api/upload_attachment', {
         method: 'POST',
         body: formData,         //Send as formData since its a file
-        credentials: 'include', // Ensure the cookie is sent with the request
+        credentials: 'include',
     })
         .then(response => response.json())
         .then(data => {
@@ -737,7 +736,7 @@ function uploadLink(link, thesis) {
     fetch('/api/upload_attachment', {
         method: 'POST',
         body: formData,
-        credentials: 'include', // Ensure the cookie is sent with the request
+        credentials: 'include',
     })
         .then(response => response.json())
         .then(data => {
@@ -769,7 +768,7 @@ function uploadNimertisLink(link, thesis) {
     fetch('/api/update_nimertis_link', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',  // Send as JSON
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
         credentials: 'include',
@@ -810,7 +809,6 @@ function uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, th
         .then(data => {
             if (data.success) {
                 fetchAndDisplayExaminations(thesis); // Refresh exam details display
-                //document.getElementById('examDateSection').style.display = 'block';
             } else {
                 alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
@@ -1058,8 +1056,7 @@ function loadExamReportData() {
 
 //------------------------------ Function to Load Logs Data for Status Change Section ------------------------------
 function loadLogsData() {
-    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
-
+    const token = localStorage.getItem('token');
     fetch('/api/logs_fetch', {
         method: 'GET',
         headers: {
@@ -1156,29 +1153,25 @@ function showSection(sectionId) {
 function loadStudentProfile() {
     const token = localStorage.getItem('token');
 
-    // Fetch student data from the backend API
     fetch('/api/student', {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${token}`, // Send token in Authorization header
+            'Authorization': `Bearer ${token}`,
         }
     })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch student data');
             }
-            return response.json(); // Parse the response as JSON
+            return response.json();
         })
         .then(data => {
-            // Update the profile page with fetched data
             const student = data;
 
             // Profile details
             document.querySelector('#student_profile [data-field="name"]').textContent = student.name;
             document.querySelector('#student_profile [data-field="surname"]').textContent = student.surname;
             document.querySelector('#student_profile [data-field="student_number"]').textContent = student.student_number;
-
-            // Contact information
             document.querySelector('#student_profile [data-field="contact_email"]').textContent = student.contact_email;
             document.querySelector('#student_profile [data-field="mobile_telephone"]').textContent = student.mobile_telephone;
             document.querySelector('#student_profile [data-field="landline_telephone"]').textContent = student.landline_telephone;
@@ -1225,15 +1218,14 @@ document.querySelector('#student_profile').addEventListener('click', function (e
             button.classList.remove('btn-success');
             button.classList.add('btn-outline-primary');
 
-            // Save the updated data to the backend
-            const token = localStorage.getItem('token'); // Get the JWT token
+            const token = localStorage.getItem('token');
             fetch('/api/updateProfile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ [fieldName]: newValue }) // Send the updated field name and value
+                body: JSON.stringify({ [fieldName]: newValue })
             })
                 .then(response => {
                     if (!response.ok) {
