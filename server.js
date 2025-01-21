@@ -532,10 +532,10 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
                 c.member2_id AS committee_member2_id,
                 CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
-                t.start_date,
+                DATE_FORMAT(t.start_date, '%Y-%m-%d') AS start_date,
                 t.final_grade,
                 t.nimertis_link,
-                e.date,
+                DATE_FORMAT(e.date, '%Y-%m-%d') AS exam_date,
                 GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
                 CASE
                     WHEN t.professor_id = ? THEN 'Επιβλέπων'
@@ -1264,6 +1264,7 @@ app.put('/api/theses/update', authenticateJWT, uploadPDFOnly.single('pdf'), (req
             updatedData.pdf_path === oldData.pdf_path
         ) {
             return res.status(400).json({ success: false, message: 'No changes detected.' });
+            
         }
 
         // Delete old PDF if a new one was uploaded
@@ -1307,8 +1308,8 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
         i.thesis_id,
         i.professor_id,
         i.status AS invitation_status,
-        i.invitation_date,
-        i.response_date,
+        DATE_FORMAT(i.invitation_date, '%Y-%m-%d') AS invitation_date,
+        DATE_FORMAT(i.response_date, '%Y-%m-%d') AS response_date,
         t.title AS thesis_title,
         t.summary AS thesis_summary,
         CONCAT(s.name, ' ', s.surname) AS student_name,
@@ -1626,7 +1627,7 @@ app.post('/api/get-notes', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        SELECT n.content, n.date, p.name AS professor_name
+        SELECT n.content, DATE_FORMAT(n.date, '%Y-%m-%d') AS date, p.name AS professor_name
         FROM Notes n
         JOIN Professors p ON n.professor_id = p.id
         WHERE n.thesis_id = ? AND n.professor_id = ?;
@@ -1669,15 +1670,15 @@ app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
     }
 
     const query = `
-        SELECT 
-            l.gen_assembly_session,
-            l.cancellation_reason,
-            l.date_of_change
-        FROM Logs l
-        WHERE l.thesis_id = ? AND l.new_state = 'cancelled'
-        ORDER BY l.date_of_change DESC
-        LIMIT 1;
-    `;
+    SELECT 
+        l.gen_assembly_session,
+        l.cancellation_reason,
+        DATE_FORMAT(l.date_of_change, '%Y-%m-%d') AS formatted_date_of_change
+    FROM Logs l
+    WHERE l.thesis_id = ? AND l.new_state = 'cancelled'
+    ORDER BY l.date_of_change DESC
+    LIMIT 1;
+`;
 
     db.query(query, [thesis_id], (err, results) => {
         if (err) {
@@ -1977,7 +1978,7 @@ app.post('/api/add-announcement', (req, res) => {
             s.surname AS student_surname,
             p.name AS professor_name,
             p.surname AS professor_surname,
-            e.date AS examination_date,
+            DATE_FORMAT(e.date, '%Y-%m-%d') AS examination_date,
             e.type_of_exam,
             e.location AS examination_location
         FROM Theses t
@@ -2098,7 +2099,7 @@ app.get('/api/get-announcement-details/', (req, res) => {
             s.surname AS student_surname,
             p.name AS professor_name,
             p.surname AS professor_surname,
-            e.date AS examination_date,
+            DATE_FORMAT(e.date, '%Y-%m-%d') AS examination_date,
             e.type_of_exam,
             e.location AS examination_location
         FROM Theses t
