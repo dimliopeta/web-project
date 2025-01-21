@@ -4,12 +4,12 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
 
-        // Απόκρυψη όλων των sections
+        // Hide all sections
         document.querySelectorAll('.content-section').forEach(section => {
             section.style.display = 'none';
         });
 
-        // Εμφάνιση του ενεργού section
+        // Show active section
         const targetId = this.getAttribute('href')
             ? this.getAttribute('href').substring(1)
             : this.getAttribute('data-target');
@@ -37,14 +37,14 @@ console.log('Hello fellow web user. Congratulations for finding this message! Yo
 
 //--------------- Logout Function ---------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
-    event.preventDefault(); // Αποφυγή της προεπιλεγμένης συμπεριφοράς του link
+    event.preventDefault();
     fetch('/logout', {
         method: 'POST',
-        credentials: 'include' // Περιλαμβάνει cookies
+        credentials: 'include'
     })
         .then(response => {
             if (response.ok) {
-                window.location.href = '/'; // Ανακατεύθυνση στο index
+                window.location.href = '/'; // Redirect to index
             } else {
                 alert('Η αποσύνδεση απέτυχε.');
             }
@@ -58,7 +58,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 //------------------------------ Functions to Load Thesis and helper functions ------------------------------
 //------------------------------ Load Thesis Function ------------------------------
 function loadStudentThesis() {
-    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
+    const token = localStorage.getItem('token');
 
     fetch('/api/theses', {
         method: 'GET',
@@ -74,7 +74,7 @@ function loadStudentThesis() {
         })
         .then(data => {
             if (data.success && data.theses.length > 0) {
-                const thesis = data.theses[0]; // Assuming one thesis per student
+                const thesis = data.theses;
 
                 let status;
                 switch (thesis.status) {
@@ -94,12 +94,12 @@ function loadStudentThesis() {
                         status = 'Ακυρωμένη.';
 
                 }
-                // Update the data-fields in the dashboard
+                
                 const finalGradeSupervisor = (thesis.supervisor_grade1*0.6 + thesis.supervisor_grade2*0.15 + thesis.supervisor_grade3*0.15 + thesis.supervisor_grade4*0.1);
                 const finalGradeCommittee1 = (thesis.committee_member1_grade1*0.6 + thesis.committee_member1_grade2*0.15 + thesis.committee_member1_grade3*0.15 + thesis.committee_member1_grade4*0.1);
                 const finalGradeCommittee2 =(thesis.committee_member2_grade1*0.6 + thesis.committee_member2_grade2*0.15 + thesis.committee_member2_grade3*0.15 + thesis.committee_member2_grade4*0.1);
                 const finalGrade = calculateFinalGrade(finalGradeSupervisor, finalGradeCommittee1, finalGradeCommittee2);
-                
+                // Update the data-fields in the dashboard
                 updateDataField('thesis_status', status); // Declared above, used in switch
                 updateDataField('thesis_title', thesis.title);
                 updateDataField('thesis_summary', thesis.summary);
@@ -116,8 +116,6 @@ function loadStudentThesis() {
                 updateDataField('supervisor_grade', finalGradeSupervisor || ' ');
                 updateDataField('committee_member1_grade', finalGradeCommittee1 || ' ');
                 updateDataField('committee_member2_grade', finalGradeCommittee2 || ' ');
-
-
                 updateDataField('final_grade', finalGrade);
 
                 // Display thesis start date, duration, end date based on status
@@ -147,7 +145,6 @@ function loadStudentThesis() {
                     dashboardEndDate.style.display = 'none';
                 }
 
-                // Handle the PDF download button
                 const pdfButton = document.querySelector('#dashboard [data-field="pdf_button"]');
                 if (thesis.pdf_path) {
                     pdfButton.addEventListener('click', () => {
@@ -158,8 +155,8 @@ function loadStudentThesis() {
                         alert('Δεν υπάρχει PDF διαθέσιμο γι αυτή τη διπλωματική.');
                     });
 
-                    //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
-                    //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
+                    pdfButton.disabled = true; // Setting to disable the button
+                    //pdfButton.style.display = 'none'; // Setting to Hide the button 
                 }
 
                 // Hide the Committee Invitation button in thesis Management if committee is full
@@ -181,17 +178,17 @@ function loadStudentThesis() {
         });
 
 }
-//---------------Helper function add 2 strings together (Name + Surname)
+//--------------- Helper function add 2 strings together (Name + Surname)
 function nameSurname(name, surname) {
     return name + ' ' + surname;
 }
-//---------------Helper function to sort alphabetically 3 inputs
+//--------------- Helper function to sort alphabetically 3 inputs
 function sortThreeStrings(input1, input2, input3) {
     const inputs = [input1, input2, input3];
     inputs.sort();
     return inputs;
 }
-//---------------Helper function to calculate the Final Grade (average of 3 committee members' grades)
+//--------------- Helper function to calculate the Final Grade (average of 3 committee members' grades)
 function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
     const grade1 = parseFloat(committeeMember1Grade) || null;
     const grade2 = parseFloat(committeeMember2Grade) || null;
@@ -205,7 +202,7 @@ function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMe
     return finalGrade.toFixed(2);
     }
 }
-//---------------Helper function to calculate the thesis duration in months and days
+//--------------- Helper function to calculate the thesis duration in months and days
 function calculateDuration(startDate) {
     const currentDate = new Date();
     const start = new Date(startDate);
@@ -229,7 +226,7 @@ function calculateDuration(startDate) {
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
-//---------------Helper function to replace ALL data-fields -and not just their first instance- as is needed
+//--------------- Helper function to replace ALL data-fields -and not just their first instance- as is needed
 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
     const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
     elements.forEach(element => {
@@ -1274,8 +1271,3 @@ window.addEventListener('DOMContentLoaded', () => {
         defaultTab.click();
     }
 });
-
-//If exam dates exists and status completed , end_date=exam date. Also create end date as null.
-//fix buttons for inv
-//API Naming scheme.
-
