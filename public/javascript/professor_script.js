@@ -323,6 +323,12 @@ function resetInfoSection() {
 function showInfoSection(thesis) {
     const infoSection = document.getElementById('info-compartment');
     const thesesCompartment = document.getElementById('theses-compartment');
+    const examReportSection = document.getElementById('examReportHTMLSection'); // Προσθέτουμε τη μεταβλητή για το πρακτικό
+
+    // Κρύβουμε το προηγούμενο πρακτικό (αν υπάρχει)
+    if (examReportSection) {
+        examReportSection.style.display = 'none';
+    }
 
     // Ενημέρωση διαστάσεων του info-compartment
     thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
@@ -349,7 +355,7 @@ function showInfoSection(thesis) {
         <p>Email: ${thesis.student_email || 'Χωρίς email'}</p>
         <p>Κατάσταση: ${thesis.status || 'Άγνωστη'}</p>
     `;
-    if(thesis.final_grade!== null){
+    if (thesis.final_grade !== null) {
         const finalGradeDisplay = document.createElement('p');
         finalGradeDisplay.classList.add('text-success', 'fw-bold');
         finalGradeDisplay.innerHTML = `Τελικός Βαθμός: ${thesis.final_grade}
@@ -368,7 +374,6 @@ function showInfoSection(thesis) {
     statusChangeSection.appendChild(statusChangeContainer);
     infoSection.appendChild(statusChangeSection);
 
-
     // Κλήση της loadLogs για να γεμίσει το statusChangeSection
     loadLogs(thesis.thesis_id);
 
@@ -384,6 +389,7 @@ function showInfoSection(thesis) {
         `;
         infoSection.appendChild(committeeSection);
     }
+
     const statusSection = document.createElement('section');
     statusSection.innerHTML = `<h4 class="text-center">Διαχείριση Διπλωματικής</h4>`;
     // Κατάσταση και Δράσεις
@@ -403,9 +409,10 @@ function showInfoSection(thesis) {
         case "cancelled":
             addCanceledSection(thesis, statusSection);
             break;
-
+        case "completed":
+            addCompletedSection(thesis, statusSection);
+            break;
     }
-
 
     infoSection.appendChild(statusSection);
 
@@ -420,6 +427,7 @@ function showInfoSection(thesis) {
     `;
     infoSection.appendChild(footer);
 }
+
 
 //--------------Function for Presenting a Canceled Thesis Info-------------
 function addCanceledSection(thesis, container) {
@@ -536,6 +544,136 @@ function addAssignedSection(thesis, container) {
         container.append(committeeText);
     }
 }
+
+function addCompletedSection(thesis, container) {
+    const complButtonContainer = document.createElement('div');
+    complButtonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4'); // Χρήση Bootstrap classes για στοίχιση
+
+    const praktikoButton = createButton('configurationCompletedFilesExamReportButton', 'Πρακτικό Εξέτασης', ['btn', 'btn-outline-primary', 'btn-sm', 'float-start'], () => {
+        const examReportSection = document.getElementById('examReportHTMLSection');
+        examReportSection.style.display = 'none'; 
+        
+        loadExamReportData(thesis.thesis_id); 
+        
+        examReportSection.style.display = 'block';
+    });
+    
+
+    const nimertisButton = createButton('configurationCompletedFilesNimertisLink', 'Σύνδεσμος αποθετηρίου "Νημερτής', ['btn', 'btn-outline-primary', 'btn-sm', 'float-start'], () => {
+
+    });
+    complButtonContainer.appendChild(praktikoButton);
+    complButtonContainer.appendChild(nimertisButton);
+
+    container.appendChild(complButtonContainer);
+  
+}
+
+function loadExamReportData(thesisId) {
+    const token = localStorage.getItem('token');
+
+    fetch(`/api/examReportDetails_fetch/?thesisId=${thesisId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch Exam Report data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.examReport.length > 0) {
+                const reportData = data.examReport[0];
+
+                const finalGradeSupervisor = (reportData.supervisor_grade1 * 0.6 + reportData.supervisor_grade2 * 0.15 + reportData.supervisor_grade3 * 0.15 + reportData.supervisor_grade4 * 0.1);
+                const finalGradeCommittee1 = (reportData.committee_member1_grade1 * 0.6 + reportData.committee_member1_grade2 * 0.15 + reportData.committee_member1_grade3 * 0.15 + reportData.committee_member1_grade4 * 0.1);
+                const finalGradeCommittee2 = (reportData.committee_member2_grade1 * 0.6 + reportData.committee_member2_grade2 * 0.15 + reportData.committee_member2_grade3 * 0.15 + reportData.committee_member2_grade4 * 0.1);
+                const final_grade = reportData.final_grade;
+
+                updateDataField('final_grade', final_grade); // Grades calculated and passed to the grades section here
+                updateDataField('supervisor_finalgrade', finalGradeSupervisor);
+                updateDataField('committee_member1_finalgrade', finalGradeCommittee1);
+                updateDataField('committee_member2_finalgrade', finalGradeCommittee2);
+
+                const examReportNameSurname = nameSurname(reportData.student_surname,reportData.student_name);
+                const supervisorSurnameName = nameSurname(reportData.professor_surname, reportData.professor_name);
+                const committeeMember1SurnameName = nameSurname(reportData.committee_member1_surname, reportData.committee_member1_name);
+                const committeeMember2SurnameName = nameSurname(reportData.committee_member2_surname, reportData.committee_member2_name);
+
+                sortedCommitteeNames = sortThreeStrings(supervisorSurnameName, committeeMember1SurnameName, committeeMember2SurnameName);
+                examReportCommitteAlphabetical1 = sortedCommitteeNames[0];
+                examReportCommitteAlphabetical2 = sortedCommitteeNames[1];
+                examReportCommitteAlphabetical3 = sortedCommitteeNames[2];
+
+                const examReportDoneInPerson = document.getElementsByClassName('examReportDoneInPerson')[0];
+                const examReportDoneOnline = document.getElementsByClassName('examReportDoneOnline')[0];
+
+                if (reportData.type_of_exam === 'in-person') {
+                    examReportDoneInPerson.style.display = 'inline';
+                    examReportDoneOnline.style.display = 'none';
+                } else if (reportData.type_of_exam === 'online') {
+                    examReportDoneInPerson.style.display = 'none';
+                    examReportDoneOnline.style.display = 'inline';
+                }
+                dayName = getDayName(reportData.exam_date, "el-GR");
+
+                // Update the datafields in the Exam Report
+                updateDataField('examReportNameSurname',examReportNameSurname)
+                updateDataField('examReportLocation', reportData.exam_location);
+                updateDataField('examReportDate', reportData.exam_date);
+                updateDataField('examReportDateName', dayName);
+                updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
+                updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
+                updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
+                updateDataField('examReportAssemblyNo', reportData.gen_assembly_session);
+                updateDataField('examReportTitle', reportData.thesis_title);
+                updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
+                updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
+                updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
+                updateDataField('examReportFinalGrade', final_grade);
+                updateDataField('examReportSupervisorGrade', finalGradeSupervisor);
+                updateDataField('examReportCommitteeMember1Grade', finalGradeCommittee1);
+                updateDataField('examReportCommitteeMember2Grade', finalGradeCommittee2);
+
+
+
+
+            } else if (data.success && data.examReport.length == 0) {
+                console.error('No Report Data found');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading reportData data:', error);
+        });
+
+}
+
+function updateDataField(dataField, value, errorMessage = 'Error - no data') {
+    const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
+    elements.forEach(element => {
+        // Ensure valid strings (e.g., '0 ημέρες') are not replaced by errorMessage
+        element.textContent = (value !== undefined && value !== null && value !== '') ? value : errorMessage;
+    });
+}
+
+function nameSurname(name, surname) {
+    return name + ' ' + surname;
+}
+
+function sortThreeStrings(input1, input2, input3) {
+    const inputs = [input1, input2, input3];
+    inputs.sort();
+    return inputs;
+}
+
+function getDayName(dateStr, locale) {
+    var date = new Date(dateStr);
+    return date.toLocaleDateString(locale, { weekday: 'long' });
+}
+
 
 //------------Display of Invitations associated with a specific thesis ----------
 function showThesisInvitations(thesis_id, container) {
@@ -1049,28 +1187,28 @@ function announcementButtonController(thesisId, container) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ thesisId: thesisId })
     })
-    .then((response) => {
-        if (!response.ok) {
-            throw new Error('Failed to add announcement');
-        }
-        return response.json();
-    })
-    .then((data) => {
-        if (!data.announced) {
-            const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesisId));
-            container.appendChild(announcementButton);
-            const announcementHr = document.createElement('hr');
-            container.appendChild(announcementHr);
-        } else {
-            const showAnnouncementButton = createButton('show-announcement-button', 'Προβολή Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => {
-                fetchAnnouncementDetails(thesisId);
-            });
-            container.appendChild(showAnnouncementButton);
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Failed to add announcement');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            if (!data.announced) {
+                const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesisId));
+                container.appendChild(announcementButton);
+                const announcementHr = document.createElement('hr');
+                container.appendChild(announcementHr);
+            } else {
+                const showAnnouncementButton = createButton('show-announcement-button', 'Προβολή Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => {
+                    fetchAnnouncementDetails(thesisId);
+                });
+                container.appendChild(showAnnouncementButton);
 
-            const announcementHr = document.createElement('hr');
-            container.appendChild(announcementHr);
-        }
-    });
+                const announcementHr = document.createElement('hr');
+                container.appendChild(announcementHr);
+            }
+        });
 }
 
 function fetchAnnouncementDetails(thesisId) {
@@ -1080,18 +1218,18 @@ function fetchAnnouncementDetails(thesisId) {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAnnouncementModal(data.data);
-        } else {
-            alert('Πρόβλημα στην ανάκτηση της ανακοίνωσης');
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching announcement details:', error);
-        alert('Κάτι πήγε στραβά κατά την ανάκτηση της ανακοίνωσης.');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAnnouncementModal(data.data);
+            } else {
+                alert('Πρόβλημα στην ανάκτηση της ανακοίνωσης');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching announcement details:', error);
+            alert('Κάτι πήγε στραβά κατά την ανάκτηση της ανακοίνωσης.');
+        });
 }
 
 function showAnnouncementModal(announcementDetails) {
@@ -1102,19 +1240,19 @@ function showAnnouncementModal(announcementDetails) {
     modal.tabIndex = -1;
     modal.setAttribute('aria-labelledby', 'announcementModalLabel');
     modal.setAttribute('aria-hidden', 'true');
-    
+
     // Δημιουργία του modal dialog
     const modalDialog = document.createElement('div');
     modalDialog.classList.add('modal-dialog');
-    
+
     // Δημιουργία του modal content
     const modalContent = document.createElement('div');
     modalContent.classList.add('modal-content');
-    
+
     // Header
     const modalHeader = document.createElement('div');
     modalHeader.classList.add('modal-header');
-    
+
     const modalTitle = document.createElement('h5');
     modalTitle.classList.add('modal-title');
     modalTitle.id = 'announcementModalLabel';
@@ -1132,7 +1270,7 @@ function showAnnouncementModal(announcementDetails) {
     // Body
     const modalBody = document.createElement('div');
     modalBody.classList.add('modal-body');
-    
+
     // Προσθήκη περιεχομένων ανακοίνωσης στο modal body
     modalBody.innerHTML = `
         <p><strong>Φοιτητής:</strong> ${announcementDetails.student_name} ${announcementDetails.student_surname}</p>
@@ -1141,30 +1279,30 @@ function showAnnouncementModal(announcementDetails) {
         <p><strong>Τύπος Εξέτασης:</strong> ${announcementDetails.type_of_exam === 'online' ? 'Ηλεκτρονική' : announcementDetails.type_of_exam === 'in-person' ? 'Δια ζώσης' : 'Άγνωστος τύπος'}</p>
         <p><strong>Τοποθεσία Εξέτασης:</strong> ${announcementDetails.examination_location}</p>
     `;
-    
+
     modalContent.appendChild(modalBody);
-    
+
     // Footer
     const modalFooter = document.createElement('div');
     modalFooter.classList.add('modal-footer');
-    
+
     const closeModalButton = document.createElement('button');
     closeModalButton.classList.add('btn', 'btn-secondary');
     closeModalButton.setAttribute('data-bs-dismiss', 'modal');
     closeModalButton.textContent = 'Κλείσιμο';
     modalFooter.appendChild(closeModalButton);
-    
+
     modalContent.appendChild(modalFooter);
-    
+
     modalDialog.appendChild(modalContent);
     modal.appendChild(modalDialog);
-    
+
     document.body.appendChild(modal);
-    
+
     // Εμφάνιση του modal
     const myModal = new bootstrap.Modal(modal);
     myModal.show();
-    
+
     // Καθαρισμός μετά το κλείσιμο
     modal.addEventListener('hidden.bs.modal', () => {
         modal.remove();
@@ -1252,6 +1390,7 @@ function loadGradeSection(thesisId, container) {
             console.error('Σφάλμα κατά την ανάκτηση της κατάστασης:', error);
         });
 }
+
 
 
 function renderGradeSection(thesisId, container) {
@@ -1848,7 +1987,7 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
 
     const title = document.getElementById('title').value;
     const summary = document.getElementById('summary').value;
-    const pdf = document.getElementById('pdf').files[0]; 
+    const pdf = document.getElementById('pdf').files[0];
     const token = localStorage.getItem('token');
 
 

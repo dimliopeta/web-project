@@ -663,9 +663,81 @@ app.post('/api/thesis/logs', authenticateJWT, (req, res) => {
 app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
     const role = req.user.role;
+    console.log(role);
+    let query = '';
+    let queryParams = [];
 
-        let queryParams = [];
-        const query = `
+    if (role === 'professor') {
+        const thesisId = req.query.thesisId;
+        console.log(thesisId);
+
+        // Επαλήθευση του thesis_id
+        if (!thesisId) {
+            return res.status(400).json({ success: false, message: 'Το thesis_id είναι υποχρεωτικό για καθηγητές.' });
+        }
+
+        query = `
+        SELECT DISTINCT
+            S.name AS student_name, 
+            S.surname AS student_surname, 
+            E.location AS exam_location,
+            E.type_of_exam AS type_of_exam,
+            DATE_FORMAT(E.date, '%Y-%m-%d') AS exam_date,
+            P.name AS professor_name, 
+            P.surname AS professor_surname, 
+            C1.name AS committee_member1_name,
+            C1.surname AS committee_member1_surname,
+            C2.name AS committee_member2_name,
+            C2.surname AS committee_member2_surname,
+            T.title AS thesis_title, 
+            T.summary AS thesis_summary,
+            T.final_grade AS final_grade,
+            GS.grade1 AS supervisor_grade1,
+            GS.grade2 AS supervisor_grade2,
+            GS.grade3 AS supervisor_grade3,
+            GS.grade4 AS supervisor_grade4,
+            GC1.grade1 AS committee_member1_grade1,
+            GC1.grade2 AS committee_member1_grade2,
+            GC1.grade3 AS committee_member1_grade3,
+            GC1.grade4 AS committee_member1_grade4,
+            GC2.grade1 AS committee_member2_grade1,
+            GC2.grade2 AS committee_member2_grade2,
+            GC2.grade3 AS committee_member2_grade3,
+            GC2.grade4 AS committee_member2_grade4,
+            L.gen_assembly_session AS gen_assembly_session
+        FROM 
+            Theses T
+        JOIN 
+            Students S ON T.student_id = S.id
+        JOIN 
+            Examinations E ON T.thesis_id = E.thesis_id
+        JOIN 
+            Professors P ON T.professor_id = P.id
+        LEFT JOIN 
+            Committees C ON T.thesis_id = C.thesis_id
+        LEFT JOIN 
+            Professors C1 ON C.member1_id = C1.id
+        LEFT JOIN 
+            Professors C2 ON C.member2_id = C2.id
+        LEFT JOIN 
+            Grades AS GS ON T.thesis_id = GS.thesis_id 
+            AND T.professor_id = GS.professor_id
+        LEFT JOIN 
+            Grades AS GC1 ON T.thesis_id = GC1.thesis_id 
+            AND C.member1_id = GC1.professor_id
+        LEFT JOIN 
+            Grades AS GC2 ON T.thesis_id = GC2.thesis_id 
+            AND C.member2_id = GC2.professor_id
+        LEFT JOIN
+            Logs AS L ON T.thesis_id = L.thesis_id
+        WHERE 
+            T.thesis_id = ?;
+
+        `;
+        queryParams = [thesisId];
+    }
+    else if (role === 'student') {
+        query = `
                 SELECT 
                     S.name AS student_name, 
                     S.surname AS student_surname, 
@@ -721,12 +793,13 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                 WHERE 
                     T.student_id = ?;
                         `;
-            queryParams = [userId];
+        queryParams = [userId];
+    }
 
-            db.query(query, queryParams, (err, results) => {
-            if (err) {
-                console.error('Σφάλμα κατά την ανάκτηση των δεδομένων του πρακτικού εξέτασης:', err);
-                return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
+    db.query(query, queryParams, (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των δεδομένων του πρακτικού εξέτασης:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
         }
 
         res.status(200).json({ success: true, examReport: results });
@@ -2119,11 +2192,11 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
         }
 
         const { grading_enabled, final_grade, role } = results[0];
-        res.status(200).json({ 
-            success: true, 
-            gradingEnabled: grading_enabled, 
-            finalGrade: final_grade, 
-            role 
+        res.status(200).json({
+            success: true,
+            gradingEnabled: grading_enabled,
+            finalGrade: final_grade,
+            role
         });
     });
 });
