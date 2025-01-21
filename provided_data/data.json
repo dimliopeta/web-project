@@ -1234,6 +1234,50 @@
       "pdf_path": "",
       "start_date": null,
       "exam_date": null
+    },
+    {
+      "thesis_id": "6",
+      "professor_id": "1",
+      "student_id": null,
+      "title": "Optimizing Neural Network Architectures for Edge Devices",
+      "summary": "The increasing prevalence of IoT and edge devices has created a demand for efficient neural networks capable of running on hardware with limited computational resources. This thesis explores methods to optimize deep learning models, such as pruning, quantization, and architecture search. The study benchmarks these techniques on common edge devices and analyzes trade-offs between accuracy, latency, and energy consumption. Results demonstrate that using lightweight architectures like MobileNet combined with advanced quantization can deliver a significant performance boost while maintaining acceptable accuracy.",
+      "status": "unassigned",
+      "pdf_path": "",
+      "start_date": null,
+      "exam_date": null
+    },
+    {
+      "thesis_id": "7",
+      "professor_id": "1",
+      "student_id": null,
+      "title": "Advancing Natural Language Processing with Zero-Shot Learning",
+      "summary": "Zero-shot learning enables machine learning models to perform tasks in domains where no labeled data is available. This thesis investigates state-of-the-art approaches to zero-shot learning in natural language processing (NLP), leveraging models like GPT and BERT. It examines their ability to generalize across languages and tasks, highlighting challenges in low-resource scenarios. A proposed framework improves accuracy by combining zero-shot learning with unsupervised domain adaptation, demonstrating effectiveness in real-world text classification tasks.",
+      "status": "unassigned",
+      "pdf_path": "",
+      "start_date": null,
+      "exam_date": null
+    },
+    {
+      "thesis_id": "8",
+      "professor_id": "2",
+      "student_id": null,
+      "title": "Blockchain in Secure Voting Systems: A Practical Evaluation",
+      "summary": "Blockchain technology offers promising solutions for secure and transparent voting systems. This thesis evaluates various blockchain platforms to assess their suitability for implementing secure e-voting protocols. By creating a prototype system, the research demonstrates how features like decentralized ledgers and cryptographic security can ensure voter anonymity and integrity. The study also addresses scalability and user accessibility, identifying key hurdles and proposing optimizations for wider adoption.",
+      "status": "unassigned",
+      "pdf_path": "",
+      "start_date": null,
+      "exam_date": null
+    },
+    {
+      "thesis_id": "9",
+      "professor_id": "2",
+      "student_id": null,
+      "title": "Quantum Computing Algorithms for Cryptographic Challenges",
+      "summary": "This thesis delves into the implications of quantum computing on modern cryptographic systems. It reviews quantum algorithms like Shor’s algorithm for factoring integers and Grover’s algorithm for search, analyzing their potential to break widely used encryption protocols. Additionally, it explores quantum-resistant algorithms that ensure security in a post-quantum world. The study emphasizes the urgency of transitioning to quantum-safe encryption standards for critical applications.",
+      "status": "unassigned",
+      "pdf_path": "",
+      "start_date": null,
+      "exam_date": null
     }
   ],
   "invitations": [
