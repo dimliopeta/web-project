@@ -4,12 +4,12 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
 
-        // Hide all sections
+        // Απόκρυψη όλων των sections
         document.querySelectorAll('.content-section').forEach(section => {
             section.style.display = 'none';
         });
 
-        // Show active section
+        // Εμφάνιση του ενεργού section
         const targetId = this.getAttribute('href')
             ? this.getAttribute('href').substring(1)
             : this.getAttribute('data-target');
@@ -37,14 +37,14 @@ console.log('Hello fellow web user. Congratulations for finding this message! Yo
 
 //--------------- Logout Function ---------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Αποφυγή της προεπιλεγμένης συμπεριφοράς του link
     fetch('/logout', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include' // Περιλαμβάνει cookies
     })
         .then(response => {
             if (response.ok) {
-                window.location.href = '/'; // Redirect to index
+                window.location.href = '/'; // Ανακατεύθυνση στο index
             } else {
                 alert('Η αποσύνδεση απέτυχε.');
             }
@@ -58,7 +58,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 //------------------------------ Functions to Load Thesis and helper functions ------------------------------
 //------------------------------ Load Thesis Function ------------------------------
 function loadStudentThesis() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
 
     fetch('/api/theses', {
         method: 'GET',
@@ -74,7 +74,7 @@ function loadStudentThesis() {
         })
         .then(data => {
             if (data.success && data.theses.length > 0) {
-                const thesis = data.theses;
+                const thesis = data.theses[0];
 
                 let status;
                 switch (thesis.status) {
@@ -94,12 +94,12 @@ function loadStudentThesis() {
                         status = 'Ακυρωμένη.';
 
                 }
-                
+                // Update the data-fields in the dashboard
                 const finalGradeSupervisor = (thesis.supervisor_grade1*0.6 + thesis.supervisor_grade2*0.15 + thesis.supervisor_grade3*0.15 + thesis.supervisor_grade4*0.1);
                 const finalGradeCommittee1 = (thesis.committee_member1_grade1*0.6 + thesis.committee_member1_grade2*0.15 + thesis.committee_member1_grade3*0.15 + thesis.committee_member1_grade4*0.1);
                 const finalGradeCommittee2 =(thesis.committee_member2_grade1*0.6 + thesis.committee_member2_grade2*0.15 + thesis.committee_member2_grade3*0.15 + thesis.committee_member2_grade4*0.1);
                 const finalGrade = calculateFinalGrade(finalGradeSupervisor, finalGradeCommittee1, finalGradeCommittee2);
-                // Update the data-fields in the dashboard
+                
                 updateDataField('thesis_status', status); // Declared above, used in switch
                 updateDataField('thesis_title', thesis.title);
                 updateDataField('thesis_summary', thesis.summary);
@@ -116,6 +116,8 @@ function loadStudentThesis() {
                 updateDataField('supervisor_grade', finalGradeSupervisor || ' ');
                 updateDataField('committee_member1_grade', finalGradeCommittee1 || ' ');
                 updateDataField('committee_member2_grade', finalGradeCommittee2 || ' ');
+
+
                 updateDataField('final_grade', finalGrade);
 
                 // Display thesis start date, duration, end date based on status
@@ -155,8 +157,8 @@ function loadStudentThesis() {
                         alert('Δεν υπάρχει PDF διαθέσιμο γι αυτή τη διπλωματική.');
                     });
 
-                    pdfButton.disabled = true; // Setting to disable the button
-                    //pdfButton.style.display = 'none'; // Setting to Hide the button 
+                    //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
+                    //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
                 }
 
                 // Hide the Committee Invitation button in thesis Management if committee is full
@@ -202,7 +204,7 @@ function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMe
     return finalGrade.toFixed(2);
     }
 }
-//--------------- Helper function to calculate the thesis duration in months and days
+//---------------Helper function to calculate the thesis duration in months and days
 function calculateDuration(startDate) {
     const currentDate = new Date();
     const start = new Date(startDate);
@@ -226,7 +228,7 @@ function calculateDuration(startDate) {
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
-//--------------- Helper function to replace ALL data-fields -and not just their first instance- as is needed
+//---------------Helper function to replace ALL data-fields -and not just their first instance- as is needed
 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
     const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
     elements.forEach(element => {
@@ -504,6 +506,7 @@ document.getElementById('changeProfessorButton').addEventListener('click', funct
 //--------------- Get the "Πρόσκληση" button to open the professor Search Bar
 document.querySelectorAll('.inviteCommitteeButton').forEach(button => {
     button.addEventListener('click', function () {
+        // Show the professor search bar
         document.getElementById('professorSearchBar').style.display = 'block';
     });
 });
@@ -552,12 +555,12 @@ function loadThesisInvitations(thesis_id) {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ thesis_id: thesis_id })
+        body: JSON.stringify({ thesis_id: thesis_id }) // Send thesis_id in the request body
     })
         .then(response => response.json())
         .then(data => {
             const container = document.querySelector('#invitationCardSection .row');
-            container.innerHTML = ''; 
+            container.innerHTML = ''; // Clear previous content
 
             if (data.success && data.invitations.length > 0) {
                 document.querySelector('#invitationCardSection').style.display = 'block';
@@ -643,7 +646,7 @@ function setupEventListeners(thesis) {
         const configurationUploadFileInputBox = document.getElementById('configurationUploadFileInputBox').files[0];
         if (configurationUploadFileInputBox) {
             if (thesis) {
-                uploadFile(configurationUploadFileInputBox, thesis);
+                uploadFile(configurationUploadFileInputBox, thesis);  // Pass thesis to the uploadFile function
             } else {
                 alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
@@ -656,7 +659,7 @@ function setupEventListeners(thesis) {
         const configurationUploadLinkInputBox = document.getElementById('configurationUploadLinkInputBox').value;
         if (configurationUploadLinkInputBox) {
             if (thesis) {
-                uploadLink(configurationUploadLinkInputBox, thesis);
+                uploadLink(configurationUploadLinkInputBox, thesis);  // Pass thesis to the uploadLink function
             } else {
                 alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
@@ -710,7 +713,7 @@ function uploadFile(fileInput, thesis) {
     fetch('/api/upload_attachment', {
         method: 'POST',
         body: formData,         //Send as formData since its a file
-        credentials: 'include',
+        credentials: 'include', // Ensure the cookie is sent with the request
     })
         .then(response => response.json())
         .then(data => {
@@ -736,7 +739,7 @@ function uploadLink(link, thesis) {
     fetch('/api/upload_attachment', {
         method: 'POST',
         body: formData,
-        credentials: 'include',
+        credentials: 'include', // Ensure the cookie is sent with the request
     })
         .then(response => response.json())
         .then(data => {
@@ -768,7 +771,7 @@ function uploadNimertisLink(link, thesis) {
     fetch('/api/update_nimertis_link', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json',  // Send as JSON
         },
         body: JSON.stringify(data),
         credentials: 'include',
@@ -809,6 +812,7 @@ function uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, th
         .then(data => {
             if (data.success) {
                 fetchAndDisplayExaminations(thesis); // Refresh exam details display
+                //document.getElementById('examDateSection').style.display = 'block';
             } else {
                 alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
@@ -1056,7 +1060,8 @@ function loadExamReportData() {
 
 //------------------------------ Function to Load Logs Data for Status Change Section ------------------------------
 function loadLogsData() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
+
     fetch('/api/logs_fetch', {
         method: 'GET',
         headers: {
@@ -1153,25 +1158,29 @@ function showSection(sectionId) {
 function loadStudentProfile() {
     const token = localStorage.getItem('token');
 
+    // Fetch student data from the backend API
     fetch('/api/student', {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`, // Send token in Authorization header
         }
     })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch student data');
             }
-            return response.json();
+            return response.json(); // Parse the response as JSON
         })
         .then(data => {
+            // Update the profile page with fetched data
             const student = data;
 
             // Profile details
             document.querySelector('#student_profile [data-field="name"]').textContent = student.name;
             document.querySelector('#student_profile [data-field="surname"]').textContent = student.surname;
             document.querySelector('#student_profile [data-field="student_number"]').textContent = student.student_number;
+
+            // Contact information
             document.querySelector('#student_profile [data-field="contact_email"]').textContent = student.contact_email;
             document.querySelector('#student_profile [data-field="mobile_telephone"]').textContent = student.mobile_telephone;
             document.querySelector('#student_profile [data-field="landline_telephone"]').textContent = student.landline_telephone;
@@ -1218,14 +1227,15 @@ document.querySelector('#student_profile').addEventListener('click', function (e
             button.classList.remove('btn-success');
             button.classList.add('btn-outline-primary');
 
-            const token = localStorage.getItem('token');
+            // Save the updated data to the backend
+            const token = localStorage.getItem('token'); // Get the JWT token
             fetch('/api/updateProfile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ [fieldName]: newValue })
+                body: JSON.stringify({ [fieldName]: newValue }) // Send the updated field name and value
             })
                 .then(response => {
                     if (!response.ok) {
