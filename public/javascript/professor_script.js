@@ -348,8 +348,15 @@ function showInfoSection(thesis) {
         <p>Φοιτητής: ${thesis.student_name || 'Χωρίς φοιτητή'} (ΑΜ: ${thesis.student_number || 'Χωρίς ΑΜ'})</p>
         <p>Email: ${thesis.student_email || 'Χωρίς email'}</p>
         <p>Κατάσταση: ${thesis.status || 'Άγνωστη'}</p>
-        <hr>
     `;
+    if(thesis.final_grade!== null){
+        const finalGradeDisplay = document.createElement('p');
+        finalGradeDisplay.classList.add('text-success', 'fw-bold');
+        finalGradeDisplay.innerHTML = `Τελικός Βαθμός: ${thesis.final_grade}
+        <hr>`;
+        basicInfoSection.appendChild(finalGradeDisplay);
+
+    }
     infoSection.appendChild(basicInfoSection);
 
     // Δημιουργία του Status Change Section
@@ -1236,13 +1243,6 @@ function loadGradeSection(thesisId, container) {
                     gradeContent.appendChild(message);
                 }
             } else if (data.success && data.gradingEnabled) {
-                if (data.finalGrade !== null) {
-                    const finalGradeDisplay = document.createElement('p');
-                    finalGradeDisplay.classList.add('text-success', 'fw-bold');
-                    finalGradeDisplay.innerHTML = `Τελικός Βαθμός: <strong>${data.finalGrade}</strong>`;
-                    gradeContent.appendChild(finalGradeDisplay);
-                }
-
                 renderGradeSection(thesisId, gradeContent);
                 loadGradeList(thesisId, gradeContent);
             }
@@ -1256,6 +1256,7 @@ function loadGradeSection(thesisId, container) {
 
 function renderGradeSection(thesisId, container) {
     container.innerHTML = '';
+
     fetch(`/api/get-professor-grades/${thesisId}`, {
         method: 'GET',
         headers: {

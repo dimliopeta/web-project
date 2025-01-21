@@ -529,6 +529,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 c.member2_id AS committee_member2_id,
                 CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
                 t.start_date,
+                t.final_grade,
                 e.date,
                 GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
                 CASE
