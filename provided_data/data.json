@@ -1259,7 +1259,7 @@
     },
     {
       "thesis_id": "8",
-      "professor_id": "2",
+      "professor_id": "1",
       "student_id": null,
       "title": "Blockchain in Secure Voting Systems: A Practical Evaluation",
       "summary": "Blockchain technology offers promising solutions for secure and transparent voting systems. This thesis evaluates various blockchain platforms to assess their suitability for implementing secure e-voting protocols. By creating a prototype system, the research demonstrates how features like decentralized ledgers and cryptographic security can ensure voter anonymity and integrity. The study also addresses scalability and user accessibility, identifying key hurdles and proposing optimizations for wider adoption.",
@@ -1270,7 +1270,7 @@
     },
     {
       "thesis_id": "9",
-      "professor_id": "2",
+      "professor_id": "1",
       "student_id": null,
       "title": "Quantum Computing Algorithms for Cryptographic Challenges",
       "summary": "This thesis delves into the implications of quantum computing on modern cryptographic systems. It reviews quantum algorithms like Shor’s algorithm for factoring integers and Grover’s algorithm for search, analyzing their potential to break widely used encryption protocols. Additionally, it explores quantum-resistant algorithms that ensure security in a post-quantum world. The study emphasizes the urgency of transitioning to quantum-safe encryption standards for critical applications.",

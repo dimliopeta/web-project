@@ -282,8 +282,8 @@ function showEditSection(thesis) {
     const editSummary = document.getElementById('editSummary');
 
     // Ενημέρωση placeholder για τίτλο και περιγραφή
-    editTitle.value = ''; // Κενό πεδίο για αλλαγή
-    editSummary.value = ''; // Κενό πεδίο για αλλαγή
+    editTitle.value = thesis.title;
+    editSummary.value = thesis.summary;
     editTitle.placeholder = thesis.title || 'Δεν υπάρχει τίτλος';
     editSummary.placeholder = thesis.summary && thesis.summary.trim() !== ''
         ? thesis.summary
