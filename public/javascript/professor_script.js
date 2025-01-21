@@ -558,9 +558,13 @@ function addCompletedSection(thesis, container) {
         examReportSection.style.display = 'block';
     });
     
-
+    const nimertisLink = thesis.nimertis_link;
     const nimertisButton = createButton('configurationCompletedFilesNimertisLink', 'Σύνδεσμος αποθετηρίου "Νημερτής', ['btn', 'btn-outline-primary', 'btn-sm', 'float-start'], () => {
-
+        if (nimertisLink) {
+            window.open(nimertisLink, '_blank');
+        } else {
+            alert('Δεν έχει αναρτηθεί σύνδεσμος');
+        }
     });
     complButtonContainer.appendChild(praktikoButton);
     complButtonContainer.appendChild(nimertisButton);

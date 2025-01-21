@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Democritus - online thesis platform </title>
+    <link rel="icon" href="images/DemBrowserIcon.png" type="image/x-icon">
+    <style>
+        section{
+            padding: 30px 0;
+        }
+
+        .card {
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .card-img-top, .announcement-image img {
+            width: 100%; /* Ή συγκεκριμένο πλάτος, π.χ. 300px */
+            height: auto; /* Διατηρεί αναλογία */
+            max-width: 300px; /* Εξασφαλίζει συνεπή μέγιστο πλάτος */
+            max-height: 200px; /* Περιορίζει το ύψος αν είναι πολύ μεγάλο */
+            object-fit: cover; /* Κόβει την εικόνα αν δεν ταιριάζει */
+            border-radius: 8px; /* Για ομοιομορφία */
+        }
+
+    </style>
+</head>
+
+<body>
+    
+    <!--- navbar --->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
+        <a class="navbar-brand px-3 fs-4" href="index.html">
+            <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav" aria-controls="mainnav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainnav">
+          <div class="navbar-nav fs-5">
+            <a class="nav-item nav-link" href="/announcements">Ανακοινώσεις</a>
+            <a class="nav-item nav-link" href="#types">Οδηγίες</a>
+            <a class="nav-item nav-link" href="/login">Σύνδεση</a>
+            </div>
+        </div>
+    </nav>
+
+    <section id="announcements-section" class="bg-light mt-5">
+        <div class="container-lg">
+            <div class="row g-4" id="announcements-container">
+                <!-- Οι ανακοινώσεις θα φορτωθούν εδώ -->
+            </div>
+        </div>
+    </section>
+    <script src="/javascript/announcements_script.js"></script>
+
+</body>

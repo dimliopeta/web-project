@@ -113,6 +113,10 @@ app.get('/login', (req, res) => {
     }
 });
 
+app.get('/announcements', (req, res) => {
+    return res.sendFile(path.join(__dirname, 'views', 'announcements.html'));
+});
+
 // Login endpoint
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -530,6 +534,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
                 t.start_date,
                 t.final_grade,
+                t.nimertis_link,
                 e.date,
                 GROUP_CONCAT(DISTINCT i.status ORDER BY i.invitation_date DESC SEPARATOR ', ') AS invitations_status,
                 CASE
@@ -2027,28 +2032,47 @@ app.post('/api/add-announcement', (req, res) => {
                     });
                 }
 
-                const filePath = path.join(__dirname, 'announcements.json');
-                fs.writeFile(filePath, JSON.stringify(announcementDetails, null, 2), (fileErr) => {
-                    if (fileErr) {
-                        console.error('Error writing to file:', fileErr);
-                        return db.rollback(() => {
-                            res.status(500).json({ success: false, message: 'Failed to save data to file.' });
-                        });
+                const filePath = path.join(__dirname, 'public', 'announcements.json');
+
+
+                // Αν το αρχείο JSON υπάρχει ήδη, διαβάζουμε τα δεδομένα και τα προσθέτουμε στον πίνακα
+                fs.readFile(filePath, (readErr, data) => {
+                    let announcements = [];
+
+                    if (!readErr) {
+                        try {
+                            announcements = JSON.parse(data).announcements || [];
+                        } catch (parseErr) {
+                            console.error('Error parsing JSON data:', parseErr);
+                        }
                     }
 
-                    db.commit((commitErr) => {
-                        if (commitErr) {
-                            console.error('Error committing transaction:', commitErr);
+                    // Προσθέτουμε την καινούρια ανακοίνωση στον πίνακα
+                    announcements.push(announcementDetails);
+
+                    // Αποθηκεύουμε τον πίνακα ανακοινώσεων ξανά στο αρχείο JSON
+                    fs.writeFile(filePath, JSON.stringify({ announcements }, null, 2), (fileErr) => {
+                        if (fileErr) {
+                            console.error('Error writing to file:', fileErr);
                             return db.rollback(() => {
-                                res.status(500).json({ success: false, message: 'Error committing transaction.' });
+                                res.status(500).json({ success: false, message: 'Failed to save data to file.' });
                             });
                         }
 
-                        res.status(200).json({
-                            success: true,
-                            message: 'Thesis details saved to file: announcements.json',
-                            data: announcementDetails,
-                            file_path: filePath,
+                        db.commit((commitErr) => {
+                            if (commitErr) {
+                                console.error('Error committing transaction:', commitErr);
+                                return db.rollback(() => {
+                                    res.status(500).json({ success: false, message: 'Error committing transaction.' });
+                                });
+                            }
+
+                            res.status(200).json({
+                                success: true,
+                                message: 'Thesis details saved to file: announcements.json',
+                                data: announcementDetails,
+                                file_path: filePath,
+                            });
                         });
                     });
                 });
