@@ -1213,7 +1213,6 @@ function loadGradeSection(thesisId, container) {
     const gradeContent = document.createElement('div');
     gradeContent.id = 'grade-content';
 
-
     // Αίτημα για την κατάσταση της διπλωματικής
     fetch(`/api/thesis-status/`, {
         method: 'POST',
@@ -1226,6 +1225,8 @@ function loadGradeSection(thesisId, container) {
         .then(response => response.json())
         .then(data => {
             if (data.success && !data.gradingEnabled) {
+                console.log("Final grade:", data.finalGrade);
+
                 if (data.role === 'Επιβλέπων') {
                     gradeEnableButton(thesisId, gradeContent);
                 } else {
@@ -1235,6 +1236,13 @@ function loadGradeSection(thesisId, container) {
                     gradeContent.appendChild(message);
                 }
             } else if (data.success && data.gradingEnabled) {
+                if (data.finalGrade !== null) {
+                    const finalGradeDisplay = document.createElement('p');
+                    finalGradeDisplay.classList.add('text-success', 'fw-bold');
+                    finalGradeDisplay.innerHTML = `Τελικός Βαθμός: <strong>${data.finalGrade}</strong>`;
+                    gradeContent.appendChild(finalGradeDisplay);
+                }
+
                 renderGradeSection(thesisId, gradeContent);
                 loadGradeList(thesisId, gradeContent);
             }
@@ -1278,7 +1286,7 @@ function renderGradeSection(thesisId, container) {
                     input.id = `grade-criterion-${index + 1}`;
                     input.classList.add('form-control');
                     input.placeholder = `Βαθμός (0-10)`;
-                    const gradeKey = index === 0 ? 'grade' : `grade${index + 1}`;
+                    const gradeKey = `grade${index + 1}`;
                     input.value = grades[gradeKey] !== undefined ? grades[gradeKey] : '';
                     container.appendChild(input);
                 });

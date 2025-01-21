@@ -2100,6 +2100,7 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     const query = `
         SELECT 
             Theses.grading_enabled,
+            Theses.final_grade,
             CASE
                 WHEN Theses.professor_id = ? THEN 'Επιβλέπων'
                 WHEN Committees.member1_id = ? OR Committees.member2_id = ? THEN 'Μέλος Τριμελούς'
@@ -2120,10 +2121,16 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
             return res.status(404).json({ success: false, message: 'Δεν βρέθηκε η συγκεκριμένη διπλωματική.' });
         }
 
-        const { grading_enabled, role } = results[0];
-        res.status(200).json({ success: true, gradingEnabled: grading_enabled, role });
+        const { grading_enabled, final_grade, role } = results[0];
+        res.status(200).json({ 
+            success: true, 
+            gradingEnabled: grading_enabled, 
+            finalGrade: final_grade, 
+            role 
+        });
     });
 });
+
 
 //-----------------API for submitting a temporary grade for a specific thesis----
 app.post('/api/submit-grades', authenticateJWT, (req, res) => {
@@ -2138,7 +2145,7 @@ app.post('/api/submit-grades', authenticateJWT, (req, res) => {
         INSERT INTO Grades (thesis_id, professor_id, grade1, grade2, grade3, grade4, comments, finalized)
         VALUES (?, ?, ?, ?, ?, ?, ?, FALSE)
         ON DUPLICATE KEY UPDATE 
-        grade1 = VALUES(grade), 
+        grade1 = VALUES(grade1), 
         grade2 = VALUES(grade2), 
         grade3 = VALUES(grade3), 
         grade4 = VALUES(grade4),
@@ -2165,7 +2172,7 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
     }
 
-    const query = `
+    const insertQuery = `
         INSERT INTO Grades (thesis_id, professor_id, grade1, grade2, grade3, grade4, comments, finalized)
         VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
         ON DUPLICATE KEY UPDATE 
@@ -2183,14 +2190,26 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
         WHERE thesis_id = ? AND finalized = TRUE;
     `;
 
+    const finalGradeQuery = `
+        SELECT AVG((grade1 * 0.6 + grade2 * 0.15 + grade3 * 0.15 + grade4 * 0.1)) AS calculated_final_grade
+        FROM Grades
+        WHERE thesis_id = ?;
+    `;
+
+    const updateFinalGradeQuery = `
+        UPDATE Theses
+        SET final_grade = ?
+        WHERE thesis_id = ?;
+    `;
+
     db.beginTransaction((err) => {
         if (err) {
             console.error('Σφάλμα κατά την εκκίνηση της συναλλαγής:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
-        // Εκτέλεση του query για την καταχώρηση ή ενημέρωση βαθμών
-        db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
+        // Εκτέλεση εισαγωγής ή ενημέρωσης βαθμών
+        db.query(insertQuery, [thesisId, professorId, ...grades, comments], (err) => {
             if (err) {
                 console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
                 return db.rollback(() => {
@@ -2198,10 +2217,10 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
                 });
             }
 
-            // Εκτέλεση του query για την καταμέτρηση των finalized βαθμών
+            // Εκτέλεση query για την καταμέτρηση finalized βαθμών
             db.query(countQuery, [thesisId], (countErr, countRes) => {
                 if (countErr) {
-                    console.error('Σφάλμα κατά την καταμέτρηση των οριστικών βαθμών:', countErr);
+                    console.error('Σφάλμα κατά την καταμέτρηση των βαθμών:', countErr);
                     return db.rollback(() => {
                         res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
                     });
@@ -2209,27 +2228,63 @@ app.post('/api/finalize-submitted-grades', authenticateJWT, (req, res) => {
 
                 const finalizedCount = countRes[0].finalized_count;
 
-                // Επικύρωση της συναλλαγής
-                db.commit((commitErr) => {
-                    if (commitErr) {
-                        console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
-                        return db.rollback(() => {
-                            res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
-                        });
-                    }
+                if (finalizedCount === 3) {
+                    // Υπολογισμός και ενημέρωση τελικού βαθμού
+                    db.query(finalGradeQuery, [thesisId], (finalGradeErr, finalGradeRes) => {
+                        if (finalGradeErr) {
+                            console.error('Σφάλμα κατά τον υπολογισμό του τελικού βαθμού:', finalGradeErr);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                            });
+                        }
 
-                    // Επιστροφή επιτυχούς απάντησης μαζί με το count
-                    res.status(200).json({
-                        success: true,
-                        message: 'Οι βαθμοί καταχωρήθηκαν επιτυχώς.',
-                        finalizedCount: finalizedCount
+                        const finalGrade = finalGradeRes[0].calculated_final_grade;
+
+                        db.query(updateFinalGradeQuery, [finalGrade, thesisId], (updateErr) => {
+                            if (updateErr) {
+                                console.error('Σφάλμα κατά την ενημέρωση του τελικού βαθμού:', updateErr);
+                                return db.rollback(() => {
+                                    res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                                });
+                            }
+
+                            db.commit((commitErr) => {
+                                if (commitErr) {
+                                    console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                                    return db.rollback(() => {
+                                        res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                                    });
+                                }
+
+                                res.status(200).json({
+                                    success: true,
+                                    message: 'Οι βαθμοί καταχωρήθηκαν και ο τελικός βαθμός υπολογίστηκε επιτυχώς.',
+                                    finalizedCount,
+                                    finalGrade
+                                });
+                            });
+                        });
                     });
-                });
+                } else {
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            console.error('Σφάλμα κατά την επικύρωση της συναλλαγής:', commitErr);
+                            return db.rollback(() => {
+                                res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+                            });
+                        }
+
+                        res.status(200).json({
+                            success: true,
+                            message: 'Οι βαθμοί καταχωρήθηκαν επιτυχώς.',
+                            finalizedCount
+                        });
+                    });
+                }
             });
         });
     });
 });
-
 
 //-----------------API for loading the grades of the other professors----
 app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
