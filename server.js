@@ -512,7 +512,7 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
 app.get('/api/theses', authenticateJWT, (req, res) => {
     const userId = req.user.userId; // Get user Id and Role from the JWT
     const role = req.user.role;
-
+    
     let query;
     let queryParams = [];
 
@@ -600,19 +600,20 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                     AND Committees.member1_id = Committee1Grade.professor_id
                 LEFT JOIN Grades AS Committee2Grade ON Theses.thesis_id = Committee2Grade.thesis_id 
                     AND Committees.member2_id = Committee2Grade.professor_id
-                WHERE Theses.student_id = ?;
+                WHERE Theses.student_id = ? AND Theses.thesis_id IS NOT NULL;
 `;
         queryParams = [userId];
     } else {
         return res.status(403).json({ success: false, message: 'Unauthorized access.' });
     }
-
+    console.log('Executing query:', query);
+console.log('With parameters:', queryParams);
     db.query(query, queryParams, (err, results) => {
         if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
         }
-
+        console.log('Raw Query Results:', results);
         res.status(200).json({ success: true, theses: results });
     });
 });

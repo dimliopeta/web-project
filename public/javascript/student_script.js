@@ -95,11 +95,11 @@ function loadStudentThesis() {
 
                 }
                 // Update the data-fields in the dashboard
-                const finalGradeSupervisor = (thesis.supervisor_grade1*0.6 + thesis.supervisor_grade2*0.15 + thesis.supervisor_grade3*0.15 + thesis.supervisor_grade4*0.1);
-                const finalGradeCommittee1 = (thesis.committee_member1_grade1*0.6 + thesis.committee_member1_grade2*0.15 + thesis.committee_member1_grade3*0.15 + thesis.committee_member1_grade4*0.1);
-                const finalGradeCommittee2 =(thesis.committee_member2_grade1*0.6 + thesis.committee_member2_grade2*0.15 + thesis.committee_member2_grade3*0.15 + thesis.committee_member2_grade4*0.1);
+                const finalGradeSupervisor = (thesis.supervisor_grade1 * 0.6 + thesis.supervisor_grade2 * 0.15 + thesis.supervisor_grade3 * 0.15 + thesis.supervisor_grade4 * 0.1);
+                const finalGradeCommittee1 = (thesis.committee_member1_grade1 * 0.6 + thesis.committee_member1_grade2 * 0.15 + thesis.committee_member1_grade3 * 0.15 + thesis.committee_member1_grade4 * 0.1);
+                const finalGradeCommittee2 = (thesis.committee_member2_grade1 * 0.6 + thesis.committee_member2_grade2 * 0.15 + thesis.committee_member2_grade3 * 0.15 + thesis.committee_member2_grade4 * 0.1);
                 const finalGrade = calculateFinalGrade(finalGradeSupervisor, finalGradeCommittee1, finalGradeCommittee2);
-                
+
                 updateDataField('thesis_status', status); // Declared above, used in switch
                 updateDataField('thesis_title', thesis.title);
                 updateDataField('thesis_summary', thesis.summary);
@@ -199,9 +199,9 @@ function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMe
     if (grade1 === null || grade2 === null || grade3 === null) {
         return 'Η βαθμολόγιση δεν έχει ολοκληρωθεί.';
     } else {
-    const totalGrade = grade1 + grade2 + grade3;
-    const finalGrade = totalGrade / 3;
-    return finalGrade.toFixed(2);
+        const totalGrade = grade1 + grade2 + grade3;
+        const finalGrade = totalGrade / 3;
+        return finalGrade.toFixed(2);
     }
 }
 //---------------Helper function to calculate the thesis duration in months and days
@@ -274,7 +274,8 @@ function setupThesisManagement() {
                     });
 
                 }
-
+                console.log(thesis);
+                console.log(thesis.thesis_id);
                 setupEventListeners(thesis);
                 fetchAndDisplayAttachments(thesis);
                 fetchAndDisplayNimertisLink(thesis);
@@ -376,7 +377,7 @@ function loadSectionsBasedOnStatus() {
                         managementSection.style.display = "block";
                         datesSection.style.display = "block";
 
-                        if(thesis.committee_member1_finalized === true && thesis.committee_member2_finalized === true && thesis.supervisor_finalized === true){
+                        if (thesis.committee_member1_finalized === true && thesis.committee_member2_finalized === true && thesis.supervisor_finalized === true) {
                             completedFilesSection.style.display = "block";
                             document.getElementById("configurationCompletedFilesNimertisLink").style.display = 'none';
                         }
@@ -927,32 +928,34 @@ function fetchAndDisplayExaminations(thesis) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Translate type of exam
-                const examData = data.examination;
-                examData.type_of_exam =
-                    examData.type_of_exam === "in-person"
-                        ? "Δια ζώσης"
-                        : examData.type_of_exam === "online"
-                            ? "Εξ αποστάσως"
-                            : 'Δεν έχει οριστεί.';
+                if (data.data !== null) { // Avoid errors and alerts when status isn't "completed"/"to be reviewed"
+                    // Translate type of exam
+                    const examData = data.examination;
+                    examData.type_of_exam =
+                        examData.type_of_exam === "in-person"
+                            ? "Δια ζώσης"
+                            : examData.type_of_exam === "online"
+                                ? "Εξ αποστάσως"
+                                : 'Δεν έχει οριστεί.';
 
-                // Format the date properly
-                let formattedDate = 'Δεν έχει οριστεί.';
-                if (examData.date) {
-                    const [year, month, day] = examData.date.split("-");
-                    formattedDate = `${day}-${month}-${year}`;
+                    // Format the date properly
+                    let formattedDate = 'Δεν έχει οριστεί.';
+                    if (examData.date) {
+                        const [year, month, day] = examData.date.split("-");
+                        formattedDate = `${day}-${month}-${year}`;
+                    }
+
+                    document.getElementById('configurationExamDateInfo').innerHTML = formattedDate;
+                    document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
+                    document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
                 }
-
-                document.getElementById('configurationExamDateInfo').innerHTML = formattedDate;
-                document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
-                document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
             } else {
                 alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error fetching exam details:', error);
-            alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης:');
+            alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης.');
         });
 }
 //------------------------------ Functions for the Completed Files Section ------------------------------
@@ -990,61 +993,62 @@ function loadExamReportData() {
             return response.json();
         })
         .then(data => {
-            if (data.success && data.examReport.length > 0) {
-                const reportData = data.examReport[0];
+            if (data.success) {
+                if (data.examReport.length > 0) {
+                    const reportData = data.examReport[0];
 
-                const finalGradeSupervisor = (reportData.supervisor_grade1*0.6 + reportData.supervisor_grade2*0.15 + reportData.supervisor_grade3*0.15 + reportData.supervisor_grade4*0.1);
-                const finalGradeCommittee1 = (reportData.committee_member1_grade1*0.6 + reportData.committee_member1_grade2*0.15 + reportData.committee_member1_grade3*0.15 + reportData.committee_member1_grade4*0.1);
-                const finalGradeCommittee2 =(reportData.committee_member2_grade1*0.6 + reportData.committee_member2_grade2*0.15 + reportData.committee_member2_grade3*0.15 + reportData.committee_member2_grade4*0.1);
-                const finalGrade = calculateFinalGrade(finalGradeSupervisor, finalGradeCommittee1, finalGradeCommittee2);
+                    const finalGradeSupervisor = (reportData.supervisor_grade1 * 0.6 + reportData.supervisor_grade2 * 0.15 + reportData.supervisor_grade3 * 0.15 + reportData.supervisor_grade4 * 0.1);
+                    const finalGradeCommittee1 = (reportData.committee_member1_grade1 * 0.6 + reportData.committee_member1_grade2 * 0.15 + reportData.committee_member1_grade3 * 0.15 + reportData.committee_member1_grade4 * 0.1);
+                    const finalGradeCommittee2 = (reportData.committee_member2_grade1 * 0.6 + reportData.committee_member2_grade2 * 0.15 + reportData.committee_member2_grade3 * 0.15 + reportData.committee_member2_grade4 * 0.1);
+                    const finalGrade = calculateFinalGrade(finalGradeSupervisor, finalGradeCommittee1, finalGradeCommittee2);
 
-                updateDataField('final_grade', finalGrade); // Grades calculated and passed to the grades section here
-                updateDataField('supervisor_finalgrade', finalGradeSupervisor); 
-                updateDataField('committee_member1_finalgrade', finalGradeCommittee1);
-                updateDataField('committee_member2_finalgrade', finalGradeCommittee2); 
+                    updateDataField('final_grade', finalGrade); // Grades calculated and passed to the grades section here
+                    updateDataField('supervisor_finalgrade', finalGradeSupervisor);
+                    updateDataField('committee_member1_finalgrade', finalGradeCommittee1);
+                    updateDataField('committee_member2_finalgrade', finalGradeCommittee2);
 
-                const supervisorNameSurname = nameSurname(reportData.professor_name, reportData.professor_surname);
-                const committeeMember1NameSurname = nameSurname(reportData.committee_member1_name, reportData.committee_member1_surname);
-                const committeeMember2NameSurname = nameSurname(reportData.committee_member2_name, reportData.committee_member2_surname);
-                const supervisorSurnameName = nameSurname(reportData.professor_surname, reportData.professor_name);
-                const committeeMember1SurnameName = nameSurname(reportData.committee_member1_surname, reportData.committee_member1_name);
-                const committeeMember2SurnameName = nameSurname(reportData.committee_member2_surname, reportData.committee_member2_name);
+                    const supervisorNameSurname = nameSurname(reportData.professor_name, reportData.professor_surname);
+                    const committeeMember1NameSurname = nameSurname(reportData.committee_member1_name, reportData.committee_member1_surname);
+                    const committeeMember2NameSurname = nameSurname(reportData.committee_member2_name, reportData.committee_member2_surname);
+                    const supervisorSurnameName = nameSurname(reportData.professor_surname, reportData.professor_name);
+                    const committeeMember1SurnameName = nameSurname(reportData.committee_member1_surname, reportData.committee_member1_name);
+                    const committeeMember2SurnameName = nameSurname(reportData.committee_member2_surname, reportData.committee_member2_name);
 
-                sortedCommitteeNames = sortThreeStrings(supervisorSurnameName, committeeMember1SurnameName, committeeMember2SurnameName);
-                examReportCommitteAlphabetical1 = sortedCommitteeNames[0];
-                examReportCommitteAlphabetical2 = sortedCommitteeNames[1];
-                examReportCommitteAlphabetical3 = sortedCommitteeNames[2];
+                    sortedCommitteeNames = sortThreeStrings(supervisorSurnameName, committeeMember1SurnameName, committeeMember2SurnameName);
+                    examReportCommitteAlphabetical1 = sortedCommitteeNames[0];
+                    examReportCommitteAlphabetical2 = sortedCommitteeNames[1];
+                    examReportCommitteAlphabetical3 = sortedCommitteeNames[2];
 
-                const examReportDoneInPerson = document.getElementsByClassName('examReportDoneInPerson')[0];
-                const examReportDoneOnline = document.getElementsByClassName('examReportDoneOnline')[0];
+                    const examReportDoneInPerson = document.getElementsByClassName('examReportDoneInPerson')[0];
+                    const examReportDoneOnline = document.getElementsByClassName('examReportDoneOnline')[0];
 
-                if (reportData.type_of_exam === 'in-person') {
-                    examReportDoneInPerson.style.display = 'inline';
-                    examReportDoneOnline.style.display = 'none';
-                } else if (reportData.type_of_exam === 'online') {
-                    examReportDoneInPerson.style.display = 'none';
-                    examReportDoneOnline.style.display = 'inline';
+                    if (reportData.type_of_exam === 'in-person') {
+                        examReportDoneInPerson.style.display = 'inline';
+                        examReportDoneOnline.style.display = 'none';
+                    } else if (reportData.type_of_exam === 'online') {
+                        examReportDoneInPerson.style.display = 'none';
+                        examReportDoneOnline.style.display = 'inline';
+                    }
+                    dayName = getDayName(reportData.exam_date, "el-GR");
+
+                    // Update the datafields in the Exam Report
+                    updateDataField('examReportLocation', reportData.exam_location);
+                    updateDataField('examReportDate', reportData.exam_date);
+                    updateDataField('examReportDateName', dayName);
+                    updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
+                    updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
+                    updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
+                    updateDataField('examReportAssemblyNo', reportData.gen_assembly_session);
+                    updateDataField('examReportTitle', reportData.thesis_title);
+                    updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
+                    updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
+                    updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
+                    updateDataField('examReportFinalGrade', finalGrade);
+                    updateDataField('examReportSupervisorGrade', finalGradeSupervisor);
+                    updateDataField('examReportCommitteeMember1Grade', finalGradeCommittee1);
+                    updateDataField('examReportCommitteeMember2Grade', finalGradeCommittee2);
+
                 }
-                dayName = getDayName(reportData.exam_date, "el-GR");
-
-                // Update the datafields in the Exam Report
-                updateDataField('examReportLocation', reportData.exam_location);
-                updateDataField('examReportDate', reportData.exam_date);
-                updateDataField('examReportDateName', dayName);
-                updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
-                updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
-                updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
-                updateDataField('examReportAssemblyNo', reportData.gen_assembly_session);
-                updateDataField('examReportTitle', reportData.thesis_title);
-                updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
-                updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
-                updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
-                updateDataField('examReportFinalGrade', finalGrade);
-                updateDataField('examReportSupervisorGrade', finalGradeSupervisor);
-                updateDataField('examReportCommitteeMember1Grade', finalGradeCommittee1);
-                updateDataField('examReportCommitteeMember2Grade', finalGradeCommittee2);
-
-
 
 
             } else if (data.success && data.examReport.length == 0) {
