@@ -10,6 +10,7 @@
       "committee_member2_id": 2,
       "committee_member2_name": "Vasilis Foukaras",
       "type_of_exam": "in-person",
+      "exam_date": "2025-01-30T22:00:00.000Z",
       "examination_location": "A2"
     }
   ]

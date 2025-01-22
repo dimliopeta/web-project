@@ -2103,20 +2103,25 @@ app.get('/api/get-announcement-details/', (req, res) => {
     }
 
     const selectQuery = `
-        SELECT 
+       SELECT 
             t.thesis_id,
             t.title,
-            s.name AS student_name,
-            s.surname AS student_surname,
-            p.name AS professor_name,
-            p.surname AS professor_surname,
-            DATE_FORMAT(e.date, '%Y-%m-%d') AS examination_date,
+            CONCAT(s.name, ' ', s.surname) AS student_name,
+            CONCAT(p.name, ' ', p.surname) AS professor_name,
+            c.member1_id AS committee_member1_id,
+            CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
+            c.member2_id AS committee_member2_id,
+            CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
             e.type_of_exam,
+            e.date as exam_date,
             e.location AS examination_location
         FROM Theses t
         LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
         LEFT JOIN Students s ON t.student_id = s.id
         LEFT JOIN Professors p ON t.professor_id = p.id
+        LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+        LEFT JOIN Professors c1 ON c.member1_id = c1.id
+        LEFT JOIN Professors c2 ON c.member2_id = c2.id
         WHERE t.thesis_id = ?;
     `;
 
