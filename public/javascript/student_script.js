@@ -221,14 +221,14 @@ function calculateDuration(startDate) {
         totalMonths--; // Subtract one month
         const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
         days += previousMonthDays;
-    }
+    } 
     const monthText = totalMonths > 0
-        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
-        : '';
+    ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+    : '0 μήνες';
 
-    const dayText = days > 0
-        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
-        : '';
+const dayText = days > 0
+    ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+    : '0 μέρες';
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
