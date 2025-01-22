@@ -846,7 +846,7 @@ function addLinkToList(link) {
 function fetchAndDisplayAttachments(thesis) {
     const token = localStorage.getItem('token');
 
-    fetch(`/api/fetch_attachments?thesis_id=${thesis.thesis_id}`, {
+    fetch(`/api/fetch_all_attachments?thesis_id=${thesis.thesis_id}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`

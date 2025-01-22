@@ -1005,8 +1005,8 @@ app.post('/api/update_nimertis_link', authenticateJWT, (req, res) => {
     });
 });
 
-//----------------- API to fetch Attachments by Thesis Id -----------------
-app.get('/api/fetch_attachments', authenticateJWT, (req, res) => {
+//----------------- API to fetch All Attachments by Thesis Id -----------------
+app.get('/api/fetch_all_attachments', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
     const thesisId = req.query.thesis_id;
 
@@ -1014,13 +1014,7 @@ app.get('/api/fetch_attachments', authenticateJWT, (req, res) => {
         SELECT * 
         FROM Attachments 
         WHERE thesis_id = ? 
-        AND type = 'file'
-        AND EXISTS (
-            SELECT 1 
-            FROM Theses 
-            WHERE Theses.thesis_id = Attachments.thesis_id
-            AND (Theses.student_id = ? OR Theses.professor_id = ?)
-        );
+        
     `;
 
     db.query(query, [thesisId, userId, userId], (err, results) => {

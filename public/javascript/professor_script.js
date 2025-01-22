@@ -1144,7 +1144,7 @@ function addToBeReviewedSection(thesis, container) {
     const downloadButton = createButton('download-thesis-button', 'Λήψη Πρόχειρου Φοιτητή', ['btn', 'btn-primary', 'my-3'], () => {
         const thesisId = thesis.thesis_id;  // ID της διπλωματικής
 
-        fetch(`/api/fetch_attachments?thesis_id=${thesisId}`, {
+        fetch(`/api/fetch_all_attachments?thesis_id=${thesisId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1154,11 +1154,14 @@ function addToBeReviewedSection(thesis, container) {
             .then(data => {
                 if (data.success) {
                     const file = data.attachments.find(attachment => attachment.type === 'file');
-                    if (data.attachments.length > 0) {
+                    if (file) {
                         const downloadLink = document.createElement('a');
                         downloadLink.href = file.file_path.replace('./', '/');
                         downloadLink.textContent = file.file_path.split('/').pop();
-                        downloadLink.download = link.textContent; //Press to download
+                        downloadLink.download = file.file_path.split('/').pop();
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
                     } else {
                         alert('Δεν έχει αναρτηθεί πρόχειρο.');
                     }
