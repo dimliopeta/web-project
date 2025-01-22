@@ -1183,13 +1183,13 @@
     {
       "thesis_id": "1",
       "professor_id": "1",
-      "student_id": "1",
+      "student_id": null,
       "title": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks",
       "summary": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks is very important so we have to do it.",
-      "status": "assigned",
-      "pdf_path": "",
-      "start_date": "2025-01-12",
-      "exam_date": "2025-01-19"
+      "status": "unassigned",
+      "pdf_path": null,
+      "start_date": null,
+      "exam_date": null
     },
     {
       "thesis_id": "2",
@@ -1197,8 +1197,8 @@
       "student_id": null,
       "title": "The Role of Normal Software Behavior in Ensuring System Reliability and Security",
       "summary": "The Role of Normal Software Behavior in Ensuring System Reliability and Security is enormous so we have to study it.",
-      "status": "assigned",
-      "pdf_path": "",
+      "status": "unassigned",
+      "pdf_path": null,
       "start_date": null,
       "exam_date": null
     },
@@ -1208,8 +1208,8 @@
       "student_id": null,
       "title": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design",
       "summary": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design is can be great so we have to do it.",
-      "status": "active",
-      "pdf_path": "",
+      "status": "unassigned",
+      "pdf_path": null,
       "start_date": null,
       "exam_date": null
     },
@@ -1219,19 +1219,19 @@
       "student_id": null,
       "title": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms",
       "summary": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms can really help with computers so we have to understand it.",
-      "status": "to-be-reviewed",
-      "pdf_path": "",
+      "status": "unassigned",
+      "pdf_path": null,
       "start_date": null,
       "exam_date": null
     },
     {
       "thesis_id": "5",
       "professor_id": "1",
-      "student_id": "5",
+      "student_id": null,
       "title": "Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science",
       "summary": "Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science is a great idea, so it's time we investigated.",
-      "status": "completed",
-      "pdf_path": "",
+      "status": "unassigned",
+      "pdf_path": null,
       "start_date": null,
       "exam_date": null
     },
@@ -1242,7 +1242,7 @@
       "title": "Optimizing Neural Network Architectures for Edge Devices",
       "summary": "The increasing prevalence of IoT and edge devices has created a demand for efficient neural networks capable of running on hardware with limited computational resources. This thesis explores methods to optimize deep learning models, such as pruning, quantization, and architecture search. The study benchmarks these techniques on common edge devices and analyzes trade-offs between accuracy, latency, and energy consumption. Results demonstrate that using lightweight architectures like MobileNet combined with advanced quantization can deliver a significant performance boost while maintaining acceptable accuracy.",
       "status": "unassigned",
-      "pdf_path": "",
+      "pdf_path": null,
       "start_date": null,
       "exam_date": null
     },
@@ -1253,7 +1253,7 @@
       "title": "Advancing Natural Language Processing with Zero-Shot Learning",
       "summary": "Zero-shot learning enables machine learning models to perform tasks in domains where no labeled data is available. This thesis investigates state-of-the-art approaches to zero-shot learning in natural language processing (NLP), leveraging models like GPT and BERT. It examines their ability to generalize across languages and tasks, highlighting challenges in low-resource scenarios. A proposed framework improves accuracy by combining zero-shot learning with unsupervised domain adaptation, demonstrating effectiveness in real-world text classification tasks.",
       "status": "unassigned",
-      "pdf_path": "",
+      "pdf_path": null,
       "start_date": null,
       "exam_date": null
     },
@@ -1264,7 +1264,7 @@
       "title": "Blockchain in Secure Voting Systems: A Practical Evaluation",
       "summary": "Blockchain technology offers promising solutions for secure and transparent voting systems. This thesis evaluates various blockchain platforms to assess their suitability for implementing secure e-voting protocols. By creating a prototype system, the research demonstrates how features like decentralized ledgers and cryptographic security can ensure voter anonymity and integrity. The study also addresses scalability and user accessibility, identifying key hurdles and proposing optimizations for wider adoption.",
       "status": "unassigned",
-      "pdf_path": "",
+      "pdf_path": null,
       "start_date": null,
       "exam_date": null
     },
@@ -1275,96 +1275,9 @@
       "title": "Quantum Computing Algorithms for Cryptographic Challenges",
       "summary": "This thesis delves into the implications of quantum computing on modern cryptographic systems. It reviews quantum algorithms like Shor’s algorithm for factoring integers and Grover’s algorithm for search, analyzing their potential to break widely used encryption protocols. Additionally, it explores quantum-resistant algorithms that ensure security in a post-quantum world. The study emphasizes the urgency of transitioning to quantum-safe encryption standards for critical applications.",
       "status": "unassigned",
-      "pdf_path": "",
+      "pdf_path": null,
       "start_date": null,
       "exam_date": null
-    }
-  ],
-  "invitations": [
-    {
-      "id": "1",
-      "thesis_id": "2",
-      "professor_id": "1"
-    },
-    {
-      "id": "2",
-      "thesis_id": "2",
-      "professor_id": "2"
-    },
-    {
-      "id": "3",
-      "thesis_id": "2",
-      "professor_id": "3"
-    }
-  ],
-  "committees": [
-    {
-      "thesis_id": "1",
-      "member1_id": "2",
-      "member2_id": "3"
-    },
-    {
-      "thesis_id": "2",
-      "member1_id": "4",
-      "member2_id": "5"
-    },
-    {
-      "thesis_id": "4",
-      "member1_id": "7",
-      "member2_id": "8"
-    }],
-  "examinations": [
-    {
-      "thesis_id": "1",
-      "date": "2025-02-10",
-      "type_of_exam": "in-person",
-      "location": "E4",
-      "exam_report": null
-    },
-    {
-      "thesis_id": 4,
-      "date": "2025-02-10",
-      "type_of_exam": "in-person",
-      "location": "Room 101, Engineering Building",
-      "exam_report": null
-    }
-  ],
-  "logs": [
-    { 
-      "id": "1",
-      "thesis_id": "1",
-      "date_of_change": "2025-02-01",
-      "old_state": "unassigned",
-      "new_state": "assigned",
-      "gen_assembly_session": null,
-      "cancellation_reason": null
-    },
-    { 
-      "id": "2",
-      "thesis_id": "1",
-      "date_of_change": "2025-03-05",
-      "old_state": "assigned",
-      "new_state": "active",
-      "gen_assembly_session": null,
-      "cancellation_reason": null
-    },
-    { 
-      "id": "3",
-      "thesis_id": "1",
-      "date_of_change": "2025-03-10",
-      "old_state": "active",
-      "new_state": "to-be-reviewed",
-      "gen_assembly_session": null,
-      "cancellation_reason": null
-    },
-    { 
-      "id": "4",
-      "thesis_id": "1",
-      "date_of_change": "2025-03-20",
-      "old_state": "to-be-reviewed",
-      "new_state": "completed",
-      "gen_assembly_session": null,
-      "cancellation_reason": null
     }
   ],
   "administrators": [
@@ -1373,41 +1286,6 @@
       "name": "kyria",
       "surname": "iwanna",
       "email": "iwanna@ceid.upatras.gr"
-    }
-  ],
-  "grades": [
-    {
-      "grade_id": "1",
-      "thesis_id" : "1",
-      "professor_id": "1", 
-      "grade1" : "8",
-      "grade2" : "8",
-      "grade3" : "7",
-      "grade4" : "7",
-      "comments" : null,
-      "finalized" : true
-    },
-    {
-      "grade_id": "2",
-      "thesis_id" : "1",
-      "professor_id": "2", 
-      "grade1" : "5",
-      "grade2" : "5",
-      "grade3" : "8",
-      "grade4" : "8",
-      "comments" : null,
-      "finalized" : true
-    },
-    {
-      "grade_id": "3",
-      "thesis_id" : "1",
-      "professor_id": "3", 
-      "grade1" : "10",
-      "grade2" : "10",
-      "grade3" : "8",
-      "grade4" : "8",
-      "comments" : null,
-      "finalized" : true
     }
   ]
   

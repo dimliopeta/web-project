@@ -563,44 +563,45 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
     } else if (role === 'student') {
         query = `
                 SELECT
-                    Theses.*,
-                    Examinations.*,
-                    DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
-                    DATE_FORMAT(Examinations.date, '%Y-%m-%d') AS exam_date,
-                    Professors.name AS professor_name, 
-                    Professors.surname AS professor_surname, 
-                    Committee1.name AS committee_member1_name,
-                    Committee1.surname AS committee_member1_surname,
-                    Committee2.name AS committee_member2_name,
-                    Committee2.surname AS committee_member2_surname,
-                    SupervisorGrade.grade1 AS supervisor_grade1,
-                    SupervisorGrade.grade2 AS supervisor_grade2,
-                    SupervisorGrade.grade3 AS supervisor_grade3,
-                    SupervisorGrade.grade4 AS supervisor_grade4,
-                    SupervisorGrade.finalized AS supervisor_finalized,
-                    Committee1Grade.grade1 AS committee_member1_grade1,
-                    Committee1Grade.grade2 AS committee_member1_grade2,
-                    Committee1Grade.grade3 AS committee_member1_grade3,
-                    Committee1Grade.grade4 AS committee_member1_grade4,
-                    Committee1Grade.finalized AS committee_member1_finalized,
-                    Committee2Grade.grade1 AS committee_member2_grade1,
-                    Committee2Grade.grade2 AS committee_member2_grade2,
-                    Committee2Grade.grade3 AS committee_member2_grade3,
-                    Committee2Grade.grade4 AS committee_member2_grade4,
-                    Committee2Grade.finalized AS committee_member2_finalized
-                FROM Theses
-                LEFT JOIN Professors ON Theses.professor_id = Professors.id
-                LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
-                LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
-                LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
-                LEFT JOIN Examinations ON Theses.thesis_id = Examinations.thesis_id
-                LEFT JOIN Grades AS SupervisorGrade ON Theses.thesis_id = SupervisorGrade.thesis_id 
-                    AND Theses.professor_id = SupervisorGrade.professor_id
-                LEFT JOIN Grades AS Committee1Grade ON Theses.thesis_id = Committee1Grade.thesis_id 
-                    AND Committees.member1_id = Committee1Grade.professor_id
-                LEFT JOIN Grades AS Committee2Grade ON Theses.thesis_id = Committee2Grade.thesis_id 
-                    AND Committees.member2_id = Committee2Grade.professor_id
-                WHERE Theses.student_id = ? AND Theses.thesis_id IS NOT NULL;
+    Theses.*,
+    COALESCE(DATE_FORMAT(Examinations.date, '%Y-%m-%d'), 'Not Scheduled') AS exam_date, 
+    COALESCE(Examinations.type_of_exam, 'Not Specified') AS type_of_exam,
+    COALESCE(Examinations.location, 'Not Assigned') AS exam_location,
+    DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
+    Professors.name AS professor_name, 
+    Professors.surname AS professor_surname, 
+    Committee1.name AS committee_member1_name,
+    Committee1.surname AS committee_member1_surname,
+    Committee2.name AS committee_member2_name,
+    Committee2.surname AS committee_member2_surname,
+    SupervisorGrade.grade1 AS supervisor_grade1,
+    SupervisorGrade.grade2 AS supervisor_grade2,
+    SupervisorGrade.grade3 AS supervisor_grade3,
+    SupervisorGrade.grade4 AS supervisor_grade4,
+    SupervisorGrade.finalized AS supervisor_finalized,
+    Committee1Grade.grade1 AS committee_member1_grade1,
+    Committee1Grade.grade2 AS committee_member1_grade2,
+    Committee1Grade.grade3 AS committee_member1_grade3,
+    Committee1Grade.grade4 AS committee_member1_grade4,
+    Committee1Grade.finalized AS committee_member1_finalized,
+    Committee2Grade.grade1 AS committee_member2_grade1,
+    Committee2Grade.grade2 AS committee_member2_grade2,
+    Committee2Grade.grade3 AS committee_member2_grade3,
+    Committee2Grade.grade4 AS committee_member2_grade4,
+    Committee2Grade.finalized AS committee_member2_finalized
+FROM Theses
+LEFT JOIN Professors ON Theses.professor_id = Professors.id
+LEFT JOIN Committees ON Theses.thesis_id = Committees.thesis_id
+LEFT JOIN Professors AS Committee1 ON Committees.member1_id = Committee1.id
+LEFT JOIN Professors AS Committee2 ON Committees.member2_id = Committee2.id
+LEFT JOIN Examinations ON Theses.thesis_id = Examinations.thesis_id
+LEFT JOIN Grades AS SupervisorGrade ON Theses.thesis_id = SupervisorGrade.thesis_id 
+    AND Theses.professor_id = SupervisorGrade.professor_id
+LEFT JOIN Grades AS Committee1Grade ON Theses.thesis_id = Committee1Grade.thesis_id 
+    AND Committees.member1_id = Committee1Grade.professor_id
+LEFT JOIN Grades AS Committee2Grade ON Theses.thesis_id = Committee2Grade.thesis_id 
+    AND Committees.member2_id = Committee2Grade.professor_id
+WHERE Theses.student_id = ? AND Theses.thesis_id IS NOT NULL;
 `;
         queryParams = [userId];
     } else {

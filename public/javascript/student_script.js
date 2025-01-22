@@ -451,7 +451,7 @@ document.querySelector('#search-professor').addEventListener('input', function (
         return;
     }
 
-    fetch(`/api/professor_search_by_student?input=${encodeURIComponent(filter)}`)
+    fetch(`/api/professor-search?input=${encodeURIComponent(filter)}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
