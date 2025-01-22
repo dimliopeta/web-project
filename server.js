@@ -868,12 +868,12 @@ app.post('/api/examinations_upload', (req, res) => {
 
     const query = `
          INSERT INTO examinations (thesis_id, date, type_of_exam, location, announced)
-    VALUES (?, ?, ?, ?, FALSE)
-    ON DUPLICATE KEY UPDATE
-      date = VALUES(date),
-      type_of_exam = VALUES(type_of_exam),
-      location = VALUES(location),
-      announced = FALSE
+            VALUES (?, ?, ?, ?, FALSE)
+            ON DUPLICATE KEY UPDATE
+              date = VALUES(date),
+              type_of_exam = VALUES(type_of_exam),
+              location = VALUES(location),
+              announced = FALSE;
     `;
 
     db.query(query, [thesis_id, exam_date, type_of_exam, location], (err, result) => {
@@ -1933,7 +1933,6 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
 app.post('/api/check-exam', authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
 
-    // Έλεγχος αν υπάρχει thesisId στο request body
     if (!thesisId) {
         return res.status(400).json({ success: false, message: 'Missing thesisId' });
     }
@@ -1950,20 +1949,17 @@ app.post('/api/check-exam', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Server error' });
         }
 
-        // Αν δεν υπάρχουν αποτελέσματα για το συγκεκριμένο thesisId
         if (results.length === 0) {
-            return res.status(200).json({ success: true, data: [] });
+            return res.status(200).json({ success: true, data: null }); // Επιστρέφεται null αντί για άδειο array
         }
-
-        // Αν βρέθηκε το πεδίο announced
-        const { announced } = results[0];
 
         return res.status(200).json({
             success: true,
-            announced: announced,
+            data: results[0], // Επιστρέφεται απευθείας το πρώτο αποτέλεσμα
         });
     });
 });
+
 
 //-----------------API for creating an announcement of an examination----
 app.post('/api/add-announcement', (req, res) => {
@@ -1977,14 +1973,14 @@ app.post('/api/add-announcement', (req, res) => {
         SELECT 
             t.thesis_id,
             t.title,
-            s.name AS student_name,
-            s.surname AS student_surname,
+            CONCAT(s.name, ' ', s.surname) AS student_name,
             CONCAT(p.name, ' ', p.surname) AS professor_name,
             c.member1_id AS committee_member1_id,
             CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
             c.member2_id AS committee_member2_id,
             CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
             e.type_of_exam,
+            e.date as exam_date,
             e.location AS examination_location
         FROM Theses t
         LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
@@ -1993,7 +1989,7 @@ app.post('/api/add-announcement', (req, res) => {
         LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
         LEFT JOIN Professors c1 ON c.member1_id = c1.id
         LEFT JOIN Professors c2 ON c.member2_id = c2.id
-        WHERE t.thesis_id = 4;
+        WHERE t.thesis_id = ?;
     `;
 
     const updateQuery = `

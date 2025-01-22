@@ -1225,16 +1225,17 @@ function announcementButtonController(thesisId, container) {
         })
         .then((data) => {
             
-            if (data.success && data.data.length === 0) {
+            if (!data.success || !data.data) {
                 const unannouncedText = document.createElement('p');
-                unannouncedText.textContent = 'Δεν έχουν καταχωρηθεί οι λεπτομέρειες της εξέτασης από τον φοιτητή. Δεν μπορείτε να δημιουργήσετε ανακοίνωση!';
+                unannouncedText.textContent =
+                    'Δεν έχουν καταχωρηθεί οι λεπτομέρειες της εξέτασης από τον φοιτητή. Δεν μπορείτε να δημιουργήσετε ανακοίνωση!';
                 container.appendChild(unannouncedText);
                 const announcementHr = document.createElement('hr');
                 container.appendChild(announcementHr);
                 return;
             }
 
-            const { announced } = data.data[0];
+            const { announced } = data.data;
 
             if (!data.announced) {
                 const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesisId));
@@ -1315,9 +1316,14 @@ function showAnnouncementModal(announcementDetails) {
 
     // Προσθήκη περιεχομένων ανακοίνωσης στο modal body
     modalBody.innerHTML = `
-        <p><strong>Φοιτητής:</strong> ${announcementDetails.student_name} ${announcementDetails.student_surname}</p>
-        <p><strong>Επιβλέπων:</strong> ${announcementDetails.professor_name} ${announcementDetails.professor_surname}</p>
-        <p><strong>Ημερομηνία Εξέτασης:</strong> ${announcementDetails.examination_date}</p>
+        <p><strong>Φοιτητής:</strong> ${announcementDetails.student_name} </p>
+        <p class="text-muted"><strong>Τριμελής Επιτροπή:</strong></p>
+                            <ul class="list-unstyled ps-3">
+                                <li>${announcement.professor_name}</li>
+                                <li>${announcement.committee_member1_name}</li>
+                                <li>${announcement.committee_member2_name}</li>
+                            </ul>        
+        <p><strong>Ημερομηνία Εξέτασης:</strong> ${announcementDetails.exam_date}</p>
         <p><strong>Τύπος Εξέτασης:</strong> ${announcementDetails.type_of_exam === 'online' ? 'Ηλεκτρονική' : announcementDetails.type_of_exam === 'in-person' ? 'Δια ζώσης' : 'Άγνωστος τύπος'}</p>
         <p><strong>Τοποθεσία Εξέτασης:</strong> ${announcementDetails.examination_location}</p>
     `;

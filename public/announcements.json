@@ -1,15 +1,16 @@
 {
   "announcements": [
     {
-      "thesis_id": 4,
-      "title": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms",
-      "student_name": "test",
-      "student_surname": "name",
-      "professor_name": "Andreas",
-      "professor_surname": "Komninos",
-      "examination_date": "2025-02-09T22:00:00.000Z",
+      "thesis_id": 6,
+      "title": "Optimizing Neural Network Architectures for Edge Devices",
+      "student_name": "Margaret Qualley",
+      "professor_name": "Andreas Komninos",
+      "committee_member1_id": 3,
+      "committee_member1_name": "Basilis Karras",
+      "committee_member2_id": 2,
+      "committee_member2_name": "Vasilis Foukaras",
       "type_of_exam": "in-person",
-      "examination_location": "Room 101, Engineering Building"
+      "examination_location": "A2"
     }
   ]
 }

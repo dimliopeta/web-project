@@ -20,30 +20,43 @@ function loadAnnouncements() {
             const container = document.getElementById('announcements-container');
             announcementsToLoad.forEach(announcement => {
                 const card = `
-                        <div class="col-md-4">
-                            <div class="card h-100">
-                                <img src="https://via.placeholder.com/150" class="card-img-top" alt="${announcement.title}">
-                                <div class="card-body">
-                                    <h5 class="card-title">${announcement.title}</h5>
-                                    <p class="card-text">${announcement.details}</p>
-                                    <a href="#" class="btn btn-primary">Read More</a>
-                                </div>
-                                <div class="card-footer">
-                                    <small class="text-muted">Φοιτητής: ${announcement.student_name} ${announcement.student_surname}</small><br>
-                                    <small class="text-muted">Επιβλέπων: ${announcement.professor_name} ${announcement.professor_surname}</small><br>
-                                    <small class="text-muted">Ημερομηνία Εξέτασης: ${new Date(announcement.examination_date).toLocaleString()}</small><br>
-                                    <small class="text-muted">Τύπος Εξέτασης: ${announcement.type_of_exam === 'online' ? 'Ηλεκτρονική' : announcement.type_of_exam === 'in-person' ? 'Δια ζώσης' : 'Άγνωστος τύπος'}</small><br>
-                                    <small class="text-muted">Τοποθεσία Εξέτασης: ${announcement.examination_location}</small>
-                                </div>
-                            </div>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-lg border-0">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">Ανακοίνωση Παρουσίασης Διπλωματικής</h5>
                         </div>
-                    `;
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">${announcement.title}</h6>
+                            <p class="text-muted"><strong>Φοιτητής:</strong> ${announcement.student_name}</p>
+                            <p class="text-muted"><strong>Τριμελής Επιτροπή:</strong></p>
+                            <ul class="list-unstyled ps-3">
+                                <li>${announcement.professor_name}</li>
+                                <li>${announcement.committee_member1_name}</li>
+                                <li>${announcement.committee_member2_name}</li>
+                            </ul>
+                            <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcement.exam_date)}</p>
+                            <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online'
+                                    ? 'Ηλεκτρονική'
+                                    : announcement.type_of_exam === 'in-person'
+                                        ? 'Δια ζώσης'
+                                        : 'Άγνωστος τύπος'
+                                }</p>
+                            <p class="text-muted"><strong>Τοποθεσία Εξέτασης:</strong> ${announcement.examination_location}</p>
+                        </div>
+                        <div class="card-footer bg-light d-flex justify-content-end">
+                            <a href="#" class="btn btn-outline-primary">Read More</a>
+                        </div>
+                    </div>
+                </div>
+`;
+
+
                 container.innerHTML += card;
             });
 
             currentPage++;
 
-        
+
         });
 }
 
