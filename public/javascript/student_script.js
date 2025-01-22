@@ -367,7 +367,7 @@ function loadSectionsBasedOnStatus() {
                         gradesSection.style.display = "none";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "none";
-                        managementSection.style.display = "block";
+                        managementSection.style.display = "none";
                         datesSection.style.display = "block";
                         break;
                     case 'to-be-reviewed':

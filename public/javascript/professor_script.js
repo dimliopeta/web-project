@@ -439,11 +439,13 @@ function showInfoSection(thesis) {
     }
 
     infoSection.appendChild(statusSection);
+    
 
     // Footer με Ημερομηνίες
     const footer = document.createElement('section');
     footer.classList.add('text-center');
     footer.innerHTML = `
+    <hr>
         <h4>Ημερομηνίες</h4>
         <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
         <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || ''}</p>
@@ -950,6 +952,11 @@ function addActiveSection(thesis, container) {
         cancelTitle.textContent = 'Ακύρωση Διπλωματικής';
         cancelThesisForm.appendChild(cancelTitle);
 
+        const cancellationNumberLabel = document.createElement('label');
+        cancellationNumberLabel.textContent = 'Α/Α ΓΣΤ';
+        cancellationNumberLabel.classList.add('form-label');
+        cancelThesisForm.appendChild(cancellationNumberLabel);
+
         const cancellationNumberInput = document.createElement('input');
         cancellationNumberInput.type = 'number';
         cancellationNumberInput.id = 'cancellation-number';
@@ -957,12 +964,22 @@ function addActiveSection(thesis, container) {
         cancellationNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
         cancelThesisForm.appendChild(cancellationNumberInput);
 
+        const cancellationDateLabel = document.createElement('label');
+        cancellationDateLabel.textContent = 'Ημερομηνία ΓΣΤ';
+        cancellationDateLabel.classList.add('form-label');
+        cancelThesisForm.appendChild(cancellationDateLabel);
+
         const cancellationDateInput = document.createElement('input');
         cancellationDateInput.type = 'date';
         cancellationDateInput.id = 'cancellation-year';
         cancellationDateInput.classList.add('form-control', 'mb-2');
         cancellationDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
         cancelThesisForm.appendChild(cancellationDateInput);
+
+        const cancellationReasonLabel = document.createElement('label');
+        cancellationReasonLabel.textContent = 'Λόγος ακύρωσης';
+        cancellationReasonLabel.classList.add('form-label');
+        cancelThesisForm.appendChild(cancellationReasonLabel);
 
         const cancellationReasonTextarea = document.createElement('textarea');
         cancellationReasonTextarea.id = 'cancellation-reason';
@@ -976,11 +993,11 @@ function addActiveSection(thesis, container) {
             const cancellationDate = cancellationDateInput.value;
             const cancellationReasonText = cancellationReasonTextarea.value;
 
-
             if (!cancellationNumber || !cancellationDate || !cancellationReasonText) {
                 alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
                 return;
             }
+
 
             // Κλήση στο API για την εκκίνηση της διπλωματικής
             fetch('/api/cancel-thesis', {
@@ -1014,6 +1031,7 @@ function addActiveSection(thesis, container) {
 
         container.appendChild(cancelThesisForm);
 
+        
 
         // Τμήμα για αλλαγή κατάστασης
         const changeStatusSection = document.createElement('section');
@@ -1034,16 +1052,28 @@ function addActiveSection(thesis, container) {
             changeThesisForm.id = 'change-thesis-form';
             changeThesisForm.classList.add('mt-3');
 
-            const changeNumberInput = document.createElement('input');
-            changeNumberInput.type = 'number';
-            changeNumberInput.classList.add('form-control', 'mb-2');
-            changeNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
-            changeThesisForm.appendChild(changeNumberInput);
+            const aaLabel = document.createElement('label');
+            aaLabel.textContent = 'A/A ΓΣΤ';
+            aaLabel.classList.add('form-label');
+
+            const aaInput = document.createElement('input');
+            aaInput.type = 'text';
+            aaInput.classList.add('form-control', 'mb-2');
+            aaInput.placeholder = 'A/A Γενικής Συνέλευσης';
+
+            const dateLabel = document.createElement('label');
+            dateLabel.textContent = 'Ημερομηνία ΓΣΤ';
+            dateLabel.classList.add('form-label');
 
             const changeDateInput = document.createElement('input');
             changeDateInput.type = 'date';
             changeDateInput.classList.add('form-control', 'mb-2');
             changeDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
+
+            changeThesisForm.appendChild(aaLabel);
+            changeThesisForm.appendChild(aaInput);
+
+            changeThesisForm.appendChild(dateLabel);
             changeThesisForm.appendChild(changeDateInput);
 
             const confirmChangeButton = createButton('confirm-change-button', 'Επιβεβαίωση Μετατροπής σε Υπό Εξέταση', ['btn', 'btn-primary'], () => {
@@ -1084,10 +1114,6 @@ function addActiveSection(thesis, container) {
         });
 
         changeStatusSection.appendChild(changeToUnderReviewButton);
-
-        const changeStatusHr = document.createElement('hr');
-        changeStatusSection.appendChild(changeStatusHr);
-
         container.appendChild(changeStatusSection);
 
     }
@@ -1244,7 +1270,7 @@ function announcementButtonController(thesisId, container) {
                 const announcementHr = document.createElement('hr');
                 container.appendChild(announcementHr);
                 return;
-            }  
+            }
             const { announced } = data.data;
 
             if (!announced) {
