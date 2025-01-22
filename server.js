@@ -1495,7 +1495,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
                                             });
                                         }
 
-                                        res.json({ success: true, message: 'Invitation accepted, committee full, and other invitations cancelled.' });
+                                        res.json({ success: true, message: 'Η πρόσκληση έγινε αποδεκτή, η Τριμελής είναι πλέον πλήρης.' });
                                     });
                                 });
                             } else {
@@ -1507,7 +1507,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
                                         });
                                     }
 
-                                    res.json({ success: true, message: 'Invitation accepted and professor added to committee.' });
+                                    res.json({ success: true, message: 'Η πρόσκληση έγινε αποδεκτή.' });
                                 });
                             }
                         });
