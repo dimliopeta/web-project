@@ -1150,15 +1150,17 @@ function addToBeReviewedSection(thesis, container) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
         })
-            .then(response => response.json()) // Επιστρέφει το αρχείο ως blob
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     const file = data.attachments.find(attachment => attachment.type === 'file');
-                    if (file) {
+                    if (data.attachments.length > 0) {
                         const downloadLink = document.createElement('a');
                         downloadLink.href = file.file_path.replace('./', '/');
                         downloadLink.textContent = file.file_path.split('/').pop();
                         downloadLink.download = link.textContent; //Press to download
+                    } else {
+                        alert('Δεν έχει αναρτηθεί PDF.');
                     }
                 } else {
                     alert('Παρουσιάστηκε πρόβλημα στην ανεύρεση των αρχείων');
@@ -1224,7 +1226,7 @@ function announcementButtonController(thesisId, container) {
             return response.json();
         })
         .then((data) => {
-            
+
             if (data.success && data.data.length === 0) {
                 const unannouncedText = document.createElement('p');
                 unannouncedText.textContent = 'Δεν έχουν καταχωρηθεί οι λεπτομέρειες της εξέτασης από τον φοιτητή. Δεν μπορείτε να δημιουργήσετε ανακοίνωση!';

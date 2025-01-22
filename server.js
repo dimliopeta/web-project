@@ -1014,6 +1014,7 @@ app.get('/api/fetch_attachments', authenticateJWT, (req, res) => {
         SELECT * 
         FROM Attachments 
         WHERE thesis_id = ? 
+        AND type = 'file'
         AND EXISTS (
             SELECT 1 
             FROM Theses 
