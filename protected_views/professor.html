@@ -68,8 +68,7 @@
 
 <body>
 
-
-    <!--- navbar --->
+    <!------------------ Navbar ------------------>
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
         <a class="navbar-brand px-3 fs-4" href="professor">
             <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
@@ -85,61 +84,22 @@
                 <a class="nav-item nav-link" href="#list">Λίστα Διπλωματικών</a>
                 <a class="nav-item nav-link" href="#invitations">Προσκλήσεις Τριμελών</a>
                 <a class="nav-item nav-link" href="#stats">Στατιστικά</a>
+
             </div>
-            <button type="button" class="nav-item btn btn-outline-secondary ms-auto"
-                data-target="professor_profile">Λογαριασμός</button>
-            <button type="button" class="nav-item btn btn-outline-secondary float-end mx-4"
+            <button type="button" class="nav-item btn btn-outline-secondary ms-auto mx-4"
                 id="logout-btn">Έξοδος</button>
         </div>
     </nav>
 
+    <!------------------ Main Content ------------------>
     <div class="main-content">
-        <!-- DashBoard -->
-        <div id="dashboard" class="content-section" style="display:block;">
-            <!-- Header -->
-            <div class="header">
-                <h2>Πίνακας Ελέγχου</h2>
-            </div>
-            <div id="dashboard-content" class="mt-5 pt-5 pb-3">
-                <h3 class="text-muted">Καλωσήρθατε!</h3>
-                <div class="row">
-                    <div class="col-md-6 pt-1">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Ενεργές Διπλωματικές</h5>
-                                <p>Πλήθος: 5</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 pt-1">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Πρόσφατες Ενημερώσεις</h5>
-                                <p>2 νέες προσκλήσεις.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-
-                <!-- Statistics -->
-                <div id="stats" class="mb-4 pt-4">
-                    <h3>Στατιστικά</h3>
-                    <p>Υπό κατασκευή...</p>
-                </div>
-            </div>
-        </div>
-
-
-
-        <!-- Θέματα Διπλωματικών -->
+        <!---------- Θέματα Διπλωματικών ---------->
         <div id="theses-section" class="content-section" style="display:none;">
-
             <h3 class="text-center mt-5 pt-5 pb-3">Θέματα Διπλωματικών</h3>
             <div class="row">
                 <div id="themes-compartment" class="col-lg-8 mx-auto">
                     <div class="border p-3 rounded">
-
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createThesisModal">Νέο
                             Θέμα</button>
                         <ul class="list-group mt-3"></ul>
@@ -156,9 +116,7 @@
                             </tbody>
                         </table>
 
-
-
-                        <!-- Modal for Create Thesis -->
+                        <!---------- Modal for Create Thesis ---------->
                         <div class="modal fade" id="createThesisModal" tabindex="-1"
                             aria-labelledby="createThesisModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
@@ -199,7 +157,6 @@
                     </div>
                 </div>
 
-
                 <div id="edit-section" class="col-md-6 d-none">
                     <div class="border p-3 rounded">
                         <h5 class="text-primary">Επεξεργασία</h5>
@@ -229,18 +186,14 @@
             </div>
         </div>
 
-
-
-
-
-        <!-- Assign to student nav-->
+        <!---------- Assign to student nav ---------->
         <div id="assign" class="content-section" style="display:none;">
             <h3 class="text-center mt-5 pt-5 pb-3">Ανάθεση Θέματος Διπλωματικής σε Φοιτητή</h3>
 
-            <!-- Κεντρικό layout -->
+            <!---------- Κεντρικό layout ---------->
             <div class="container">
                 <div class="row">
-                    <!-- Φοιτητής -->
+                    <!---------- Φοιτητής ---------->
                     <div class="col-md-6">
                         <div class="border p-3 rounded">
                             <h5 class="text-primary">Φοιτητής</h5>
@@ -262,7 +215,7 @@
                         </div>
                     </div>
 
-                    <!-- Διπλωματικές -->
+                    <!---------- Διπλωματικές ---------->
                     <div class="col-md-6">
                         <div class="border p-3 rounded">
                             <h5 class="text-primary">Θέματα Διπλωματικών</h5>
@@ -273,7 +226,7 @@
                     </div>
                 </div>
 
-                <!-- Κουμπί ανάθεσης -->
+                <!---------- Κουμπί ανάθεσης ---------->
                 <div class="row mt-4">
                     <div class="col text-center">
                         <button class="btn btn-primary btn-lg" id="assignThesisButton">Ανάθεση Διπλωματικής</button>
@@ -298,15 +251,14 @@
             </div>
         </div>
 
-
-        <!-- Λίστα Διπλωματικών -->
+        <!---------- Λίστα Διπλωματικών ---------->
         <div id="list" class="content-section" style="display:none;">
             <h3 class="text-center mt-5 pt-5 pb-3">Λίστα Διπλωματικών</h3>
 
-            <!-- Κεντρικό layout -->
+            <!---------- Κεντρικό layout ---------->
             <div class="container">
                 <div class="row">
-                    <!-- Λίστα Διπλωματικών -->
+                    <!---------- Λίστα Διπλωματικών ---------->
 
                     <div id="theses-compartment" class="col-lg-6 mx-auto">
                         <div class="border p-3 rounded">
@@ -327,19 +279,18 @@
                                         onclick="applyFilter('status', 'active')">Ενεργές</a>
                                     <a class="dropdown-item" href="#" onclick="applyFilter('status', 'assigned')">Υπό
                                         Ανάθεση</a>
-                                        <div class="dropdown-divider" style="margin: 10px 0;"></div>
-                                        <h5 style="margin-bottom: 10px;">Ρόλος</h5>
+                                    <div class="dropdown-divider" style="margin: 10px 0;"></div>
+                                    <h5 style="margin-bottom: 10px;">Ρόλος</h5>
                                     <a class="dropdown-item" href="#"
                                         onclick="applyFilter('role', 'Επιβλέπων')">Επιβλέπων</a>
                                     <a class="dropdown-item" href="#"
                                         onclick="applyFilter('role', 'Μέλος Τριμελούς')">Μέλος Τριμελούς</a>
-                                        <div class="dropdown-divider" style="margin: 10px 0;"></div>
-                                        <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                                            <a class="btn btn-outline-danger btn-sm" href="#"
-                                                onclick="clearFilters()">Αναίρεση Φίλτρου</a>
-                                        </div>
+                                    <div class="dropdown-divider" style="margin: 10px 0;"></div>
+                                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                        <a class="btn btn-outline-danger btn-sm" href="#"
+                                            onclick="clearFilters()">Αναίρεση Φίλτρου</a>
+                                    </div>
                                 </div>
-
                             </div>
                             <table id="theses" class="table table-striped table-hover">
                                 <thead>
@@ -354,26 +305,25 @@
                                 </tbody>
                             </table>
                         </div>
-                        
-                    <button id="export-csv" class="btn btn-primary btn-sm my-3 ms-1">
-                        Εξαγωγή σε CSV
-                    </button>
+                        <button id="export-csv" class="btn btn-primary btn-sm my-3 ms-1">
+                            Εξαγωγή σε CSV
+                        </button>
 
-                    <button id="export-json" class="btn btn-secondary btn-sm my-3 ms-1">
-                        Εξαγωγή σε JSON
-                    </button>
+                        <button id="export-json" class="btn btn-secondary btn-sm my-3 ms-1">
+                            Εξαγωγή σε JSON
+                        </button>
                     </div>
 
-                    <!-- Βασικές Πληροφορίες Διπλωματικής -->
+                    <!---------- Βασικές Πληροφορίες Διπλωματικής ---------->
                     <div id="info-compartment" class="card col-md-6 d-none border p-3 rounded">
                         <h5 class="text-primary">Βασικές Πληροφορίες</h5>
                     </div>
                     <p></p>
 
-
                 </div>
                 <div class="row">
-                    <section id="examReportHTMLSection" class="col-lg-8 border border-dark p-5 m-2 mx-auto" style="display:none;">
+                    <section id="examReportHTMLSection" class="col-lg-8 border border-dark p-5 m-2 mx-auto"
+                        style="display:none;">
                         <h4>ΠΡΑΚΤΙΚΟ ΣΥΝΕΔΡΙΑΣΗΣ ΤΗΣ ΤΡΙΜΕΛΟΥΣ ΕΠΙΤΡΟΠΗΣ ΓΙΑ ΤΗΝ ΠΑΡΟΥΣΙΑΣΗ ΚΑΙ ΚΡΙΣΗ ΤΗΣ
                             ΔΙΠΛΩΜΑΤΙΚΗΣ ΕΡΓΑΣΙΑΣ</h4>
                         <span>του/της φοιτητή/φοτήτρια κ.</span>
@@ -520,7 +470,7 @@
             <h3 class="text-center mt-5 pt-5 pb-3">Προσκλήσεις Τριμελών</h3>
             <div class="container">
                 <div class="row">
-                    <!-- Οι κάρτες των προσκλήσεων θα φορτώνονται εδώ -->
+                    <!---------- Οι κάρτες των προσκλήσεων θα φορτώνονται εδώ ---------->
                 </div>
 
                 <h3 class="text-center  pt-4 pb-3">Ιστορικό Απαντήσεων</h3>
@@ -544,8 +494,7 @@
 
 
 
-
-        <!-- Bootstrap JS -->
+        <!------------------ Bootstrap JS ------------------>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="/javascript/professor_script.js"></script>
 </body>

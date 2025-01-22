@@ -54,7 +54,7 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
 
 //-----------Load the Dashboard Tab as the Homepage-------------
 window.addEventListener('DOMContentLoaded', () => {
-    const defaultTab = document.querySelector('a[href="#dashboard"]');
+    const defaultTab = document.querySelector('a[href="#theses-section"]');
     if (defaultTab) {
         defaultTab.click();
     }
