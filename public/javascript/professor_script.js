@@ -1224,6 +1224,18 @@ function announcementButtonController(thesisId, container) {
             return response.json();
         })
         .then((data) => {
+            
+            if (data.success && data.data.length === 0) {
+                const unannouncedText = document.createElement('p');
+                unannouncedText.textContent = 'Δεν έχουν καταχωρηθεί οι λεπτομέρειες της εξέτασης από τον φοιτητή. Δεν μπορείτε να δημιουργήσετε ανακοίνωση!';
+                container.appendChild(unannouncedText);
+                const announcementHr = document.createElement('hr');
+                container.appendChild(announcementHr);
+                return;
+            }
+
+            const { announced } = data.data[0];
+
             if (!data.announced) {
                 const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesisId));
                 container.appendChild(announcementButton);

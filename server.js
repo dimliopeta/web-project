@@ -867,12 +867,13 @@ app.post('/api/examinations_upload', (req, res) => {
     }
 
     const query = `
-        INSERT INTO examinations (thesis_id, date, type_of_exam, location)
-        VALUES (?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE 
-            date = VALUES(date),
-            type_of_exam = VALUES(type_of_exam),
-            location = VALUES(location);
+         INSERT INTO examinations (thesis_id, date, type_of_exam, location, announced)
+    VALUES (?, ?, ?, ?, FALSE)
+    ON DUPLICATE KEY UPDATE
+      date = VALUES(date),
+      type_of_exam = VALUES(type_of_exam),
+      location = VALUES(location),
+      announced = FALSE
     `;
 
     db.query(query, [thesis_id, exam_date, type_of_exam, location], (err, result) => {
@@ -1951,7 +1952,7 @@ app.post('/api/check-exam', authenticateJWT, (req, res) => {
 
         // Αν δεν υπάρχουν αποτελέσματα για το συγκεκριμένο thesisId
         if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'No exam found for the given thesisId' });
+            return res.status(200).json({ success: true, data: [] });
         }
 
         // Αν βρέθηκε το πεδίο announced
@@ -1978,16 +1979,21 @@ app.post('/api/add-announcement', (req, res) => {
             t.title,
             s.name AS student_name,
             s.surname AS student_surname,
-            p.name AS professor_name,
-            p.surname AS professor_surname,
-            DATE_FORMAT(e.date, '%Y-%m-%d') AS examination_date,
+            CONCAT(p.name, ' ', p.surname) AS professor_name,
+            c.member1_id AS committee_member1_id,
+            CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
+            c.member2_id AS committee_member2_id,
+            CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
             e.type_of_exam,
             e.location AS examination_location
         FROM Theses t
         LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
         LEFT JOIN Students s ON t.student_id = s.id
         LEFT JOIN Professors p ON t.professor_id = p.id
-        WHERE t.thesis_id = ?;
+        LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+        LEFT JOIN Professors c1 ON c.member1_id = c1.id
+        LEFT JOIN Professors c2 ON c.member2_id = c2.id
+        WHERE t.thesis_id = 4;
     `;
 
     const updateQuery = `
@@ -2037,7 +2043,6 @@ app.post('/api/add-announcement', (req, res) => {
 
                 const filePath = path.join(__dirname, 'public', 'announcements.json');
 
-
                 // Αν το αρχείο JSON υπάρχει ήδη, διαβάζουμε τα δεδομένα και τα προσθέτουμε στον πίνακα
                 fs.readFile(filePath, (readErr, data) => {
                     let announcements = [];
@@ -2050,8 +2055,16 @@ app.post('/api/add-announcement', (req, res) => {
                         }
                     }
 
-                    // Προσθέτουμε την καινούρια ανακοίνωση στον πίνακα
-                    announcements.push(announcementDetails);
+                    // Ελέγχουμε αν η ανακοίνωση με το συγκεκριμένο thesisId υπάρχει ήδη
+                    const existingAnnouncementIndex = announcements.findIndex(announcement => announcement.thesis_id === thesisId);
+
+                    if (existingAnnouncementIndex !== -1) {
+                        // Αν υπάρχει, αντικαθιστούμε την υπάρχουσα καταχώρηση
+                        announcements[existingAnnouncementIndex] = announcementDetails;
+                    } else {
+                        // Αν δεν υπάρχει, προσθέτουμε τη νέα καταχώρηση
+                        announcements.push(announcementDetails);
+                    }
 
                     // Αποθηκεύουμε τον πίνακα ανακοινώσεων ξανά στο αρχείο JSON
                     fs.writeFile(filePath, JSON.stringify({ announcements }, null, 2), (fileErr) => {
@@ -2083,6 +2096,7 @@ app.post('/api/add-announcement', (req, res) => {
         });
     });
 });
+
 
 
 //-----------------API for viewing an announcement of an examination----
