@@ -405,7 +405,7 @@ function showInfoSection(thesis) {
     if (thesis.status === 'active' || thesis.status === 'to-be-reviewed') {
         const committeeSection = document.createElement('section');
         committeeSection.innerHTML = `
-            <h4>Μέλη Τριμελούς Επιτροπής</h4>
+            <h4 class="text-center">Μέλη Τριμελούς Επιτροπής</h4>
             <p>Επιβλέπων: ${thesis.professor_name || 'Χωρίς επιβλέποντα'}</p>
             <p>Μέλος 1: ${thesis.committee_member1_name || 'Χωρίς μέλος'}</p>
             <p>Μέλος 2: ${thesis.committee_member2_name || 'Χωρίς μέλος'}</p>
@@ -1138,10 +1138,10 @@ function loadNotes(thesisId) {
 
 //------------Frontend for Managing an To-be-reviewed Thesis----------
 function addToBeReviewedSection(thesis, container) {
-    // Τμήμα για λήψη αρχείου διπλωματικής
+    // Τμήμα για λήψη πρόχειρου διπλωματικής
     const downloadSection = document.createElement('section');
 
-    const downloadButton = createButton('download-thesis-button', 'Λήψη Αρχείου Διπλωματικής', ['btn', 'btn-primary', 'mb-3'], () => {
+    const downloadButton = createButton('download-thesis-button', 'Λήψη Πρόχειρου Φοιτητή', ['btn', 'btn-primary', 'my-3'], () => {
         const thesisId = thesis.thesis_id;  // ID της διπλωματικής
 
         fetch(`/api/fetch_attachments?thesis_id=${thesisId}`, {
@@ -1160,10 +1160,10 @@ function addToBeReviewedSection(thesis, container) {
                         downloadLink.textContent = file.file_path.split('/').pop();
                         downloadLink.download = link.textContent; //Press to download
                     } else {
-                        alert('Δεν έχει αναρτηθεί PDF.');
+                        alert('Δεν έχει αναρτηθεί πρόχειρο.');
                     }
                 } else {
-                    alert('Παρουσιάστηκε πρόβλημα στην ανεύρεση των αρχείων');
+                    alert('Παρουσιάστηκε πρόβλημα στην ανεύρεση του αρχείου');
                 }
             })
             .catch(error => {
@@ -1201,6 +1201,7 @@ function addToBeReviewedSection(thesis, container) {
 
     const gradeTitle = document.createElement('h4');
     gradeTitle.textContent = 'Καταχώρηση Βαθμού';
+    gradeTitle.classList.add('text-center');
     gradeSection.appendChild(gradeTitle);
 
     // Δημιουργία wrapper για δυναμικό περιεχόμενο
@@ -1211,6 +1212,7 @@ function addToBeReviewedSection(thesis, container) {
     loadGradeSection(thesis.thesis_id, gradeContent);
 
     container.appendChild(gradeSection);
+    container.appendChild(Object.assign(document.createElement('hr'), { classList: 'mb-3 mt-4' }));
 }
 
 function announcementButtonController(thesisId, container) {
@@ -1228,6 +1230,10 @@ function announcementButtonController(thesisId, container) {
         .then((data) => {
 
             if (data.success && data.data.length === 0) {
+                const unannouncedHeader = document.createElement('h4');
+                unannouncedHeader.textContent = 'Δημιουργία Ανακοίνωσης';
+                unannouncedHeader.classList.add('text-center');
+                container.appendChild(unannouncedHeader);
                 const unannouncedText = document.createElement('p');
                 unannouncedText.textContent = 'Δεν έχουν καταχωρηθεί οι λεπτομέρειες της εξέτασης από τον φοιτητή. Δεν μπορείτε να δημιουργήσετε ανακοίνωση!';
                 container.appendChild(unannouncedText);
@@ -1494,7 +1500,7 @@ function renderGradeSection(thesisId, container) {
 
                 const submitGradeButton = createButton(
                     'submit-grade-button',
-                    grades.grade !== undefined ? 'Αλλαγή Καταχώρησης Βαθμού' : 'Καταχώρηση Βαθμού',
+                    grades.grade !== undefined ? 'Αλλαγή Βαθμού' : 'Καταχώρηση Βαθμού',
                     ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId, container)
                 );
 
