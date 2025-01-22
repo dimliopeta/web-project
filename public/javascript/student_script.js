@@ -126,6 +126,10 @@ function loadStudentThesis() {
                 const dashboardExamDate = document.querySelector('[data-field="dashboardExamDate"]');
                 const dashboardEndDate = document.querySelector('[data-field="dashboardEndDate"]');
 
+                dashboardDuration.style.display = 'inline';
+                dashboardExamDate.style.display = 'none';
+                dashboardEndDate.style.display = 'none';
+
                 if (thesis.start_date && thesis.status === "active") {
                     dashboardDuration.style.display = 'inline';
                     dashboardExamDate.style.display = 'none';
@@ -877,12 +881,23 @@ function fetchAndDisplayAttachments(thesis) {
                     if (noLinksMessage) {
                         noLinksMessage.remove();
                     }
+                
                     links.forEach(linkObj => {
                         const li = document.createElement('li');
                         const link = document.createElement('a');
-                        link.href = linkObj.link_path;
-                        link.textContent = linkObj.link_path;
-                        link.target = '_blank'; // Press t open in a new tab
+
+                        try {
+                            // If link_path is already a valid URL, this will work
+                            const url = new URL(linkObj.link_path);
+                            link.href = url.href;
+                        } catch (e) {
+                            // If link_path is relative, prepend 'https://'
+                            link.href = `https://${linkObj.link_path}`;
+                        }
+                        link.textContent = linkObj.link_path; 
+                        link.target = '_blank'; // Open the link in a new tab
+                        link.rel = 'noopener noreferrer';
+                
                         li.appendChild(link);
                         configurationUploadedLinksList.appendChild(li);
                     });
