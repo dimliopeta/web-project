@@ -3,58 +3,63 @@ const announcementsPerPage = 6;
 let hasMoreAnnouncements = true; // Μεταβλητή για να ελέγξουμε αν υπάρχουν περισσότερες ανακοινώσεις
 
 function loadAnnouncements(filters = {}) {
-    // Επαναφορά τρέχουσας σελίδας όταν αλλάζουν τα φίλτρα
+    console.log("Φόρτωση ανακοινώσεων με φίλτρα:", filters);
+
+    // Επαναφορά της τρέχουσας σελίδας αν αλλάζουν τα φίλτρα
     if (filters.anDateFrom || filters.anDateTo || filters.examDateFrom || filters.examDateTo) {
         currentPage = 1;
-        hasMoreAnnouncements = true; // Επαναφορά της κατάστασης για περισσότερες ανακοινώσεις
     }
 
     fetch('announcements.json')
         .then(response => response.json())
         .then(data => {
             const announcements = data.announcements;
+
             if (!Array.isArray(announcements)) {
                 throw new Error('Το data.announcements δεν είναι πίνακας');
             }
 
-            // Φιλτράρισμα ανακοινώσεων
-            const filteredAnnouncements = announcements.filter(announcement => {
-                let match = true;
+            // Έλεγχος για τα φίλτρα
+            let filteredAnnouncements = announcements;
 
-                // Φιλτράρισμα ημερομηνίας δημοσίευσης
-                if (filters.anDateFrom && new Date(announcement.an_date) < new Date(filters.anDateFrom)) {
-                    match = false;
-                }
-                if (filters.anDateTo && new Date(announcement.an_date) > new Date(filters.anDateTo)) {
-                    match = false;
-                }
+            if (Object.values(filters).some(filter => filter !== null)) {
+                filteredAnnouncements = announcements.filter(announcement => {
+                    let match = true;
 
-                // Φιλτράρισμα ημερομηνίας εξέτασης
-                if (filters.examDateFrom && new Date(announcement.exam_date) < new Date(filters.examDateFrom)) {
-                    match = false;
-                }
-                if (filters.examDateTo && new Date(announcement.exam_date) > new Date(filters.examDateTo)) {
-                    match = false;
-                }
+                    // Φιλτράρισμα ημερομηνίας δημοσίευσης
+                    if (filters.anDateFrom && new Date(announcement.an_date) < new Date(filters.anDateFrom)) {
+                        match = false;
+                    }
+                    if (filters.anDateTo && new Date(announcement.an_date) > new Date(filters.anDateTo)) {
+                        match = false;
+                    }
 
-                return match;
-            });
+                    // Φιλτράρισμα ημερομηνίας εξέτασης
+                    if (filters.examDateFrom && new Date(announcement.exam_date) < new Date(filters.examDateFrom)) {
+                        match = false;
+                    }
+                    if (filters.examDateTo && new Date(announcement.exam_date) > new Date(filters.examDateTo)) {
+                        match = false;
+                    }
 
-            // Εάν δεν υπάρχουν περισσότερες ανακοινώσεις, σταματάμε τη φόρτωση
-            if (filteredAnnouncements.length <= (currentPage - 1) * announcementsPerPage) {
-                hasMoreAnnouncements = false;
+                    return match;
+                });
             }
 
-            // Φόρτωση των ανακοινώσεων για την τρέχουσα σελίδα
+            // Υπολογισμός του τρέχοντος εύρους
             const startIndex = (currentPage - 1) * announcementsPerPage;
             const endIndex = startIndex + announcementsPerPage;
+
             const announcementsToLoad = filteredAnnouncements.slice(startIndex, endIndex);
 
             const container = document.getElementById('announcements-container');
+
+            // Καθαρισμός container αν είναι η πρώτη σελίδα
             if (currentPage === 1) {
-                container.innerHTML = ''; // Καθαρισμός του περιεχομένου όταν γίνεται νέα φόρτωση
+                container.innerHTML = '';
             }
 
+            // Δημιουργία κάρτας για κάθε ανακοίνωση
             announcementsToLoad.forEach(announcement => {
                 const card = `
                 <div class="col-md-4">
@@ -90,25 +95,31 @@ function loadAnnouncements(filters = {}) {
                 container.innerHTML += card;
             });
 
-            if (hasMoreAnnouncements) {
-                currentPage++; // Αν υπάρχουν περισσότερες ανακοινώσεις, αυξάνουμε τη σελίδα
+            // Ενημέρωση της κατάστασης για περισσότερες σελίδες
+            if (announcementsToLoad.length < announcementsPerPage) {
+                hasMoreAnnouncements = false;
+            } else {
+                hasMoreAnnouncements = true;
+                currentPage++;
             }
         });
 }
 
+
 // Συνάρτηση για το infinite scroll
-function infiniteScroll() {
-    if (!hasMoreAnnouncements) return; // Αν δεν υπάρχουν περισσότερες ανακοινώσεις, σταματάμε τη φόρτωση
+// function infiniteScroll() {
+//     if (!hasMoreAnnouncements) return; // Αν δεν υπάρχουν περισσότερες ανακοινώσεις, σταματάμε τη φόρτωση
 
-    const scrollableHeight = document.documentElement.scrollHeight;
-    const currentScroll = window.scrollY + window.innerHeight;
+//     const scrollableHeight = document.documentElement.scrollHeight;
+//     const currentScroll = window.scrollY + window.innerHeight;
 
-    if (currentScroll >= scrollableHeight - 100) {
-        loadAnnouncements();
-    }
-}
+//     if (currentScroll >= scrollableHeight - 100) {
+//         loadAnnouncements();
+//     }
+// }
 
 document.getElementById('apply-filters').addEventListener('click', () => {
+    console.log("2");
     const anDateFrom = document.getElementById('filter-an-date-from').value;
     const anDateTo = document.getElementById('filter-an-date-to').value;
     const examDateFrom = document.getElementById('filter-exam-date-from').value;
@@ -125,16 +136,19 @@ document.getElementById('apply-filters').addEventListener('click', () => {
 });
 
 document.getElementById('clear-filters').addEventListener('click', () => {
+    console.log("3");
     document.getElementById('filter-an-date-from').value = '';
     document.getElementById('filter-an-date-to').value = '';
     document.getElementById('filter-exam-date-from').value = '';
     document.getElementById('filter-exam-date-to').value = '';
+
     const filters = {
         anDateFrom: null,
         anDateTo: null,
         examDateFrom: null,
         examDateTo: null
     };
+    console.log(filters);
     loadAnnouncements(filters); // Επαναφόρτωση χωρίς φίλτρα
 });
 
@@ -142,4 +156,4 @@ document.getElementById('clear-filters').addEventListener('click', () => {
 loadAnnouncements();
 
 // Ενεργοποίηση infinite scroll
-window.addEventListener('scroll', infiniteScroll);
+// window.addEventListener('scroll', infiniteScroll);
