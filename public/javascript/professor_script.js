@@ -4,11 +4,9 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
 
-
         document.querySelectorAll('.content-section').forEach(section => {
             section.style.display = 'none';
         });
-
 
         const targetId = this.getAttribute('href')
             ? this.getAttribute('href').substring(1)
@@ -29,12 +27,10 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 loadInvitationHistory();
             }
         }
-
         const editSection = document.getElementById('edit-section');
         if (editSection && !editSection.classList.contains('d-none')) {
             editSection.classList.add('d-none');
         }
-
         resetInfoSection();
 
         const themesCompartment = document.getElementById('themes-compartment');
@@ -42,7 +38,6 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
             themesCompartment.classList.remove('col-md-6');
             themesCompartment.classList.add('col-lg-8', 'mx-auto');
         }
-
 
         document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
             link.classList.remove('active');
@@ -78,16 +73,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 //--------------------------------------------- THEMES TAB ---------------------------------------------
 
-
-
-
 //-----------Function for Loading Themes that haven't been assigned to a student----------------- 
 function loadUnassignedTheses() {
     fetch('/api/theses/unassigned')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Φόρτωση στο "Θέματα Διπλωματικών"
                 const thesesTableBody = document.querySelector('#theses-section table tbody');
                 thesesTableBody.innerHTML = '';
 
@@ -101,14 +92,11 @@ function loadUnassignedTheses() {
                             <button class="btn btn-sm btn-primary" data-id="${thesis.thesis_id}">Επεξεργασία</button>
                         </td>
                     `;
-
                     const editButton = row.querySelector('button');
                     editButton.addEventListener('click', () => showEditSection(thesis));
 
                     thesesTableBody.appendChild(row);
                 });
-
-                // Φόρτωση στο "Ανάθεση σε Φοιτητή"
                 const thesisList = document.getElementById('thesisList');
                 thesisList.innerHTML = '';
 
@@ -120,7 +108,6 @@ function loadUnassignedTheses() {
                         <input class="form-check-input" type="radio" name="thesisRadio" id="thesis-${thesis.thesis_id}" value="${thesis.thesis_id}">
                         <label class="form-check-label" for="thesis-${thesis.thesis_id}">${thesis.title}</label>
                     `;
-
                     thesisList.appendChild(radioItem);
                 });
             } else {
@@ -140,11 +127,8 @@ function showEditSection(thesis) {
         return;
     }
 
-    // Ενημέρωση των πεδίων του κουτιού επεξεργασίας
     const editTitle = document.getElementById('editTitle');
     const editSummary = document.getElementById('editSummary');
-
-    // Ενημέρωση placeholder για τίτλο και περιγραφή
     editTitle.value = thesis.title;
     editSummary.value = thesis.summary;
     editTitle.placeholder = thesis.title || 'Δεν υπάρχει τίτλος';
@@ -152,16 +136,13 @@ function showEditSection(thesis) {
         ? thesis.summary
         : 'Δεν υπάρχει περιγραφή';
 
-    // Ορισμός του ID της διπλωματικής στο dataset της φόρμας
     const editForm = document.getElementById('editThesisForm');
-    editForm.dataset.id = thesis.thesis_id; // thesis_id από το αντικείμενο thesis
+    editForm.dataset.id = thesis.thesis_id;
 
-    // Αλλαγή διατάξεων
     themesCompartment.classList.remove('col-lg-8', 'mx-auto');
     themesCompartment.classList.add('col-md-6');
     editSection.classList.remove('d-none');
 
-    // Εστίαση στο edit-section
     editSection.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -169,23 +150,23 @@ function showEditSection(thesis) {
 document.getElementById('editThesisForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    const thesisId = this.dataset.id; // Διατήρηση του ID από το dataset
+    const thesisId = this.dataset.id;
     const title = document.getElementById('editTitle').value;
     const summary = document.getElementById('editSummary').value;
-    const pdf = document.getElementById('editPdf').files[0]; // Νέο αρχείο PDF
+    const pdf = document.getElementById('editPdf').files[0];
 
     const formData = new FormData();
-    formData.append('thesisId', thesisId); // Προσθήκη του ID στο body
+    formData.append('thesisId', thesisId);
     formData.append('title', title);
     formData.append('summary', summary);
     if (pdf) {
-        formData.append('pdf', pdf); // Επισύναψη νέου αρχείου PDF αν υπάρχει
+        formData.append('pdf', pdf);
     }
 
-    fetch('/api/theses/update', { // Τροποποίηση του endpoint για να μην χρησιμοποιεί το ID στο URL
+    fetch('/api/theses/update', {
         method: 'PUT',
         headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Αν χρειάζεται token
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: formData
     })
@@ -193,7 +174,7 @@ document.getElementById('editThesisForm').addEventListener('submit', function (e
         .then(data => {
             if (data.success) {
                 alert('Η διπλωματική ενημερώθηκε επιτυχώς! Το προηγούμενο PDF, αν υπήρχε, αντικαταστάθηκε.');
-                loadUnassignedTheses(); // Επαναφόρτωση λίστας
+                loadUnassignedTheses();
             } else {
                 alert(`Σφάλμα: ${data.message}`);
             }
@@ -205,19 +186,16 @@ document.getElementById('editThesisForm').addEventListener('submit', function (e
 });
 //-------------- Thesis Creation Event Listener on Submit -------------
 document.getElementById('thesisForm').addEventListener('submit', function (e) {
-    e.preventDefault(); // Αποτροπή της παραδοσιακής υποβολής φόρμας
-
+    e.preventDefault();
     const title = document.getElementById('title').value;
     const summary = document.getElementById('summary').value;
     const pdf = document.getElementById('pdf').files[0];
     const token = localStorage.getItem('token');
 
-
     const formData = new FormData();
     formData.append('title', title);
     formData.append('summary', summary);
     formData.append('pdf', pdf);
-
 
     fetch('/api/theses/new', {
         method: 'POST',
@@ -229,16 +207,11 @@ document.getElementById('thesisForm').addEventListener('submit', function (e) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                //console.log('Success:', data);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
                 alert(data.message);
-
 
                 document.getElementById('title').value = '';
                 document.getElementById('summary').value = '';
                 document.getElementById('pdf').value = '';
-
-
-
                 loadUnassignedTheses();
             } else {
                 alert('Σφάλμα: ' + data.message);
@@ -276,8 +249,6 @@ function loadAssignedTheses() {
                             <button class="btn btn-sm btn-primary" data-id="${thesis.thesis_id}">Αναίρεση Ανάθεσης</button>
                         </td>
                     `;
-
-                    // Προσθήκη event listener για το κουμπί "Αναίρεση Ανάθεσης"
                     const unassignButton = row.querySelector('button');
                     unassignButton.addEventListener('click', () => {
                         unassignThesis(thesis.thesis_id);
@@ -309,7 +280,7 @@ document.querySelector('#search-student').addEventListener('input', function () 
                     const listItem = document.createElement('li');
                     listItem.className = 'list-group-item list-group-item-action';
                     listItem.textContent = `AM: ${student.student_number} - ${student.name} ${student.surname}`;
-                    listItem.dataset.studentId = student.id; // Αποθήκευση του ID
+                    listItem.dataset.studentId = student.id;
 
                     listItem.addEventListener('click', function () {
                         document.getElementById('studentNameInput').value = `${student.student_number} - ${student.name} ${student.surname}`;
@@ -335,7 +306,6 @@ document.querySelector('#student-list').addEventListener('click', function (even
 
         document.getElementById('studentNameInput').value = studentName;
         document.getElementById('assignThesisButton').dataset.studentId = studentId;
-
         document.getElementById('studentListWrapper').style.display = 'none';
     }
 });
@@ -346,7 +316,6 @@ document.getElementById('changeStudentButton').addEventListener('click', functio
 
     document.getElementById('search-student').value = '';
     document.getElementById('student-list').innerHTML = '';
-
     document.getElementById('studentNameInput').value = '';
     delete document.getElementById('assignThesisButton').dataset.studentId;
 });
@@ -359,11 +328,7 @@ document.getElementById('assignThesisButton').addEventListener('click', function
         alert('Παρακαλώ επιλέξτε φοιτητή και διπλωματική.');
         return;
     }
-
     const thesisId = selectedThesis.value;
-
-    //console.log('Sending Student ID:', studentId);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
-    //console.log('Sending Thesis ID:', thesisId);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
 
     fetch('/api/theses/assign', {
         method: 'POST',
@@ -380,11 +345,9 @@ document.getElementById('assignThesisButton').addEventListener('click', function
                 loadAssignedTheses();
                 document.getElementById('studentListWrapper').style.display = 'block';
 
-                // Επαναφέρουμε το search-student και τη λίστα φοιτητών
-                document.getElementById('search-student').value = ''; // Καθαρισμός του input αναζήτησης
-                document.getElementById('student-list').innerHTML = ''; // Καθαρισμός της λίστας φοιτητών
+                document.getElementById('search-student').value = '';
+                document.getElementById('student-list').innerHTML = '';
 
-                // Καθαρίζουμε επίσης το επιλεγμένο όνομα φοιτητή και το ID
                 document.getElementById('studentNameInput').value = '';
                 delete document.getElementById('assignThesisButton').dataset.studentId;
             } else {
@@ -413,7 +376,7 @@ function unassignThesis(thesisId) {
                 }
 
                 loadTheses();
-                loadAssignedTheses(); // Επαναφόρτωση της λίστας
+                loadAssignedTheses();
                 loadUnassignedTheses();
             } else {
                 console.error('Σφάλμα:', data.message);
@@ -429,21 +392,17 @@ function unassignThesis(thesisId) {
 function showInfoSection(thesis) {
     const infoSection = document.getElementById('info-compartment');
     const thesesCompartment = document.getElementById('theses-compartment');
-    const examReportSection = document.getElementById('examReportHTMLSection'); // Προσθέτουμε τη μεταβλητή για το πρακτικό
+    const examReportSection = document.getElementById('examReportHTMLSection');
 
-    // Κρύβουμε το προηγούμενο πρακτικό (αν υπάρχει)
     if (examReportSection) {
         examReportSection.style.display = 'none';
     }
 
-    // Ενημέρωση διαστάσεων του info-compartment
     thesesCompartment.classList.remove('col-lg-8', 'mx-auto');
     thesesCompartment.classList.add('col-md-6');
-
     infoSection.classList.remove('d-none');
-    infoSection.innerHTML = ''; // Καθαρισμός προηγούμενου περιεχομένου
+    infoSection.innerHTML = '';
 
-    // Τίτλος Διπλωματικής
     const titleSection = document.createElement('section');
     titleSection.classList.add('text-center');
     titleSection.innerHTML = `
@@ -452,7 +411,6 @@ function showInfoSection(thesis) {
     `;
     infoSection.appendChild(titleSection);
 
-    // Βασικές Πληροφορίες
     let status;
     switch (thesis.status) {
         case 'assigned':
@@ -488,12 +446,10 @@ function showInfoSection(thesis) {
         finalGradeDisplay.innerHTML = `Τελικός Βαθμός: ${thesis.final_grade}
         <hr>`;
         basicInfoSection.appendChild(finalGradeDisplay);
-
     }
     infoSection.appendChild(basicInfoSection);
     infoSection.appendChild(Object.assign(document.createElement('hr'), { classList: 'mb-3 mt-2' }));
 
-    // Δημιουργία του Status Change Section
     const statusChangeSection = document.createElement('section');
     statusChangeSection.id = 'statusChangeSection';
     statusChangeSection.innerHTML = '<h4 class="text-center mb-3">Αλλαγές Καταστάσεων</h4>';
@@ -503,11 +459,8 @@ function showInfoSection(thesis) {
     infoSection.appendChild(statusChangeSection);
     infoSection.appendChild(Object.assign(document.createElement('hr'), { classList: 'mb-3 mt-2' }));
 
-    // Κλήση της loadLogs για να γεμίσει το statusChangeSection
     loadLogs(thesis.thesis_id);
 
-
-    // Τριμελής Επιτροπή (εμφανίζεται μόνο για `active` και `to-be-reviewed`)
     if (thesis.status === 'active' || thesis.status === 'to-be-reviewed') {
         const committeeSection = document.createElement('section');
         committeeSection.innerHTML = `
@@ -522,7 +475,6 @@ function showInfoSection(thesis) {
 
     const statusSection = document.createElement('section');
     statusSection.innerHTML = `<h4 class="text-center">Διαχείριση Διπλωματικής</h4>`;
-    // Κατάσταση και Δράσεις
 
     switch (thesis.status) {
         case 'assigned':
@@ -545,9 +497,7 @@ function showInfoSection(thesis) {
     }
 
     infoSection.appendChild(statusSection);
-    
 
-    // Footer με Ημερομηνίες
     const footer = document.createElement('section');
     footer.classList.add('text-center');
     footer.innerHTML = `
@@ -565,13 +515,13 @@ function resetInfoSection() {
     const thesesCompartment = document.getElementById('theses-compartment');
 
     if (infoSection) {
-        infoSection.classList.add('d-none'); // Απόκρυψη του info-compartment
-        infoSection.innerHTML = ''; // Καθαρισμός περιεχομένου
+        infoSection.classList.add('d-none');
+        infoSection.innerHTML = '';
     }
 
     if (thesesCompartment) {
-        thesesCompartment.classList.remove('col-md-6'); // Αφαίρεση της μειωμένης διάταξης
-        thesesCompartment.classList.add('col-lg-8', 'mx-auto'); // Επαναφορά της αρχικής διάταξης
+        thesesCompartment.classList.remove('col-md-6');
+        thesesCompartment.classList.add('col-lg-8', 'mx-auto');
     }
 }
 //-------------- Function for Loading the Theses List of the professor -------------
@@ -596,8 +546,7 @@ function loadTheses() {
                     console.error('Δεν βρέθηκε το στοιχείο #theses tbody.');
                     return;
                 }
-
-                thesesTableBody.innerHTML = ''; // Καθαρισμός του πίνακα
+                thesesTableBody.innerHTML = '';
 
                 if (data.theses.length === 0) {
                     thesesTableBody.innerHTML = '<tr><td colspan="4">Δεν βρέθηκαν δεδομένα.</td></tr>';
@@ -605,7 +554,6 @@ function loadTheses() {
                 }
 
                 data.theses.forEach(thesis => {
-                    //console.log('Προσθήκη θέματος:', thesis);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
 
                     let status;
                     switch (thesis.status) {
@@ -629,8 +577,6 @@ function loadTheses() {
                         : thesis.role === 'Μέλος Τριμελούς' ? 'Μέλος Τριμελούς Επιτροπής'
                             : 'Άγνωστος Ρόλος';
 
-
-                    // Δημιουργία γραμμής πίνακα
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${thesis.title || 'Χωρίς τίτλο'}</td>
@@ -639,10 +585,8 @@ function loadTheses() {
                         <td>${status}</td>
                     `;
 
-                    // Ενεργοποίηση εμφάνισης πληροφοριών κατά το κλικ
                     row.addEventListener('click', (event) => {
                         showInfoSection(thesis);
-                        //console.log('clicked!');//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
                     });
 
                     thesesTableBody.appendChild(row);
@@ -697,7 +641,6 @@ function addCanceledSection(thesis, container) {
 
     const cancelledHr = document.createElement('hr');
     cancelledSection.appendChild(cancelledHr);
-
     container.appendChild(cancelledSection);
 }
 
@@ -711,14 +654,11 @@ function addAssignedSection(thesis, container) {
             const existingList = container.querySelector('.invitations-list');
 
             if (existingList) {
-                // Αν η λίστα υπάρχει, την αφαιρούμε και αλλάζουμε το κουμπί στην αρχική του κατάσταση
                 existingList.remove();
                 showInvitationsButton.textContent = 'Εμφάνιση Προσκλήσεων';
                 showInvitationsButton.classList.remove('btn-primary');
                 showInvitationsButton.classList.add('btn-info');
             } else {
-                // Αν η λίστα δεν υπάρχει, την εμφανίζουμε και αλλάζουμε το κουμπί για "Απόκρυψη"
-                //console.log('Container:', container);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
                 showThesisInvitations(thesis.thesis_id, container);
                 showInvitationsButton.textContent = 'Απόκρυψη Προσκλήσεων';
                 showInvitationsButton.classList.remove('btn-info');
@@ -726,15 +666,13 @@ function addAssignedSection(thesis, container) {
             }
         });
         buttonsContainer.appendChild(showInvitationsButton);
-
         const unassignThButton = createButton('unassign-thesis-button', 'Αναίρεση Ανάθεσης', ['btn', 'btn-danger', 'mt-2'], () => unassignThesis(thesis.thesis_id));
-
         buttonsContainer.appendChild(unassignThButton);
 
-        const formContainer = document.createElement('div'); // Container για τη φόρμα
-        formContainer.classList.add('mt-3'); // Τοποθέτηση κάτω από τα κουμπιά
+        const formContainer = document.createElement('div');
+        formContainer.classList.add('mt-3');
 
-        const startButtonContainer = document.createElement('div'); // Ξεχωριστό container για το Start Button
+        const startButtonContainer = document.createElement('div');
         startButtonContainer.classList.add('d-flex', 'align-items-center', 'mt-2');
         buttonsContainer.appendChild(startButtonContainer);
 
@@ -759,40 +697,18 @@ function addAssignedSection(thesis, container) {
 }
 //-------------- Function to Display Invitations associated with a specific thesis in Theses List -------------
 function showThesisInvitations(thesis_id, container) {
-    // Έλεγχος αν το container είναι έγκυρο
     if (!container) {
         console.error('Το container δεν βρέθηκε στο DOM.');
         return;
     }
-
-    // Καθαρισμός παλαιότερης λίστας, αν υπάρχει
     const existingList = container.querySelector('.invitations-list');
     if (existingList) {
-        // Αν υπάρχει, την αφαιρούμε (toggle behavior)
         existingList.remove();
-        //console.log('Η λίστα προσκλήσεων αφαιρέθηκε.');//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
         return;
     }
 
-    // Δημιουργία λίστας
     const invitationsList = document.createElement('div');
     invitationsList.classList.add('invitations-list', 'mt-3');
-
-    // Αν το invitations είναι κενό ή undefined, χρησιμοποιούμε προεπιλεγμένες τιμές
-    const defaultInvitations = invitations && invitations.length > 0 ? invitations : [
-        {
-            professor_name: 'Προεπιλεγμένος Καθηγητής 1',
-            status: 'Αποδεκτή',
-            invitation_date: '2025-01-01',
-            response_date: '2025-01-02'
-        },
-        {
-            professor_name: 'Προεπιλεγμένος Καθηγητής 2',
-            status: 'Απορρίφθηκε',
-            invitation_date: '2025-01-03',
-            response_date: '2025-01-04'
-        }
-    ];
 
     fetch('/api/invitations-for-thesis', {
         method: 'POST',
@@ -840,21 +756,20 @@ function checkCommitteeStatus(thesisId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                return data.isFull; // Επιστρέφουμε true αν η επιτροπή είναι πλήρης
+                return data.isFull;
             } else {
                 console.error('Σφάλμα:', data.message);
-                return false; // Αν υπάρξει σφάλμα, θεωρούμε πως δεν είναι πλήρης
+                return false;
             }
         })
         .catch(err => {
             console.error('Σφάλμα κατά την επικοινωνία με το API:', err);
-            return false; // Αν υπάρξει σφάλμα δικτύου, θεωρούμε πως δεν είναι πλήρης
+            return false;
         });
 }
 //-------------- Function that Manages the Display the Start Thesis Button -------------
 function addStartThesisButton(thesisId, container) {
     const startThesisButton = createButton('start-thesis-button', 'Εκκίνηση Διπλωματικής', ['btn', 'btn-success', 'mt-2'], () => {
-        // Αφαίρεση του κουμπιού και εμφάνιση των inputs
         startThesisButton.remove();
 
         const startThesisForm = document.createElement('div');
@@ -883,7 +798,6 @@ function addStartThesisButton(thesisId, container) {
                 return;
             }
 
-            // Κλήση στο API για την εκκίνηση της διπλωματικής
             fetch('/api/start-thesis', {
                 method: 'POST',
                 headers: {
@@ -907,18 +821,16 @@ function addStartThesisButton(thesisId, container) {
                     alert('Κάτι πήγε στραβά κατά την εκκίνηση!');
                 });
         });
-
         startThesisForm.appendChild(confirmStartButton);
         container.appendChild(startThesisForm);
     });
-
     container.appendChild(startThesisButton);
 }
 
 //-------------- Function for Managing a Completed Thesis -------------
 function addCompletedSection(thesis, container) {
     const complButtonContainer = document.createElement('div');
-    complButtonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4'); // Χρήση Bootstrap classes για στοίχιση
+    complButtonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4');
 
     const praktikoButton = createButton('configurationCompletedFilesExamReportButton', 'Πρακτικό Εξέτασης', ['btn', 'btn-outline-primary', 'btn-sm', 'float-start'], () => {
         const examReportSection = document.getElementById('examReportHTMLSection');
@@ -947,9 +859,7 @@ function addCompletedSection(thesis, container) {
 }
 //-------------- Function for Managing an Active Thesis -------------
 function addActiveSection(thesis, container) {
-    // Τμήμα για καταχώρηση σημείωσης
     const notesSection = document.createElement('section');
-
     const notesTitle = document.createElement('h4');
     notesTitle.textContent = 'Σημειώσεις';
     notesSection.appendChild(notesTitle);
@@ -984,8 +894,8 @@ function addActiveSection(thesis, container) {
             .then(data => {
                 if (data.success) {
                     alert('Η σημείωση καταχωρήθηκε επιτυχώς!');
-                    noteTextarea.value = ''; // Καθαρισμός του textarea
-                    loadNotes(thesis.thesis_id); // Επαναφόρτωση σημειώσεων
+                    noteTextarea.value = '';
+                    loadNotes(thesis.thesis_id);
                 } else {
                     alert(`Σφάλμα: ${data.message}`);
                 }
@@ -994,14 +904,12 @@ function addActiveSection(thesis, container) {
                 console.error('Σφάλμα κατά την καταχώρηση της σημείωσης:', error);
                 alert('Κάτι πήγε στραβά!');
             });
-
     });
     notesSection.appendChild(addNoteButton);
 
     const previousNotesTitle = document.createElement('h5');
     previousNotesTitle.textContent = 'Προηγούμενες Σημειώσεις';
     notesSection.appendChild(previousNotesTitle);
-
     const notesList = document.createElement('div');
     notesList.id = 'notes-list';
     notesList.classList.add('border', 'p-3');
@@ -1017,7 +925,6 @@ function addActiveSection(thesis, container) {
     container.appendChild(notesSection);
 
     if (thesis.role === "Επιβλέπων") {
-        // Τμήμα για ακύρωση διπλωματικής
         cancelThesisForm = document.createElement('div');
         cancelThesisForm.classList.add('mt-3');
 
@@ -1071,8 +978,6 @@ function addActiveSection(thesis, container) {
                 return;
             }
 
-
-            // Κλήση στο API για την εκκίνηση της διπλωματικής
             fetch('/api/cancel-thesis', {
                 method: 'POST',
                 headers: {
@@ -1104,11 +1009,8 @@ function addActiveSection(thesis, container) {
 
         container.appendChild(cancelThesisForm);
 
-        
 
-        // Τμήμα για αλλαγή κατάστασης
         const changeStatusSection = document.createElement('section');
-
         const changeStatusTitle = document.createElement('h4');
         changeStatusTitle.textContent = 'Μετατροπή σε υπό Εξέταση';
         changeStatusSection.appendChild(changeStatusTitle);
@@ -1120,7 +1022,6 @@ function addActiveSection(thesis, container) {
             if (existingForm) {
                 existingForm.remove();
             }
-
             const changeThesisForm = document.createElement('div');
             changeThesisForm.id = 'change-thesis-form';
             changeThesisForm.classList.add('mt-3');
@@ -1181,11 +1082,9 @@ function addActiveSection(thesis, container) {
                         alert('Κάτι πήγε στραβά κατά την μετατροπή σε υπό εξέταση!');
                     });
             });
-
             changeThesisForm.appendChild(confirmChangeButton);
             changeStatusSection.appendChild(changeThesisForm);
         });
-
         changeStatusSection.appendChild(changeToUnderReviewButton);
         container.appendChild(changeStatusSection);
 
@@ -1218,7 +1117,7 @@ function loadExamReportData(thesisId) {
                 const finalGradeCommittee2 = (reportData.committee_member2_grade1 * 0.6 + reportData.committee_member2_grade2 * 0.15 + reportData.committee_member2_grade3 * 0.15 + reportData.committee_member2_grade4 * 0.1);
                 const final_grade = reportData.final_grade;
 
-                updateDataField('final_grade', final_grade); // Grades calculated and passed to the grades section here
+                updateDataField('final_grade', final_grade);
                 updateDataField('supervisor_finalgrade', finalGradeSupervisor);
                 updateDataField('committee_member1_finalgrade', finalGradeCommittee1);
                 updateDataField('committee_member2_finalgrade', finalGradeCommittee2);
@@ -1262,10 +1161,6 @@ function loadExamReportData(thesisId) {
                 updateDataField('examReportSupervisorGrade', finalGradeSupervisor);
                 updateDataField('examReportCommitteeMember1Grade', finalGradeCommittee1);
                 updateDataField('examReportCommitteeMember2Grade', finalGradeCommittee2);
-
-
-
-
             } else if (data.success && data.examReport.length == 0) {
                 console.error('No Report Data found');
             }
@@ -1319,11 +1214,9 @@ function loadNotes(thesisId) {
 
 //-------------- Function for Managing a To-be-reviewed Thesis -------------
 function addToBeReviewedSection(thesis, container) {
-    // Τμήμα για λήψη πρόχειρου διπλωματικής
     const downloadSection = document.createElement('section');
-
     const downloadButton = createButton('download-thesis-button', 'Λήψη Πρόχειρου Φοιτητή', ['btn', 'btn-primary', 'my-3'], () => {
-        const thesisId = thesis.thesis_id;  // ID της διπλωματικής
+        const thesisId = thesis.thesis_id;
 
         fetch(`/api/fetch_all_attachments?thesis_id=${thesisId}`, {
             method: 'GET',
@@ -1354,7 +1247,6 @@ function addToBeReviewedSection(thesis, container) {
                 console.error('Download failed:', error);
             });
     });
-
     downloadSection.appendChild(downloadButton);
 
     const downloadHr = document.createElement('hr');
@@ -1362,11 +1254,9 @@ function addToBeReviewedSection(thesis, container) {
 
     container.appendChild(downloadSection);
 
-    // Τμήμα για δημιουργία ανακοίνωσης
     if (thesis.role === 'Επιβλέπων') {
-        const announcementSection = document.createElement('section'); // Δηλώνουμε ρητά το announcementSection
+        const announcementSection = document.createElement('section');
 
-        // Εδώ δημιουργούμε το κουμπί και το πρόσθετο περιεχόμενο για την ανακοίνωση
         announcementButtonController(thesis.thesis_id, announcementSection);
 
         let announcementContainer = document.querySelector('#announcement-container');
@@ -1374,21 +1264,18 @@ function addToBeReviewedSection(thesis, container) {
             announcementContainer = document.createElement('div');
             announcementContainer.id = 'announcement-container';
             announcementContainer.classList.add('container', 'mt-4');
-            document.body.appendChild(announcementContainer); // Εδώ μπορείς να προσαρμόσεις το σημείο εισαγωγής
+            document.body.appendChild(announcementContainer);
         }
-
-        container.appendChild(announcementSection); // Προσθέτουμε το announcementSection στο container
+        container.appendChild(announcementSection);
     }
 
-    // Τμήμα για καταχώρηση βαθμού
-    const gradeSection = document.createElement('section');
 
+    const gradeSection = document.createElement('section');
     const gradeTitle = document.createElement('h4');
     gradeTitle.textContent = 'Καταχώρηση Βαθμού';
     gradeTitle.classList.add('text-center');
     gradeSection.appendChild(gradeTitle);
 
-    // Δημιουργία wrapper για δυναμικό περιεχόμενο
     const gradeContent = document.createElement('div');
     gradeContent.id = 'grade-content';
     gradeSection.appendChild(gradeContent);
@@ -1466,7 +1353,7 @@ function fetchAnnouncementDetails(thesisId) {
 }
 //-------------- Function for creating the Announcement View Modal in Theses List -------------
 function showAnnouncementModal(announcementDetails) {
-    // Δημιουργία του modal container
+
     const modal = document.createElement('div');
     modal.classList.add('modal', 'fade');
     modal.id = 'announcementModal';
@@ -1474,15 +1361,12 @@ function showAnnouncementModal(announcementDetails) {
     modal.setAttribute('aria-labelledby', 'announcementModalLabel');
     modal.setAttribute('aria-hidden', 'true');
 
-    // Δημιουργία του modal dialog
     const modalDialog = document.createElement('div');
     modalDialog.classList.add('modal-dialog');
 
-    // Δημιουργία του modal content
     const modalContent = document.createElement('div');
     modalContent.classList.add('modal-content');
 
-    // Header
     const modalHeader = document.createElement('div');
     modalHeader.classList.add('modal-header');
 
@@ -1500,11 +1384,9 @@ function showAnnouncementModal(announcementDetails) {
 
     modalContent.appendChild(modalHeader);
 
-    // Body
     const modalBody = document.createElement('div');
     modalBody.classList.add('modal-body');
 
-    // Προσθήκη περιεχομένων ανακοίνωσης στο modal body
     modalBody.innerHTML = `
         <p><strong>Φοιτητής:</strong> ${announcementDetails.student_name} </p>
         <p class="text-muted"><strong>Τριμελής Επιτροπή:</strong></p>
@@ -1520,7 +1402,6 @@ function showAnnouncementModal(announcementDetails) {
 
     modalContent.appendChild(modalBody);
 
-    // Footer
     const modalFooter = document.createElement('div');
     modalFooter.classList.add('modal-footer');
 
@@ -1537,11 +1418,9 @@ function showAnnouncementModal(announcementDetails) {
 
     document.body.appendChild(modal);
 
-    // Εμφάνιση του modal
     const myModal = new bootstrap.Modal(modal);
     myModal.show();
 
-    // Καθαρισμός μετά το κλείσιμο
     modal.addEventListener('hidden.bs.modal', () => {
         modal.remove();
     });
@@ -1553,7 +1432,7 @@ function addToAnnouncements(thesisId) {
     fetch('/api/add-announcement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ thesisId: thesisId }) // Sending thesisId, not thesis.id
+        body: JSON.stringify({ thesisId: thesisId }) 
     })
         .then((response) => {
             if (!response.ok) {
@@ -1562,19 +1441,11 @@ function addToAnnouncements(thesisId) {
             return response.json();
         })
         .then((data) => {
-            //console.log('Received data:', data); // Προσθήκη log για να δούμε τα δεδομένα//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
-
-            // Ελέγχουμε αν υπάρχουν τα announcementDetails
             if (data.success && data.data) {
-
-                // Αφαίρεση του κουμπιού μετά την επιτυχή δημιουργία ανακοίνωσης
                 if (announcementButton) {
                     announcementButton.remove();
                 }
-
                 showAnnouncementModal(data.data);
-
-                // Προσθήκη του στοιχείου ανακοίνωσης στην σελίδα (π.χ. μέσα σε κάποιο container)
             } else {
                 alert(data.message);
             }
@@ -1611,7 +1482,6 @@ function gradeEnableButton(thesisId, container) {
                 alert('Κάτι πήγε στραβά κατά την εκκίνηση!');
             });
     });
-
     container.appendChild(gradeThesisButton);
 }
 //-------------- Function for Loading the Grades if enabled in Theses List-------------
@@ -1625,7 +1495,6 @@ function loadGradeSection(thesisId, container) {
     const gradeContent = document.createElement('div');
     gradeContent.id = 'grade-content';
 
-    // Αίτημα για την κατάσταση της διπλωματικής
     fetch(`/api/thesis-status/`, {
         method: 'POST',
         headers: {
@@ -1637,21 +1506,19 @@ function loadGradeSection(thesisId, container) {
         .then(response => response.json())
         .then(data => {
             if (data.success && !data.gradingEnabled) {
-                //console.log("Final grade:", data.finalGrade);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
-
                 if (data.role === 'Επιβλέπων') {
                     gradeEnableButton(thesisId, gradeContent);
                 } else {
                     const message = document.createElement('p');
                     message.textContent = 'Η βαθμολόγηση δεν έχει ενεργοποιηθεί από τον επιβλέποντα διδάσκοντα.';
-                    message.classList.add('text-warning', 'mt-3'); // Προσθήκη κάποιου στυλ για έμφαση
+                    message.classList.add('text-warning', 'mt-3');
                     gradeContent.appendChild(message);
                 }
             } else if (data.success && data.gradingEnabled) {
                 renderGradeSection(thesisId, gradeContent);
                 loadGradeList(thesisId, gradeContent);
             }
-            container.appendChild(gradeContent); // Προσθήκη περιεχομένου βαθμολογίας
+            container.appendChild(gradeContent);
         })
         .catch(error => {
             console.error('Σφάλμα κατά την ανάκτηση της κατάστασης:', error);
@@ -1704,14 +1571,13 @@ function renderGradeSection(thesisId, container) {
                 const commentsTextarea = document.createElement('textarea');
                 commentsTextarea.id = 'grade-comments';
                 commentsTextarea.classList.add('form-control');
-                commentsTextarea.rows = 4; // Προαιρετικά για το ύψος
+                commentsTextarea.rows = 4;
                 commentsTextarea.placeholder = 'Προσθέστε σχόλια...';
                 commentsTextarea.value = (data.grades && data.grades.comments) ? data.grades.comments : '';
                 container.appendChild(commentsTextarea);
 
-                // Δημιουργία button container
                 const buttonContainer = document.createElement('div');
-                buttonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4'); // Χρήση Bootstrap classes για στοίχιση
+                buttonContainer.classList.add('button-container', 'd-flex', 'gap-2', 'mt-4');
 
                 const submitGradeButton = createButton(
                     'submit-grade-button',
@@ -1721,7 +1587,6 @@ function renderGradeSection(thesisId, container) {
 
                 buttonContainer.appendChild(submitGradeButton);
 
-                // Δημιουργία κουμπιού "Οριστική Υποβολή"
                 const finalizeButton = createButton(
                     'finalize-grade-button',
                     'Οριστική Υποβολή',
@@ -1732,7 +1597,6 @@ function renderGradeSection(thesisId, container) {
 
                 container.appendChild(buttonContainer);
             } else {
-                // Μήνυμα αν η βαθμολογία είναι οριστικοποιημένη
                 container.innerHTML = '<p class="text-danger text-center">Οι βαθμοί έχουν ήδη υποβληθεί οριστικά και δεν μπορούν να τροποποιηθούν.</p>';
             }
         })
@@ -1750,7 +1614,6 @@ function loadGradeList(thesisId, container) {
     })
         .then(response => response.json())
         .then(data => {
-            //console.log('API Response:', data);  // Ελέγχουμε τα δεδομένα που επιστρέφει το API//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
 
             const gradeListSection = document.createElement('div');
             gradeListSection.classList.add('grade-list', 'mt-4');
@@ -1762,13 +1625,10 @@ function loadGradeList(thesisId, container) {
             const gradeListContainer = document.createElement('ul');
             gradeListContainer.classList.add('list-group');
 
-            // Ελέγχουμε αν το 'grades' είναι πίνακας και έχει δεδομένα
             if (data.success && Array.isArray(data.grades) && data.grades.length > 0) {
-                // Διατρέχουμε τον πίνακα και δημιουργούμε ένα στοιχείο για κάθε βαθμό
                 data.grades.forEach(grade => {
                     const gradeItem = document.createElement('li');
                     gradeItem.classList.add('list-group-item');
-
                     gradeItem.innerHTML = `
                         Καθηγητής:<strong> ${grade.professor_name} ${grade.professor_surname} </strong> <br>
                         Ποιότητα της Δ.Ε. και βαθμός εκπλήρωσης των στόχων της (60%): <strong>  ${grade.grade1} </strong><br>
@@ -1778,7 +1638,6 @@ function loadGradeList(thesisId, container) {
                         Σχόλια:<strong> ${grade.comments || 'Δεν υπάρχουν σχόλια'} </strong><br>
                         Οριστικοποιημένο: <strong> ${grade.is_finalized ? 'Ναι' : 'Όχι'} </strong>
                     `;
-
                     gradeListContainer.appendChild(gradeItem);
                 });
                 gradeListSection.appendChild(gradeListContainer);
@@ -1799,7 +1658,6 @@ function loadGradeList(thesisId, container) {
 function handleSubmitGradeButtonClick(thesisId, container) {
     const grades = [];
 
-    // Συλλογή βαθμών από τα input πεδία
     for (let i = 1; i <= 4; i++) {
         const input = document.getElementById(`grade-criterion-${i}`);
         const value = parseFloat(input.value);
@@ -1808,14 +1666,10 @@ function handleSubmitGradeButtonClick(thesisId, container) {
             alert(`Ο βαθμός ${i} πρέπει να είναι μεταξύ 0 και 10.`);
             return;
         }
-
         grades.push(value);
     }
-
-    // Συλλογή σχολίων
     const comments = document.getElementById('grade-comments')?.value || '';
 
-    // Αποστολή δεδομένων στο API
     fetch('/api/submit-grades', {
         method: 'POST',
         headers: {
@@ -1825,14 +1679,14 @@ function handleSubmitGradeButtonClick(thesisId, container) {
         body: JSON.stringify({
             thesisId,
             grades,
-            comments // Προσθήκη σχολίων στο αίτημα
+            comments
         })
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
-                renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+                renderGradeSection(thesisId, container);
                 loadGradeList(thesisId, container);
             } else {
                 alert(`Σφάλμα: ${data.message}`);
@@ -1847,7 +1701,6 @@ function handleSubmitGradeButtonClick(thesisId, container) {
 function handleFinalizeButtonClick(thesisId, container) {
     const grades = [];
 
-    // Συλλογή βαθμών από τα input πεδία
     for (let i = 1; i <= 4; i++) {
         const input = document.getElementById(`grade-criterion-${i}`);
         const value = parseFloat(input.value);
@@ -1856,13 +1709,10 @@ function handleFinalizeButtonClick(thesisId, container) {
             alert(`Ο βαθμός ${i} πρέπει να είναι μεταξύ 0 και 10.`);
             return;
         }
-
         grades.push(value);
     }
-
     const comments = document.getElementById('grade-comments')?.value || '';
 
-    // Αποστολή δεδομένων στο API για οριστική υποβολή
     fetch('/api/finalize-submitted-grades', {
         method: 'POST',
         headers: {
@@ -1879,7 +1729,7 @@ function handleFinalizeButtonClick(thesisId, container) {
         .then(data => {
             if (data.success) {
                 alert('Η οριστική καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!');
-                renderGradeSection(thesisId, container); // Επαναφόρτωση της ενότητας
+                renderGradeSection(thesisId, container);
                 loadGradeList(thesisId, container);
 
             } else {
@@ -1907,17 +1757,13 @@ document.getElementById('export-csv').addEventListener('click', () => {
                     alert('Δεν υπάρχουν δεδομένα για εξαγωγή.');
                     return;
                 }
-
-                // Δημιουργία κεφαλίδων (headers) από τα κλειδιά του πρώτου αντικειμένου
                 const headers = Object.keys(rows[0]).map(header => `"${header}"`).join(',');
-
-                // Δημιουργία περιεχομένου CSV από τις τιμές
                 const csvContent = rows.map(row => {
                     return Object.values(row).map(value => `"${value || ''}"`).join(',');
                 });
 
                 const csvBlob = new Blob(
-                    [`\uFEFF${headers}\n${csvContent.join('\n')}`], // Προσθέτει το BOM για σωστή κωδικοποίηση
+                    [`\uFEFF${headers}\n${csvContent.join('\n')}`],
                     { type: 'text/csv;charset=utf-8;' }
                 );
 
@@ -1948,8 +1794,6 @@ document.getElementById('export-json').addEventListener('click', () => {
                     alert('Δεν υπάρχουν δεδομένα για εξαγωγή.');
                     return;
                 }
-
-                // Δημιουργία JSON
                 const jsonBlob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json;charset=utf-8;' });
 
                 const url = URL.createObjectURL(jsonBlob);
@@ -1968,7 +1812,7 @@ document.getElementById('export-json').addEventListener('click', () => {
 //-------------- Event Listener for Filter dropdown in Theses List  -------------
 document.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', event => {
-        event.preventDefault(); // Αποφυγή default συμπεριφοράς του link
+        event.preventDefault();
         const filterValue = event.target.getAttribute('data-filter');
         applyFilter(filterValue);
     });
@@ -1977,7 +1821,6 @@ document.querySelectorAll('.dropdown-item').forEach(item => {
 //-------------- Functions for handling the Filtering in Theses List -------------
 let appliedFilters = { status: null, role: null };
 function applyFilter(filterType, filterValue) {
-    // Ενημέρωση των εφαρμοσμένων φίλτρων
     appliedFilters[filterType] = filterValue;
 
     const token = localStorage.getItem('token');
@@ -1997,8 +1840,6 @@ function applyFilter(filterType, filterValue) {
                 }
 
                 thesesTableBody.innerHTML = '';
-
-                // Φιλτράρισμα των δεδομένων
                 data.theses
                     .filter(thesis => {
                         const matchesStatus = !appliedFilters.status || thesis.status === appliedFilters.status;
@@ -2049,7 +1890,7 @@ function applyFilter(filterType, filterValue) {
 }
 function clearFilters() {
     appliedFilters = { status: null, role: null };
-    applyFilter(); // Επαναφόρτωση χωρίς φίλτρα
+    applyFilter();
 }
 
 //-------------- Function for Loading Logs Data in Theses List -------------
@@ -2067,7 +1908,7 @@ function loadLogs(thesis_id) {
         .then(response => response.json())
         .then(data => {
             const statusChangeContainer = document.getElementById('statusChangeContainer');
-            statusChangeContainer.innerHTML = ''; // Καθαρισμός προηγούμενου περιεχομένου
+            statusChangeContainer.innerHTML = '';
 
             if (data.success && data.log.length > 0) {
                 let logData = data.log;
@@ -2080,7 +1921,6 @@ function loadLogs(thesis_id) {
                     'completed': 'Ολοκληρωμένη',
                     'cancelled': 'Ακυρωμένη'
                 };
-
                 logData = logData.map(log => {
                     log.old_state = statusTranslations[log.old_state];
                     log.new_state = statusTranslations[log.new_state];
@@ -2097,7 +1937,6 @@ function loadLogs(thesis_id) {
                             <p class="card-text">${new Date(log.date_of_change).toLocaleDateString('el-GR')}</p>
                         </div>
                     `;
-
                     statusChangeContainer.appendChild(logEntry);
                 });
             } else if (data.success && data.log.length === 0) {
@@ -2121,7 +1960,6 @@ function loadLogs(thesis_id) {
 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
     const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
     elements.forEach(element => {
-        // Ensure valid strings (e.g., '0 ημέρες') are not replaced by errorMessage
         element.textContent = (value !== undefined && value !== null && value !== '') ? value : errorMessage;
     });
 }
@@ -2164,10 +2002,8 @@ function loadInvitations() {
     })
         .then(response => response.json())
         .then(data => {
-            //console.log('Data from API:', data);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
-
             const container = document.querySelector('#invitations .row');
-            container.innerHTML = ''; // Καθαρισμός προηγούμενου περιεχομένου
+            container.innerHTML = '';
 
             if (data.success && data.invitations.length > 0) {
                 data.invitations.forEach(invitation => {
@@ -2189,8 +2025,6 @@ function loadInvitations() {
                     `;
                     container.appendChild(card);
                 });
-
-                // Προσθήκη event listeners στα κουμπιά
                 document.querySelectorAll('.accept-btn').forEach(button => {
                     button.addEventListener('click', (event) => {
                         const invitationId = event.target.dataset.id;
@@ -2215,21 +2049,18 @@ function loadInvitations() {
 }
 //-------------- Invitation History Frontend -------------
 function loadInvitationHistory() {
-    //console.log('Fetching invitation history...');//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
     fetch('/api/invitation-history', {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
         .then(response => {
-            //console.log('Fetch Response:', response);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            //console.log('API Data:', data);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
             if (data.success) {
                 const invHistTableBody = document.querySelector('#invitation-history tbody');
                 if (!invHistTableBody) {
@@ -2237,7 +2068,7 @@ function loadInvitationHistory() {
                     return;
                 }
 
-                invHistTableBody.innerHTML = ''; // Καθαρισμός του πίνακα
+                invHistTableBody.innerHTML = '';
 
                 if (data.invitations.length === 0) {
                     invHistTableBody.innerHTML = '<tr><td colspan="7">Δεν βρέθηκαν δεδομένα.</td></tr>';
@@ -2245,7 +2076,6 @@ function loadInvitationHistory() {
                 }
 
                 data.invitations.forEach(invitation => {
-                    //console.log('Invitation Data:', invitation);//DELETOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooo
                     const row = document.createElement('tr');
 
                     let response;
@@ -2292,7 +2122,7 @@ function handleInvitationAction(invitationId, action) {
         .then(data => {
             if (data.success) {
                 alert(data.message);
-                loadInvitations(); // Reload invitations
+                loadInvitations();
                 loadInvitationHistory();
             } else {
                 alert(`Σφάλμα: ${data.message}`);
