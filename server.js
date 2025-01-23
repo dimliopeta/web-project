@@ -1987,7 +1987,7 @@ app.post('/api/add-announcement', (req, res) => {
 
     const updateQuery = `
         UPDATE EXAMINATIONS 
-        SET announced = TRUE 
+        SET announced = TRUE, announcement_date = CURRENT_DATE
         WHERE thesis_id = ?;
     `;
 
@@ -2108,6 +2108,7 @@ app.get('/api/get-announcement-details/', (req, res) => {
             CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
             e.type_of_exam,
             e.date as exam_date,
+            e.announcement_date as an_date,
             e.location AS examination_location
         FROM Theses t
         LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
@@ -2139,34 +2140,6 @@ app.get('/api/get-announcement-details/', (req, res) => {
     });
 });
 
-
-
-//-----------------API for fetching all the exam announcements----
-app.get('/api/announcements', (req, res) => {
-    const { startDate, endDate } = req.query; // Παράμετροι για εύρος χρόνου
-
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ success: false, message: 'Failed to read data.' });
-        }
-
-        let announcements = JSON.parse(data);
-
-        // Φιλτράρισμα κατά εύρος ημερομηνιών αν δοθούν
-        if (startDate && endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-
-            announcements = announcements.filter(announcement => {
-                const examDate = new Date(announcement.examination.date);
-                return examDate >= start && examDate <= end;
-            });
-        }
-
-        res.json(announcements);
-    });
-});
 
 
 //-----------------API for enabling the grading of an examination----

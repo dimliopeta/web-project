@@ -44,7 +44,7 @@ function loadAnnouncements() {
                             <p class="text-muted"><strong>Τοποθεσία Εξέτασης:</strong> ${announcement.examination_location}</p>
                         </div>
                         <div class="card-footer bg-light d-flex justify-content-end">
-                            <a href="#" class="btn btn-outline-primary">Read More</a>
+                            <p class="text-center">Ημερομηνία Δημοσίευσης Ανακοίνωσης: ${announcement.an_date}</p>
                         </div>
                     </div>
                 </div>

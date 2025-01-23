@@ -109,6 +109,7 @@ CREATE TABLE `Examinations`(
     `location` VARCHAR(200) NULL,
     `exam_report` VARCHAR(200) NULL,
     `announced` BOOLEAN DEFAULT FALSE,
+    `announcement_date` DATE NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 
