@@ -4,12 +4,9 @@
 document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
-
-
         document.querySelectorAll('.content-section').forEach(section => {
             section.style.display = 'none';
         });
-
 
         const targetId = this.getAttribute('href')
             ? this.getAttribute('href').substring(1)
@@ -24,18 +21,23 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
                 insertData();
             }
         }
-        // Hide the Info and Management section on navbar tab click  
         const infoSection = document.getElementById('administratorThesesInfoSection');
         const managementSection = document.getElementById('administratorThesesManagementSection');
         if (infoSection) infoSection.style.display = 'none';
         if (managementSection) managementSection.style.display = 'none';
-
 
         document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
             link.classList.remove('active');
         });
         this.classList.add('active');
     });
+});
+//-----------Load the Dashboard Tab as the Homepage-------------
+window.addEventListener('DOMContentLoaded', () => {
+    const defaultTab = document.querySelector('a[href="#administratorDashboardSection"]');
+    if (defaultTab) {
+        defaultTab.click();
+    }
 });
 
 
@@ -63,8 +65,7 @@ function loadAllTheses() {
                     console.error('Element with selector #theses tbody not found.');
                     return;
                 }
-
-                thesesTableBody.innerHTML = ''; // Clear existing table rows
+                thesesTableBody.innerHTML = '';
 
                 if (data.thesesAll.length === 0) {
                     thesesTableBody.innerHTML = '<tr><td colspan="4">No theses found.</td></tr>';
@@ -72,7 +73,6 @@ function loadAllTheses() {
                 }
 
                 data.thesesAll.forEach(thesis => {
-                    // Translate status
                     let status;
                     switch (thesis.status) {
                         case 'active':
@@ -93,8 +93,7 @@ function loadAllTheses() {
                         default:
                             status = 'Άγνωστη';
                     }
-
-                    // Construct table row
+                    
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${thesis.thesis_id || 'Χωρίς ID'}</td>
@@ -102,12 +101,9 @@ function loadAllTheses() {
                         <td>${(thesis.professor_surname && thesis.professor_name) ? `${thesis.professor_surname} ${thesis.professor_name}` : 'Χωρίς Καθηγητή'}</td>
                         <td>${status}</td>
                     `;
-
-                    // Add a click event for additional actions if needed
                     row.addEventListener('click', () => {
                         showInfoSection(thesis);
                     });
-
                     thesesTableBody.appendChild(row);
                 });
             } else {
@@ -116,11 +112,8 @@ function loadAllTheses() {
         })
         .catch(err => console.error('Error loading theses:', err));
 }
-
-
-
-let selectedThesisId = null;
 //--------------- Function for Showing Info of clicked Thesis ---------------
+let selectedThesisId = null;
 function showInfoSection(thesis) {
 
     const infoSection = document.getElementById('administratorThesesInfoSection');
@@ -164,7 +157,6 @@ function showInfoSection(thesis) {
         default:
             status = 'Άγνωστη';
     }
-
     const duration = calculateDuration(thesis.start_date);
 
     infoSection.innerHTML = `
@@ -248,7 +240,6 @@ function showInfoSection(thesis) {
         const nimertisLink = thesis.nimertis_link;
         const allGradesFinalized = thesis.all_grades_finalized;
 
-
         const nimertisBadge = nimertisLink ? '<span class="m-2 badge bg-success" style="font-size: 14px;">Υπάρχει</span>' : '<span class="m-2 badge bg-danger" style="font-size: 14px;">Δεν υπάρχει</span>';
         const gradesBadge = allGradesFinalized ? '<span class="m-2 badge bg-success" style="font-size: 14px;">Υπάρχει</span>' : '<span class="m-2 badge bg-danger" style="font-size: 14px;">Δεν υπάρχει</span>';
 
@@ -285,13 +276,120 @@ function showInfoSection(thesis) {
                 </div>
             </div>
         `;
-
     }
 
 }
-function insertData() {
+//--------------- Function for filtering for Theses List ---------------
+let appliedFilters = { status: null, professor: '' };
+function applyFilter(filterType, filterValue) {
 
+    appliedFilters[filterType] = filterValue;
+    const token = localStorage.getItem('token');
 
+    fetch('/api/thesesAll', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const thesesTableBody = document.querySelector('#theses tbody');
+                if (!thesesTableBody) {
+                    console.error('Δεν βρέθηκε το στοιχείο #theses tbody στη σελίδα.');
+                    return;
+                }
+
+                thesesTableBody.innerHTML = '';
+
+                data.thesesAll
+                    .filter(thesis => {
+                        const matchesStatus = !appliedFilters.status || thesis.status === appliedFilters.status;
+                        const professorFullName = `${thesis.professor_surname || ''} ${thesis.professor_name || ''}`.toLowerCase();
+                        const matchesProfessor = !appliedFilters.professor || professorFullName.includes(appliedFilters.professor);
+
+                        return matchesStatus && matchesProfessor;
+                    })
+                    .forEach(thesis => {
+                        const row = document.createElement('tr');
+
+                        let status;
+                        switch (thesis.status) {
+                            case 'assigned':
+                                status = 'Υπό Ανάθεση';
+                                break;
+                            case 'to-be-reviewed':
+                                status = 'Υπό Εξέταση';
+                                break;
+                            case 'completed':
+                                status = 'Περατωμένη';
+                                break;
+                            case 'unassigned':
+                                status = 'Μη Ανατεθημένο Θέμα';
+                                break;
+                            case 'active':
+                                status = 'Ενεργή';
+                                break;
+                            default:
+                                status = 'Άγνωστη Κατάσταση';
+                        }
+                        row.innerHTML = `
+                        <td>${thesis.thesis_id || 'Χωρίς ID'}</td>
+                        <td>${thesis.title || 'Χωρίς Τίτλο'}</td>
+                        <td>${(thesis.professor_surname && thesis.professor_name) ? `${thesis.professor_surname} ${thesis.professor_name}` : 'Χωρίς Καθηγητή'}</td>
+                        <td>${status}</td>
+                        `;
+                        row.addEventListener('click', () => {
+                            showInfoSection(thesis);
+                        });
+                        thesesTableBody.appendChild(row);
+                    });
+            } else {
+                console.error('Σφάλμα:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
+}
+//--------------- Function to load professor data in search bar ---------------
+function searchProfessors(searchQuery) {
+    const token = localStorage.getItem('token');
+    const searchResults = document.getElementById('administratorProfessorSearchResults');
+    searchResults.style.display = "block";
+
+    fetch(`/api/professor_search_all?search=${searchQuery}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            const searchResults = document.querySelector('#administratorProfessorSearchResults');
+            if (!searchResults) return;
+
+            searchResults.innerHTML = '';
+
+            if (data.success && data.professors) {
+                data.professors.forEach(professor => {
+                    const li = document.createElement('li');
+                    li.classList.add('dropdown-item');
+                    li.textContent = `${professor.surname} ${professor.name}`;
+                    li.addEventListener('click', () => {
+                        // Apply filter when a professor name is clicked
+                        appliedFilters.professor = `${professor.surname} ${professor.name}`.toLowerCase();
+                        applyFilter('professor', appliedFilters.professor);
+                    });
+                    searchResults.appendChild(li);
+                });
+            }
+        })
+        .catch(err => console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err));
+}
+//--------------- Function to clear selected filters --------------- 
+function clearFilters() {
+    appliedFilters = { status: null, professor: '' };
+    document.getElementById('administratorFilterProfessorSearch').value = '';
+    applyFilter();
 }
 
 //--------------- Event Listener for Submit AP Button (Delegated since the APButton wasnt loaded in the DOM in time) ---------------
@@ -339,7 +437,6 @@ document.getElementById("adminUploadDataButton").addEventListener("change", func
         alert("Please upload a valid JSON file.");
     }
 });
-
 //--------------- Event Listener for Cancel Thesis Button (Delegated) ---------------
 administratorThesesManagementSection.addEventListener('click', (event) => {
     if (event.target && event.target.id === 'cancelThesisButton') {
@@ -356,12 +453,10 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
                 .then(response => response.json())
                 .then(data => {
 
-                    // Insert the saved values next to the labels
                     document.getElementById('GSTLabel').innerHTML = `Α/Α ΓΣΤ: ${GSTInput}`;
                     document.getElementById('dateLabel').innerHTML = `Ημερομηνία: ${dateInput}`;
                     document.getElementById('reasonLabel').innerHTML = `Λόγος: ${reasonInput}`;
 
-                    // Clear the input fields
                     document.getElementById('GSTInputBox').value = '';
                     document.getElementById('dateInputBox').value = '';
                     document.getElementById('reasonInputBox').value = 'Μετά από αίτηση του/της φοιτητή/φοιτήτριας';
@@ -393,12 +488,10 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
         }
     }
 });
-
-
 //--------------- Event Listener for Filter dropdown ---------------
 document.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', event => {
-        event.preventDefault(); // Αποφυγή default συμπεριφοράς του link
+        event.preventDefault();
         const filterType = event.target.getAttribute('data-type');
         const filterValue = event.target.getAttribute('data-value');
         applyFilter(filterType, filterValue);
@@ -409,22 +502,20 @@ document.getElementById('administratorFilterProfessorSearch').addEventListener('
     const searchValue = event.target.value.trim().toLowerCase(); // Normalize input for comparison
     searchProfessors(searchValue); // Call function to search professors as the user types
 });
-// Trigger search and show results
+//--------------- Event Listener to trigger the search and load the results ---------------
 document.getElementById('administratorFilterProfessorSearch').addEventListener('input', (event) => {
     const searchQuery = event.target.value.trim().toLowerCase();
 
-    // Hide results if the input is empty
     if (searchQuery === '') {
         const searchResults = document.getElementById('administratorProfessorSearchResults');
         if (searchResults) {
-            searchResults.style.display = 'none'; // Hide the results if input is empty
+            searchResults.style.display = 'none';
         }
     } else {
-        searchProfessors(searchQuery); // Trigger the search as before
+        searchProfessors(searchQuery);
     }
 });
-
-// Hide results when clicking outside the search bar or results container
+//--------------- Event Listener to hide results when clicking outside of the search area ---------------
 document.addEventListener('click', (event) => {
     const searchResults = document.getElementById('administratorProfessorSearchResults');
     const searchInput = document.getElementById('administratorFilterProfessorSearch');
@@ -432,128 +523,10 @@ document.addEventListener('click', (event) => {
     // If the click is outside the search bar or search results, hide the results
     if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
         if (searchResults) {
-            searchResults.style.display = 'none'; // Hide the results
+            searchResults.style.display = 'none';
         }
     }
 });
-
-//--------------- Function for filtering for Theses List ---------------
-let appliedFilters = { status: null, professor: '' };
-function applyFilter(filterType, filterValue) {
-    // Ενημέρωση των εφαρμοσμένων φίλτρων
-    appliedFilters[filterType] = filterValue;
-
-    const token = localStorage.getItem('token');
-
-    fetch('/api/thesesAll', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const thesesTableBody = document.querySelector('#theses tbody');
-                if (!thesesTableBody) {
-                    console.error('Δεν βρέθηκε το στοιχείο #theses tbody στη σελίδα.');
-                    return;
-                }
-
-                thesesTableBody.innerHTML = '';
-
-                // Φιλτράρισμα των δεδομένων
-                data.thesesAll
-                    .filter(thesis => {
-                        const matchesStatus = !appliedFilters.status || thesis.status === appliedFilters.status;
-                        const professorFullName = `${thesis.professor_surname || ''} ${thesis.professor_name || ''}`.toLowerCase();
-                        const matchesProfessor = !appliedFilters.professor || professorFullName.includes(appliedFilters.professor);
-
-                        return matchesStatus && matchesProfessor;
-                    })
-                    .forEach(thesis => {
-                        const row = document.createElement('tr');
-
-                        let status;
-                        switch (thesis.status) {
-                            case 'assigned':
-                                status = 'Υπό Ανάθεση';
-                                break;
-                            case 'to-be-reviewed':
-                                status = 'Υπό Εξέταση';
-                                break;
-                            case 'completed':
-                                status = 'Περατωμένη';
-                                break;
-                            case 'unassigned':
-                                status = 'Μη Ανατεθημένο Θέμα';
-                                break;
-                            case 'active':
-                                status = 'Ενεργή';
-                                break;
-                            default:
-                                status = 'Άγνωστη Κατάσταση';
-                        }
-
-                        row.innerHTML = `
-                        <td>${thesis.thesis_id || 'Χωρίς ID'}</td>
-                        <td>${thesis.title || 'Χωρίς Τίτλο'}</td>
-                        <td>${(thesis.professor_surname && thesis.professor_name) ? `${thesis.professor_surname} ${thesis.professor_name}` : 'Χωρίς Καθηγητή'}</td>
-                        <td>${status}</td>
-                        `;
-                        row.addEventListener('click', () => {
-                            showInfoSection(thesis);
-                        });
-
-                        thesesTableBody.appendChild(row);
-                    });
-            } else {
-                console.error('Σφάλμα:', data.message);
-            }
-        })
-        .catch(err => console.error('Σφάλμα φόρτωσης διπλωματικών:', err));
-}
-
-//--------------- Function to load professor data in search bar ---------------
-function searchProfessors(searchQuery) {
-    const token = localStorage.getItem('token');
-    const searchResults = document.getElementById('administratorProfessorSearchResults');
-    searchResults.style.display = "block";
-
-    fetch(`/api/professor_search_all?search=${searchQuery}`, {  // Send the search term in the query string
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            const searchResults = document.querySelector('#administratorProfessorSearchResults');
-            if (!searchResults) return;
-
-            searchResults.innerHTML = ''; // Clear previous search results
-
-            if (data.success && data.professors) {
-                data.professors.forEach(professor => {
-                    const li = document.createElement('li');
-                    li.classList.add('dropdown-item');
-                    li.textContent = `${professor.surname} ${professor.name}`;
-                    li.addEventListener('click', () => {
-                        // Apply filter when a professor name is clicked
-                        appliedFilters.professor = `${professor.surname} ${professor.name}`.toLowerCase();
-                        applyFilter('professor', appliedFilters.professor);
-                    });
-                    searchResults.appendChild(li);
-                });
-            }
-        })
-        .catch(err => console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err));
-}
-//--------------- Function to clear selected filters --------------- 
-function clearFilters() {
-    appliedFilters = { status: null, professor: '' };
-    document.getElementById('administratorFilterProfessorSearch').value = '';
-    applyFilter();
-}
 
 //--------------- Helper function to calculate the thesis duration in months and days --------------- 
 function calculateDuration(startDate) {
@@ -601,17 +574,12 @@ function resetManagementSection() {
         managementSection.innerHTML = '';
     }
 }
-//--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
 
+
+
+//--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
 document.addEventListener('DOMContentLoaded', function () {
     loadAllTheses();
 });
 
-//-----------Load the Dashboard Tab as the Homepage-------------
-window.addEventListener('DOMContentLoaded', () => {
-    const defaultTab = document.querySelector('a[href="#administratorDashboardSection"]');
-    if (defaultTab) {
-        defaultTab.click();
-    }
-});
 
