@@ -1,3 +1,4 @@
+//--------------------------------------------- STARTUP SETTINGS ---------------------------------------------
 const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
@@ -9,8 +10,7 @@ const db = mysql.createConnection({
     database: 'project_db'
 });
 
-
-// Helper function to load data from a file or the frontend
+//--------------- Helper Function to load data from file or fronted ---------------
 function loadData(filePath) {
     if (fs.existsSync(filePath)) {
         try {
@@ -25,16 +25,12 @@ function loadData(filePath) {
     }
 }
 
-
-// Μετατρέπουμε τα JSON objects σε Javascript objects και τα αποθηκεύουμε στο data
-//const data = JSON.parse(fs.readFileSync('./provided_data/data.json', 'utf8'));
-
-// Insert data function
+//--------------- Function to load data into the DB ---------------
 function insertData(filePath = './provided_data/data.json') {
     const data = loadData(filePath); // Load data from the specified file
     if (data !== null) {
 
-        // Insert Professors
+        //--------------- Insert Professors
         if (data.professors) {
             data.professors.forEach(professor => {
 
@@ -58,7 +54,7 @@ function insertData(filePath = './provided_data/data.json') {
                             professor.mobile,
                             professor.department,
                             professor.university,
-                            'defaultpassword' // Προσωρινός κωδικός
+                            'defaultpassword' // Temporary password
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting professor:', insertErr);
@@ -74,7 +70,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No professors data found in the file.');
         }
 
-        // Insert Students
+        //--------------- Insert Students
         if (data.students) {
             data.students.forEach(student => {
                 const query = `SELECT * FROM STUDENTS WHERE email=?;`;
@@ -101,7 +97,7 @@ function insertData(filePath = './provided_data/data.json') {
                             student.mobile_telephone,
                             student.email,
                             student.email,
-                            'defaultpassword' // Προσωρινός κωδικός
+                            'defaultpassword' // Temporary Password
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting student:', insertErr);
@@ -116,7 +112,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No students data found in the file.');
         }
 
-        // Insert Administrators
+        //--------------- Insert Administrators
         if (data.administrators) {
             data.administrators.forEach(administrator => {
                 const query = `SELECT * FROM ADMINISTRATORS WHERE email=?;`;
@@ -134,7 +130,7 @@ function insertData(filePath = './provided_data/data.json') {
                             administrator.name,
                             administrator.surname,
                             administrator.email,
-                            'defaultpassword' // Προσωρινός κωδικός
+                            'defaultpassword' // Temporary Password
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting administrator:', insertErr);
@@ -149,7 +145,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No administrators data found in the file.');
         }
 
-        // Insert Thesis
+        //--------------- Insert Thesis
         if (data.theses) {
             data.theses.forEach(thesis => {
 
@@ -166,11 +162,11 @@ function insertData(filePath = './provided_data/data.json') {
                 `;
                         db.query(insertQuery, [
                             thesis.professor_id,
-                            thesis.student_id || null, // Χρησιμοποίησε NULL αν το student_id είναι κενό
+                            thesis.student_id || null,
                             thesis.title,
                             thesis.summary,
                             thesis.status,
-                            thesis.pdf_path || null, // Χρησιμοποίησε NULL αν το pdf_path είναι κενό
+                            thesis.pdf_path || null,
                             thesis.start_date
                         ], (insertErr) => {
                             if (insertErr) {
@@ -186,7 +182,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No theses data found in the file.');
         }
 
-        //Insert Committees
+        //--------------- Insert Committees
         if (data.committees) {
             data.committees.forEach(committee => {
                 const query = `SELECT * FROM COMMITTEES WHERE thesis_id=?;`;
@@ -202,8 +198,8 @@ function insertData(filePath = './provided_data/data.json') {
                 `;
                         db.query(insertQuery, [
                             committee.thesis_id,
-                            committee.member1_id,  // Καθηγητής 1
-                            committee.member2_id   // Καθηγητής 2
+                            committee.member1_id,
+                            committee.member2_id
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting committee:', insertErr);
@@ -218,7 +214,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No committees data found in the file.');
         }
 
-        //Insert Invites
+        //--------------- Insert Invites
         if (data.invitations) {
             data.invitations.forEach(invitation => {
                 const query = `SELECT * FROM INVITATIONS WHERE id=?;`;
@@ -246,7 +242,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No invitations data found in the file.');
         }
 
-        // Insert Examinations
+        //--------------- Insert Examinations
         if (data.examinations) {
             data.examinations.forEach(examination => {
                 const query = `SELECT * FROM EXAMINATIONS WHERE thesis_id=?;`;
@@ -280,7 +276,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No examinations data found in the file.');
         }
 
-        // Insert Logs
+        //--------------- Insert Logs
         if (data.logs) {
             data.logs.forEach(log => {
                 const query = `SELECT * FROM LOGS WHERE logs.id=?;`;
@@ -314,7 +310,7 @@ function insertData(filePath = './provided_data/data.json') {
             console.warn('No logs data found in the file.');
         }
 
-        // Insert Grades
+        //--------------- Insert Grades
         if (data.grades) {
             data.grades.forEach(grade => {
                 const query = `SELECT * FROM GRADES WHERE thesis_id=?;`;
@@ -351,7 +347,6 @@ function insertData(filePath = './provided_data/data.json') {
         } else {
             console.warn('No grades data found in the file.');
         }
-
         console.log(`Database updated!`);
 
     } else {
@@ -360,5 +355,4 @@ function insertData(filePath = './provided_data/data.json') {
 }
 
 insertData();
-
 module.exports = { db, insertData };
