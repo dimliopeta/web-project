@@ -32,15 +32,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
             font-size: calc(1rem + 0.2vw);
-            /* Προσαρμόζει τη γραμματοσειρά δυναμικά */
         }
 
         .navbar-nav .nav-link.active {
             font-weight: bold;
             color: #0d6efd;
-            /* Χρώμα για το ενεργό tab */
             border-bottom: 2px solid #0d6efd;
-            /* Γραμμή στο κάτω μέρος */
         }
 
         #studentListWrapper {
@@ -49,9 +46,7 @@
 
         #student-list {
             max-height: 200px;
-            /* Ορίζουμε ένα μέγιστο ύψος */
             overflow-y: auto;
-            /* Ενεργοποιούμε το scroll */
             border: 1px solid #ddd;
             border-radius: 5px;
         }
@@ -84,7 +79,6 @@
                 <a class="nav-item nav-link" href="#list">Λίστα Διπλωματικών</a>
                 <a class="nav-item nav-link" href="#invitations">Προσκλήσεις Τριμελών</a>
                 <a class="nav-item nav-link" href="#stats">Στατιστικά</a>
-
             </div>
             <button type="button" class="nav-item btn btn-outline-secondary ms-auto mx-4"
                 id="logout-btn">Έξοδος</button>
@@ -94,11 +88,11 @@
     <!------------------ Main Content ------------------>
     <div class="main-content">
 
-        <!---------- Θέματα Διπλωματικών ---------->
+        <!---------- Themes Section ---------->
         <div id="theses-section" class="content-section" style="display:none;">
             <h3 class="text-center mt-5 pt-5 pb-3">Θέματα Διπλωματικών</h3>
             <div class="row">
-                <div id="themes-compartment" class="col-lg-10 mx-auto">
+                <div id="themes-compartment" class="col-lg-6 mx-auto">
                     <div class="border p-3 rounded">
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createThesisModal">Νέο
                             Θέμα</button>
@@ -186,14 +180,12 @@
             </div>
         </div>
 
-        <!---------- Assign to student nav ---------->
+        <!---------- Assign to student ---------->
         <div id="assign" class="content-section" style="display:none;">
             <h3 class="text-center mt-5 pt-5 pb-3">Ανάθεση Θέματος Διπλωματικής σε Φοιτητή</h3>
-
-            <!---------- Κεντρικό layout ---------->
             <div class="container">
                 <div class="row">
-                    <!---------- Φοιτητής ---------->
+                    <!---------- Student Area ---------->
                     <div class="col-md-6">
                         <div class="border p-3 rounded">
                             <h5 class="text-primary">Φοιτητής</h5>
@@ -215,7 +207,7 @@
                         </div>
                     </div>
 
-                    <!---------- Διπλωματικές ---------->
+                    <!---------- Thesis Area ---------->
                     <div class="col-md-6">
                         <div class="border p-3 rounded">
                             <h5 class="text-primary">Θέματα Διπλωματικών</h5>
@@ -225,14 +217,11 @@
                         </div>
                     </div>
                 </div>
-
-                <!---------- Κουμπί ανάθεσης ---------->
                 <div class="row mt-4">
                     <div class="col text-center">
                         <button class="btn btn-primary btn-lg" id="assignThesisButton">Ανάθεση Διπλωματικής</button>
                     </div>
                 </div>
-
                 <div class="row">
                     <h3 class="text-center  pt-4 pb-3">Ανατεθημένα θέματα</h3>
                     <table id="assigned-theses" class="table table-striped table-hover">
@@ -251,15 +240,11 @@
             </div>
         </div>
 
-        <!---------- Λίστα Διπλωματικών ---------->
+        <!---------- Thesis List Section ---------->
         <div id="list" class="content-section" style="display:none;">
             <h3 class="text-center mt-5 pt-5 pb-3">Λίστα Διπλωματικών</h3>
-
-            <!---------- Κεντρικό layout ---------->
             <div class="container">
                 <div class="row">
-                    <!---------- Λίστα Διπλωματικών ---------->
-
                     <div id="theses-compartment" class="col-lg-6 mx-auto">
                         <div class="border p-3 rounded">
                             <div class="btn-group">
@@ -314,7 +299,7 @@
                         </button>
                     </div>
 
-                    <!---------- Βασικές Πληροφορίες Διπλωματικής ---------->
+                    <!---------- Basic Info ---------->
                     <div id="info-compartment" class="card col-md-6 d-none border p-3 rounded">
                         <h5 class="text-primary">Βασικές Πληροφορίες</h5>
                     </div>
@@ -466,11 +451,12 @@
             </div>
         </div>
 
+        <!---------- Invitations Section ---------->
         <div id="invitations" class="content-section" style="display:none;">
             <h3 class="text-center mt-5 pt-5 pb-3">Προσκλήσεις Τριμελών</h3>
             <div class="container">
                 <div class="row">
-                    <!---------- Οι κάρτες των προσκλήσεων θα φορτώνονται εδώ ---------->
+                    <!---------- Inv will load here dynamically ---------->
                 </div>
 
                 <h3 class="text-center  pt-4 pb-3">Ιστορικό Απαντήσεων</h3>
