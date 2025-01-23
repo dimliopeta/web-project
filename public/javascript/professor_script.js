@@ -2205,7 +2205,6 @@ function loadInvitations() {
                     });
                 });
             } else {
-                console.warn('No invitations found or API error.');
                 container.innerHTML = '<h5 class="text-center">Δεν υπάρχουν προσκλήσεις!</h5>';
             }
         })
