@@ -1309,11 +1309,14 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
         t.title AS thesis_title,
         t.summary AS thesis_summary,
         CONCAT(s.name, ' ', s.surname) AS student_name,
+        CONCAT(p.name,' ',p.surname) AS professor_name,
         s.student_number AS student_number
     FROM 
         Invitations i
     JOIN 
         Theses t ON i.thesis_id = t.thesis_id
+    LEFT JOIN 
+        Professors p ON t.professor_id = p.id
     LEFT JOIN 
         Students s ON t.student_id = s.id
     WHERE 
