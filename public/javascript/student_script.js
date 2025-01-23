@@ -34,7 +34,6 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     });
 });
 console.log('Hello fellow web user. Congratulations for finding this message! You win a mediocre sense of accomplishment.')
-
 //--------------- Logout Function ---------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
     event.preventDefault(); // Αποφυγή της προεπιλεγμένης συμπεριφοράς του link
@@ -50,6 +49,13 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
             }
         })
         .catch(err => console.error('Error:', err));
+});
+//------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------
+window.addEventListener('DOMContentLoaded', () => {
+    const defaultTab = document.querySelector('a[href="#dashboard"]');
+    if (defaultTab) {
+        defaultTab.click();
+    }
 });
 
 
@@ -1276,7 +1282,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 
 
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
-//------------------------------ Load the student profile after DOM is loaded ------------------------------
+//------------------------------ Load functions after DOM is loaded ------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     loadStudentProfile();
     loadStudentThesis();
@@ -1285,10 +1291,4 @@ document.addEventListener('DOMContentLoaded', () => {
     loadExamReportData();
     loadLogsData();
 });
-//------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------
-window.addEventListener('DOMContentLoaded', () => {
-    const defaultTab = document.querySelector('a[href="#dashboard"]');
-    if (defaultTab) {
-        defaultTab.click();
-    }
-});
+
