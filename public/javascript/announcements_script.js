@@ -129,8 +129,13 @@ document.getElementById('clear-filters').addEventListener('click', () => {
     document.getElementById('filter-an-date-to').value = '';
     document.getElementById('filter-exam-date-from').value = '';
     document.getElementById('filter-exam-date-to').value = '';
-
-    loadAnnouncements(); // Επαναφόρτωση χωρίς φίλτρα
+    const filters = {
+        anDateFrom: null,
+        anDateTo: null,
+        examDateFrom: null,
+        examDateTo: null
+    };
+    loadAnnouncements(filters); // Επαναφόρτωση χωρίς φίλτρα
 });
 
 // Αρχική φόρτωση ανακοινώσεων
