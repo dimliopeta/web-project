@@ -1222,7 +1222,7 @@
       {
         "thesis_id": "4",
         "professor_id": "1",
-        "student_id": null,
+        "student_id": "12",
         "title": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms",
         "summary": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms can really help with computers so we have to understand it.",
         "status": "completed",
@@ -1339,7 +1339,7 @@
       {
         "thesis_id": "13",
         "professor_id": "3",
-        "student_id": "3",
+        "student_id": "17",
         "title": "Data Security in Cloud Computing",
         "summary": "An analysis of security challenges in cloud computing and proposed solutions.",
         "status": "active",
@@ -1378,7 +1378,7 @@
       {
         "thesis_id": "16",
         "professor_id": "4",
-        "student_id": 205,
+        "student_id": "18",
         "title": "Augmented Reality in Education",
         "summary": "Design and development of AR tools for interactive learning experiences.",
         "status": "cancelled",
@@ -1391,7 +1391,7 @@
       {
         "thesis_id": "17",
         "professor_id": "6",
-        "student_id": 206,
+        "student_id": "16",
         "title": "Artificial Intelligence in Healthcare",
         "summary": "Using AI to enhance diagnostics and treatment in healthcare.",
         "status": "assigned",
