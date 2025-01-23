@@ -6,13 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Democritus-Announcements</title>
     <!------------------ Bootstrap CSS ------------------>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!------------------ Bootstrap Bundle with Popper ------------------>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="icon" href="images/DemBrowserIcon.png" type="image/x-icon">
 
     <!------------------ CSS ------------------>
     <style>
+        body {
+            padding-top: 70px;
+        }
+
         section {
             padding: 30px 0;
         }
@@ -20,22 +23,6 @@
         .card {
             flex: 1;
             max-width: 300px;
-        }
-
-        .card-img-top,
-        .announcement-image img {
-            width: 100%;
-            /* Ή συγκεκριμένο πλάτος, π.χ. 300px */
-            height: auto;
-            /* Διατηρεί αναλογία */
-            max-width: 300px;
-            /* Εξασφαλίζει συνεπή μέγιστο πλάτος */
-            max-height: 200px;
-            /* Περιορίζει το ύψος αν είναι πολύ μεγάλο */
-            object-fit: cover;
-            /* Κόβει την εικόνα αν δεν ταιριάζει */
-            border-radius: 8px;
-            /* Για ομοιομορφία */
         }
     </style>
 </head>
@@ -59,6 +46,41 @@
         </div>
     </nav>
 
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown"
+            aria-expanded="false">
+            Φιλτράρισμα
+        </button>
+        <div class="dropdown-menu p-4" aria-labelledby="filterDropdown" style="min-width: 300px;">
+            <div class="d-flex flex-column gap-3">
+                <div>
+                    <label for="filter-an-date-from" class="form-label">Φίλτρο ημερομηνίας δημοσίευσης:</label>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="filter-an-date-from" class="form-control" style="flex: 1;">
+                        <span>-</span>
+                        <input type="date" id="filter-an-date-to" class="form-control" style="flex: 1;">
+                    </div>
+                </div>
+                <div>
+                    <label for="filter-exam-date-from" class="form-label">Φίλτρο ημερομηνίας εξέτασης:</label>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="filter-exam-date-from" class="form-control" style="flex: 1;">
+                        <span>-</span>
+                        <input type="date" id="filter-exam-date-to" class="form-control" style="flex: 1;">
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button id="apply-filters" class="btn btn-primary">Εφαρμογή Φίλτρων</button>
+                    <button id="clear-filters" class="btn btn-secondary">Καθαρισμός Φίλτρων</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+
+
+
     <section id="announcements-section" class="bg-white mt-5">
         <div class="container-lg">
             <div class="row g-4" id="announcements-container">
@@ -67,5 +89,5 @@
         </div>
     </section>
     <script src="/javascript/announcements_script.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
