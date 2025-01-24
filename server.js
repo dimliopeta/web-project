@@ -2027,7 +2027,8 @@ app.get('/api/get-all-announcements/', (req, res) => {
                 message: 'No announcements found.'
             });
         }
-
+        console.log("vag");
+        console.log(results);
         res.status(200).json({
             success: true,
             data: results
