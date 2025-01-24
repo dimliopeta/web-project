@@ -865,13 +865,12 @@ app.post('/api/examinations_upload', (req, res) => {
     }
 
     const query = `
-         INSERT INTO examinations (thesis_id, date, type_of_exam, location, announced)
-            VALUES (?, ?, ?, ?, FALSE)
+         INSERT INTO examinations (thesis_id, date, type_of_exam, location)
+            VALUES (?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
               date = VALUES(date),
               type_of_exam = VALUES(type_of_exam),
-              location = VALUES(location),
-              announced = FALSE;
+              location = VALUES(location);
     `;
 
     db.query(query, [thesis_id, exam_date, type_of_exam, location], (err, result) => {
@@ -1941,20 +1940,21 @@ app.post('/api/announcement-check', authenticateJWT, (req, res) => {
 
     db.query(query, [thesisId], (err, results) => {
         if (err) {
-            console.error('Error fetching exam details:', err);
+            console.error('Error fetching announcement details:', err);
             return res.status(500).json({ success: false, message: 'Server error' });
         }
 
         if (results.length === 0) {
-            return res.status(200).json({ success: true, data: null }); // Επιστρέφεται null αντί για άδειο array
+            return res.status(200).json({ success: true, data: false }); // Επιστρέφεται false όταν δεν υπάρχει ανακοίνωση
         }
 
         return res.status(200).json({
             success: true,
-            data: results[0], // Επιστρέφεται απευθείας το πρώτο αποτέλεσμα
+            data: results[0], // Επιστρέφεται η πρώτη ανακοίνωση όταν υπάρχει
         });
     });
 });
+
 
 
 //-----------------API for creating an announcement of an examination----

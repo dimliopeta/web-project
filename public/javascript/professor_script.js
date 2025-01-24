@@ -1069,7 +1069,7 @@ function addActiveSection(thesis, container) {
             changeThesisForm.appendChild(changeDateInput);
 
             const confirmChangeButton = createButton('confirm-change-button', 'Επιβεβαίωση Μετατροπής σε Υπό Εξέταση', ['btn', 'btn-primary'], () => {
-                const changeNumber = changeNumberInput.value;
+                const changeNumber = aaInput.value;
                 const changeDate = changeDateInput.value;
 
                 if (!changeNumber || !changeDate) {
@@ -1318,7 +1318,7 @@ function announcementButtonController(thesisId, container) {
         })
         .then((data) => {
 
-            if (!data.success || !data.data) {
+            if (!data.success || data.data === false) {
                 const unannouncedHeader = document.createElement('h4');
                 unannouncedHeader.textContent = 'Δημιουργία Ανακοίνωσης';
                 unannouncedHeader.classList.add('text-center');
@@ -1331,7 +1331,7 @@ function announcementButtonController(thesisId, container) {
                 container.appendChild(announcementHr);
                 return;
             }
-            const { announced } = data.data;
+            const { announced } = data.data || {}; // Αν το data.data είναι false, το value θα είναι {}
 
             if (!announced) {
                 const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesisId));
