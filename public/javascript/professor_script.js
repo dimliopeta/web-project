@@ -659,6 +659,7 @@ function addAssignedSection(thesis, container) {
                 showInvitationsButton.classList.remove('btn-primary');
                 showInvitationsButton.classList.add('btn-info');
             } else {
+
                 showThesisInvitations(thesis.thesis_id, container);
                 showInvitationsButton.textContent = 'Απόκρυψη Προσκλήσεων';
                 showInvitationsButton.classList.remove('btn-info');
@@ -739,7 +740,6 @@ function showThesisInvitations(thesis_id, container) {
                     }
                     return `
                         <div class="card mb-2">
-                        <h4 class="text-center">Hello</h4>
                             <div class="card-body">
                                 <p><strong>Καθηγητής:</strong> ${invitation.professor_name} ${invitation.professor_surname}</p>
                                 <p><strong>Κατάσταση:</strong> ${inv_status}</p>
@@ -793,12 +793,22 @@ function addStartThesisButton(thesisId, container) {
         const startThesisForm = document.createElement('div');
         startThesisForm.classList.add('mt-3');
 
+        const startNumberLabel = document.createElement('label');
+        startNumberLabel.textContent = 'A/A ΓΣΤ έγκρισης διπλωματικής';
+        startNumberLabel.classList.add('form-label'); // Optional: for Bootstrap styling
+        startThesisForm.appendChild(startNumberLabel);
+
         const startNumberInput = document.createElement('input');
         startNumberInput.type = 'number';
         startNumberInput.id = 'start-number';
         startNumberInput.classList.add('form-control', 'mb-2');
         startNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
         startThesisForm.appendChild(startNumberInput);
+
+        const startDateLabel = document.createElement('label');
+        startDateLabel.textContent = 'Ημερομηνία ΓΣΤ';
+        startDateLabel.classList.add('form-label'); // Optional: for Bootstrap styling
+        startThesisForm.appendChild(startDateLabel);
 
         const startDateInput = document.createElement('input');
         startDateInput.type = 'date';
@@ -1450,7 +1460,7 @@ function addToAnnouncements(thesisId) {
     fetch('/api/add-announcement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ thesisId: thesisId }) 
+        body: JSON.stringify({ thesisId: thesisId })
     })
         .then((response) => {
             if (!response.ok) {
