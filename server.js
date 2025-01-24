@@ -865,13 +865,12 @@ app.post('/api/examinations_upload', (req, res) => {
     }
 
     const query = `
-         INSERT INTO examinations (thesis_id, date, type_of_exam, location, announced)
-            VALUES (?, ?, ?, ?, FALSE)
+         INSERT INTO examinations (thesis_id, date, type_of_exam, location)
+            VALUES (?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
               date = VALUES(date),
               type_of_exam = VALUES(type_of_exam),
-              location = VALUES(location),
-              announced = FALSE;
+              location = VALUES(location);
     `;
 
     db.query(query, [thesis_id, exam_date, type_of_exam, location], (err, result) => {
@@ -1926,7 +1925,7 @@ app.post('/api/cancel-thesis', authenticateJWT, (req, res) => {
 });
 
 //-----------------API for checking if an examination is announced----
-app.post('/api/check-exam', authenticateJWT, (req, res) => {
+app.post('/api/announcement-check', authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
 
     if (!thesisId) {
@@ -1934,32 +1933,64 @@ app.post('/api/check-exam', authenticateJWT, (req, res) => {
     }
 
     const query = ` 
-        SELECT announced 
-        FROM EXAMINATIONS 
+        SELECT * 
+        FROM ANNOUNCEMENTS 
         WHERE thesis_id = ?;
     `;
 
     db.query(query, [thesisId], (err, results) => {
         if (err) {
-            console.error('Error fetching exam details:', err);
+            console.error('Error fetching announcement details:', err);
             return res.status(500).json({ success: false, message: 'Server error' });
         }
 
         if (results.length === 0) {
-            return res.status(200).json({ success: true, data: null }); // Επιστρέφεται null αντί για άδειο array
+            return res.status(200).json({ success: true, data: false }); // Επιστρέφεται false όταν δεν υπάρχει ανακοίνωση
         }
 
         return res.status(200).json({
             success: true,
-            data: results[0], // Επιστρέφεται απευθείας το πρώτο αποτέλεσμα
+            data: results[0], // Επιστρέφεται η πρώτη ανακοίνωση όταν υπάρχει
         });
     });
 });
 
 
+
 //-----------------API for creating an announcement of an examination----
 app.post('/api/add-announcement', (req, res) => {
     const thesisId = req.body.thesisId;
+
+    if (!thesisId) {
+        return res.status(400).json({ success: false, message: 'Missing thesis_id parameter' });
+    }
+
+    const updateQuery = `
+        INSERT INTO Announcements(thesis_id, announcement_date) 
+        VALUES(?,CURRENT_DATE);
+    `;
+
+
+    db.query(updateQuery, [thesisId], (updateErr) => {
+        if (updateErr) {
+            console.error('Error updating thesis:', updateErr);
+            return res.status(500).json({ success: false, message: 'Error updating thesis.' });
+            ;
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Announcement added successfully.',
+            data: announcementDetails,
+        });
+    });
+});
+
+
+
+//-----------------API for viewing an announcement of an examination----
+app.get('/api/get-announcement-details/', (req, res) => {
+    const thesisId = req.query.thesisId;
 
     if (!thesisId) {
         return res.status(400).json({ success: false, message: 'Missing thesis_id parameter' });
@@ -1977,143 +2008,10 @@ app.post('/api/add-announcement', (req, res) => {
             CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
             e.type_of_exam,
             e.date as exam_date,
-            e.location AS examination_location
+            e.location AS examination_location,
+            a.announcement_date as an_date
         FROM Theses t
-        LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
-        LEFT JOIN Students s ON t.student_id = s.id
-        LEFT JOIN Professors p ON t.professor_id = p.id
-        LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
-        LEFT JOIN Professors c1 ON c.member1_id = c1.id
-        LEFT JOIN Professors c2 ON c.member2_id = c2.id
-        WHERE t.thesis_id = ?;
-    `;
-
-    const updateQuery = `
-        UPDATE EXAMINATIONS 
-        SET announced = TRUE, announcement_date = CURRENT_DATE
-        WHERE thesis_id = ?;
-    `;
-
-    db.beginTransaction((err) => {
-        if (err) {
-            console.error('Error starting transaction:', err);
-            return res.status(500).json({ success: false, message: 'Server error starting transaction.' });
-        }
-
-        db.query(selectQuery, [thesisId], (selectErr, results) => {
-            if (selectErr) {
-                console.error('Error fetching thesis details:', selectErr);
-                return db.rollback(() => {
-                    res.status(500).json({ success: false, message: 'Error fetching thesis details.' });
-                });
-            }
-
-            if (results.length === 0) {
-                return res.status(200).json({
-                    success: false,
-                    message: 'No presentation details provided by the student.'
-                });
-            }
-
-            const announcementDetails = results[0];
-            const fieldsAreComplete = Object.values(announcementDetails).every(field => field !== null);
-
-            if (!fieldsAreComplete) {
-                return res.status(200).json({
-                    success: false,
-                    message: 'Some presentation details are missing.'
-                });
-            }
-
-            db.query(updateQuery, [thesisId], (updateErr) => {
-                if (updateErr) {
-                    console.error('Error updating thesis:', updateErr);
-                    return db.rollback(() => {
-                        res.status(500).json({ success: false, message: 'Error updating thesis.' });
-                    });
-                }
-
-                const filePath = path.join(__dirname, 'public', 'announcements.json');
-
-                // Αν το αρχείο JSON υπάρχει ήδη, διαβάζουμε τα δεδομένα και τα προσθέτουμε στον πίνακα
-                fs.readFile(filePath, (readErr, data) => {
-                    let announcements = [];
-
-                    if (!readErr) {
-                        try {
-                            announcements = JSON.parse(data).announcements || [];
-                        } catch (parseErr) {
-                            console.error('Error parsing JSON data:', parseErr);
-                        }
-                    }
-
-                    // Ελέγχουμε αν η ανακοίνωση με το συγκεκριμένο thesisId υπάρχει ήδη
-                    const existingAnnouncementIndex = announcements.findIndex(announcement => announcement.thesis_id === thesisId);
-
-                    if (existingAnnouncementIndex !== -1) {
-                        // Αν υπάρχει, αντικαθιστούμε την υπάρχουσα καταχώρηση
-                        announcements[existingAnnouncementIndex] = announcementDetails;
-                    } else {
-                        // Αν δεν υπάρχει, προσθέτουμε τη νέα καταχώρηση
-                        announcements.push(announcementDetails);
-                    }
-
-                    // Αποθηκεύουμε τον πίνακα ανακοινώσεων ξανά στο αρχείο JSON
-                    fs.writeFile(filePath, JSON.stringify({ announcements }, null, 2), (fileErr) => {
-                        if (fileErr) {
-                            console.error('Error writing to file:', fileErr);
-                            return db.rollback(() => {
-                                res.status(500).json({ success: false, message: 'Failed to save data to file.' });
-                            });
-                        }
-
-                        db.commit((commitErr) => {
-                            if (commitErr) {
-                                console.error('Error committing transaction:', commitErr);
-                                return db.rollback(() => {
-                                    res.status(500).json({ success: false, message: 'Error committing transaction.' });
-                                });
-                            }
-
-                            res.status(200).json({
-                                success: true,
-                                message: 'Thesis details saved to file: announcements.json',
-                                data: announcementDetails,
-                                file_path: filePath,
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
-});
-
-
-
-//-----------------API for viewing an announcement of an examination----
-app.get('/api/get-announcement-details/', (req, res) => {
-    const thesisId = req.query.thesisId;
-
-    if (!thesisId) {
-        return res.status(400).json({ success: false, message: 'Missing thesis_id parameter' });
-    }
-
-    const selectQuery = `
-       SELECT 
-            t.thesis_id,
-            t.title,
-            CONCAT(s.name, ' ', s.surname) AS student_name,
-            CONCAT(p.name, ' ', p.surname) AS professor_name,
-            c.member1_id AS committee_member1_id,
-            CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
-            c.member2_id AS committee_member2_id,
-            CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
-            e.type_of_exam,
-            e.date as exam_date,
-            e.announcement_date as an_date,
-            e.location AS examination_location
-        FROM Theses t
+        LEFT JOIN Announcements a ON t.thesis_id = a.thesis_id
         LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
         LEFT JOIN Students s ON t.student_id = s.id
         LEFT JOIN Professors p ON t.professor_id = p.id
@@ -2142,6 +2040,55 @@ app.get('/api/get-announcement-details/', (req, res) => {
         });
     });
 });
+
+
+// API for viewing all announcements
+app.get('/api/get-all-announcements/', (req, res) => {
+    const selectQuery = `
+        SELECT 
+            t.thesis_id,
+            t.title,
+            CONCAT(s.name, ' ', s.surname) AS student_name,
+            CONCAT(p.name, ' ', p.surname) AS professor_name,
+            c.member1_id AS committee_member1_id,
+            CONCAT(c1.name, ' ', c1.surname) AS committee_member1_name,
+            c.member2_id AS committee_member2_id,
+            CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
+            e.type_of_exam,
+            e.date as exam_date,
+            e.location AS examination_location,
+            a.announcement_date as an_date
+        FROM Theses t
+        LEFT JOIN Announcements a ON t.thesis_id = a.thesis_id
+        LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
+        LEFT JOIN Students s ON t.student_id = s.id
+        LEFT JOIN Professors p ON t.professor_id = p.id
+        LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+        LEFT JOIN Professors c1 ON c.member1_id = c1.id
+        LEFT JOIN Professors c2 ON c.member2_id = c2.id
+        ORDER BY a.announcement_date DESC;
+    `;
+
+    db.query(selectQuery, (err, results) => {
+        if (err) {
+            console.error('Error fetching announcements:', err);
+            return res.status(500).json({ success: false, message: 'Error fetching announcements.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: 'No announcements found.'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: results
+        });
+    });
+});
+
 
 
 
