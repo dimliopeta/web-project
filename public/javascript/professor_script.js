@@ -720,17 +720,35 @@ function showThesisInvitations(thesis_id, container) {
     })
         .then(response => response.json())
         .then(data => {
+
             if (data.success && data.invitations) {
-                invitationsList.innerHTML = data.invitations.map(invitation => `
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <p><strong>Καθηγητής:</strong> ${invitation.professor_name} ${invitation.professor_surname}</p>
-                            <p><strong>Κατάσταση:</strong> ${invitation.invitation_status}</p>
-                            <p><strong>Ημερομηνία Αποστολής:</strong> ${invitation.invitation_date}</p>
-                            <p><strong>Ημερομηνία Απάντησης:</strong> ${invitation.response_date || 'Καμία απάντηση'}</p>
+                invitationsList.innerHTML = data.invitations.map(invitation => {
+                    let inv_status;
+                    switch (invitation.invitation_status) {
+                        case 'pending':
+                            inv_status = 'Εκκρεμής';
+                            break;
+                        case 'accepted':
+                            inv_status = 'Αποδεκτή';
+                            break;
+                        case 'rejected':
+                            inv_status = 'Απορρίφθηκε';
+                            break;
+                        case 'cancelled':
+                            inv_status = 'Ακυρώθηκε';
+                    }
+                    return `
+                        <div class="card mb-2">
+                        <h4 class="text-center">Hello</h4>
+                            <div class="card-body">
+                                <p><strong>Καθηγητής:</strong> ${invitation.professor_name} ${invitation.professor_surname}</p>
+                                <p><strong>Κατάσταση:</strong> ${inv_status}</p>
+                                <p><strong>Ημερομηνία Αποστολής:</strong> ${invitation.invitation_date}</p>
+                                <p><strong>Ημερομηνία Απάντησης:</strong> ${invitation.response_date || 'Καμία απάντηση'}</p>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             } else {
                 invitationsList.innerHTML = '<p class="text-muted">Δεν βρέθηκαν προσκλήσεις.</p>';
             }
