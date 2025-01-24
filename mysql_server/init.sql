@@ -108,8 +108,6 @@ CREATE TABLE `Examinations`(
     `type_of_exam` ENUM('online','in-person') DEFAULT 'in-person',
     `location` VARCHAR(200) NULL,
     `exam_report` VARCHAR(200) NULL,
-    `announced` BOOLEAN DEFAULT FALSE,
-    `announcement_date` DATE NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 
@@ -133,4 +131,10 @@ CREATE TABLE `Notes`(
     `content` TEXT NOT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
 	FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`)
+);
+
+CREATE TABLE `Announcements`(
+	`thesis_id` INT NOT NULL PRIMARY KEY,
+    `announcement_date` date NOT NULL,
+	FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );

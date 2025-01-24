@@ -10,7 +10,12 @@ function loadAnnouncements(filters = {}) {
         currentPage = 1;
     }
 
-    fetch('announcements.json')
+    fetch('/api/get-all-announcements/', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
         .then(response => response.json())
         .then(data => {
             const announcements = data.announcements;

@@ -1287,7 +1287,7 @@ function addToBeReviewedSection(thesis, container) {
 }
 //-------------- Function for Announcement controls in Theses List -------------
 function announcementButtonController(thesisId, container) {
-    fetch('/api/check-exam', {
+    fetch('/api/announcement-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ thesisId: thesisId })
