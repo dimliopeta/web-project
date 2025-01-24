@@ -1863,25 +1863,41 @@ app.post('/api/announcement-check', authenticateJWT, (req, res) => {
         return res.status(400).json({ success: false, message: 'Missing thesisId' });
     }
 
-    const query = ` 
-        SELECT * 
-        FROM ANNOUNCEMENTS 
+    const announcementQuery = `
+        SELECT *
+        FROM ANNOUNCEMENTS
         WHERE thesis_id = ?;
     `;
 
-    db.query(query, [thesisId], (err, results) => {
-        if (err) {
-            console.error('Error fetching announcement details:', err);
+    const examinationQuery = `
+        SELECT *
+        FROM Examinations
+        WHERE thesis_id = ?;
+    `;
+
+    db.query(announcementQuery, [thesisId], (announcementErr, announcementResults) => {
+        if (announcementErr) {
+            console.error('Error fetching announcement details:', announcementErr);
             return res.status(500).json({ success: false, message: 'Server error' });
         }
 
-        if (results.length === 0) {
-            return res.status(200).json({ success: true, data: false });
-        }
+        const announced = announcementResults.length > 0; // Αν υπάρχει ανακοίνωση, τότε είναι true
 
-        return res.status(200).json({
-            success: true,
-            data: results[0],
+        db.query(examinationQuery, [thesisId], (examinationErr, examinationResults) => {
+            if (examinationErr) {
+                console.error('Error fetching examination details:', examinationErr);
+                return res.status(500).json({ success: false, message: 'Server error' });
+            }
+
+            const examinationExists = examinationResults.length > 0; // Αν υπάρχει εξέταση, τότε είναι true
+
+            return res.status(200).json({
+                success: true,
+                data: {
+                    announced,
+                    examinationExists
+                }
+            });
         });
     });
 });

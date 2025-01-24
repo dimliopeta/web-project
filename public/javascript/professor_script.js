@@ -1322,42 +1322,53 @@ function announcementButtonController(thesisId, container) {
     })
         .then((response) => {
             if (!response.ok) {
-                throw new Error('Failed to add announcement');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then((data) => {
+            if (!data.success) {
+                throw new Error('Server error: ' + data.message);
+            }
 
-            if (!data.success || data.data === false) {
+            const { announced, examinationExists } = data.data;
+
+            if (!examinationExists) {
                 const unannouncedHeader = document.createElement('h4');
                 unannouncedHeader.textContent = 'Δημιουργία Ανακοίνωσης';
                 unannouncedHeader.classList.add('text-center');
                 container.appendChild(unannouncedHeader);
+
                 const unannouncedText = document.createElement('p');
                 unannouncedText.textContent =
                     'Δεν έχουν καταχωρηθεί οι λεπτομέρειες της εξέτασης από τον φοιτητή. Δεν μπορείτε να δημιουργήσετε ανακοίνωση!';
                 container.appendChild(unannouncedText);
+
                 const announcementHr = document.createElement('hr');
                 container.appendChild(announcementHr);
                 return;
             }
-            const { announced } = data.data || {}; // Αν το data.data είναι false, το value θα είναι {}
 
             if (!announced) {
                 const announcementButton = createButton('create-announcement-button', 'Δημιουργία Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => addToAnnouncements(thesisId));
                 container.appendChild(announcementButton);
-                const announcementHr = document.createElement('hr');
-                container.appendChild(announcementHr);
             } else {
                 const showAnnouncementButton = createButton('show-announcement-button', 'Προβολή Ανακοίνωσης', ['btn', 'btn-warning', 'mb-3'], () => {
                     fetchAnnouncementDetails(thesisId);
                 });
                 container.appendChild(showAnnouncementButton);
-                const announcementHr = document.createElement('hr');
-                container.appendChild(announcementHr);
             }
+
+            const announcementHr = document.createElement('hr');
+            container.appendChild(announcementHr);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            // Εμφάνιση μηνύματος σφάλματος στον χρήστη, αν χρειάζεται
         });
 }
+
+
 //-------------- Function for Loading Announcement Data in Theses List -------------
 function fetchAnnouncementDetails(thesisId) {
     fetch(`/api/get-announcement-details?thesisId=${thesisId}`, {
