@@ -18,7 +18,7 @@ function loadAnnouncements(filters = {}) {
     })
         .then(response => response.json())
         .then(data => {
-            const announcements = data.announcements;
+            const announcements = data.data;
             console.log(announcements);
             if (!Array.isArray(announcements)) {
                 throw new Error('Το data.announcements δεν είναι πίνακας');
