@@ -795,7 +795,7 @@ function addStartThesisButton(thesisId, container) {
 
         const startNumberLabel = document.createElement('label');
         startNumberLabel.textContent = 'A/A ΓΣΤ έγκρισης διπλωματικής';
-        startNumberLabel.classList.add('form-label'); // Optional: for Bootstrap styling
+        startNumberLabel.classList.add('form-label');
         startThesisForm.appendChild(startNumberLabel);
 
         const startNumberInput = document.createElement('input');
@@ -807,7 +807,7 @@ function addStartThesisButton(thesisId, container) {
 
         const startDateLabel = document.createElement('label');
         startDateLabel.textContent = 'Ημερομηνία ΓΣΤ';
-        startDateLabel.classList.add('form-label'); // Optional: for Bootstrap styling
+        startDateLabel.classList.add('form-label');
         startThesisForm.appendChild(startDateLabel);
 
         const startDateInput = document.createElement('input');
