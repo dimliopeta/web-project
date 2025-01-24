@@ -2470,8 +2470,6 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     });
 });
 
-
-
 //-------------- API to Edit Student contact data via Button --------------
 app.post('/api/updateProfile', authenticateJWT, (req, res) => {
     const userId = req.user.userId;
@@ -2488,7 +2486,6 @@ app.post('/api/updateProfile', authenticateJWT, (req, res) => {
     const fields = Object.keys(updates).map((field) => `${field} = ?`).join(', ');
     const values = Object.values(updates);
 
-    // Add the User Id to the parameters
     values.push(userId);
 
     const query = `UPDATE students SET ${fields} WHERE id = ?`;
