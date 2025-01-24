@@ -277,7 +277,6 @@ function showInfoSection(thesis) {
             </div>
         `;
     }
-
 }
 //--------------- Function for filtering for Theses List ---------------
 let appliedFilters = { status: null, professor: '' };
@@ -299,7 +298,6 @@ function applyFilter(filterType, filterValue) {
                     console.error('Δεν βρέθηκε το στοιχείο #theses tbody στη σελίδα.');
                     return;
                 }
-
                 thesesTableBody.innerHTML = '';
 
                 data.thesesAll
@@ -307,7 +305,6 @@ function applyFilter(filterType, filterValue) {
                         const matchesStatus = !appliedFilters.status || thesis.status === appliedFilters.status;
                         const professorFullName = `${thesis.professor_surname || ''} ${thesis.professor_name || ''}`.toLowerCase();
                         const matchesProfessor = !appliedFilters.professor || professorFullName.includes(appliedFilters.professor);
-
                         return matchesStatus && matchesProfessor;
                     })
                     .forEach(thesis => {
@@ -500,7 +497,7 @@ document.querySelectorAll('.dropdown-item').forEach(item => {
 //--------------- Event Listener for Search Bar click on professor ---------------
 document.getElementById('administratorFilterProfessorSearch').addEventListener('input', event => {
     const searchValue = event.target.value.trim().toLowerCase(); // Normalize input for comparison
-    searchProfessors(searchValue); // Call function to search professors as the user types
+    searchProfessors(searchValue);
 });
 //--------------- Event Listener to trigger the search and load the results ---------------
 document.getElementById('administratorFilterProfessorSearch').addEventListener('input', (event) => {
