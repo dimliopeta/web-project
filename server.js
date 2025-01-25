@@ -13,7 +13,6 @@ const app = express();
 app.use('/files', express.static(path.join(__dirname, 'files')));
 const PORT = 3000;
 const SECRET_KEY = 'your-secret-key';
-
 //-------------- Check if the server is connected to the database --------------
 db.query('SELECT 1', (err, results) => {
     if (err) {
@@ -23,7 +22,6 @@ db.query('SELECT 1', (err, results) => {
         console.log('Database connected successfully!');
     }
 });
-
 //-------------- Set Index file and the public folder --------------
 app.use(express.static('public', {
     index: 'index.html'
@@ -54,7 +52,6 @@ const authenticateJWT = (req, res, next) => {
         next();
     });
 };
-
 const authorizeRole = (requiredRole) => {
     return (req, res, next) => {
         if (req.user.role !== requiredRole) {
@@ -63,7 +60,6 @@ const authorizeRole = (requiredRole) => {
         next();
     };
 };
-
 app.get('/api/check-auth', (req, res) => {
     const token = req.cookies?.token;
 
@@ -158,7 +154,7 @@ app.post('/login', (req, res) => {
         }
     });
 });
-// Route user to protected view page pased on role
+// User Routing based on Role
 app.get('/professor', authenticateJWT, authorizeRole('professor'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'professor.html'));
 });
@@ -1247,7 +1243,6 @@ app.put('/api/theses/update', authenticateJWT, uploadPDFOnly.single('pdf'), (req
 //----------------- API for Invitations associated with a specific professor-----------------
 app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
     const professorId = req.user.userId; // Get professor ID from the JWT
-    console.log('Professor ID:', professorId);
 
     if (!professorId) {
         return res.status(400).json({ success: false, message: 'Professor ID is missing.' });
@@ -1285,7 +1280,6 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
             console.error('Error fetching invitations:', err);
             return res.status(500).json({ success: false, message: 'Database error.' });
         }
-        console.log('Invitations from DB:', results);
         res.json({ success: true, invitations: results });
     });
 });
@@ -1321,7 +1315,6 @@ app.post('/api/invitation_cancel', authenticateJWT, (req, res) => {
                 return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
             }
             const thesis_id = thesisResults[0]?.thesis_id;
-            console.log('Cancelled Invitations from DB:', results);
             res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
         });
     });
@@ -1490,9 +1483,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
 
 //----------------- API for loading Past Invitations associated with a specific professor-----------------
 app.get('/api/invitation-history', authenticateJWT, (req, res) => {
-    console.log('API /api/invitation-history hit');
     const professorId = req.user.userId;
-    console.log('Professor ID from JWT:', req.user.userId);
 
     const query = ` 
             SELECT 
@@ -2025,8 +2016,6 @@ app.get('/api/get-all-announcements/', (req, res) => {
                 message: 'No announcements found.'
             });
         }
-        console.log("vag");
-        console.log(results);
         res.status(200).json({
             success: true,
             data: results
