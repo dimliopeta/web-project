@@ -1,13 +1,16 @@
 let currentPage = 1;
 const announcementsPerPage = 6;
-let hasMoreAnnouncements = true; // Μεταβλητή για να ελέγξουμε αν υπάρχουν περισσότερες ανακοινώσεις
+let totalAnnouncements = 9; // Αριθμός συνολικών ανακοινώσεων που υπάρχει στο σύστημα
+let hasMoreAnnouncements = true;
 
 function loadAnnouncements(filters = {}, exportFormat = null) {
     console.log("Φόρτωση ανακοινώσεων με φίλτρα:", filters);
-    // Επαναφορά της τρέχουσας σελίδας αν αλλάζουν τα φίλτρα
+
+    // Επαναφορά της τρέχουσας σελίδας όταν αλλάζουν τα φίλτρα
     if (filters.anDateFrom || filters.anDateTo || filters.examDateFrom || filters.examDateTo) {
         currentPage = 1;
     }
+
     fetch('/api/get-all-announcements/', {
         method: 'GET',
         headers: {
@@ -17,15 +20,16 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
     .then(response => response.json())
     .then(data => {
         const announcements = data.data;
-        console.log(announcements);
         if (!Array.isArray(announcements)) {
             throw new Error('Το data.announcements δεν είναι πίνακας');
         }
-        // Έλεγχος για τα φίλτρα
+
+        // Εφαρμογή φίλτρων
         let filteredAnnouncements = announcements;
-        if (Object.values(filters).some(filter => filter !== null)) {
+        if (Object.values(filters).some(filter => filter !== null && filter !== '')) {
             filteredAnnouncements = announcements.filter(announcement => {
                 let match = true;
+
                 // Φιλτράρισμα ημερομηνίας δημοσίευσης
                 if (filters.anDateFrom && new Date(announcement.an_date) < new Date(filters.anDateFrom)) {
                     match = false;
@@ -33,6 +37,7 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                 if (filters.anDateTo && new Date(announcement.an_date) > new Date(filters.anDateTo)) {
                     match = false;
                 }
+
                 // Φιλτράρισμα ημερομηνίας εξέτασης
                 if (filters.examDateFrom && new Date(announcement.exam_date) < new Date(filters.examDateFrom)) {
                     match = false;
@@ -40,111 +45,88 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                 if (filters.examDateTo && new Date(announcement.exam_date) > new Date(filters.examDateTo)) {
                     match = false;
                 }
+
                 return match;
             });
         }
+
+        console.log('Φιλτραρισμένες ανακοινώσεις:', filteredAnnouncements);
+
         // Υπολογισμός του τρέχοντος εύρους
         const startIndex = (currentPage - 1) * announcementsPerPage;
         const endIndex = startIndex + announcementsPerPage;
         const announcementsToLoad = filteredAnnouncements.slice(startIndex, endIndex);
+
+        console.log('Ανακοινώσεις προς φόρτωση:', announcementsToLoad);
+
         const container = document.getElementById('announcements-container');
-        
-        // Αν εξάγουμε σε JSON ή XML, δεν καθαρίζουμε το container
-        if (!exportFormat && currentPage === 1) {
-            container.innerHTML = ''; // Καθαρισμός μόνο στην πρώτη σελίδα
+
+        // Καθαρισμός του container μόνο στην πρώτη σελίδα
+        if (currentPage === 1) {
+            container.innerHTML = '';
         }
 
-        // Δημιουργία κάρτας για κάθε ανακοίνωση (μόνο αν δεν εξάγουμε σε JSON ή XML)
-        if (!exportFormat) {
-            announcementsToLoad.forEach(announcement => {
-                const card = `
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-lg border-0">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="card-title mb-0">Ανακοίνωση Παρουσίασης Διπλωματικής</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-subtitle mb-2 text-muted">${announcement.title}</h6>
-                            <p class="text-muted"><strong>Φοιτητής:</strong> ${announcement.student_name}</p>
-                            <p class="text-muted"><strong>Τριμελής Επιτροπή:</strong></p>
-                            <ul class="list-unstyled ps-3">
-                                <li>${announcement.professor_name}</li>
-                                <li>${announcement.committee_member1_name}</li>
-                                <li>${announcement.committee_member2_name}</li>
-                            </ul>
-                            <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcement.exam_date).toLocaleDateString()}</p>
-                            <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online' 
-                                ? 'Ηλεκτρονική' 
-                                : announcement.type_of_exam === 'in-person' 
-                                ? 'Δια ζώσης' 
-                                : 'Άγνωστος τύπος'}</p>
-                            <p class="text-muted"><strong>Τοποθεσία Εξέτασης:</strong> ${announcement.examination_location}</p>
-                        </div>
-                        <div class="card-footer bg-light d-flex justify-content-end">
-                            <p class="text-center">Ημερομηνία Δημοσίευσης Ανακοίνωσης: ${new Date(announcement.an_date).toLocaleDateString()}</p>
-                        </div>
+        // Δημιουργία κάρτας για κάθε ανακοίνωση
+        announcementsToLoad.forEach(announcement => {
+            const card = `
+            <div class="col-md-4">
+                <div class="card h-100 shadow-lg border-0">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Ανακοίνωση Παρουσίασης Διπλωματικής</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">${announcement.title}</h6>
+                        <p class="text-muted"><strong>Φοιτητής:</strong> ${announcement.student_name}</p>
+                        <p class="text-muted"><strong>Τριμελής Επιτροπή:</strong></p>
+                        <ul class="list-unstyled ps-3">
+                            <li>${announcement.professor_name}</li>
+                            <li>${announcement.committee_member1_name}</li>
+                            <li>${announcement.committee_member2_name}</li>
+                        </ul>
+                        <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcement.exam_date).toLocaleDateString()}</p>
+                        <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online' 
+                            ? 'Ηλεκτρονική' 
+                            : announcement.type_of_exam === 'in-person' 
+                            ? 'Δια ζώσης' 
+                            : 'Άγνωστος τύπος'}</p>
+                        <p class="text-muted"><strong>Τοποθεσία Εξέτασης:</strong> ${announcement.examination_location}</p>
+                    </div>
+                    <div class="card-footer bg-light d-flex justify-content-end">
+                        <p class="text-center">Ημερομηνία Δημοσίευσης Ανακοίνωσης: ${new Date(announcement.an_date).toLocaleDateString()}</p>
                     </div>
                 </div>
-                `;
-                container.innerHTML += card;
-            });
-        } else {
-            let output;
-            // Εξαγωγή σε JSON
-            if (exportFormat === 'json') {
-                output = JSON.stringify(filteredAnnouncements, null, 2);
-                downloadFile('announcements.json', output);
-            }
-            // Εξαγωγή σε XML
-            else if (exportFormat === 'xml') {
-                output = jsonToXml(filteredAnnouncements);
-                downloadFile('announcements.xml', output);
-            }
-        }
-        // Ενημέρωση της κατάστασης για περισσότερες σελίδες
+            </div>
+            `;
+            container.innerHTML += card;
+        });
+
+        // Ενημέρωση κατάστασης για περισσότερες σελίδες
         if (announcementsToLoad.length < announcementsPerPage) {
             hasMoreAnnouncements = false;
         } else {
             hasMoreAnnouncements = true;
             currentPage++;
         }
-    });
-}
 
-// Συνάρτηση για να κατεβάσεις το αρχείο
-function downloadFile(filename, content) {
-    const blob = new Blob([content], { type: 'application/octet-stream' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-}
-
-// Συνάρτηση για τη δημιουργία XML από JSON
-function jsonToXml(json) {
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<announcements>\n';
-    json.forEach(announcement => {
-        xml += '  <announcement>\n';
-        for (const key in announcement) {
-            xml += `    <${key}>${announcement[key]}</${key}>\n`;
+        // Αν υπάρχουν περισσότερες σελίδες, προσθέτουμε το κουμπί "Επόμενη Σελίδα"
+        if (hasMoreAnnouncements) {
+            const loadMoreButton = document.getElementById('load-more-button');
+            loadMoreButton.style.display = 'block'; // Εμφανίζουμε το κουμπί
+        } else {
+            const loadMoreButton = document.getElementById('load-more-button');
+            loadMoreButton.style.display = 'none'; // Κρύβουμε το κουμπί όταν δεν υπάρχουν περισσότερες σελίδες
         }
-        xml += '  </announcement>\n';
+    })
+    .catch(error => {
+        console.error('Σφάλμα κατά τη λήψη των ανακοινώσεων:', error);
     });
-    xml += '</announcements>';
-    return xml;
 }
 
-document.getElementById('export-json').addEventListener('click', () => {
-    loadAnnouncements({}, 'json');
-});
+function loadMoreAnnouncements() {
+    loadAnnouncements(); // Φορτώνουμε τις επόμενες ανακοινώσεις
+}
 
-document.getElementById('export-xml').addEventListener('click', () => {
-    loadAnnouncements({}, 'xml');
-});
-
-
-document.getElementById('apply-filters').addEventListener('click', () => {
-    console.log("2");
+function getFilterValues(){
     const anDateFrom = document.getElementById('filter-an-date-from').value;
     const anDateTo = document.getElementById('filter-an-date-to').value;
     const examDateFrom = document.getElementById('filter-exam-date-from').value;
@@ -156,12 +138,27 @@ document.getElementById('apply-filters').addEventListener('click', () => {
         examDateFrom,
         examDateTo
     };
+    return filters;
+}
+
+document.getElementById('export-json').addEventListener('click', () => {
+    const filters = getFilterValues();
+    loadAnnouncements( filters, 'json');
+});
+
+document.getElementById('export-xml').addEventListener('click', () => {
+    const filters = getFilterValues();
+    loadAnnouncements(filters, 'xml');
+});
+
+
+document.getElementById('apply-filters').addEventListener('click', () => {
+    const filters = getFilterValues();
 
     loadAnnouncements(filters);
 });
 
 document.getElementById('clear-filters').addEventListener('click', () => {
-    console.log("3");
     document.getElementById('filter-an-date-from').value = '';
     document.getElementById('filter-an-date-to').value = '';
     document.getElementById('filter-exam-date-from').value = '';

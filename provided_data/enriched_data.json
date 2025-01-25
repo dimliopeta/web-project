@@ -1214,7 +1214,7 @@
         "summary": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design is can be great so we have to do it.",
         "status": "completed",
         "pdf_path": null,
-        "start_date": null,
+        "start_date": "2023-11-10",
         "nimertis_link": null,
         "grading_enabled": true,
         "final_grade": "10"       
@@ -1417,7 +1417,7 @@
       {
         "thesis_id": "19",
         "professor_id": "3",
-        "student_id": 207,
+        "student_id": "4",
         "title": "Game Development with Unreal Engine",
         "summary": "Developing a 3D game using Unreal Engine and exploring advanced features.",
         "status": "to-be-reviewed",
@@ -1461,6 +1461,90 @@
     "member1_id": "3",
     "member2_id": "6"
   }
+  ], 
+  "examinations":[
+    {
+        "thesis_id":"1",
+        "date": "2024-04-15",
+        "type_of_exam":"online",
+        "location": "zoom"
+    },
+    {
+        "thesis_id": "2",
+        "date": "2024-12-10",
+        "type_of_exam": "in-person",
+        "location": "Δ2"
+    },
+    {
+        "thesis_id": "3",
+        "date": "2024-06-10",
+        "type_of_exam": "online",
+        "location": "zoomies"
+    },
+    {
+        "thesis_id": "4",
+        "date": "2024-03-09",
+        "type_of_exam": "in-person",
+        "location": "ΒΑ"
+    },
+    {
+        "thesis_id": "11",
+        "date": "2024-12-05",
+        "type_of_exam": "online",
+        "location": "zOOOm"
+    },
+    {
+        "thesis_id": "14",
+        "date": "2025-02-10",
+        "type_of_exam": "in-person",
+        "location": "Δ5"
+    },
+    {
+        "thesis_id": "15",
+        "date": "2024-10-01",
+        "type_of_exam": "online",
+        "location": "Zoooooom"
+    },
+    {
+        "thesis_id":"19",
+        "date": "2025-03-15",
+        "type_of_exam":"online",
+        "location": "zoom"
+    }
+  ], 
+  "announcements":[
+    {
+        "thesis_id": "1",
+        "announcement_date": "2024-04-08"
+    },
+    {
+        "thesis_id": "2",
+        "announcement_date": "2024-12-03"
+    },
+    {
+        "thesis_id": "3",
+        "announcement_date": "2024-06-03"
+    },
+    {
+        "thesis_id": "4",
+        "announcement_date": "2024-03-02"
+    },
+    {
+        "thesis_id": "11",
+        "announcement_date": "2024-11-30"
+    },
+    {
+        "thesis_id": "14",
+        "announcement_date": "2025-02-03"
+    },
+    {
+        "thesis_id": "15",
+        "announcement_date": "2024-09-26"
+    },
+    {
+        "thesis_id": "19",
+        "announcement_date": "2025-03-08"
+    }
   ],
   "administrators": [
     {
