@@ -129,7 +129,6 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
     });
 }
 
-
 function generateXmlFeed(filteredAnnouncements) {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<announcements>\n';
 
@@ -161,7 +160,6 @@ function generateXmlFeed(filteredAnnouncements) {
     a.click();
 }
 
-
 function generateJsonFeed(filteredAnnouncements) {
     const jsonFeed = filteredAnnouncements.map(announcement => ({
         title: announcement.title,
@@ -186,9 +184,6 @@ function generateJsonFeed(filteredAnnouncements) {
     a.click();
 }
 
-function loadMoreAnnouncements() {
-    loadAnnouncements(); // Φορτώνουμε τις επόμενες ανακοινώσεις
-}
 
 function getFilterValues(){
     const anDateFrom = document.getElementById('filter-an-date-from').value;
