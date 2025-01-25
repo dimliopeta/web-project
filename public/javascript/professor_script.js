@@ -1380,6 +1380,7 @@ function fetchAnnouncementDetails(thesisId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                console.log(data);
                 showAnnouncementModal(data.data);
             } else {
                 alert('Πρόβλημα στην ανάκτηση της ανακοίνωσης');
@@ -1434,7 +1435,7 @@ function showAnnouncementModal(announcementDetails) {
                                 <li>${announcementDetails.committee_member1_name}</li>
                                 <li>${announcementDetails.committee_member2_name}</li>
                             </ul>        
-        <p><strong>Ημερομηνία Εξέτασης:</strong> ${announcementDetails.exam_date}</p>
+        <p><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcementDetails.exam_date).toLocaleDateString()}</p>
         <p><strong>Τύπος Εξέτασης:</strong> ${announcementDetails.type_of_exam === 'online' ? 'Ηλεκτρονική' : announcementDetails.type_of_exam === 'in-person' ? 'Δια ζώσης' : 'Άγνωστος τύπος'}</p>
         <p><strong>Τοποθεσία Εξέτασης:</strong> ${announcementDetails.examination_location}</p>
     `;
@@ -1480,13 +1481,9 @@ function addToAnnouncements(thesisId) {
             return response.json();
         })
         .then((data) => {
-            if (data.success && data.data) {
-                if (announcementButton) {
-                    announcementButton.remove();
-                }
-                showAnnouncementModal(data.data);
-            } else {
-                alert(data.message);
+            if (data.success) {
+                resetInfoSection();
+                fetchAnnouncementDetails(thesisId);         
             }
         })
         .catch((error) => {

@@ -1221,7 +1221,7 @@
       },
       {
         "thesis_id": "4",
-        "professor_id": "1",
+        "professor_id": "2",
         "student_id": "12",
         "title": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms",
         "summary": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms can really help with computers so we have to understand it.",
@@ -1247,7 +1247,7 @@
       },
       {
         "thesis_id": "6",
-        "professor_id": "1",
+        "professor_id": "4",
         "student_id": null,
         "title": "Optimizing Neural Network Architectures for Edge Devices",
         "summary": "The increasing prevalence of IoT and edge devices has created a demand for efficient neural networks capable of running on hardware with limited computational resources. This thesis explores methods to optimize deep learning models, such as pruning, quantization, and architecture search. The study benchmarks these techniques on common edge devices and analyzes trade-offs between accuracy, latency, and energy consumption. Results demonstrate that using lightweight architectures like MobileNet combined with advanced quantization can deliver a significant performance boost while maintaining acceptable accuracy.",
@@ -1274,12 +1274,12 @@
       {
         "thesis_id": "8",
         "professor_id": "5",
-        "student_id": null,
+        "student_id": "15",
         "title": "Blockchain in Secure Voting Systems: A Practical Evaluation",
         "summary": "Blockchain technology offers promising solutions for secure and transparent voting systems. This thesis evaluates various blockchain platforms to assess their suitability for implementing secure e-voting protocols. By creating a prototype system, the research demonstrates how features like decentralized ledgers and cryptographic security can ensure voter anonymity and integrity. The study also addresses scalability and user accessibility, identifying key hurdles and proposing optimizations for wider adoption.",
-        "status": "unassigned",
+        "status": "active",
         "pdf_path": null,
-        "start_date": null,
+        "start_date": "2024-12-15",
         "nimertis_link": null,
         "grading_enabled": false,
         "final_grade": null       
@@ -1287,12 +1287,12 @@
       {
         "thesis_id": "9",
         "professor_id": "1",
-        "student_id": null,
+        "student_id": "19",
         "title": "Quantum Computing Algorithms for Cryptographic Challenges",
         "summary": "This thesis delves into the implications of quantum computing on modern cryptographic systems. It reviews quantum algorithms like Shor’s algorithm for factoring integers and Grover’s algorithm for search, analyzing their potential to break widely used encryption protocols. Additionally, it explores quantum-resistant algorithms that ensure security in a post-quantum world. The study emphasizes the urgency of transitioning to quantum-safe encryption standards for critical applications.",
-        "status": "unassigned",
+        "status": "active",
         "pdf_path": null,
-        "start_date": null,
+        "start_date": "2024-06-15",
         "nimertis_link": null,
         "grading_enabled": false,
         "final_grade": null       
@@ -1312,7 +1312,7 @@
       },
       {
         "thesis_id": "11",
-        "professor_id": "2",
+        "professor_id": "3",
         "student_id": "8",
         "title": "Big Data Analysis for Social Media Trends",
         "summary": "Analyzing social media trends using big data tools and techniques.",
@@ -1321,7 +1321,7 @@
         "start_date": "2024-06-15",
         "nimertis_link": null,
         "grading_enabled": true,
-        "final_grade": 8.50
+        "final_grade": "8.50"
       },
       {
         "thesis_id": "12",
@@ -1331,7 +1331,7 @@
         "summary": "Design and implementation of a user-friendly mobile app for online shopping.",
         "status": "assigned",
         "pdf_path": "/theses/2025/ecommerce_app.pdf",
-        "start_date": "2025-01-15",
+        "start_date": null,
         "nimertis_link": null,
         "grading_enabled": false,
         "final_grade": null
@@ -1364,7 +1364,7 @@
       },
       {
         "thesis_id": "15",
-        "professor_id": "4",
+        "professor_id": "3",
         "student_id": "7",
         "title": "Blockchain and Decentralized Finance",
         "summary": "Investigating the role of blockchain in enabling decentralized finance systems.",
@@ -1373,7 +1373,7 @@
         "start_date": "2024-05-01",
         "nimertis_link": "http://nimertis.example.com/2024/blockchain_defi",
         "grading_enabled": true,
-        "final_grade": 9.75
+        "final_grade": "9.75"
       },
       {
         "thesis_id": "16",
@@ -1382,11 +1382,11 @@
         "title": "Augmented Reality in Education",
         "summary": "Design and development of AR tools for interactive learning experiences.",
         "status": "cancelled",
-        "pdf_path": null,
+        "pdf_path": "",
         "start_date": "2024-03-01",
         "nimertis_link": null,
         "grading_enabled": false,
-        "final_grade": null
+        "final_grade": "10"
       },
       {
         "thesis_id": "17",
@@ -1403,7 +1403,7 @@
       },
       {
         "thesis_id": "18",
-        "professor_id": "8",
+        "professor_id": "3",
         "student_id": null,
         "title": "Robotics in Industrial Automation",
         "summary": "Exploring the integration of robotics in automating industrial processes.",
@@ -1424,9 +1424,43 @@
         "pdf_path": "/theses/2025/unreal_engine_game.pdf",
         "start_date": "2024-10-20",
         "nimertis_link": "http://nimertis.example.com/2025/unreal_engine_game",
-        "grading_enabled": true,
+        "grading_enabled": "false",
         "final_grade": null
       }
+  ],
+  "committees":[{
+    "thesis_id": "1",
+    "member1_id": "2",
+    "member2_id": "4"
+  },
+  {
+    "thesis_id": "2",
+    "member1_id": "3",
+    "member2_id": "5"
+  },
+  {
+    "thesis_id": "3",
+    "member1_id": "1",
+    "member2_id": "5"
+  },
+  {
+    "thesis_id": "4",
+    "member1_id": "3",
+    "member2_id": "1"
+  },{
+    "thesis_id": "11",
+    "member1_id": "2",
+    "member2_id": "4"
+  },{
+    "thesis_id": "15",
+    "member1_id": "2",
+    "member2_id": "1"
+  },
+  {
+    "thesis_id": "8",
+    "member1_id": "3",
+    "member2_id": "6"
+  }
   ],
   "administrators": [
     {

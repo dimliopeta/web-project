@@ -157,6 +157,72 @@ document.getElementById('clear-filters').addEventListener('click', () => {
     loadAnnouncements(filters); // Επαναφόρτωση χωρίς φίλτρα
 });
 
+document.getElementById('export-csv').addEventListener('click', () => {
+    const token = localStorage.getItem('token');
+    fetch('/api/theses', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const rows = data.theses;
+                if (rows.length === 0) {
+                    alert('Δεν υπάρχουν δεδομένα για εξαγωγή.');
+                    return;
+                }
+                const headers = Object.keys(rows[0]).map(header => `"${header}"`).join(',');
+                const csvContent = rows.map(row => {
+                    return Object.values(row).map(value => `"${value || ''}"`).join(',');
+                });
+
+                const csvBlob = new Blob(
+                    [`\uFEFF${headers}\n${csvContent.join('\n')}`],
+                    { type: 'text/csv;charset=utf-8;' }
+                );
+
+                const url = URL.createObjectURL(csvBlob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'theses.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                console.error('Σφάλμα API:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα φόρτωσης:', err));
+});
+//-------------- Event Listener for Export to JSON button in Theses List  ------------- 
+document.getElementById('export-json').addEventListener('click', () => {
+    const token = localStorage.getItem('token');
+    fetch('/api/theses', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const rows = data.theses;
+                if (rows.length === 0) {
+                    alert('Δεν υπάρχουν δεδομένα για εξαγωγή.');
+                    return;
+                }
+                const jsonBlob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json;charset=utf-8;' });
+
+                const url = URL.createObjectURL(jsonBlob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'theses.json');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                console.error('Σφάλμα API:', data.message);
+            }
+        })
+        .catch(err => console.error('Σφάλμα φόρτωσης:', err));
+});
+
 // Αρχική φόρτωση ανακοινώσεων
 loadAnnouncements();
 

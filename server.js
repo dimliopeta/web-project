@@ -1926,9 +1926,7 @@ app.post('/api/add-announcement', (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Announcement added successfully.',
-            data: announcementDetails,
-        });
+            message: 'Announcement added successfully.'});
     });
 });
 
