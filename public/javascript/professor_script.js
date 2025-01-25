@@ -428,6 +428,9 @@ function showInfoSection(thesis) {
         case 'active':
             status = 'Ενεργή';
             break;
+        case 'cancelled':
+            status = 'Ακυρωμένη';
+            break;
         default:
             status = 'Άγνωστη Κατάσταση';
     }
@@ -472,7 +475,6 @@ function showInfoSection(thesis) {
         `;
         infoSection.appendChild(committeeSection);
     }
-
     const statusSection = document.createElement('section');
     statusSection.innerHTML = `<h4 class="text-center">Διαχείριση Διπλωματικής</h4>`;
 
@@ -480,17 +482,18 @@ function showInfoSection(thesis) {
         case 'assigned':
             addAssignedSection(thesis, statusSection);
             break;
-
         case "active":
             addActiveSection(thesis, statusSection);
             break;
-
         case "to-be-reviewed":
             addToBeReviewedSection(thesis, statusSection);
             break;
         case "cancelled":
+            const configTitleElement = statusSection.querySelector('h4');
+            configTitleElement.remove();
             addCanceledSection(thesis, statusSection);
             break;
+
         case "completed":
             addCompletedSection(thesis, statusSection);
             break;
@@ -603,6 +606,7 @@ function addCanceledSection(thesis, container) {
     const cancelledSection = document.createElement('section');
 
     const cancelledTitle = document.createElement('h4');
+    cancelledTitle.classList.add('text-center');
     cancelledTitle.textContent = 'Ακυρωμένη Διπλωματική';
     cancelledSection.appendChild(cancelledTitle);
 
@@ -638,9 +642,6 @@ function addCanceledSection(thesis, container) {
             console.error('Σφάλμα κατά την ανάκτηση των λεπτομερειών ακύρωσης:', error);
             detailsParagraph.innerHTML = '<p class="text-danger">Σφάλμα κατά τη φόρτωση λεπτομερειών.</p>';
         });
-
-    const cancelledHr = document.createElement('hr');
-    cancelledSection.appendChild(cancelledHr);
     container.appendChild(cancelledSection);
 }
 
@@ -858,11 +859,14 @@ function addCompletedSection(thesis, container) {
 
     const praktikoButton = createButton('configurationCompletedFilesExamReportButton', 'Πρακτικό Εξέτασης', ['btn', 'btn-outline-primary', 'btn-sm', 'float-start'], () => {
         const examReportSection = document.getElementById('examReportHTMLSection');
+
+        if (examReportSection.style.display === 'none') {
+            loadExamReportData(thesis.thesis_id);
+            examReportSection.style.display = 'block';
+
+        }else {
         examReportSection.style.display = 'none';
-
-        loadExamReportData(thesis.thesis_id);
-
-        examReportSection.style.display = 'block';
+        }
     });
 
     const nimertisLink = thesis.nimertis_link;
@@ -1901,6 +1905,9 @@ function applyFilter(filterType, filterValue) {
                                 break;
                             case 'active':
                                 status = 'Ενεργή';
+                                break;
+                            case 'cancelled':
+                                status = 'Ακυρωμένη';
                                 break;
                             default:
                                 status = 'Άγνωστη Κατάσταση';
