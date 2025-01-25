@@ -16,58 +16,59 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        const announcements = data.data;
-        if (!Array.isArray(announcements)) {
-            throw new Error('Το data.announcements δεν είναι πίνακας');
-        }
+        .then(response => response.json())
+        .then(data => {
+            const announcements = data.data;
+            if (!Array.isArray(announcements)) {
+                throw new Error('Το data.announcements δεν είναι πίνακας');
+            }
 
-        // Εφαρμογή φίλτρων
-        let filteredAnnouncements = announcements;
-        if (Object.values(filters).some(filter => filter !== null && filter !== '')) {
-            filteredAnnouncements = announcements.filter(announcement => {
-                let match = true;
+            // Εφαρμογή φίλτρων
+            let filteredAnnouncements = announcements;
+            if (Object.values(filters).some(filter => filter !== null && filter !== '')) {
+                filteredAnnouncements = announcements.filter(announcement => {
+                    let match = true;
 
-                // Φιλτράρισμα ημερομηνίας δημοσίευσης
-                if (filters.anDateFrom && new Date(announcement.an_date) < new Date(filters.anDateFrom)) {
-                    match = false;
-                }
-                if (filters.anDateTo && new Date(announcement.an_date) > new Date(filters.anDateTo)) {
-                    match = false;
-                }
+                    // Φιλτράρισμα ημερομηνίας δημοσίευσης
+                    if (filters.anDateFrom && new Date(announcement.an_date) < new Date(filters.anDateFrom)) {
+                        match = false;
+                    }
+                    if (filters.anDateTo && new Date(announcement.an_date) > new Date(filters.anDateTo)) {
+                        match = false;
+                    }
 
-                // Φιλτράρισμα ημερομηνίας εξέτασης
-                if (filters.examDateFrom && new Date(announcement.exam_date) < new Date(filters.examDateFrom)) {
-                    match = false;
-                }
-                if (filters.examDateTo && new Date(announcement.exam_date) > new Date(filters.examDateTo)) {
-                    match = false;
-                }
+                    // Φιλτράρισμα ημερομηνίας εξέτασης
+                    if (filters.examDateFrom && new Date(announcement.exam_date) < new Date(filters.examDateFrom)) {
+                        match = false;
+                    }
+                    if (filters.examDateTo && new Date(announcement.exam_date) > new Date(filters.examDateTo)) {
+                        match = false;
+                    }
 
-                return match;
-            });
-        }
+                    return match;
+                });
+            }
 
-        console.log('Φιλτραρισμένες ανακοινώσεις:', filteredAnnouncements);
+            console.log('Φιλτραρισμένες ανακοινώσεις:', filteredAnnouncements);
 
-        // Υπολογισμός του τρέχοντος εύρους
-        const startIndex = (currentPage - 1) * announcementsPerPage;
-        const endIndex = startIndex + announcementsPerPage;
-        const announcementsToLoad = filteredAnnouncements.slice(startIndex, endIndex);
+            // Υπολογισμός του τρέχοντος εύρους
+            const startIndex = (currentPage - 1) * announcementsPerPage;
+            const endIndex = startIndex + announcementsPerPage;
+            const announcementsToLoad = filteredAnnouncements.slice(startIndex, endIndex);
 
-        console.log('Ανακοινώσεις προς φόρτωση:', announcementsToLoad);
+            console.log('Ανακοινώσεις προς φόρτωση:', announcementsToLoad);
 
-        const container = document.getElementById('announcements-container');
+            const container = document.getElementById('announcements-container');
 
-        // Καθαρισμός του container μόνο στην πρώτη σελίδα
-        if (currentPage === 1) {
-            container.innerHTML = '';
-        }
+            // Καθαρισμός του container μόνο στην πρώτη σελίδα
+            if (currentPage === 1) {
+                container.innerHTML = '';
+            }
 
-        // Δημιουργία κάρτας για κάθε ανακοίνωση
-        announcementsToLoad.forEach(announcement => {
-            const card = `
+            if (exportFormat === null) {
+                // Δημιουργία κάρτας για κάθε ανακοίνωση
+                announcementsToLoad.forEach(announcement => {
+                    const card = `
             <div class="col-md-4">
                 <div class="card h-100 shadow-lg border-0">
                     <div class="card-header bg-primary text-white">
@@ -83,11 +84,11 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                             <li>${announcement.committee_member2_name}</li>
                         </ul>
                         <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcement.exam_date).toLocaleDateString()}</p>
-                        <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online' 
-                            ? 'Ηλεκτρονική' 
-                            : announcement.type_of_exam === 'in-person' 
-                            ? 'Δια ζώσης' 
-                            : 'Άγνωστος τύπος'}</p>
+                        <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online'
+                            ? 'Ηλεκτρονική'
+                            : announcement.type_of_exam === 'in-person'
+                                ? 'Δια ζώσης'
+                                : 'Άγνωστος τύπος'}</p>
                         <p class="text-muted"><strong>Τοποθεσία Εξέτασης:</strong> ${announcement.examination_location}</p>
                     </div>
                     <div class="card-footer bg-light d-flex justify-content-end">
@@ -96,37 +97,40 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                 </div>
             </div>
             `;
-            container.innerHTML += card;
+                    container.innerHTML += card;
+                });
+            }
+
+            if (exportFormat === 'xml') {
+                generateXmlFeed(filteredAnnouncements);
+            }
+
+            if (exportFormat === 'json') {
+                generateJsonFeed(filteredAnnouncements);
+            }
+
+            // Ενημέρωση κατάστασης για περισσότερες σελίδες
+            if (exportFormat === null) {
+                if (announcementsToLoad.length < announcementsPerPage) {
+                    hasMoreAnnouncements = false;
+                } else {
+                    hasMoreAnnouncements = true;
+                    currentPage++;
+                }
+            }
+
+            // Αν υπάρχουν περισσότερες σελίδες, προσθέτουμε το κουμπί "Επόμενη Σελίδα"
+            if (hasMoreAnnouncements) {
+                const loadMoreButton = document.getElementById('load-more-button');
+                loadMoreButton.style.display = 'block'; // Εμφανίζουμε το κουμπί
+            } else {
+                const loadMoreButton = document.getElementById('load-more-button');
+                loadMoreButton.style.display = 'none'; // Κρύβουμε το κουμπί όταν δεν υπάρχουν περισσότερες σελίδες
+            }
+        })
+        .catch(error => {
+            console.error('Σφάλμα κατά τη λήψη των ανακοινώσεων:', error);
         });
-
-        if (exportFormat === 'xml') {
-            generateXmlFeed(filteredAnnouncements); // Δημιουργία του XML
-        }
-
-        if (exportFormat === 'json') {
-            generateJsonFeed(filteredAnnouncements); // Δημιουργία του JSON
-        }    
-
-        // Ενημέρωση κατάστασης για περισσότερες σελίδες
-        if (announcementsToLoad.length < announcementsPerPage) {
-            hasMoreAnnouncements = false;
-        } else {
-            hasMoreAnnouncements = true;
-            currentPage++;
-        }
-
-        // Αν υπάρχουν περισσότερες σελίδες, προσθέτουμε το κουμπί "Επόμενη Σελίδα"
-        if (hasMoreAnnouncements) {
-            const loadMoreButton = document.getElementById('load-more-button');
-            loadMoreButton.style.display = 'block'; // Εμφανίζουμε το κουμπί
-        } else {
-            const loadMoreButton = document.getElementById('load-more-button');
-            loadMoreButton.style.display = 'none'; // Κρύβουμε το κουμπί όταν δεν υπάρχουν περισσότερες σελίδες
-        }
-    })
-    .catch(error => {
-        console.error('Σφάλμα κατά τη λήψη των ανακοινώσεων:', error);
-    });
 }
 
 function generateXmlFeed(filteredAnnouncements) {
@@ -177,7 +181,7 @@ function generateJsonFeed(filteredAnnouncements) {
 
     const jsonBlob = new Blob([JSON.stringify(jsonFeed, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(jsonBlob);
-    
+
     const a = document.createElement('a');
     a.href = url;
     a.download = 'announcements.json';
@@ -185,7 +189,7 @@ function generateJsonFeed(filteredAnnouncements) {
 }
 
 
-function getFilterValues(){
+function getFilterValues() {
     const anDateFrom = document.getElementById('filter-an-date-from').value;
     const anDateTo = document.getElementById('filter-an-date-to').value;
     const examDateFrom = document.getElementById('filter-exam-date-from').value;
@@ -202,7 +206,7 @@ function getFilterValues(){
 
 document.getElementById('export-json').addEventListener('click', () => {
     const filters = getFilterValues();
-    loadAnnouncements( filters, 'json');
+    loadAnnouncements(filters, 'json');
 });
 
 document.getElementById('export-xml').addEventListener('click', () => {

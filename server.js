@@ -1552,7 +1552,7 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
 //-----------------API for loading all the notes of a professor associated with a specific thesis-------
 app.post('/api/get-notes', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
-    const professor_id = req.user.userId; // Από το JWT payload
+    const professor_id = req.user.userId;
 
     if (!thesis_id || !professor_id) {
         return res.status(400).json({ success: false, message: 'Απαιτούνται τα thesis_id και professor_id.' });
@@ -1595,7 +1595,7 @@ app.post('/api/add-note', authenticateJWT, (req, res) => {
 
 //-----------------API for loading the info of a cancelled thesis-------
 app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
-    const { thesis_id } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
+    const { thesis_id } = req.body;
 
     if (!thesis_id) {
         return res.status(400).json({ success: false, message: 'Απαιτείται το thesis_id.' });
