@@ -13,8 +13,6 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
         const targetSection = document.getElementById(targetId);
         if (targetSection) {
             targetSection.style.display = 'block';
-
-
         }
         document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
             link.classList.remove('active');
@@ -1251,4 +1249,15 @@ document.addEventListener('DOMContentLoaded', () => {
     loadExamReportData();
     loadLogsData();
 });
+
+// responsive design για κινητα - student menu margins
+// Cache πραγματα
+// Labels στης δημητρας
+// γραμματεια λογαριασμος
+// γραμματεια ναβμαπρ
+//logout γραμματεια
+// Σιερα φιλτρων προφεσορ
+// 300 χαρακτηρες τα σχολια
+// 2 ετη και μετα ακυρωση
+// λογος απο διδασκοντα αυτοματα
 
