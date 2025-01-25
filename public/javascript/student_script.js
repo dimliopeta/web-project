@@ -3,13 +3,10 @@
 document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
-
-        // Απόκρυψη όλων των sections
         document.querySelectorAll('.content-section').forEach(section => {
             section.style.display = 'none';
         });
 
-        // Εμφάνιση του ενεργού section
         const targetId = this.getAttribute('href')
             ? this.getAttribute('href').substring(1)
             : this.getAttribute('data-target');
@@ -19,14 +16,11 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
 
 
         }
-
-        // Set active tab
         document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
             link.classList.remove('active');
         });
         this.classList.add('active');
 
-        // Set active tab for when buttons are used to change tabs
         const correspondingTab = document.querySelector(`.nav-link[href='#${targetId}']`);
         if (correspondingTab) {
             correspondingTab.classList.add('active');
@@ -34,22 +28,28 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     });
 });
 console.log('Hello fellow web user. Congratulations for finding this message! You win a mediocre sense of accomplishment.')
-
 //--------------- Logout Function ---------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
-    event.preventDefault(); // Αποφυγή της προεπιλεγμένης συμπεριφοράς του link
+    event.preventDefault();
     fetch('/logout', {
         method: 'POST',
-        credentials: 'include' // Περιλαμβάνει cookies
+        credentials: 'include'
     })
         .then(response => {
             if (response.ok) {
-                window.location.href = '/'; // Ανακατεύθυνση στο index
+                window.location.href = '/';
             } else {
                 alert('Η αποσύνδεση απέτυχε.');
             }
         })
         .catch(err => console.error('Error:', err));
+});
+//------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------
+window.addEventListener('DOMContentLoaded', () => {
+    const defaultTab = document.querySelector('a[href="#dashboard"]');
+    if (defaultTab) {
+        defaultTab.click();
+    }
 });
 
 
@@ -58,7 +58,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
 //------------------------------ Functions to Load Thesis and helper functions ------------------------------
 //------------------------------ Load Thesis Function ------------------------------
 function loadStudentThesis() {
-    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
+    const token = localStorage.getItem('token');
 
     fetch('/api/theses', {
         method: 'GET',
@@ -74,7 +74,7 @@ function loadStudentThesis() {
         })
         .then(data => {
             if (data.success && data.theses.length > 0) {
-                const thesis = data.theses[0]; // Assuming one thesis per student
+                const thesis = data.theses[0];
 
                 let status;
                 switch (thesis.status) {
@@ -95,6 +95,10 @@ function loadStudentThesis() {
 
                 }
                 // Update the data-fields in the dashboard
+                const finalGradeSupervisor = (thesis.supervisor_grade1 * 0.6 + thesis.supervisor_grade2 * 0.15 + thesis.supervisor_grade3 * 0.15 + thesis.supervisor_grade4 * 0.1);
+                const finalGradeCommittee1 = (thesis.committee_member1_grade1 * 0.6 + thesis.committee_member1_grade2 * 0.15 + thesis.committee_member1_grade3 * 0.15 + thesis.committee_member1_grade4 * 0.1);
+                const finalGradeCommittee2 = (thesis.committee_member2_grade1 * 0.6 + thesis.committee_member2_grade2 * 0.15 + thesis.committee_member2_grade3 * 0.15 + thesis.committee_member2_grade4 * 0.1);
+
                 updateDataField('thesis_status', status); // Declared above, used in switch
                 updateDataField('thesis_title', thesis.title);
                 updateDataField('thesis_summary', thesis.summary);
@@ -108,18 +112,22 @@ function loadStudentThesis() {
                 updateDataField('committee_member1_surname', thesis.committee_member1_surname || ' ');
                 updateDataField('committee_member2_name', thesis.committee_member2_name || 'Δεν έχει οριστεί');
                 updateDataField('committee_member2_surname', thesis.committee_member2_surname || ' ');
-                updateDataField('supervisor_grade', thesis.supervisor_grade || ' ');
-                updateDataField('committee_member1_grade', thesis.committee_member1_grade || ' ');
-                updateDataField('committee_member2_grade', thesis.committee_member2_grade || ' ');
+                updateDataField('supervisor_grade', finalGradeSupervisor || ' ');
+                updateDataField('committee_member1_grade', finalGradeCommittee1 || ' ');
+                updateDataField('committee_member2_grade', finalGradeCommittee2 || ' ');
 
-                const finalGrade = calculateFinalGrade(thesis.supervisor_grade, thesis.committee_member1_grade, thesis.committee_member2_grade);
-                updateDataField('final_grade', finalGrade);
+
+                updateDataField('final_grade', thesis.final_grade);
 
                 // Display thesis start date, duration, end date based on status
                 const dashboardDuration = document.querySelector('[data-field="dashboardDuration"]');
                 const dashboardStartDate = document.querySelector('[data-field="dashboardStartDate"]');
                 const dashboardExamDate = document.querySelector('[data-field="dashboardExamDate"]');
                 const dashboardEndDate = document.querySelector('[data-field="dashboardEndDate"]');
+
+                dashboardDuration.style.display = 'inline';
+                dashboardExamDate.style.display = 'none';
+                dashboardEndDate.style.display = 'none';
 
                 if (thesis.start_date && thesis.status === "active") {
                     dashboardDuration.style.display = 'inline';
@@ -142,7 +150,6 @@ function loadStudentThesis() {
                     dashboardEndDate.style.display = 'none';
                 }
 
-                // Handle the PDF download button
                 const pdfButton = document.querySelector('#dashboard [data-field="pdf_button"]');
                 if (thesis.pdf_path) {
                     pdfButton.addEventListener('click', () => {
@@ -153,8 +160,7 @@ function loadStudentThesis() {
                         alert('Δεν υπάρχει PDF διαθέσιμο γι αυτή τη διπλωματική.');
                     });
 
-                    //pdfButton.disabled = true; // Optionally disable the button if no PDF exists
-                    //pdfButton.style.display = 'none'; // Optionally hide the button if no PDF exists
+                    pdfButton.disabled = true; // Disable the button if no PDF exists
                 }
 
                 // Hide the Committee Invitation button in thesis Management if committee is full
@@ -176,29 +182,15 @@ function loadStudentThesis() {
         });
 
 }
-//---------------Helper function add 2 strings together (Name + Surname)
+//--------------- Helper function add 2 strings together (Name + Surname)
 function nameSurname(name, surname) {
     return name + ' ' + surname;
 }
-//---------------Helper function to sort alphabetically 3 inputs
+//--------------- Helper function to sort alphabetically 3 inputs
 function sortThreeStrings(input1, input2, input3) {
     const inputs = [input1, input2, input3];
     inputs.sort();
     return inputs;
-}
-//---------------Helper function to calculate the Final Grade (average of 3 committee members' grades)
-function calculateFinalGrade(supervisorGrade, committeeMember1Grade, committeeMember2Grade) {
-    const grade1 = parseFloat(committeeMember1Grade) || null;
-    const grade2 = parseFloat(committeeMember2Grade) || null;
-    const grade3 = parseFloat(supervisorGrade) || null;
-
-    if (grade1 === null || grade2 === null || grade3 === null) {
-        return 'Η βαθμολόγιση δεν έχει ολοκληρωθεί.';
-    }
-
-    const totalGrade = grade1 + grade2 + grade3;
-    const finalGrade = totalGrade / 3;
-    return finalGrade.toFixed(2);
 }
 //---------------Helper function to calculate the thesis duration in months and days
 function calculateDuration(startDate) {
@@ -213,14 +205,14 @@ function calculateDuration(startDate) {
         totalMonths--; // Subtract one month
         const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
         days += previousMonthDays;
-    }
+    } 
     const monthText = totalMonths > 0
-        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
-        : '';
+    ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+    : '0 μήνες';
 
-    const dayText = days > 0
-        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
-        : '';
+const dayText = days > 0
+    ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+    : '0 μέρες';
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
@@ -228,7 +220,6 @@ function calculateDuration(startDate) {
 function updateDataField(dataField, value, errorMessage = 'Error - no data') {
     const elements = document.querySelectorAll(`[data-field="${dataField}"]`);
     elements.forEach(element => {
-        // Ensure valid strings (e.g., '0 ημέρες') are not replaced by errorMessage
         element.textContent = (value !== undefined && value !== null && value !== '') ? value : errorMessage;
     });
 }
@@ -256,8 +247,6 @@ function setupThesisManagement() {
         .then(data => {
             if (data.success && data.theses.length > 0) {
                 const thesis = data.theses[0];
-
-                // If Nimertis Link exists in the thesis table, then 
                 const nimertisLinkButton = document.getElementById('configurationCompletedFilesNimertisLink');
                 if (thesis.nimertis_link) {
                     nimertisLinkButton.addEventListener('click', () => {
@@ -270,7 +259,8 @@ function setupThesisManagement() {
                     });
 
                 }
-
+                console.log(thesis);
+                console.log(thesis.thesis_id);
                 setupEventListeners(thesis);
                 fetchAndDisplayAttachments(thesis);
                 fetchAndDisplayNimertisLink(thesis);
@@ -358,7 +348,7 @@ function loadSectionsBasedOnStatus() {
                         gradesSection.style.display = "none";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "none";
-                        managementSection.style.display = "block";
+                        managementSection.style.display = "none";
                         datesSection.style.display = "block";
                         break;
                     case 'to-be-reviewed':
@@ -372,7 +362,7 @@ function loadSectionsBasedOnStatus() {
                         managementSection.style.display = "block";
                         datesSection.style.display = "block";
 
-                        if(thesis.committee_member1_grade != null && thesis.committee_member2_grade != null && thesis.supervisor_grade != null){
+                        if (thesis.committee_member1_finalized === true && thesis.committee_member2_finalized === true && thesis.supervisor_finalized === true) {
                             completedFilesSection.style.display = "block";
                             document.getElementById("configurationCompletedFilesNimertisLink").style.display = 'none';
                         }
@@ -400,7 +390,6 @@ function loadSectionsBasedOnStatus() {
                         datesSection.style.display = "none";
                         break;
                 }
-
 
             } else if (data.success && data.theses.length == 0) {
                 console.error('No thesis found for this student');
@@ -446,11 +435,11 @@ document.querySelector('#search-professor').addEventListener('input', function (
         return;
     }
 
-    fetch(`/api/professor_search_by_student?input=${encodeURIComponent(filter)}`)
+    fetch(`/api/professor-search?input=${encodeURIComponent(filter)}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                professorList.innerHTML = ''; // Clear list
+                professorList.innerHTML = '';
 
                 data.professors.forEach(professor => {
                     const listItem = document.createElement('li');
@@ -489,11 +478,10 @@ document.querySelector('#professor-list').addEventListener('click', function (ev
 });
 //--------------- EventListener for changing chosen professor ---------------
 document.getElementById('changeProfessorButton').addEventListener('click', function () {
-    //Show the list again, hide the chosen professor section
     document.getElementById('professorListWrapper').style.display = 'block';
     document.getElementById('chosenProfessor').style.display = 'none';
 
-    document.getElementById('search-professor').value = ''; // Clears
+    document.getElementById('search-professor').value = '';
     document.getElementById('professor-list').innerHTML = '';
     document.getElementById('professorNameInput').value = '';
 
@@ -502,7 +490,6 @@ document.getElementById('changeProfessorButton').addEventListener('click', funct
 //--------------- Get the "Πρόσκληση" button to open the professor Search Bar
 document.querySelectorAll('.inviteCommitteeButton').forEach(button => {
     button.addEventListener('click', function () {
-        // Show the professor search bar
         document.getElementById('professorSearchBar').style.display = 'block';
     });
 });
@@ -551,12 +538,12 @@ function loadThesisInvitations(thesis_id) {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ thesis_id: thesis_id }) // Send thesis_id in the request body
+        body: JSON.stringify({ thesis_id: thesis_id })
     })
         .then(response => response.json())
         .then(data => {
             const container = document.querySelector('#invitationCardSection .row');
-            container.innerHTML = ''; // Clear previous content
+            container.innerHTML = '';
 
             if (data.success && data.invitations.length > 0) {
                 document.querySelector('#invitationCardSection').style.display = 'block';
@@ -564,11 +551,11 @@ function loadThesisInvitations(thesis_id) {
                 data.invitations.forEach(invitation => {
                     const card = document.createElement('div');
                     card.classList.add('col-lg-6', 'mb-3');
-                    // Set up the status message
+
                     const statusText = invitation.invitation_status === 'pending' ? 'Εκκρεμής'
                         : invitation.invitation_status === 'accepted' ? 'Αποδεκτή'
                             : 'Ακυρώθηκε';
-                    // Set up the status message color
+
                     const statusColor = invitation.invitation_status === 'accepted' ? 'text-success'
                         : invitation.invitation_status === 'cancelled' ? 'text-danger'
                             : '';
@@ -655,7 +642,7 @@ function setupEventListeners(thesis) {
         const configurationUploadLinkInputBox = document.getElementById('configurationUploadLinkInputBox').value;
         if (configurationUploadLinkInputBox) {
             if (thesis) {
-                uploadLink(configurationUploadLinkInputBox, thesis);  // Pass thesis to the uploadLink function
+                uploadLink(configurationUploadLinkInputBox, thesis); 
             } else {
                 alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
@@ -709,13 +696,13 @@ function uploadFile(fileInput, thesis) {
     fetch('/api/upload_attachment', {
         method: 'POST',
         body: formData,         //Send as formData since its a file
-        credentials: 'include', // Ensure the cookie is sent with the request
+        credentials: 'include',
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('Το αρχείο αναρτήθηκε. Αν υπήρχε προηγούμενο αρχείο έχει αντικατασταθεί.');
-                fetchAndDisplayAttachments(thesis); // Refresh the displayed file on every upload
+                fetchAndDisplayAttachments(thesis);
             } else {
                 alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
@@ -728,14 +715,14 @@ function uploadFile(fileInput, thesis) {
 //--------------- Link upload
 function uploadLink(link, thesis) {
     const formData = new FormData();
-    formData.append('type', 'link'); // Specify that this is a link upload
+    formData.append('type', 'link');
     formData.append('link', link);
     formData.append('thesis_id', thesis.thesis_id);
 
     fetch('/api/upload_attachment', {
         method: 'POST',
         body: formData,
-        credentials: 'include', // Ensure the cookie is sent with the request
+        credentials: 'include',
     })
         .then(response => response.json())
         .then(data => {
@@ -767,7 +754,7 @@ function uploadNimertisLink(link, thesis) {
     fetch('/api/update_nimertis_link', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',  // Send as JSON
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
         credentials: 'include',
@@ -776,7 +763,7 @@ function uploadNimertisLink(link, thesis) {
         .then(data => {
             if (data.success) {
                 thesis.nimertis_link = link;
-                fetchAndDisplayNimertisLink(thesis); // Refresh the displayed Nimertis link
+                fetchAndDisplayNimertisLink(thesis);
             } else {
                 alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
@@ -795,20 +782,18 @@ function uploadExaminationDetails({ examDate, typeOfExamProper, examLocation, th
         location: examLocation,
     };
 
-
     fetch('/api/examinations_upload', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
-        credentials: 'include', // Ensure cookies are sent
+        credentials: 'include',
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 fetchAndDisplayExaminations(thesis); // Refresh exam details display
-                //document.getElementById('examDateSection').style.display = 'block';
             } else {
                 alert('Παρουσιάστηκε πρόβλημα στην ανάρτηση: ' + data.message);
             }
@@ -837,7 +822,7 @@ function addLinkToList(link) {
 function fetchAndDisplayAttachments(thesis) {
     const token = localStorage.getItem('token');
 
-    fetch(`/api/fetch_attachments?thesis_id=${thesis.thesis_id}`, {
+    fetch(`/api/fetch_all_attachments?thesis_id=${thesis.thesis_id}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -872,12 +857,23 @@ function fetchAndDisplayAttachments(thesis) {
                     if (noLinksMessage) {
                         noLinksMessage.remove();
                     }
+                
                     links.forEach(linkObj => {
                         const li = document.createElement('li');
                         const link = document.createElement('a');
-                        link.href = linkObj.link_path;
-                        link.textContent = linkObj.link_path;
-                        link.target = '_blank'; // Press t open in a new tab
+
+                        try {
+                            // If link_path is already a valid URL, this will work
+                            const url = new URL(linkObj.link_path);
+                            link.href = url.href;
+                        } catch (e) {
+                            // If link_path is relative, prepend 'https://'
+                            link.href = `https://${linkObj.link_path}`;
+                        }
+                        link.textContent = linkObj.link_path; 
+                        link.target = '_blank'; // Open the link in a new tab
+                        link.rel = 'noopener noreferrer';
+                
                         li.appendChild(link);
                         configurationUploadedLinksList.appendChild(li);
                     });
@@ -923,36 +919,37 @@ function fetchAndDisplayExaminations(thesis) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Translate type of exam
-                const examData = data.examination;
-                examData.type_of_exam =
-                    examData.type_of_exam === "in-person"
-                        ? "Δια ζώσης"
-                        : examData.type_of_exam === "online"
-                            ? "Εξ αποστάσως"
-                            : 'Δεν έχει οριστεί.';
+                if (data.data !== null) { // Avoid errors and alerts when status isn't "completed"/"to be reviewed"
 
-                // Format the date properly
-                let formattedDate = 'Δεν έχει οριστεί.';
-                if (examData.date) {
-                    const [year, month, day] = examData.date.split("-");
-                    formattedDate = `${day}-${month}-${year}`;
+                    const examData = data.examination;
+                    examData.type_of_exam =
+                        examData.type_of_exam === "in-person"
+                            ? "Δια ζώσης"
+                            : examData.type_of_exam === "online"
+                                ? "Εξ αποστάσως"
+                                : 'Δεν έχει οριστεί.';
+
+                    // Format the date properly
+                    let formattedDate = 'Δεν έχει οριστεί.';
+                    if (examData.date) {
+                        const [year, month, day] = examData.date.split("-");
+                        formattedDate = `${day}-${month}-${year}`;
+                    }
+
+                    document.getElementById('configurationExamDateInfo').innerHTML = formattedDate;
+                    document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
+                    document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
                 }
-
-                document.getElementById('configurationExamDateInfo').innerHTML = formattedDate;
-                document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
-                document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
             } else {
                 alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error fetching exam details:', error);
-            alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης:');
+            alert('Παρουσιάστηκε πρόβλημα στην δημιουργία του πρακτικού εξέτασης.');
         });
 }
 //------------------------------ Functions for the Completed Files Section ------------------------------
-//------------------------------ Completed Files Section Event Listeners  ------------------------------
 //--------------- Examination Report button Event Listener  ---------------
 document.getElementById('configurationCompletedFilesExamReportButton').addEventListener('click', function () {
     loadExamReportData();
@@ -971,7 +968,7 @@ function getDayName(dateStr, locale) {
 }
 //------------------------------ Load Exam Report Data Function ------------------------------
 function loadExamReportData() {
-    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
+    const token = localStorage.getItem('token');
 
     fetch('/api/examReportDetails_fetch', {
         method: 'GET',
@@ -986,54 +983,61 @@ function loadExamReportData() {
             return response.json();
         })
         .then(data => {
-            if (data.success && data.examReport.length > 0) {
-                const reportData = data.examReport[0];
+            if (data.success) {
+                if (data.examReport.length > 0) {
+                    const reportData = data.examReport[0];
 
-                const finalGrade = calculateFinalGrade(reportData.supervisor_grade, reportData.committee_member1_grade, reportData.committee_member2_grade);
-                updateDataField('final_grade', finalGrade);
+                    const finalGradeSupervisor = (reportData.supervisor_grade1 * 0.6 + reportData.supervisor_grade2 * 0.15 + reportData.supervisor_grade3 * 0.15 + reportData.supervisor_grade4 * 0.1);
+                    const finalGradeCommittee1 = (reportData.committee_member1_grade1 * 0.6 + reportData.committee_member1_grade2 * 0.15 + reportData.committee_member1_grade3 * 0.15 + reportData.committee_member1_grade4 * 0.1);
+                    const finalGradeCommittee2 = (reportData.committee_member2_grade1 * 0.6 + reportData.committee_member2_grade2 * 0.15 + reportData.committee_member2_grade3 * 0.15 + reportData.committee_member2_grade4 * 0.1);
 
-                const supervisorNameSurname = nameSurname(reportData.professor_name, reportData.professor_surname);
-                const committeeMember1NameSurname = nameSurname(reportData.committee_member1_name, reportData.committee_member1_surname);
-                const committeeMember2NameSurname = nameSurname(reportData.committee_member2_name, reportData.committee_member2_surname);
-                const supervisorSurnameName = nameSurname(reportData.professor_surname, reportData.professor_name);
-                const committeeMember1SurnameName = nameSurname(reportData.committee_member1_surname, reportData.committee_member1_name);
-                const committeeMember2SurnameName = nameSurname(reportData.committee_member2_surname, reportData.committee_member2_name);
+                    updateDataField('final_grade', reportData.final_grade);
+                    updateDataField('supervisor_finalgrade', finalGradeSupervisor);
+                    updateDataField('committee_member1_finalgrade', finalGradeCommittee1);
+                    updateDataField('committee_member2_finalgrade', finalGradeCommittee2);
 
-                sortedCommitteeNames = sortThreeStrings(supervisorSurnameName, committeeMember1SurnameName, committeeMember2SurnameName);
-                examReportCommitteAlphabetical1 = sortedCommitteeNames[0];
-                examReportCommitteAlphabetical2 = sortedCommitteeNames[1];
-                examReportCommitteAlphabetical3 = sortedCommitteeNames[2];
+                    const supervisorNameSurname = nameSurname(reportData.professor_name, reportData.professor_surname);
+                    const committeeMember1NameSurname = nameSurname(reportData.committee_member1_name, reportData.committee_member1_surname);
+                    const committeeMember2NameSurname = nameSurname(reportData.committee_member2_name, reportData.committee_member2_surname);
+                    const supervisorSurnameName = nameSurname(reportData.professor_surname, reportData.professor_name);
+                    const committeeMember1SurnameName = nameSurname(reportData.committee_member1_surname, reportData.committee_member1_name);
+                    const committeeMember2SurnameName = nameSurname(reportData.committee_member2_surname, reportData.committee_member2_name);
 
-                const examReportDoneInPerson = document.getElementsByClassName('examReportDoneInPerson')[0];
-                const examReportDoneOnline = document.getElementsByClassName('examReportDoneOnline')[0];
+                    sortedCommitteeNames = sortThreeStrings(supervisorSurnameName, committeeMember1SurnameName, committeeMember2SurnameName);
+                    examReportCommitteAlphabetical1 = sortedCommitteeNames[0];
+                    examReportCommitteAlphabetical2 = sortedCommitteeNames[1];
+                    examReportCommitteAlphabetical3 = sortedCommitteeNames[2];
 
-                if (reportData.type_of_exam === 'in-person') {
-                    examReportDoneInPerson.style.display = 'inline';
-                    examReportDoneOnline.style.display = 'none';
-                } else if (reportData.type_of_exam === 'online') {
-                    examReportDoneInPerson.style.display = 'none';
-                    examReportDoneOnline.style.display = 'inline';
+                    const examReportDoneInPerson = document.getElementsByClassName('examReportDoneInPerson')[0];
+                    const examReportDoneOnline = document.getElementsByClassName('examReportDoneOnline')[0];
+
+                    if (reportData.type_of_exam === 'in-person') {
+                        examReportDoneInPerson.style.display = 'inline';
+                        examReportDoneOnline.style.display = 'none';
+                    } else if (reportData.type_of_exam === 'online') {
+                        examReportDoneInPerson.style.display = 'none';
+                        examReportDoneOnline.style.display = 'inline';
+                    }
+                    dayName = getDayName(reportData.exam_date, "el-GR");
+
+                    // Update the datafields in the Exam Report
+                    updateDataField('examReportLocation', reportData.exam_location);
+                    updateDataField('examReportDate', reportData.exam_date);
+                    updateDataField('examReportDateName', dayName);
+                    updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
+                    updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
+                    updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
+                    updateDataField('examReportAssemblyNo', reportData.gen_assembly_session);
+                    updateDataField('examReportTitle', reportData.thesis_title);
+                    updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
+                    updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
+                    updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
+                    updateDataField('examReportFinalGrade', reportData.final_grade);
+                    updateDataField('examReportSupervisorGrade', finalGradeSupervisor);
+                    updateDataField('examReportCommitteeMember1Grade', finalGradeCommittee1);
+                    updateDataField('examReportCommitteeMember2Grade', finalGradeCommittee2);
+
                 }
-                dayName = getDayName(reportData.exam_date, "el-GR");
-
-                // Update the datafields in the Exam Report
-                updateDataField('examReportLocation', reportData.exam_location);
-                updateDataField('examReportDate', reportData.exam_date);
-                updateDataField('examReportDateName', dayName);
-                updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
-                updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
-                updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
-                updateDataField('examReportAssemblyNo', reportData.gen_assembly_session);
-                updateDataField('examReportTitle', reportData.thesis_title);
-                updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
-                updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
-                updateDataField('examReportCommitteAlphabetical3', examReportCommitteAlphabetical3);
-                updateDataField('examReportFinalGrade', finalGrade);
-                updateDataField('examReportSupervisorGrade', reportData.supervisor_grade);
-                updateDataField('examReportCommittee1Grade', reportData.committee_member1_grade);
-                updateDataField('examReportCommittee2Grade', reportData.committee_member2_grade);
-
-
 
 
             } else if (data.success && data.examReport.length == 0) {
@@ -1049,7 +1053,7 @@ function loadExamReportData() {
 
 //------------------------------ Function to Load Logs Data for Status Change Section ------------------------------
 function loadLogsData() {
-    const token = localStorage.getItem('token'); // Get the JWT token stored in local storage
+    const token = localStorage.getItem('token');
 
     fetch('/api/logs_fetch', {
         method: 'GET',
@@ -1096,7 +1100,6 @@ function loadLogsData() {
                             <p class="card-text">${new Date(log.date_of_change).toLocaleDateString('el-GR')}</p>
                         </div>
                     `;
-
                     statusChangeContainer.appendChild(logEntry);
                 });
             } else if (data.success && data.log.length === 0) {
@@ -1107,7 +1110,6 @@ function loadLogsData() {
         .catch(error => {
             console.error('Error loading reportData data:', error);
         });
-
 }
 
 
@@ -1147,18 +1149,17 @@ function showSection(sectionId) {
 function loadStudentProfile() {
     const token = localStorage.getItem('token');
 
-    // Fetch student data from the backend API
     fetch('/api/student', {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${token}`, // Send token in Authorization header
+            'Authorization': `Bearer ${token}`,
         }
     })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch student data');
             }
-            return response.json(); // Parse the response as JSON
+            return response.json();
         })
         .then(data => {
             // Update the profile page with fetched data
@@ -1168,8 +1169,6 @@ function loadStudentProfile() {
             document.querySelector('#student_profile [data-field="name"]').textContent = student.name;
             document.querySelector('#student_profile [data-field="surname"]').textContent = student.surname;
             document.querySelector('#student_profile [data-field="student_number"]').textContent = student.student_number;
-
-            // Contact information
             document.querySelector('#student_profile [data-field="contact_email"]').textContent = student.contact_email;
             document.querySelector('#student_profile [data-field="mobile_telephone"]').textContent = student.mobile_telephone;
             document.querySelector('#student_profile [data-field="landline_telephone"]').textContent = student.landline_telephone;
@@ -1181,7 +1180,6 @@ function loadStudentProfile() {
             // Update student details in ExamReport
             const studentFullname = nameSurname(student.name, student.surname);
             updateDataField('examReportNameSurname', studentFullname);
-
         })
         .catch(error => {
             console.error('Error loading student data:', error);
@@ -1189,7 +1187,6 @@ function loadStudentProfile() {
 }
 //------------------------------ Event Listener for clicks on the edit buttons in Student Profile ------------------------------
 document.querySelector('#student_profile').addEventListener('click', function (event) {
-    // Check if the clicked element is a toggle button
     if (event.target.classList.contains('toggle-edit')) {
         const button = event.target;
         const row = button.closest('.row');
@@ -1208,7 +1205,6 @@ document.querySelector('#student_profile').addEventListener('click', function (e
             // Switch to view mode and save data
             const input = field.querySelector('input');
             const newValue = input.value;
-
             // Update the field display
             field.textContent = newValue;
             button.textContent = 'Αλλαγή';
@@ -1217,14 +1213,14 @@ document.querySelector('#student_profile').addEventListener('click', function (e
             button.classList.add('btn-outline-primary');
 
             // Save the updated data to the backend
-            const token = localStorage.getItem('token'); // Get the JWT token
+            const token = localStorage.getItem('token');
             fetch('/api/updateProfile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ [fieldName]: newValue }) // Send the updated field name and value
+                body: JSON.stringify({ [fieldName]: newValue }) 
             })
                 .then(response => {
                     if (!response.ok) {
@@ -1246,7 +1242,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
 
 
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
-//------------------------------ Load the student profile after DOM is loaded ------------------------------
+//------------------------------ Load functions after DOM is loaded ------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     loadStudentProfile();
     loadStudentThesis();
@@ -1255,15 +1251,4 @@ document.addEventListener('DOMContentLoaded', () => {
     loadExamReportData();
     loadLogsData();
 });
-//------------------------------ Show the dashboard as main page after DOM is loaded ------------------------------
-window.addEventListener('DOMContentLoaded', () => {
-    const defaultTab = document.querySelector('a[href="#dashboard"]');
-    if (defaultTab) {
-        defaultTab.click();
-    }
-});
-
-//If exam dates exists and status completed , end_date=exam date. Also create end date as null.
-//fix buttons for inv
-//API Naming scheme.
 

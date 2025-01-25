@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Πίνακας Ελέγχου Φοιτητή</title>
+    <title>Democritus-Student</title>
     <!------------------ Bootstrap CSS ------------------>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -140,7 +140,7 @@
                         </section>
                     </div>
 
-                    <div class="card-footer text-muted">
+                    <div class="card-footer text-muted" id="dashboardFooter">
                         <span data-field="dashboardStartDate">
                             <span class="ps-5">Ημερομηνία έναρξης:</span>
                             <span class="pe-4" data-field="thesis_start_date"> </span>
@@ -149,7 +149,7 @@
                             <span class="ps-5">Ημερομηνία εξέτασης:</span>
                             <span class="pe-4" data-field="thesis_exam_date"> </span>
                         </span>
-                        <span data-field="dashboardDate">
+                        <span data-field="dashboardEndDate">
                             <span class="ps-5">Ημερομηνία περάτωσης:</span>
                             <span class="pe-4" data-field="thesis_end_date"> </span>
                         </span>
@@ -266,7 +266,7 @@
                         <div id="invitationCardSection" class="container mt-4" style="display:none;">
                             <h3 class="text-center mb-4">Προσκλήσεις για τη Διπλωματική</h3>
                             <div class="row">
-                                <!---------- Invitations cards will be appended here dynamically ---------->
+                                <!---------- Invitations cards will be added here dynamically ---------->
                             </div>
                             <button class="btn btn-outline-secondary" id="HideInvitesButton">
                                 Κρύψε</button>
@@ -295,13 +295,13 @@
                             </div>
                             <div class="row">
                                 <div class="col-sm-4">
-                                    <p class="my-2 text-center">Αναμονή</p>
+                                    <p class="my-2 text-center" data-field="supervisor_finalgrade">Αναμονή</p>
                                 </div>
                                 <div class="col-sm-4">
-                                    <p class="my-2 text-center">Αναμονή</p>
+                                    <p class="my-2 text-center" data-field="committee_member1_finalgrade">Αναμονή</p>
                                 </div>
                                 <div class="col-sm-4">
-                                    <p class="mt-2 mb-0 text-center">Αναμονή</p>
+                                    <p class="mt-2 mb-0 text-center" data-field="committee_member2_finalgrade">Αναμονή</p>
                                 </div>
                             </div>
                         </section>
@@ -312,7 +312,7 @@
                             <div class="row">
                                 <h4 class="text-center pb-3">Αλλαγές Κατάστασης</h4>
                                 <div id="statusChangeContainer">
-                                    <!---------- Status change logs will be dynamically added here ---------->
+                                    <!---------- Status change logs will be added here dynamically ---------->
                                 </div>
                             </div>
                         </section>
@@ -405,15 +405,15 @@
                             <p></p>
                             <span> 1.</span>
                             <span data-field="examReportCommitteAlphabetical1">……………………………</span>
-                            <span> .</span>
+                            <span></span>
                             <p></p>
                             <span> 2.</span>
                             <span data-field="examReportCommitteAlphabetical2">……………………………</span>
-                            <span> .</span>
+                            <span></span>
                             <p></p>
                             <span> 3.</span>
                             <span data-field="examReportCommitteAlphabetical3">……………………………</span>
-                            <span> .</span>
+                            <span></span>
                             <p></p>
                             <span>υπέρ της εγκρίσεως της Διπλωματικής Εργασίας του φοιτητή </span>
                             <span data-field="examReportNameSurname">……………………………</span>

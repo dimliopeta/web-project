@@ -51,6 +51,7 @@ CREATE TABLE `Theses`(
 	`start_date` DATE NULL DEFAULT NULL,
 	`nimertis_link` VARCHAR(200) NULL,
     `grading_enabled` BOOLEAN DEFAULT FALSE,
+    `final_grade` DECIMAL(5,2) NULL,
     FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`),
     FOREIGN KEY (`student_id`) REFERENCES `Students`(`id`)
 
@@ -81,7 +82,7 @@ CREATE TABLE `Grades`(
     `grade_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `thesis_id` INT NOT NULL,
     `professor_id` INT NOT NULL,
-    `grade` DECIMAL(5,2) NOT NULL,
+    `grade1` DECIMAL(5,2) NOT NULL,
 	`grade2` DECIMAL(5,2) NOT NULL,
     `grade3` DECIMAL(5,2) NOT NULL,
     `grade4` DECIMAL(5,2) NOT NULL,
@@ -107,7 +108,6 @@ CREATE TABLE `Examinations`(
     `type_of_exam` ENUM('online','in-person') DEFAULT 'in-person',
     `location` VARCHAR(200) NULL,
     `exam_report` VARCHAR(200) NULL,
-    `announced` BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 
@@ -131,4 +131,10 @@ CREATE TABLE `Notes`(
     `content` TEXT NOT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`),
 	FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`)
+);
+
+CREATE TABLE `Announcements`(
+	`thesis_id` INT NOT NULL PRIMARY KEY,
+    `announcement_date` date NOT NULL,
+	FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
