@@ -501,8 +501,8 @@ function showInfoSection(thesis) {
     const footer = document.createElement('section');
     footer.classList.add('text-center');
     footer.innerHTML = `
-    <hr>
-        <h4>Ημερομηνίες</h4>
+        <hr>
+        <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
         <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
         <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || ''}</p>
         
@@ -684,10 +684,6 @@ function addAssignedSection(thesis, container) {
         });
         container.appendChild(buttonsContainer);
         container.appendChild(formContainer);
-
-        const hr = document.createElement('hr');
-        hr.classList.add('my-3');
-        container.appendChild(hr);
     }
     else {
         const committeeText = document.createElement('p');
@@ -880,9 +876,7 @@ function addCompletedSection(thesis, container) {
     complButtonContainer.appendChild(praktikoButton);
     complButtonContainer.appendChild(nimertisButton);
     container.appendChild(complButtonContainer);
-    const hr = document.createElement('hr');
-    hr.classList.add('my-3');
-    container.appendChild(hr);
+
 
 }
 //-------------- Function for Managing an Active Thesis -------------
@@ -953,90 +947,96 @@ function addActiveSection(thesis, container) {
     container.appendChild(notesSection);
 
     if (thesis.role === "Επιβλέπων") {
-        cancelThesisForm = document.createElement('div');
-        cancelThesisForm.classList.add('mt-3');
+        const startDate = new Date(thesis.start_date); // Convert the start date to a Date object
+        const currentDate = new Date(); // Get the current date
+        const twoYearsAgo = new Date(currentDate.setFullYear(currentDate.getFullYear() - 2)); // Calculate the date 2 years ago
 
-        const cancelTitle = document.createElement('h4');
-        cancelTitle.textContent = 'Ακύρωση Διπλωματικής';
-        cancelThesisForm.appendChild(cancelTitle);
+        if (startDate <= twoYearsAgo) {
+            cancelThesisForm = document.createElement('div');
+            cancelThesisForm.classList.add('mt-3');
 
-        const cancellationNumberLabel = document.createElement('label');
-        cancellationNumberLabel.textContent = 'Α/Α ΓΣΤ';
-        cancellationNumberLabel.classList.add('form-label');
-        cancelThesisForm.appendChild(cancellationNumberLabel);
+            const cancelTitle = document.createElement('h4');
+            cancelTitle.textContent = 'Ακύρωση Διπλωματικής';
+            cancelThesisForm.appendChild(cancelTitle);
 
-        const cancellationNumberInput = document.createElement('input');
-        cancellationNumberInput.type = 'number';
-        cancellationNumberInput.id = 'cancellation-number';
-        cancellationNumberInput.classList.add('form-control', 'mb-2');
-        cancellationNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
-        cancelThesisForm.appendChild(cancellationNumberInput);
+            const cancellationNumberLabel = document.createElement('label');
+            cancellationNumberLabel.textContent = 'Α/Α ΓΣΤ';
+            cancellationNumberLabel.classList.add('form-label');
+            cancelThesisForm.appendChild(cancellationNumberLabel);
 
-        const cancellationDateLabel = document.createElement('label');
-        cancellationDateLabel.textContent = 'Ημερομηνία ΓΣΤ';
-        cancellationDateLabel.classList.add('form-label');
-        cancelThesisForm.appendChild(cancellationDateLabel);
+            const cancellationNumberInput = document.createElement('input');
+            cancellationNumberInput.type = 'number';
+            cancellationNumberInput.id = 'cancellation-number';
+            cancellationNumberInput.classList.add('form-control', 'mb-2');
+            cancellationNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
+            cancelThesisForm.appendChild(cancellationNumberInput);
 
-        const cancellationDateInput = document.createElement('input');
-        cancellationDateInput.type = 'date';
-        cancellationDateInput.id = 'cancellation-year';
-        cancellationDateInput.classList.add('form-control', 'mb-2');
-        cancellationDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
-        cancelThesisForm.appendChild(cancellationDateInput);
+            const cancellationDateLabel = document.createElement('label');
+            cancellationDateLabel.textContent = 'Ημερομηνία ΓΣΤ';
+            cancellationDateLabel.classList.add('form-label');
+            cancelThesisForm.appendChild(cancellationDateLabel);
 
-        const cancellationReasonLabel = document.createElement('label');
-        cancellationReasonLabel.textContent = 'Λόγος ακύρωσης';
-        cancellationReasonLabel.classList.add('form-label');
-        cancelThesisForm.appendChild(cancellationReasonLabel);
+            const cancellationDateInput = document.createElement('input');
+            cancellationDateInput.type = 'date';
+            cancellationDateInput.id = 'cancellation-year';
+            cancellationDateInput.classList.add('form-control', 'mb-2');
+            cancellationDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
+            cancelThesisForm.appendChild(cancellationDateInput);
 
-        const cancellationReasonTextarea = document.createElement('textarea');
-        cancellationReasonTextarea.id = 'cancellation-reason';
-        cancellationReasonTextarea.classList.add('form-control', 'mb-2');
-        cancellationReasonTextarea.placeholder = 'Καταχωρήστε τον λόγο ακύρωσης';
-        cancellationReasonTextarea.maxLength = 300;
-        cancelThesisForm.appendChild(cancellationReasonTextarea);
+            const cancellationReasonLabel = document.createElement('label');
+            cancellationReasonLabel.textContent = 'Λόγος ακύρωσης';
+            cancellationReasonLabel.classList.add('form-label');
+            cancelThesisForm.appendChild(cancellationReasonLabel);
 
-        const cancelButton = createButton('cancel-thesis-button', 'Ακύρωση Διπλωματικής', ['btn', 'btn-danger', 'mb-3'], () => {
-            const cancellationNumber = cancellationNumberInput.value;
-            const cancellationDate = cancellationDateInput.value;
-            const cancellationReasonText = cancellationReasonTextarea.value;
+            const cancellationReasonTextarea = document.createElement('textarea');
+            cancellationReasonTextarea.id = 'cancellation-reason';
+            cancellationReasonTextarea.classList.add('form-control', 'mb-2');
+            cancellationReasonTextarea.placeholder = 'Καταχωρήστε τον λόγο ακύρωσης';
+            cancellationReasonTextarea.maxLength = 300;
+            cancellationReasonTextarea.value = 'Από Διδάσκοντα';
+            cancelThesisForm.appendChild(cancellationReasonTextarea);
 
-            if (!cancellationNumber || !cancellationDate || !cancellationReasonText) {
-                alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
-                return;
-            }
+            const cancelButton = createButton('cancel-thesis-button', 'Ακύρωση Διπλωματικής', ['btn', 'btn-danger', 'mb-3'], () => {
+                const cancellationNumber = cancellationNumberInput.value;
+                const cancellationDate = cancellationDateInput.value;
+                const cancellationReasonText = cancellationReasonTextarea.value;
 
-            fetch('/api/cancel-thesis', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ thesis_id: thesis.thesis_id, cancellationNumber, cancellationDate, cancellationReasonText })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Η διπλωματική ακυρώθηκε επιτυχώς!');
-                        loadTheses();
-                        resetInfoSection();
-                    } else {
-                        alert(`Σφάλμα: ${data.message}`);
-                    }
+                if (!cancellationNumber || !cancellationDate || !cancellationReasonText) {
+                    alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
+                    return;
+                }
+
+                fetch('/api/cancel-thesis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ thesis_id: thesis.thesis_id, cancellationNumber, cancellationDate, cancellationReasonText })
                 })
-                .catch(error => {
-                    console.error('Σφάλμα κατά την ακύρωση:', error);
-                    alert('Κάτι πήγε στραβά κατά την ακύρωση!');
-                });
-        });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Η διπλωματική ακυρώθηκε επιτυχώς!');
+                            loadTheses();
+                            resetInfoSection();
+                        } else {
+                            alert(`Σφάλμα: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Σφάλμα κατά την ακύρωση:', error);
+                        alert('Κάτι πήγε στραβά κατά την ακύρωση!');
+                    });
+            });
 
-        cancelThesisForm.appendChild(cancelButton);
+            cancelThesisForm.appendChild(cancelButton);
 
-        const cancelHr = document.createElement('hr');
-        cancelThesisForm.appendChild(cancelHr);
+            const cancelHr = document.createElement('hr');
+            cancelThesisForm.appendChild(cancelHr);
 
-        container.appendChild(cancelThesisForm);
-
+            container.appendChild(cancelThesisForm);
+        }
 
         const changeStatusSection = document.createElement('section');
         const changeStatusTitle = document.createElement('h4');
@@ -1311,7 +1311,7 @@ function addToBeReviewedSection(thesis, container) {
     loadGradeSection(thesis.thesis_id, gradeContent);
 
     container.appendChild(gradeSection);
-    container.appendChild(Object.assign(document.createElement('hr'), { classList: 'mb-3 mt-4' }));
+
 }
 //-------------- Function for Announcement controls in Theses List -------------
 function announcementButtonController(thesisId, container) {
@@ -1483,7 +1483,7 @@ function addToAnnouncements(thesisId) {
         .then((data) => {
             if (data.success) {
                 resetInfoSection();
-                fetchAnnouncementDetails(thesisId);         
+                fetchAnnouncementDetails(thesisId);
             }
         })
         .catch((error) => {

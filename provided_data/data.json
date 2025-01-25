@@ -1271,12 +1271,12 @@
     {
       "thesis_id": "9",
       "professor_id": "1",
-      "student_id": null,
+      "student_id": 10,
       "title": "Quantum Computing Algorithms for Cryptographic Challenges",
       "summary": "This thesis delves into the implications of quantum computing on modern cryptographic systems. It reviews quantum algorithms like Shor’s algorithm for factoring integers and Grover’s algorithm for search, analyzing their potential to break widely used encryption protocols. Additionally, it explores quantum-resistant algorithms that ensure security in a post-quantum world. The study emphasizes the urgency of transitioning to quantum-safe encryption standards for critical applications.",
-      "status": "unassigned",
+      "status": "active",
       "pdf_path": null,
-      "start_date": null,
+      "start_date": "2020-01-01",
       "exam_date": null
     }
   ],
