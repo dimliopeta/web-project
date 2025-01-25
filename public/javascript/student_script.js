@@ -203,14 +203,14 @@ function calculateDuration(startDate) {
         totalMonths--; // Subtract one month
         const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
         days += previousMonthDays;
-    } 
+    }
     const monthText = totalMonths > 0
-    ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
-    : '0 μήνες';
+        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+        : '0 μήνες';
 
-const dayText = days > 0
-    ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
-    : '0 μέρες';
+    const dayText = days > 0
+        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+        : '0 μέρες';
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
@@ -640,7 +640,7 @@ function setupEventListeners(thesis) {
         const configurationUploadLinkInputBox = document.getElementById('configurationUploadLinkInputBox').value;
         if (configurationUploadLinkInputBox) {
             if (thesis) {
-                uploadLink(configurationUploadLinkInputBox, thesis); 
+                uploadLink(configurationUploadLinkInputBox, thesis);
             } else {
                 alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
@@ -855,7 +855,7 @@ function fetchAndDisplayAttachments(thesis) {
                     if (noLinksMessage) {
                         noLinksMessage.remove();
                     }
-                
+
                     links.forEach(linkObj => {
                         const li = document.createElement('li');
                         const link = document.createElement('a');
@@ -868,10 +868,10 @@ function fetchAndDisplayAttachments(thesis) {
                             // If link_path is relative, prepend 'https://'
                             link.href = `https://${linkObj.link_path}`;
                         }
-                        link.textContent = linkObj.link_path; 
+                        link.textContent = linkObj.link_path;
                         link.target = '_blank'; // Open the link in a new tab
                         link.rel = 'noopener noreferrer';
-                
+
                         li.appendChild(link);
                         configurationUploadedLinksList.appendChild(li);
                     });
@@ -1218,7 +1218,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ [fieldName]: newValue }) 
+                body: JSON.stringify({ [fieldName]: newValue })
             })
                 .then(response => {
                     if (!response.ok) {
@@ -1250,14 +1250,5 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLogsData();
 });
 
-// responsive design για κινητα - student menu margins
 // Cache πραγματα
-// Labels στης δημητρας
-// γραμματεια λογαριασμος
-// γραμματεια ναβμαπρ
-//logout γραμματεια
-// Σιερα φιλτρων προφεσορ
-// 300 χαρακτηρες τα σχολια
-// 2 ετη και μετα ακυρωση
-// λογος απο διδασκοντα αυτοματα
 
