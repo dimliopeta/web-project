@@ -253,15 +253,14 @@ function insertData(filePath = './provided_data/data.json') {
                     }
                     if (results.length === 0) {
                         const insertQuery = `
-                    INSERT INTO EXAMINATIONS (thesis_id, date, type_of_exam, location, exam_report)
-                    VALUES (?, ?, ?, ?, ?);
+                    INSERT INTO EXAMINATIONS (thesis_id, date, type_of_exam, location)
+                    VALUES (?, ?, ?, ?);
                 `;
                         db.query(insertQuery, [
                             examination.thesis_id,
                             examination.date,
                             examination.type_of_exam,
                             examination.location,
-                            examination.exam_report
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting examination:', insertErr);
@@ -275,7 +274,33 @@ function insertData(filePath = './provided_data/data.json') {
         } else {
             console.warn('No examinations data found in the file.');
         }
-
+        if (data.announcements){
+            data.announcements.forEach(announcement =>{
+                const query = `SELECT * FROM ANNOUNCEMENTS WHERE thesis_id=?;`;
+                db.query(query, [announcement.thesis_id], (err, results) => {
+                    if (err) {
+                        console.error('Error checking for duplicate examinations: ', err);
+                        return;
+                    }
+                    if (results.length === 0) {
+                        const insertQuery = `
+                    INSERT INTO ANNOUNCEMENTS (thesis_id, announcement_date)
+                    VALUES (?, ?);
+                `;
+                        db.query(insertQuery, [
+                            announcement.thesis_id,
+                            announcement.announcement_date
+                        ], (insertErr) => {
+                            if (insertErr) {
+                                console.error('Error inserting announcement:', insertErr);
+                            } else {
+                                console.log(`Announcement for thesis ${announcement.thesis_id} added successfully.`);
+                            }
+                        });
+                    }
+                });
+            });
+        }
         //--------------- Insert Logs
         if (data.logs) {
             data.logs.forEach(log => {
