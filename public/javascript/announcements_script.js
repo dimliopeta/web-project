@@ -2,69 +2,60 @@ let currentPage = 1;
 const announcementsPerPage = 6;
 let hasMoreAnnouncements = true; // Μεταβλητή για να ελέγξουμε αν υπάρχουν περισσότερες ανακοινώσεις
 
-function loadAnnouncements(filters = {}) {
+function loadAnnouncements(filters = {}, exportFormat = null) {
     console.log("Φόρτωση ανακοινώσεων με φίλτρα:", filters);
-
     // Επαναφορά της τρέχουσας σελίδας αν αλλάζουν τα φίλτρα
     if (filters.anDateFrom || filters.anDateTo || filters.examDateFrom || filters.examDateTo) {
         currentPage = 1;
     }
-
     fetch('/api/get-all-announcements/', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
-        .then(response => response.json())
-        .then(data => {
-            const announcements = data.data;
-            console.log(announcements);
-            if (!Array.isArray(announcements)) {
-                throw new Error('Το data.announcements δεν είναι πίνακας');
-            }
+    .then(response => response.json())
+    .then(data => {
+        const announcements = data.data;
+        console.log(announcements);
+        if (!Array.isArray(announcements)) {
+            throw new Error('Το data.announcements δεν είναι πίνακας');
+        }
+        // Έλεγχος για τα φίλτρα
+        let filteredAnnouncements = announcements;
+        if (Object.values(filters).some(filter => filter !== null)) {
+            filteredAnnouncements = announcements.filter(announcement => {
+                let match = true;
+                // Φιλτράρισμα ημερομηνίας δημοσίευσης
+                if (filters.anDateFrom && new Date(announcement.an_date) < new Date(filters.anDateFrom)) {
+                    match = false;
+                }
+                if (filters.anDateTo && new Date(announcement.an_date) > new Date(filters.anDateTo)) {
+                    match = false;
+                }
+                // Φιλτράρισμα ημερομηνίας εξέτασης
+                if (filters.examDateFrom && new Date(announcement.exam_date) < new Date(filters.examDateFrom)) {
+                    match = false;
+                }
+                if (filters.examDateTo && new Date(announcement.exam_date) > new Date(filters.examDateTo)) {
+                    match = false;
+                }
+                return match;
+            });
+        }
+        // Υπολογισμός του τρέχοντος εύρους
+        const startIndex = (currentPage - 1) * announcementsPerPage;
+        const endIndex = startIndex + announcementsPerPage;
+        const announcementsToLoad = filteredAnnouncements.slice(startIndex, endIndex);
+        const container = document.getElementById('announcements-container');
+        
+        // Αν εξάγουμε σε JSON ή XML, δεν καθαρίζουμε το container
+        if (!exportFormat && currentPage === 1) {
+            container.innerHTML = ''; // Καθαρισμός μόνο στην πρώτη σελίδα
+        }
 
-            // Έλεγχος για τα φίλτρα
-            let filteredAnnouncements = announcements;
-
-            if (Object.values(filters).some(filter => filter !== null)) {
-                filteredAnnouncements = announcements.filter(announcement => {
-                    let match = true;
-
-                    // Φιλτράρισμα ημερομηνίας δημοσίευσης
-                    if (filters.anDateFrom && new Date(announcement.an_date) < new Date(filters.anDateFrom)) {
-                        match = false;
-                    }
-                    if (filters.anDateTo && new Date(announcement.an_date) > new Date(filters.anDateTo)) {
-                        match = false;
-                    }
-
-                    // Φιλτράρισμα ημερομηνίας εξέτασης
-                    if (filters.examDateFrom && new Date(announcement.exam_date) < new Date(filters.examDateFrom)) {
-                        match = false;
-                    }
-                    if (filters.examDateTo && new Date(announcement.exam_date) > new Date(filters.examDateTo)) {
-                        match = false;
-                    }
-
-                    return match;
-                });
-            }
-
-            // Υπολογισμός του τρέχοντος εύρους
-            const startIndex = (currentPage - 1) * announcementsPerPage;
-            const endIndex = startIndex + announcementsPerPage;
-
-            const announcementsToLoad = filteredAnnouncements.slice(startIndex, endIndex);
-
-            const container = document.getElementById('announcements-container');
-
-            // Καθαρισμός container αν είναι η πρώτη σελίδα
-            if (currentPage === 1) {
-                container.innerHTML = '';
-            }
-
-            // Δημιουργία κάρτας για κάθε ανακοίνωση
+        // Δημιουργία κάρτας για κάθε ανακοίνωση (μόνο αν δεν εξάγουμε σε JSON ή XML)
+        if (!exportFormat) {
             announcementsToLoad.forEach(announcement => {
                 const card = `
                 <div class="col-md-4">
@@ -82,12 +73,11 @@ function loadAnnouncements(filters = {}) {
                                 <li>${announcement.committee_member2_name}</li>
                             </ul>
                             <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcement.exam_date).toLocaleDateString()}</p>
-                            <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online'
-                                ? 'Ηλεκτρονική'
-                                : announcement.type_of_exam === 'in-person'
-                                    ? 'Δια ζώσης'
-                                    : 'Άγνωστος τύπος'
-                            }</p>
+                            <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online' 
+                                ? 'Ηλεκτρονική' 
+                                : announcement.type_of_exam === 'in-person' 
+                                ? 'Δια ζώσης' 
+                                : 'Άγνωστος τύπος'}</p>
                             <p class="text-muted"><strong>Τοποθεσία Εξέτασης:</strong> ${announcement.examination_location}</p>
                         </div>
                         <div class="card-footer bg-light d-flex justify-content-end">
@@ -96,32 +86,62 @@ function loadAnnouncements(filters = {}) {
                     </div>
                 </div>
                 `;
-
                 container.innerHTML += card;
             });
-
-            // Ενημέρωση της κατάστασης για περισσότερες σελίδες
-            if (announcementsToLoad.length < announcementsPerPage) {
-                hasMoreAnnouncements = false;
-            } else {
-                hasMoreAnnouncements = true;
-                currentPage++;
+        } else {
+            let output;
+            // Εξαγωγή σε JSON
+            if (exportFormat === 'json') {
+                output = JSON.stringify(filteredAnnouncements, null, 2);
+                downloadFile('announcements.json', output);
             }
-        });
+            // Εξαγωγή σε XML
+            else if (exportFormat === 'xml') {
+                output = jsonToXml(filteredAnnouncements);
+                downloadFile('announcements.xml', output);
+            }
+        }
+        // Ενημέρωση της κατάστασης για περισσότερες σελίδες
+        if (announcementsToLoad.length < announcementsPerPage) {
+            hasMoreAnnouncements = false;
+        } else {
+            hasMoreAnnouncements = true;
+            currentPage++;
+        }
+    });
 }
 
+// Συνάρτηση για να κατεβάσεις το αρχείο
+function downloadFile(filename, content) {
+    const blob = new Blob([content], { type: 'application/octet-stream' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+}
 
-// Συνάρτηση για το infinite scroll
-// function infiniteScroll() {
-//     if (!hasMoreAnnouncements) return; // Αν δεν υπάρχουν περισσότερες ανακοινώσεις, σταματάμε τη φόρτωση
+// Συνάρτηση για τη δημιουργία XML από JSON
+function jsonToXml(json) {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<announcements>\n';
+    json.forEach(announcement => {
+        xml += '  <announcement>\n';
+        for (const key in announcement) {
+            xml += `    <${key}>${announcement[key]}</${key}>\n`;
+        }
+        xml += '  </announcement>\n';
+    });
+    xml += '</announcements>';
+    return xml;
+}
 
-//     const scrollableHeight = document.documentElement.scrollHeight;
-//     const currentScroll = window.scrollY + window.innerHeight;
+document.getElementById('export-json').addEventListener('click', () => {
+    loadAnnouncements({}, 'json');
+});
 
-//     if (currentScroll >= scrollableHeight - 100) {
-//         loadAnnouncements();
-//     }
-// }
+document.getElementById('export-xml').addEventListener('click', () => {
+    loadAnnouncements({}, 'xml');
+});
+
 
 document.getElementById('apply-filters').addEventListener('click', () => {
     console.log("2");
@@ -157,74 +177,8 @@ document.getElementById('clear-filters').addEventListener('click', () => {
     loadAnnouncements(filters); // Επαναφόρτωση χωρίς φίλτρα
 });
 
-document.getElementById('export-csv').addEventListener('click', () => {
-    const token = localStorage.getItem('token');
-    fetch('/api/theses', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const rows = data.theses;
-                if (rows.length === 0) {
-                    alert('Δεν υπάρχουν δεδομένα για εξαγωγή.');
-                    return;
-                }
-                const headers = Object.keys(rows[0]).map(header => `"${header}"`).join(',');
-                const csvContent = rows.map(row => {
-                    return Object.values(row).map(value => `"${value || ''}"`).join(',');
-                });
 
-                const csvBlob = new Blob(
-                    [`\uFEFF${headers}\n${csvContent.join('\n')}`],
-                    { type: 'text/csv;charset=utf-8;' }
-                );
-
-                const url = URL.createObjectURL(csvBlob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'theses.csv');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                console.error('Σφάλμα API:', data.message);
-            }
-        })
-        .catch(err => console.error('Σφάλμα φόρτωσης:', err));
-});
-//-------------- Event Listener for Export to JSON button in Theses List  ------------- 
-document.getElementById('export-json').addEventListener('click', () => {
-    const token = localStorage.getItem('token');
-    fetch('/api/theses', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const rows = data.theses;
-                if (rows.length === 0) {
-                    alert('Δεν υπάρχουν δεδομένα για εξαγωγή.');
-                    return;
-                }
-                const jsonBlob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json;charset=utf-8;' });
-
-                const url = URL.createObjectURL(jsonBlob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'theses.json');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                console.error('Σφάλμα API:', data.message);
-            }
-        })
-        .catch(err => console.error('Σφάλμα φόρτωσης:', err));
-});
 
 // Αρχική φόρτωση ανακοινώσεων
 loadAnnouncements();
 
-// Ενεργοποίηση infinite scroll
-// window.addEventListener('scroll', infiniteScroll);
