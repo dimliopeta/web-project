@@ -1,6 +1,5 @@
 let currentPage = 1;
 const announcementsPerPage = 6;
-let totalAnnouncements = 9; // Αριθμός συνολικών ανακοινώσεων που υπάρχει στο σύστημα
 let hasMoreAnnouncements = true;
 
 function loadAnnouncements(filters = {}, exportFormat = null) {
@@ -100,6 +99,14 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
             container.innerHTML += card;
         });
 
+        if (exportFormat === 'xml') {
+            generateXmlFeed(filteredAnnouncements); // Δημιουργία του XML
+        }
+
+        if (exportFormat === 'json') {
+            generateJsonFeed(filteredAnnouncements); // Δημιουργία του JSON
+        }    
+
         // Ενημέρωση κατάστασης για περισσότερες σελίδες
         if (announcementsToLoad.length < announcementsPerPage) {
             hasMoreAnnouncements = false;
@@ -120,6 +127,63 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
     .catch(error => {
         console.error('Σφάλμα κατά τη λήψη των ανακοινώσεων:', error);
     });
+}
+
+
+function generateXmlFeed(filteredAnnouncements) {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<announcements>\n';
+
+    filteredAnnouncements.forEach(announcement => {
+        xml += `
+        <announcement>
+            <title>${announcement.title}</title>
+            <student_name>${announcement.student_name}</student_name>
+            <committee_members>
+                <member>${announcement.professor_name}</member>
+                <member>${announcement.committee_member1_name}</member>
+                <member>${announcement.committee_member2_name}</member>
+            </committee_members>
+            <exam_date>${new Date(announcement.exam_date).toISOString()}</exam_date>
+            <exam_type>${announcement.type_of_exam}</exam_type>
+            <examination_location>${announcement.examination_location}</examination_location>
+            <announcement_date>${new Date(announcement.an_date).toISOString()}</announcement_date>
+        </announcement>\n`;
+    });
+
+    xml += '</announcements>';
+
+    const xmlBlob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(xmlBlob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'announcements.xml';
+    a.click();
+}
+
+
+function generateJsonFeed(filteredAnnouncements) {
+    const jsonFeed = filteredAnnouncements.map(announcement => ({
+        title: announcement.title,
+        student_name: announcement.student_name,
+        committee_members: [
+            announcement.professor_name,
+            announcement.committee_member1_name,
+            announcement.committee_member2_name
+        ],
+        exam_date: new Date(announcement.exam_date).toISOString(),
+        exam_type: announcement.type_of_exam,
+        examination_location: announcement.examination_location,
+        announcement_date: new Date(announcement.an_date).toISOString(),
+    }));
+
+    const jsonBlob = new Blob([JSON.stringify(jsonFeed, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(jsonBlob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'announcements.json';
+    a.click();
 }
 
 function loadMoreAnnouncements() {
@@ -154,7 +218,6 @@ document.getElementById('export-xml').addEventListener('click', () => {
 
 document.getElementById('apply-filters').addEventListener('click', () => {
     const filters = getFilterValues();
-
     loadAnnouncements(filters);
 });
 

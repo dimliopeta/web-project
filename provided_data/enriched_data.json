@@ -1183,7 +1183,7 @@
       {
         "thesis_id": "1",
         "professor_id": "1",
-        "student_id": "3",
+        "student_id": "23",
         "title": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks",
         "summary": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks is very important so we have to do it.",
         "status": "completed",
@@ -1196,7 +1196,7 @@
       {
         "thesis_id": "2",
         "professor_id": "1",
-        "student_id": "11",
+        "student_id": "21",
         "title": "The Role of Normal Software Behavior in Ensuring System Reliability and Security",
         "summary": "The Role of Normal Software Behavior in Ensuring System Reliability and Security is enormous so we have to study it.",
         "status": "completed",
@@ -1326,7 +1326,7 @@
       {
         "thesis_id": "12",
         "professor_id": "2",
-        "student_id": "10",
+        "student_id": "20",
         "title": "Developing a Mobile Application for E-commerce",
         "summary": "Design and implementation of a user-friendly mobile app for online shopping.",
         "status": "assigned",
@@ -1417,7 +1417,7 @@
       {
         "thesis_id": "19",
         "professor_id": "3",
-        "student_id": "4",
+        "student_id": "26",
         "title": "Game Development with Unreal Engine",
         "summary": "Developing a 3D game using Unreal Engine and exploring advanced features.",
         "status": "to-be-reviewed",
@@ -1449,17 +1449,26 @@
     "member2_id": "1"
   },{
     "thesis_id": "11",
-    "member1_id": "2",
+    "member1_id": "7",
     "member2_id": "4"
   },{
     "thesis_id": "15",
     "member1_id": "2",
     "member2_id": "1"
+  },{
+    "thesis_id": "14",
+    "member1_id": "6",
+    "member2_id": "10"
   },
   {
     "thesis_id": "8",
     "member1_id": "3",
     "member2_id": "6"
+  },
+  {
+    "thesis_id": "19",
+    "member1_id": "11",
+    "member2_id": "7"
   }
   ], 
   "examinations":[
