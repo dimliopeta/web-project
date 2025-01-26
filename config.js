@@ -241,7 +241,38 @@ function insertData(filePath = './provided_data/enriched_data.json') {
         } else {
             console.warn('No invitations data found in the file.');
         }
+        //------------- Insert Logs
+        if (data.logs) {
+            data.logs.forEach(log => {
+                const query = `SELECT * FROM LOGS WHERE id = ?`;
+                db.query(query, [log.id], (err, results) => {
+                    if (err) {
+                        console.error('Error checking for duplicate logs: ', err);
+                        return;
+                    }
+                    if (results.length === 0) {
+                        const insertQuery = `
+                    INSERT INTO LOGS ( thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
+                    VALUES ( ?, ?, ?, ?, ?, ?);`;
+                        db.query(insertQuery, [
+                            log.thesis_id,
+                            log.date_of_change,
+                            log.old_state,
+                            log.new_state,
+                            log.gen_assembly_session,
+                            log.cancellation_reason
+                        ], (insertErr) => {
+                            if (insertErr) {
+                                console.error('Error inserting log:', insertErr);
+                            } else {
+                                console.log(`Log ${log.id} added successfully.`);
+                            }
+                        });
+                    }
+                });
+            })
 
+        }
         //--------------- Insert Examinations
         if (data.examinations) {
             data.examinations.forEach(examination => {
@@ -274,8 +305,8 @@ function insertData(filePath = './provided_data/enriched_data.json') {
         } else {
             console.warn('No examinations data found in the file.');
         }
-        if (data.announcements){
-            data.announcements.forEach(announcement =>{
+        if (data.announcements) {
+            data.announcements.forEach(announcement => {
                 const query = `SELECT * FROM ANNOUNCEMENTS WHERE thesis_id=?;`;
                 db.query(query, [announcement.thesis_id], (err, results) => {
                     if (err) {
@@ -300,39 +331,6 @@ function insertData(filePath = './provided_data/enriched_data.json') {
                     }
                 });
             });
-        }
-        //--------------- Insert Logs
-        if (data.logs) {
-            data.logs.forEach(log => {
-                const query = `SELECT * FROM LOGS WHERE logs.id=?;`;
-                db.query(query, [log.id], (err, results) => {
-                    if (err) {
-                        console.error('Error checking for duplicate logs: ', err);
-                        return;
-                    }
-                    if (results.length === 0) {
-                        const insertQuery = `
-                        INSERT INTO LOGS (id, thesis_id, date_of_change, old_state, new_state)
-                        VALUES (?, ?, ?, ?, ?);
-                    `;
-                        db.query(insertQuery, [
-                            log.id,
-                            log.thesis_id,
-                            log.date_of_change,
-                            log.old_state,
-                            log.new_state
-                        ], (insertErr) => {
-                            if (insertErr) {
-                                console.error('Error inserting logs:', insertErr);
-                            } else {
-                                console.log(`Log ${log.id} added successfully.`);
-                            }
-                        });
-                    }
-                });
-            });
-        } else {
-            console.warn('No logs data found in the file.');
         }
 
         //--------------- Insert Grades

@@ -117,7 +117,6 @@ CREATE TABLE `Logs`(
     `old_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','cancelled') NULL,
     `new_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','cancelled') NULL,
     `gen_assembly_session` INT NULL,
-    `ap` INT NULL,
     `cancellation_reason` TEXT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );

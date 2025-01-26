@@ -162,6 +162,9 @@ function generateXmlFeed(filteredAnnouncements) {
     a.href = url;
     a.download = 'announcements.xml';
     a.click();
+    const filters = getFilterValues()
+
+    loadAnnouncements(filters);
 }
 
 function generateJsonFeed(filteredAnnouncements) {
@@ -186,6 +189,9 @@ function generateJsonFeed(filteredAnnouncements) {
     a.href = url;
     a.download = 'announcements.json';
     a.click();
+    const filters = getFilterValues()
+
+    loadAnnouncements(filters);
 }
 
 
