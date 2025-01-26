@@ -157,8 +157,8 @@ function insertData(filePath = './provided_data/enriched_data.json') {
                     }
                     if (results.length === 0) {
                         const insertQuery = `
-                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?);
+                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date, nimertis_link, grading_enabled, final_grade)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 `;
                         db.query(insertQuery, [
                             thesis.professor_id,
@@ -167,7 +167,10 @@ function insertData(filePath = './provided_data/enriched_data.json') {
                             thesis.summary,
                             thesis.status,
                             thesis.pdf_path || null,
-                            thesis.start_date
+                            thesis.start_date,
+                            thesis.nimertis_link,
+                            thesis.grading_enabled,
+                            thesis.final_grade
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting thesis:', insertErr);

@@ -462,9 +462,7 @@ function showInfoSection(thesis) {
     infoSection.appendChild(statusChangeSection);
     infoSection.appendChild(Object.assign(document.createElement('hr'), { classList: 'mb-3 mt-2' }));
 
-    loadLogs(thesis.thesis_id);
-
-    if (thesis.status === 'active' || thesis.status === 'to-be-reviewed') {
+    if ( thesis.status !== 'assigned' ) {
         const committeeSection = document.createElement('section');
         committeeSection.innerHTML = `
             <h4 class="text-center">Μέλη Τριμελούς Επιτροπής</h4>
@@ -475,6 +473,10 @@ function showInfoSection(thesis) {
         `;
         infoSection.appendChild(committeeSection);
     }
+
+    loadLogs(thesis.thesis_id);
+
+    
     const statusSection = document.createElement('section');
     statusSection.innerHTML = `<h4 class="text-center">Διαχείριση Διπλωματικής</h4>`;
 
@@ -507,11 +509,37 @@ function showInfoSection(thesis) {
         <hr>
         <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
         <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
-        <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || ''}</p>
+        <p>Διάρκεια: ${calculateDuration(thesis.start_date) || ''}</p>
         
     `;
     infoSection.appendChild(footer);
 }
+
+//---------------Helper function to calculate the thesis duration in months and days
+function calculateDuration(startDate) {
+    const currentDate = new Date();
+    const start = new Date(startDate);
+
+    let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
+    let days = currentDate.getDate() - start.getDate();
+
+    // Adjust for negative days (crossed into a new month)
+    if (days < 0) {
+        totalMonths--; // Subtract one month
+        const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
+        days += previousMonthDays;
+    }
+    const monthText = totalMonths > 0
+        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+        : '0 μήνες';
+
+    const dayText = days > 0
+        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+        : '0 μέρες';
+
+    return [monthText, dayText].filter(Boolean).join(' και ');
+}
+
 //-------------- Function for Reseting the Info Section in Theses List ------------- 
 function resetInfoSection() {
     const infoSection = document.getElementById('info-compartment');
