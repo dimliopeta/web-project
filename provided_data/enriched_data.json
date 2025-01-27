@@ -1279,6 +1279,7 @@
       "date_of_change": "2024-02-10",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1288,6 +1289,7 @@
       "date_of_change": "2024-02-15",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 1,
       "gen_assembly_session": 1,
       "cancellation_reason": null
     },
@@ -1297,6 +1299,7 @@
       "date_of_change": "2024-03-15",
       "old_state": "active",
       "new_state": "to-be-reviewed",
+      "ap": null,
       "gen_assembly_session": 2,
       "cancellation_reason": null
     },
@@ -1306,6 +1309,7 @@
       "date_of_change": "2024-04-10",
       "old_state": "to-be-reviewed",
       "new_state": "completed",
+      "ap": null,
       "gen_assembly_session": 3,
       "cancellation_reason": null
     },
@@ -1315,6 +1319,7 @@
       "date_of_change": "2024-08-05",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1324,6 +1329,7 @@
       "date_of_change": "2024-08-10",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 2,
       "gen_assembly_session": 4,
       "cancellation_reason": null
     },
@@ -1333,6 +1339,7 @@
       "date_of_change": "2024-11-15",
       "old_state": "active",
       "new_state": "to-be-reviewed",
+      "ap": null,
       "gen_assembly_session": 5,
       "cancellation_reason": null
     },
@@ -1342,6 +1349,7 @@
       "date_of_change": "2024-12-05",
       "old_state": "to-be-reviewed",
       "new_state": "completed",
+      "ap": null,
       "gen_assembly_session": 6,
       "cancellation_reason": null
     },
@@ -1351,6 +1359,7 @@
       "date_of_change": "2023-11-03",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1360,6 +1369,7 @@
       "date_of_change": "2023-11-10",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 3,
       "gen_assembly_session": 7,
       "cancellation_reason": null
     },
@@ -1369,6 +1379,7 @@
       "date_of_change": "2024-05-10",
       "old_state": "active",
       "new_state": "to-be-reviewed",
+      "ap": null,
       "gen_assembly_session": 8,
       "cancellation_reason": null
     },
@@ -1378,6 +1389,7 @@
       "date_of_change": "2024-06-05",
       "old_state": "to-be-reviewed",
       "new_state": "completed",
+      "ap": null,
       "gen_assembly_session": 9,
       "cancellation_reason": null
     },
@@ -1387,6 +1399,7 @@
       "date_of_change": "2023-10-28",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1396,6 +1409,7 @@
       "date_of_change": "2023-11-10",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 4,
       "gen_assembly_session": 10,
       "cancellation_reason": null
     },
@@ -1405,6 +1419,7 @@
       "date_of_change": "2024-02-20",
       "old_state": "active",
       "new_state": "to-be-reviewed",
+      "ap": null,
       "gen_assembly_session": 11,
       "cancellation_reason": null
     },
@@ -1414,6 +1429,7 @@
       "date_of_change": "2024-03-05",
       "old_state": "to-be-reviewed",
       "new_state": "completed",
+      "ap": null,
       "gen_assembly_session": 12,
       "cancellation_reason": null
     },
@@ -1423,6 +1439,7 @@
       "date_of_change": "2024-12-03",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1432,6 +1449,7 @@
       "date_of_change": "2024-12-15",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 5,
       "gen_assembly_session": 13,
       "cancellation_reason": null
     },
@@ -1441,6 +1459,7 @@
       "date_of_change": "2024-05-25",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1450,6 +1469,7 @@
       "date_of_change": "2024-06-15",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 6,
       "gen_assembly_session": 14,
       "cancellation_reason": null
     },
@@ -1459,6 +1479,7 @@
       "date_of_change": "2024-05-20",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1468,6 +1489,7 @@
       "date_of_change": "2024-06-15",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 7,
       "gen_assembly_session": 15,
       "cancellation_reason": null
     },
@@ -1477,6 +1499,7 @@
       "date_of_change": "2024-11-12",
       "old_state": "active",
       "new_state": "to-be-reviewed",
+      "ap": null,
       "gen_assembly_session": 23,
       "cancellation_reason": null
     },
@@ -1486,6 +1509,7 @@
       "date_of_change": "2024-12-08",
       "old_state": "to-be-reviewed",
       "new_state": "completed",
+      "ap": null,
       "gen_assembly_session": 3,
       "cancellation_reason": null
     },
@@ -1495,6 +1519,7 @@
       "date_of_change": "2025-01-03",
       "old_state": "unassigned",
       "new_state":"assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1504,6 +1529,7 @@
       "date_of_change": "2024-11-25",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1513,6 +1539,7 @@
       "date_of_change": "2024-12-01",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 8,
       "gen_assembly_session": 12,
       "cancellation_reason": null
     },
@@ -1522,6 +1549,7 @@
       "date_of_change": "2024-10-20",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1531,6 +1559,7 @@
       "date_of_change": "2024-11-15",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 9,
       "gen_assembly_session": 15,
       "cancellation_reason": null
     },
@@ -1540,6 +1569,7 @@
       "date_of_change": "2025-01-15",
       "old_state": "active",
       "new_state": "to-be-reviewed",
+      "ap": null,
       "gen_assembly_session": 23,
       "cancellation_reason": null
     },
@@ -1549,6 +1579,7 @@
       "date_of_change": "2024-02-25",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1558,6 +1589,7 @@
       "date_of_change": "2024-03-01",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 10,
       "gen_assembly_session": 12,
       "cancellation_reason": null
     },
@@ -1567,6 +1599,7 @@
       "date_of_change": "2024-04-20",
       "old_state": "active",
       "new_state": "cancelled",
+      "ap": null,
       "gen_assembly_session": 23,
       "cancellation_reason": null
     },
@@ -1576,6 +1609,7 @@
       "date_of_change": "2024-04-20",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1585,6 +1619,7 @@
       "date_of_change": "2024-05-01",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 11,
       "gen_assembly_session": 15,
       "cancellation_reason": null
     },
@@ -1594,6 +1629,7 @@
       "date_of_change": "2024-09-12",
       "old_state": "active",
       "new_state": "to-be-reviewed",
+      "ap": null,
       "gen_assembly_session": 23,
       "cancellation_reason": null
     },
@@ -1603,6 +1639,7 @@
       "date_of_change": "2024-10-08",
       "old_state": "to-be-reviewed",
       "new_state": "completed",
+      "ap": null,
       "gen_assembly_session": 3,
       "cancellation_reason": null
     },
@@ -1612,6 +1649,7 @@
       "date_of_change": "2024-12-01",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1621,6 +1659,7 @@
       "date_of_change": "2024-09-20",
       "old_state": "unassigned",
       "new_state": "assigned",
+      "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
     },
@@ -1630,6 +1669,7 @@
       "date_of_change": "2024-10-20",
       "old_state": "assigned",
       "new_state": "active",
+      "ap": 12,
       "gen_assembly_session": 15,
       "cancellation_reason": null
     },
@@ -1639,6 +1679,7 @@
       "date_of_change": "2025-01-12",
       "old_state": "active",
       "new_state": "to-be-reviewed",
+      "ap": null,
       "gen_assembly_session": 23,
       "cancellation_reason": null
     }

@@ -678,7 +678,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    L.gen_assembly_session AS gen_assembly_session
+                    L.ap AS ap
                 FROM 
                     Theses T
                 JOIN 
