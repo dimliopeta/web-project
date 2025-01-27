@@ -1025,7 +1025,7 @@ function loadExamReportData() {
                     updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
                     updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
                     updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
-                    updateDataField('examReportAssemblyNo', reportData.ap);
+                    updateDataField('examReportAssemblyNo', reportData.gen_assembly_session_date);
                     updateDataField('examReportTitle', reportData.thesis_title);
                     updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
                     updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);

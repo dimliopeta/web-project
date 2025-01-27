@@ -678,7 +678,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    L.ap AS ap
+                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%d-%m-%Y')) AS gen_assembly_session_date                
                 FROM 
                     Theses T
                 JOIN 
@@ -703,7 +703,9 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     Grades AS GC2 ON T.thesis_id = GC2.thesis_id 
                     AND C.member2_id = GC2.professor_id
                 LEFT JOIN
-                    Logs AS L ON T.thesis_id = L.thesis_id
+                    Logs AS L ON T.thesis_id = L.thesis_id 
+                    AND L.old_state = 'assigned' 
+                    AND L.new_state = 'active'
                 WHERE 
                     T.thesis_id = ?;
         `;
