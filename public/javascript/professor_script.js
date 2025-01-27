@@ -25,6 +25,8 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
             } else if (targetId === 'invitations') {
                 loadInvitations();
                 loadInvitationHistory();
+            } else if (targetId === 'stats') {
+                loadCharts();
             }
         }
         const editSection = document.getElementById('edit-section');
@@ -462,7 +464,7 @@ function showInfoSection(thesis) {
     infoSection.appendChild(statusChangeSection);
     infoSection.appendChild(Object.assign(document.createElement('hr'), { classList: 'mb-3 mt-2' }));
 
-    if ( thesis.status !== 'assigned' ) {
+    if (thesis.status !== 'assigned') {
         const committeeSection = document.createElement('section');
         committeeSection.innerHTML = `
             <h4 class="text-center">Μέλη Τριμελούς Επιτροπής</h4>
@@ -476,7 +478,7 @@ function showInfoSection(thesis) {
 
     loadLogs(thesis.thesis_id);
 
-    
+
     const statusSection = document.createElement('section');
     statusSection.innerHTML = `<h4 class="text-center">Διαχείριση Διπλωματικής</h4>`;
 
@@ -505,8 +507,7 @@ function showInfoSection(thesis) {
 
     const footer = document.createElement('section');
     footer.classList.add('text-center');
-    if ( thesis.status ==="active" || thesis.status === "to-be-reviewed")
-    {
+    if (thesis.status === "active" || thesis.status === "to-be-reviewed") {
         footer.innerHTML = `
         <hr>
         <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
@@ -514,29 +515,26 @@ function showInfoSection(thesis) {
         <p>Διάρκεια: ${calculateDuration(thesis.start_date) || ''}</p>
         
     `;
-    } else if (thesis.status === "completed")
-    {
-          footer.innerHTML = `
+    } else if (thesis.status === "completed") {
+        footer.innerHTML = `
         <hr>
         <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
         <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
         <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || ''}</p>`;
     }
-    else if (thesis.status === "cancelled")
-    {
+    else if (thesis.status === "cancelled") {
         footer.innerHTML = `
         <hr>
         <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
         <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
         <p>Ημερομηνία Περάτωσης: Ακυρωμένη</p>`;
     }
-    else if (thesis.status === "assigned")
-    {
+    else if (thesis.status === "assigned") {
         footer.innerHTML = `
         <hr>
         <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
         <p>Ημερομηνία Έναρξης: Η διπλωματική αυτή δεν έχει εκκινήσει ακόμα.</p>`
-        ;
+            ;
     }
     infoSection.appendChild(footer);
 }
@@ -905,7 +903,7 @@ function addStartThesisButton(thesisId, container) {
     });
     container.appendChild(startThesisButton);
 }
- 
+
 //-------------- Function for Managing a Completed Thesis -------------
 function addCompletedSection(thesis, container) {
     const complButtonContainer = document.createElement('div');
@@ -918,8 +916,8 @@ function addCompletedSection(thesis, container) {
             loadExamReportData(thesis.thesis_id);
             examReportSection.style.display = 'block';
 
-        }else {
-        examReportSection.style.display = 'none';
+        } else {
+            examReportSection.style.display = 'none';
         }
     });
 
@@ -2230,6 +2228,65 @@ function handleInvitationAction(invitationId, action) {
         });
 }
 
+//--------------------- Function for Loading the Charts of a professor --------
+function loadCharts() {
+    fetch('/api/stats/professors', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('API returned an error:', data.message);
+            return;
+        }
+
+        const results = data.results; // Πάρε τον πίνακα από το data.results
+        console.log('API Results:', results); // Εκτύπωσε τα αποτελέσματα για έλεγχο
+
+        const labels = results.map(prof => `${prof.name} ${prof.surname}`);
+        const avgGrades = results.map(prof => parseFloat(prof.avg_final_grade));
+        const avgCompletionTimes = results.map(prof => parseFloat(prof.avg_completion_time));
+        const totalTheses = results.map(prof => parseInt(prof.total_theses));
+
+        new Chart(document.getElementById('professorChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Average Grade',
+                        data: avgGrades,
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                    },
+                    {
+                        label: 'Average Completion Time (days)',
+                        data: avgCompletionTimes,
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                    },
+                    {
+                        label: 'Total Theses',
+                        data: totalTheses,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => console.error('Σφάλμα στο loadCharts:', error));
+}
+
+
+
 
 
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
@@ -2240,4 +2297,5 @@ document.addEventListener('DOMContentLoaded', function () {
     loadInvitationHistory();
     loadUnassignedTheses();
     loadAssignedTheses();
+    loadCharts();
 });

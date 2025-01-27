@@ -1165,7 +1165,7 @@ app.post('/api/theses/new', authenticateJWT, uploadPDFOnly.single('pdf'), (req, 
 
         console.log('Thesis created successfully!');
         if (file) {
-            console.log("PDF uploaded:", file); 
+            console.log("PDF uploaded:", file);
         } else {
             console.log("Theses created without pdf");
         }
@@ -1916,7 +1916,8 @@ app.post('/api/add-announcement', (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Announcement added successfully.'});
+            message: 'Announcement added successfully.'
+        });
     });
 });
 
@@ -2272,7 +2273,7 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
         if (results.length === 0) {
             return res.status(200).json({ success: true, grades: [] });
         }
-        res.status(200).json({ success: true, grades: results });  
+        res.status(200).json({ success: true, grades: results });
     });
 
 });
@@ -2472,6 +2473,42 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
         });
     });
 });
+
+
+app.get('/api/stats/professors', authenticateJWT, (req, res) => {
+    const professorId =req.user.userId;
+    const query = `
+    SELECT 
+      p.id AS professor_id,
+      p.name,
+      p.surname,
+      AVG(t.final_grade) AS avg_final_grade,
+      AVG(DATEDIFF(
+          (SELECT l.date_of_change 
+           FROM Logs l 
+           WHERE l.thesis_id = t.thesis_id AND l.new_state = 'completed' LIMIT 1), 
+          t.start_date
+      )) AS avg_completion_time,
+      COUNT(DISTINCT t.thesis_id) AS total_theses
+    FROM 
+      Professors p
+    LEFT JOIN 
+      Theses t ON t.professor_id = p.id
+    LEFT JOIN 
+      Committees c ON c.thesis_id = t.thesis_id AND (c.member1_id = p.id OR c.member2_id = p.id)
+    WHERE 
+      t.status = 'completed' and p.id=?;
+  `;
+
+    db.query(query, [professorId], (err, results) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των πληροφοριών για τα στατιστικά:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        };
+        res.status(200).json({ success: true, results });
+    });
+});
+
 
 //-------------- API to Edit Student contact data via Button --------------
 app.post('/api/updateProfile', authenticateJWT, (req, res) => {
