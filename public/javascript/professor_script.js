@@ -505,13 +505,39 @@ function showInfoSection(thesis) {
 
     const footer = document.createElement('section');
     footer.classList.add('text-center');
-    footer.innerHTML = `
+    if ( thesis.status ==="active" || thesis.status === "to-be-reviewed")
+    {
+        footer.innerHTML = `
         <hr>
         <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
         <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
         <p>Διάρκεια: ${calculateDuration(thesis.start_date) || ''}</p>
         
     `;
+    } else if (thesis.status === "completed")
+    {
+          footer.innerHTML = `
+        <hr>
+        <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
+        <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
+        <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || ''}</p>`;
+    }
+    else if (thesis.status === "cancelled")
+    {
+        footer.innerHTML = `
+        <hr>
+        <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
+        <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
+        <p>Ημερομηνία Περάτωσης: Ακυρωμένη</p>`;
+    }
+    else if (thesis.status === "assigned")
+    {
+        footer.innerHTML = `
+        <hr>
+        <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
+        <p>Ημερομηνία Έναρξης: Η διπλωματική αυτή δεν έχει εκκινήσει ακόμα.</p>`
+        ;
+    }
     infoSection.appendChild(footer);
 }
 

@@ -794,7 +794,6 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
         DATE_FORMAT(examinations.date, '%Y-%m-%d') AS date,
         examinations.type_of_exam, 
         examinations.location,
-        examinations.exam_report 
         FROM examinations 
         WHERE thesis_id = ?;
     `;
