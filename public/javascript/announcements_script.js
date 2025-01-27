@@ -117,7 +117,7 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                     hasMoreAnnouncements = true;
                     currentPage++;
                 }
-            }
+            } 
 
             // Αν υπάρχουν περισσότερες σελίδες, προσθέτουμε το κουμπί "Επόμενη Σελίδα"
             if (hasMoreAnnouncements) {
