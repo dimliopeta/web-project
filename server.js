@@ -3,6 +3,8 @@ const express = require('express');
 const { db, insertData } = require('./config');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+
 
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
@@ -105,6 +107,7 @@ app.get('/login', (req, res) => {
 app.get('/announcements', (req, res) => {
     return res.sendFile(path.join(__dirname, 'views', 'announcements.html'));
 });
+
 //-------------- API for login --------------
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -262,7 +265,14 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
+        // Μετατροπή των αποτελεσμάτων σε string πριν υπολογιστεί το ETag
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, theses: results });
     });
 });
@@ -288,6 +298,14 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των ανατεθημένων διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
+        // Μετατροπή των αποτελεσμάτων σε string πριν υπολογιστεί το ETag
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, theses: results });
     });
 });
@@ -615,7 +633,15 @@ app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των δεδομένων των καταγραφών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, log: results });
+
     });
 });
 
@@ -816,6 +842,13 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
                 message: 'No examination details found for the given thesis.'
             });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.json({ success: true, examination: results[0] });
     });
 });
@@ -987,6 +1020,13 @@ app.get('/api/fetch_all_attachments', authenticateJWT, (req, res) => {
             console.error('Error fetching attachments:', err);
             return res.status(500).json({ success: false, message: 'Server error' });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, attachments: results });
     });
 });
@@ -1005,7 +1045,17 @@ app.get('/api/student', authenticateJWT, (req, res) => {
         if (results.length === 0) {
             return res.status(404).json({ error: 'Student not found' });
         }
-        res.json(results[0]);
+        const student = results[0];
+        const etag = crypto.createHash('sha1').update(JSON.stringify(student)).digest('hex');
+
+        // Έλεγχος αν το ETag του client ταιριάζει με το τρέχον
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Ρύθμιση του ETag header και επιστροφή δεδομένων
+        res.setHeader('ETag', etag);
+        res.json(student);
     });
 });
 
@@ -1035,7 +1085,17 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την αναζήτηση φοιτητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
-        res.status(200).json({ success: true, students: results });
+
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
+        return res.status(200).json({ success: true, students: results });
     });
 });
 //----------------- API for Professor Search Bar for Administration -----------------
@@ -1054,6 +1114,15 @@ app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
     });
 });
@@ -1103,6 +1172,15 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify({userId, results})).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
     });
 });
@@ -1971,6 +2049,15 @@ app.get('/api/get-announcement-details/', (req, res) => {
             });
         }
 
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({
             success: true,
             data: results[0]
@@ -2018,6 +2105,15 @@ app.get('/api/get-all-announcements/', (req, res) => {
                 message: 'No announcements found.'
             });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({
             success: true,
             data: results
@@ -2275,6 +2371,15 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
         if (results.length === 0) {
             return res.status(200).json({ success: true, grades: [] });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades: results });
     });
 
@@ -2304,7 +2409,17 @@ app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
         if (results.length === 0) {
             return res.status(200).json({ success: true, grades: null });
         }
+        
         const grades = results[0];
+        const etag = crypto.createHash('sha1').update(JSON.stringify(grades)).digest('hex'); // Υπολογισμός ETag
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades });
     });
 });
@@ -2498,7 +2613,7 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
     const queryName = `SELECT p.name, p.surname FROM Professors p WHERE p.id = ?`;
 
     db.query(queryStats, [
-        professorId, professorId, professorId, 
+        professorId, professorId, professorId,
         professorId, professorId, professorId,
         professorId, professorId, professorId
     ], (err, statsResults) => {
@@ -2520,6 +2635,16 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
                 statsResults[0].name = professorName.name;
                 statsResults[0].surname = professorName.surname;
             }
+            
+            const etag = crypto.createHash('sha1').update(JSON.stringify(statsResults)).digest('hex');
+
+            // Έλεγχος ETag από τον client
+            if (req.headers['if-none-match'] === etag) {
+                return res.status(304).end(); // 304 Not Modified
+            }
+
+            // Αποστολή δεδομένων με ETag header
+            res.setHeader('ETag', etag);
 
             res.status(200).json({ success: true, results: statsResults });
         });
