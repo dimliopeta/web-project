@@ -2474,40 +2474,56 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     });
 });
 
-
 app.get('/api/stats/professors', authenticateJWT, (req, res) => {
-    const professorId =req.user.userId;
-    const query = `
-    SELECT 
-      p.id AS professor_id,
-      p.name,
-      p.surname,
-      AVG(t.final_grade) AS avg_final_grade,
-      AVG(DATEDIFF(
-          (SELECT l.date_of_change 
-           FROM Logs l 
-           WHERE l.thesis_id = t.thesis_id AND l.new_state = 'completed' LIMIT 1), 
-          t.start_date
-      )) AS avg_completion_time,
-      COUNT(DISTINCT t.thesis_id) AS total_theses
-    FROM 
-      Professors p
-    LEFT JOIN 
-      Theses t ON t.professor_id = p.id
-    LEFT JOIN 
-      Committees c ON c.thesis_id = t.thesis_id AND (c.member1_id = p.id OR c.member2_id = p.id)
-    WHERE 
-      t.status = 'completed' and p.id=?;
-  `;
+    const professorId = req.user.userId;
 
-    db.query(query, [professorId], (err, results) => {
+    // Query για τα στατιστικά
+    const queryStats = `
+        SELECT distinct 
+            AVG(CASE WHEN c.member1_id = ? OR c.member2_id = ? THEN t.final_grade END) AS avg_committee_member_grade,
+            AVG(CASE WHEN t.professor_id = ? THEN t.final_grade END) AS avg_supervisor_grade,
+            COUNT( CASE WHEN t.professor_id = ? THEN t.thesis_id ELSE NULL END) AS total_supervised_theses,
+            COUNT( CASE WHEN c.member1_id = ? OR c.member2_id = ? THEN t.thesis_id ELSE NULL END) AS total_committee_theses,
+        	AVG( CASE WHEN t.professor_id = ? THEN DATEDIFF( (SELECT e.date FROM examinations e WHERE e.thesis_id = t.thesis_id), t.start_date ) ELSE NULL END) AS avg_supervisor_completion_time,
+            AVG( CASE WHEN c.member1_id = ? OR c.member2_id = ? THEN DATEDIFF( (SELECT e.date FROM examinations e WHERE e.thesis_id = t.thesis_id), t.start_date ) ELSE NULL END) AS avg_committee_member_completion_time
+        FROM Theses t
+        LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+        LEFT JOIN Professors p ON t.professor_id = p.id
+        WHERE t.status= 'completed';
+    `;
+
+    // Query για το όνομα και το επώνυμο του καθηγητή
+    const queryName = `SELECT p.name, p.surname FROM Professors p WHERE p.id = ?`;
+
+    db.query(queryStats, [
+        professorId, professorId, professorId, 
+        professorId, professorId, professorId,
+        professorId, professorId, professorId
+    ], (err, statsResults) => {
         if (err) {
             console.error('Σφάλμα κατά την ανάκτηση των πληροφοριών για τα στατιστικά:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
-        };
-        res.status(200).json({ success: true, results });
+        }
+
+        // Ανάκτηση του ονόματος και του επωνύμου του καθηγητή
+        db.query(queryName, [professorId], (err, nameResults) => {
+            if (err) {
+                console.error('Σφάλμα κατά την ανάκτηση του ονόματος του καθηγητή:', err);
+                return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+            }
+
+            // Προσθήκη του ονόματος και του επωνύμου στα αποτελέσματα
+            if (nameResults.length > 0) {
+                const professorName = nameResults[0];
+                statsResults[0].name = professorName.name;
+                statsResults[0].surname = professorName.surname;
+            }
+
+            res.status(200).json({ success: true, results: statsResults });
+        });
     });
 });
+
 
 
 //-------------- API to Edit Student contact data via Button --------------

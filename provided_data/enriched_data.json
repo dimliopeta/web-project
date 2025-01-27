@@ -1222,6 +1222,56 @@
       "finalized": true
     }
   ],
+  "invitations":[
+    {
+      "id": "1",
+      "thesis_id": "12",
+      "professor_id": "9",
+      "status": "pending",
+      "invitation_date": "2024-12-08 00:00:00",
+      "response_date": null
+    },
+    {
+      "id": "2",
+      "thesis_id": "12",
+      "professor_id": "10",
+      "status": "rejected",
+      "invitation_date": "2024-12-04 00:00:00",
+      "response_date": "2024-12-25"
+    },
+    {
+      "id": "3",
+      "thesis_id": "12",
+      "professor_id": "16",
+      "status": "accepted",
+      "invitation_date": "2024-12-04 00:00:00",
+      "response_date": "2024-12-31"
+    },
+    {
+      "id": "4",
+      "thesis_id": "17",
+      "professor_id": "2",
+      "status": "pending",
+      "invitation_date": "2024-12-11 00:00:00",
+      "response_date": null
+    },
+    {
+      "id": "5",
+      "thesis_id": "17",
+      "professor_id": "1",
+      "status": "pending",
+      "invitation_date": "2024-12-17 00:00:00",
+      "response_date": "2024-12-25"
+    },
+    {
+      "id": "6",
+      "thesis_id": "17",
+      "professor_id": "9",
+      "status": "accepted",
+      "invitation_date": "2024-12-25 00:00:00",
+      "response_date": "2024-12-31"
+    }
+  ],
   "logs": [
     {
       "id": 1,

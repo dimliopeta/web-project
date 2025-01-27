@@ -228,10 +228,10 @@ function insertData(filePath = './provided_data/enriched_data.json') {
                     }
                     if (results.length === 0) {
                         const insertQuery = `
-                    INSERT INTO invitations (id, thesis_id, professor_id)
-                    VALUES (?, ?, ?);
+                    INSERT INTO invitations (thesis_id, professor_id, status, invitation_date, response_date)
+                    VALUES (?, ?, ?, ?, ?);
                 `;
-                        db.query(insertQuery, [invitation.id, invitation.thesis_id, invitation.professor_id], (insertErr) => {
+                        db.query(insertQuery, [invitation.thesis_id, invitation.professor_id, invitation.status, invitation.invitation_date, invitation.response_date], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting invitation:', insertErr);
                             } else {

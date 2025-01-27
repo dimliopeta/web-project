@@ -2229,6 +2229,10 @@ function handleInvitationAction(invitationId, action) {
 }
 
 //--------------------- Function for Loading the Charts of a professor --------
+let chartInstance; 
+
+let chartSupervisorGrades, chartCompletionTimes, chartSupervisedTheses;
+
 function loadCharts() {
     fetch('/api/stats/professors', {
         headers: {
@@ -2242,50 +2246,114 @@ function loadCharts() {
             return;
         }
 
-        const results = data.results; // Πάρε τον πίνακα από το data.results
-        console.log('API Results:', results); // Εκτύπωσε τα αποτελέσματα για έλεγχο
+        const results = data.results;
 
+        const avgSupervisorGrades = results.map(prof => parseFloat(prof.avg_supervisor_grade));
+        const avgCommitteeMemberGrades = results.map(prof => parseFloat(prof.avg_committee_member_grade));
+        const avgSupervisorCompletionTimes = results.map(prof => parseFloat(prof.avg_supervisor_completion_time));
+        const avgCommitteeMemberCompletionTimes = results.map(prof => parseFloat(prof.avg_committee_member_completion_time));
+        const totalSupervisedTheses = results.map(prof => prof.total_supervised_theses);
+        const totalCommitteeTheses = results.map(prof => prof.total_committee_theses);
         const labels = results.map(prof => `${prof.name} ${prof.surname}`);
-        const avgGrades = results.map(prof => parseFloat(prof.avg_final_grade));
-        const avgCompletionTimes = results.map(prof => parseFloat(prof.avg_completion_time));
-        const totalTheses = results.map(prof => parseInt(prof.total_theses));
 
-        new Chart(document.getElementById('professorChart'), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Average Grade',
-                        data: avgGrades,
-                        backgroundColor: 'rgba(75, 192, 192, 0.5)'
-                    },
-                    {
-                        label: 'Average Completion Time (days)',
-                        data: avgCompletionTimes,
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)'
-                    },
-                    {
-                        label: 'Total Theses',
-                        data: totalTheses,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        const supervisorGradesChartElement = document.getElementById('chartSupervisorGrades');
+        if (supervisorGradesChartElement) {
+            if (chartSupervisorGrades) {
+                chartSupervisorGrades.destroy();
+            }
+            chartSupervisorGrades = new Chart(supervisorGradesChartElement, {
+                type: 'bar',
+                data: {
+                    labels: labels,  
+                    datasets: [
+                        {
+                            label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Επιβλέπωντας)',
+                            data: avgSupervisorGrades,
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                        },
+                        {
+                            label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Μέλος Τριμελούς)',
+                            data: avgCommitteeMemberGrades,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    aspectRatio: 0.99,
+                    scales: {
+                        y: { beginAtZero: true }
                     }
                 }
+            });
+        }
+
+        const completionTimesChartElement = document.getElementById('chartCompletionTimes');
+        if (completionTimesChartElement) {
+            if (chartCompletionTimes) {
+                chartCompletionTimes.destroy();
             }
-        });
+            chartCompletionTimes = new Chart(completionTimesChartElement, {
+                type: 'bar',
+                data: {
+                    labels: labels,  
+                    datasets: [
+                        {
+                            label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Επιβλέπωντας)',
+                            data: avgSupervisorCompletionTimes,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                        },
+                        {
+                            label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Μέλος Τριμελούς)',
+                            data: avgCommitteeMemberCompletionTimes,
+                            backgroundColor: 'rgba(153, 102, 255, 0.5)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    aspectRatio: 0.99, 
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        const supervisedThesesChartElement = document.getElementById('chartSupervisedTheses');
+        if (supervisedThesesChartElement) {
+            if (chartSupervisedTheses) {
+                chartSupervisedTheses.destroy();
+            }
+            chartSupervisedTheses = new Chart(supervisedThesesChartElement, {
+                type: 'bar',
+                data: {
+                    labels: labels,  
+                    datasets: [
+                        {
+                            label: 'Συνολικός Αριθμός Διπλωματικών (ως Επιβλέπωντας)',
+                            data: totalSupervisedTheses,
+                            backgroundColor: 'rgba(255, 159, 64, 0.5)'
+                        },
+                        {
+                            label: 'Συνολικός Αριθμός Διπλωματικών (ως Μέλος Τριμελούς)',
+                            data: totalCommitteeTheses,
+                            backgroundColor: 'rgba(255, 99, 71, 0.5)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    aspectRatio: 0.99,  
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
     })
-    .catch(error => console.error('Σφάλμα στο loadCharts:', error));
+    .catch(error => console.error('Error in loadCharts:', error));
 }
-
-
 
 
 
