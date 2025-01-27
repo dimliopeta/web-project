@@ -879,7 +879,7 @@ function addStartThesisButton(thesisId, container) {
     });
     container.appendChild(startThesisButton);
 }
-
+ 
 //-------------- Function for Managing a Completed Thesis -------------
 function addCompletedSection(thesis, container) {
     const complButtonContainer = document.createElement('div');
