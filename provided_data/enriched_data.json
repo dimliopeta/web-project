@@ -1706,13 +1706,23 @@
       "member2_id": "1"
     },
     {
-      "thesis_id": "9",
+      "thesis_id": "8",
       "member1_id": "9",
       "member2_id": "8"
     },
     {
       "thesis_id": "11",
       "member1_id": "7",
+      "member2_id": "4"
+    },
+    {
+      "thesis_id": "12",
+      "member1_id": null,
+      "member2_id": null
+    },
+    {
+      "thesis_id": "13",
+      "member1_id": "3",
       "member2_id": "4"
     },
     {
@@ -1726,9 +1736,14 @@
       "member2_id": "10"
     },
     {
-      "thesis_id": "8",
+      "thesis_id": "9",
       "member1_id": "3",
       "member2_id": "6"
+    },
+    {
+      "thesis_id": "17",
+      "member1_id": null,
+      "member2_id": null
     },
     {
       "thesis_id": "19",
