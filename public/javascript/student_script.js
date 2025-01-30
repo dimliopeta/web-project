@@ -579,7 +579,6 @@ function loadThesisInvitations(thesis_id) {
                     container.appendChild(card);
                 });
             } else {
-                console.warn('No invitations found or API error.');
                 container.innerHTML = '<h5 class="text-center">Δεν υπάρχουν προσκλήσεις για τη συγκεκριμένη διπλωματική!</h5>';
             }
         })
@@ -918,8 +917,8 @@ function fetchAndDisplayExaminations(thesis) {
         .then(data => {
             if (data.success) {
                 if (data.data !== null) { // Avoid errors and alerts when status isn't "completed"/"to be reviewed"
-
                     const examData = data.examination;
+                    console.log(examData);
                     examData.type_of_exam =
                         examData.type_of_exam === "in-person"
                             ? "Δια ζώσης"
@@ -927,14 +926,7 @@ function fetchAndDisplayExaminations(thesis) {
                                 ? "Εξ αποστάσως"
                                 : 'Δεν έχει οριστεί.';
 
-                    // Format the date properly
-                    let formattedDate = 'Δεν έχει οριστεί.';
-                    if (examData.date) {
-                        const [year, month, day] = examData.date.split("-");
-                        formattedDate = `${day}-${month}-${year}`;
-                    }
-
-                    document.getElementById('configurationExamDateInfo').innerHTML = formattedDate;
+                    document.getElementById('configurationExamDateInfo').innerHTML = `${examData.exam_date || 'Δεν έχει οριστεί.'}`;
                     document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
                     document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
                 }
@@ -984,6 +976,7 @@ function loadExamReportData() {
             if (data.success) {
                 if (data.examReport.length > 0) {
                     const reportData = data.examReport[0];
+                    console.log(reportData);
 
                     const finalGradeSupervisor = (reportData.supervisor_grade1 * 0.6 + reportData.supervisor_grade2 * 0.15 + reportData.supervisor_grade3 * 0.15 + reportData.supervisor_grade4 * 0.1);
                     const finalGradeCommittee1 = (reportData.committee_member1_grade1 * 0.6 + reportData.committee_member1_grade2 * 0.15 + reportData.committee_member1_grade3 * 0.15 + reportData.committee_member1_grade4 * 0.1);

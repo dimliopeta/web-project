@@ -556,7 +556,8 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         query = `
                 SELECT
                     Theses.*,
-                    COALESCE(DATE_FORMAT(Examinations.date, '%Y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date, 
+                    Theses.final_grade,
+                    COALESCE(DATE_FORMAT(Examinations.date, '%y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date, 
                     COALESCE(Examinations.type_of_exam, 'Δεν έχει οριστεί') AS type_of_exam,
                     COALESCE(Examinations.location, 'Δεν έχει οριστεί') AS exam_location,
                     DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
@@ -753,6 +754,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     C2.surname AS committee_member2_surname,
                     T.title AS thesis_title, 
                     T.summary AS thesis_summary,
+                    T.final_grade AS final_grade,
                     GS.grade1 AS supervisor_grade1,
                     GS.grade2 AS supervisor_grade2,
                     GS.grade3 AS supervisor_grade3,
@@ -765,7 +767,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    L.gen_assembly_session AS gen_assembly_session
+                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%d-%m-%Y')) AS gen_assembly_session_date                
                 FROM 
                     Students S
                 JOIN 
@@ -791,6 +793,8 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                         AND C.member2_id = GC2.professor_id
                 LEFT JOIN
                     Logs AS L ON T.thesis_id = L.thesis_id
+                    AND L.old_state = 'assigned' 
+                    AND L.new_state = 'active' 
                 WHERE 
                     T.student_id = ?;
                         `;
@@ -819,10 +823,10 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
 
     const query = `
         SELECT 
-        DATE_FORMAT(examinations.date, '%Y-%m-%d') AS date,
-        examinations.type_of_exam, 
-        examinations.location,
-        FROM examinations 
+        COALESCE(DATE_FORMAT(Examinations.date, '%d-%m-%Y'), 'Δεν έχει οριστεί') AS exam_date,
+        Examinations.type_of_exam, 
+        Examinations.location
+        FROM Examinations 
         WHERE thesis_id = ?;
     `;
 
@@ -2184,6 +2188,26 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
             finalGrade: final_grade,
             role
         });
+    });
+});
+
+app.get('api/thesis/check-completed', authenticateJWT, (req,res) =>{
+    const studentId = req.user.userId;
+    if(!studentId){
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `SELECT * FROM THESES WHERE student_id =? and status='completed'; `;
+    db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({ success: true, message: 'Η διπλωματική δεν είναι περατωμένη' });
+        }
+        res.status(200).json({ success: true, message: 'Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!' });
     });
 });
 
