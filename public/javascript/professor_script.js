@@ -1680,7 +1680,7 @@ function renderGradeSection(thesisId, container) {
                 const submitGradeButton = createButton(
                     'submit-grade-button',
                     grades.grade !== undefined ? 'Αλλαγή Βαθμού' : 'Καταχώρηση Βαθμού',
-                    ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId, container)
+                    ['btn', 'btn-warning'], () => handleSubmitGradeButtonClick(thesisId, container)
                 );
 
                 buttonContainer.appendChild(submitGradeButton);
@@ -1688,7 +1688,7 @@ function renderGradeSection(thesisId, container) {
                 const finalizeButton = createButton(
                     'finalize-grade-button',
                     'Οριστική Υποβολή',
-                    ['btn', 'btn-danger'], () => handleFinalizeButtonClick(thesisId, container)
+                    ['btn', 'btn-success'], () => handleFinalizeButtonClick(thesisId, container)
                 );
 
                 buttonContainer.appendChild(finalizeButton);
