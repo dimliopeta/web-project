@@ -1,6 +1,6 @@
 
 //--------------------------------------------- STARTUP SETTINGS ---------------------------------------------
-//--------------------Nav Bar Event Listener-----------------------------
+//-------------------- Nav Bar Event Listener -----------------------------
 document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
@@ -43,7 +43,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
         })
         .catch(err => console.error('Error:', err));
 });
-//-----------Load the Dashboard Tab as the Homepage-------------
+//-----------Load the Dashboard Tab as the Homepage ---------------
 window.addEventListener('DOMContentLoaded', () => {
     const defaultTab = document.querySelector('a[href="#administratorDashboardSection"]');
     if (defaultTab) {
@@ -104,7 +104,6 @@ function loadAllTheses() {
                         default:
                             status = 'Άγνωστη';
                     }
-                    
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${thesis.thesis_id || 'Χωρίς ID'}</td>

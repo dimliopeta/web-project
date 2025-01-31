@@ -49,14 +49,14 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
 });
 //-------------- Log-Out Button Event Listener -------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
-    event.preventDefault(); // Αποφυγή της προεπιλεγμένης συμπεριφοράς του link
+    event.preventDefault();
     fetch('/logout', {
         method: 'POST',
-        credentials: 'include' // Περιλαμβάνει cookies
+        credentials: 'include'
     })
         .then(response => {
             if (response.ok) {
-                window.location.href = '/'; // Ανακατεύθυνση στο index
+                window.location.href = '/';
             } else {
                 alert('Η αποσύνδεση απέτυχε.');
             }
@@ -1414,13 +1414,11 @@ function announcementButtonController(thesisId, container) {
                 });
                 container.appendChild(showAnnouncementButton);
             }
-
             const announcementHr = document.createElement('hr');
             container.appendChild(announcementHr);
         })
         .catch((error) => {
             console.error('Error:', error);
-            // Εμφάνιση μηνύματος σφάλματος στον χρήστη, αν χρειάζεται
         });
 }
 
@@ -1578,7 +1576,6 @@ function gradeEnableButton(thesisId, container) {
 }
 //-------------- Function for Loading the Grades if enabled in Theses List-------------
 function loadGradeSection(thesisId, container) {
-    // Δημιουργία wrapper για το περιεχόμενο βαθμολογίας
     const existingContent = document.getElementById('grade-content');
     if (existingContent && container.contains(existingContent)) {
         container.removeChild(existingContent);
@@ -1997,7 +1994,7 @@ function loadLogs(thesis_id) {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-            thesis_id: thesis_id, // Σωστή μεταβλητή
+            thesis_id: thesis_id,
         })
     })
         .then(response => response.json())
@@ -2024,7 +2021,7 @@ function loadLogs(thesis_id) {
 
                 logData.forEach((log) => {
                     const logEntry = document.createElement('div');
-                    logEntry.classList.add('card', 'mb-3', 'shadow-sm'); // Εξασφαλίζει στυλ card
+                    logEntry.classList.add('card', 'mb-3', 'shadow-sm'); 
 
                     logEntry.innerHTML = `
                         <div class="card-body">
@@ -2036,7 +2033,7 @@ function loadLogs(thesis_id) {
                 });
             } else if (data.success && data.log.length === 0) {
                 const noChangesCard = document.createElement('div');
-                noChangesCard.classList.add('card', 'mb-3', 'shadow-sm'); // Στυλ κάρτας
+                noChangesCard.classList.add('card', 'mb-3', 'shadow-sm');
 
                 noChangesCard.innerHTML = `
                     <div class="card-body">
@@ -2088,7 +2085,7 @@ function createButton(id, text, classes, onClick = null) {
 
 
 //--------------------------------------------- INVITATION TAB ---------------------------------------------
-//------------ Function for loading Invitations associated with a specific professor ----------
+//------------ Function for loading Invitations associated with a specific professor -------------
 function loadInvitations() {
     fetch('/api/invitations-for-professor', {
         headers: {
@@ -2228,7 +2225,7 @@ function handleInvitationAction(invitationId, action) {
         });
 }
 
-//--------------------- Function for Loading the Charts of a professor --------
+//--------------------- Function for Loading the Charts of a professor -------------
 let chartInstance; 
 
 let chartSupervisorGrades, chartCompletionTimes, chartSupervisedTheses;

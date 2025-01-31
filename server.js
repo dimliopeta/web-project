@@ -19,7 +19,7 @@ const SECRET_KEY = 'your-secret-key';
 db.query('SELECT 1', (err, results) => {
     if (err) {
         console.error('Database connection failed:', err);
-        process.exit(1); // Τερματισμός του server αν η σύνδεση αποτύχει
+        process.exit(1);
     } else {
         console.log('Database connected successfully!');
     }
@@ -30,7 +30,7 @@ app.use(express.static('public', {
     maxAge: '1d'
 }));
 app.use(express.static(path.join(__dirname, 'views'), {
-    maxAge: '1d', // Cache για 1 ημέρα
+    maxAge: '1d', // Cache ttl 1 day
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,7 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 
 
 //----------------------------- TOKEN-COOKIES CONTROL AND LOGIN ROLE ROUTING -----------------------------
-
 //-------------- JWT token control --------------
 app.use(cookieParser());
 const authenticateJWT = (req, res, next) => {
@@ -269,11 +268,10 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
-        // Μετατροπή των αποτελεσμάτων σε string πριν υπολογιστεί το ETag
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();  
         }
 
         res.setHeader('ETag', etag);
@@ -302,11 +300,10 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των ανατεθημένων διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
-        // Μετατροπή των αποτελεσμάτων σε string πριν υπολογιστεί το ETag
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();  
         }
 
         res.setHeader('ETag', etag);
@@ -507,7 +504,7 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
 
 //----------------- API to fetch Theses Data for both students and professors -----------------
 app.get('/api/theses', authenticateJWT, (req, res) => {
-    const userId = req.user.userId; // Get user Id and Role from the JWT
+    const userId = req.user.userId;
     const role = req.user.role;
 
     let query;
@@ -641,7 +638,7 @@ app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();
         }
 
         res.setHeader('ETag', etag);
@@ -853,7 +850,7 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();  
         }
 
         res.setHeader('ETag', etag);
@@ -1031,7 +1028,7 @@ app.get('/api/fetch_all_attachments', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();  
         }
 
         res.setHeader('ETag', etag);
@@ -1041,7 +1038,7 @@ app.get('/api/fetch_all_attachments', authenticateJWT, (req, res) => {
 
 //----------------- API to fetch Student Data by Id -----------------
 app.get('/api/student', authenticateJWT, (req, res) => {
-    const userId = req.user.userId; // Get user ID from the JWT
+    const userId = req.user.userId;
 
     const query = `SELECT * FROM students WHERE id = ?`;
 
@@ -1056,12 +1053,10 @@ app.get('/api/student', authenticateJWT, (req, res) => {
         const student = results[0];
         const etag = crypto.createHash('sha1').update(JSON.stringify(student)).digest('hex');
 
-        // Έλεγχος αν το ETag του client ταιριάζει με το τρέχον
-        if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
-        }
 
-        // Ρύθμιση του ETag header και επιστροφή δεδομένων
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); 
+        }
         res.setHeader('ETag', etag);
         res.json(student);
     });
@@ -1096,12 +1091,9 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
 
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         return res.status(200).json({ success: true, students: results });
     });
@@ -1124,12 +1116,9 @@ app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
         }
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
     });
@@ -1182,12 +1171,9 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
         }
         const etag = crypto.createHash('sha1').update(JSON.stringify({userId, results})).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
     });
@@ -2059,12 +2045,10 @@ app.get('/api/get-announcement-details/', (req, res) => {
 
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
 
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({
             success: true,
@@ -2115,12 +2099,9 @@ app.get('/api/get-all-announcements/', (req, res) => {
         }
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({
             success: true,
@@ -2155,7 +2136,7 @@ app.post('/api/enable-grading', authenticateJWT, (req, res) => {
 //-----------------API for checking if a thesis has grading enabled----
 app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
-    const professorId = req.user.userId; // Από το JWT
+    const professorId = req.user.userId;
 
     if (!thesisId) {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
@@ -2401,12 +2382,9 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
         }
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades: results });
     });
@@ -2441,12 +2419,9 @@ app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
         const grades = results[0];
         const etag = crypto.createHash('sha1').update(JSON.stringify(grades)).digest('hex'); // Υπολογισμός ETag
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades });
     });
@@ -2530,7 +2505,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     });
 });
 
-//----------------API for Unassigning a Thesis Theme -----------------
+//---------------- API for Unassigning a Thesis Theme -----------------
 app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     const thesisId = parseInt(req.body.thesisId, 10);
 
@@ -2619,10 +2594,10 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     });
 });
 
+//---------------- API for Loading Professor Statistics -----------------
 app.get('/api/stats/professors', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
 
-    // Query για τα στατιστικά
     const queryStats = `
         SELECT distinct 
             AVG(CASE WHEN c.member1_id = ? OR c.member2_id = ? THEN t.final_grade END) AS avg_committee_member_grade,
@@ -2637,7 +2612,6 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
         WHERE t.status= 'completed';
     `;
 
-    // Query για το όνομα και το επώνυμο του καθηγητή
     const queryName = `SELECT p.name, p.surname FROM Professors p WHERE p.id = ?`;
 
     db.query(queryStats, [
@@ -2650,14 +2624,12 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
-        // Ανάκτηση του ονόματος και του επωνύμου του καθηγητή
         db.query(queryName, [professorId], (err, nameResults) => {
             if (err) {
                 console.error('Σφάλμα κατά την ανάκτηση του ονόματος του καθηγητή:', err);
                 return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
             }
 
-            // Προσθήκη του ονόματος και του επωνύμου στα αποτελέσματα
             if (nameResults.length > 0) {
                 const professorName = nameResults[0];
                 statsResults[0].name = professorName.name;
@@ -2666,19 +2638,15 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
             
             const etag = crypto.createHash('sha1').update(JSON.stringify(statsResults)).digest('hex');
 
-            // Έλεγχος ETag από τον client
             if (req.headers['if-none-match'] === etag) {
-                return res.status(304).end(); // 304 Not Modified
+                return res.status(304).end(); 
             }
-
-            // Αποστολή δεδομένων με ETag header
             res.setHeader('ETag', etag);
 
             res.status(200).json({ success: true, results: statsResults });
         });
     });
 });
-
 
 
 //-------------- API to Edit Student contact data via Button --------------
