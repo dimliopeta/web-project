@@ -1315,7 +1315,7 @@ app.put('/api/theses/update', authenticateJWT, uploadPDFOnly.single('pdf'), (req
 
 //----------------- API for Invitations associated with a specific professor-----------------
 app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
-    const professorId = req.user.userId; // Get professor ID from the JWT
+    const professorId = req.user.userId;
 
     if (!professorId) {
         return res.status(400).json({ success: false, message: 'Professor ID is missing.' });
@@ -1566,8 +1566,8 @@ app.get('/api/invitation-history', authenticateJWT, (req, res) => {
                 CONCAT(s.name, ' ', s.surname) AS student_name,
                 s.student_number AS student_number,
                 i.status AS response,
-                DATE(i.invitation_date) AS invitation_date,
-                DATE(i.response_date) AS response_date
+                DATE_FORMAT(i.invitation_date, '%Y-%m-%d') AS invitation_date,
+                DATE_FORMAT(i.response_date, '%Y-%m-%d') AS response_date
             FROM 
                 Invitations i
             LEFT JOIN 

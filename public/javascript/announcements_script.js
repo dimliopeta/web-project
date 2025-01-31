@@ -6,7 +6,6 @@ let hasMoreAnnouncements = true;
 //--------------------------------------------- FUNCTIONS TO LOAD AND HANDLE ANNOUNCEMENTS ---------------------------------------------
 //-------------- Function to Load Announcements -------------
 function loadAnnouncements(filters = {}, exportFormat = null) {
-    console.log("Φόρτωση ανακοινώσεων με φίλτρα:", filters);
 
     if (filters.anDateFrom || filters.anDateTo || filters.examDateFrom || filters.examDateTo) {
         currentPage = 1;
@@ -47,18 +46,15 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                     return match;
                 });
             }
-            console.log('Φιλτραρισμένες ανακοινώσεις:', filteredAnnouncements);
             const startIndex = (currentPage - 1) * announcementsPerPage;
             const endIndex = startIndex + announcementsPerPage;
             const announcementsToLoad = filteredAnnouncements.slice(startIndex, endIndex);
-            console.log('Ανακοινώσεις προς φόρτωση:', announcementsToLoad);
             const container = document.getElementById('announcements-container');
 
             if (currentPage === 1) {
                 container.innerHTML = '';
             }
             if (exportFormat === null) {
-                console.log(exportFormat);
                 announcementsToLoad.forEach(announcement => {
                     const card = `
                      <div class="col-md-4">
@@ -221,7 +217,6 @@ document.getElementById('clear-filters').addEventListener('click', () => {
         examDateFrom: null,
         examDateTo: null
     };
-    console.log(filters);
     loadAnnouncements(filters);
 });
 
