@@ -928,7 +928,7 @@
       "summary": "An analysis of security challenges in cloud computing and proposed solutions.",
       "status": "active",
       "pdf_path": "/theses/2025/cloud_security.pdf",
-      "start_date": "2023-12-01",
+      "start_date": "2022-12-01",
       "nimertis_link": null,
       "grading_enabled": false,
       "final_grade": null
@@ -1852,7 +1852,7 @@
       "thesis_id": "1",
       "date": "2024-04-15",
       "type_of_exam": "online",
-      "location": "zoom"
+      "location": "https://zoom.us"
     },
     {
       "thesis_id": "2",
@@ -1864,7 +1864,7 @@
       "thesis_id": "3",
       "date": "2024-06-10",
       "type_of_exam": "online",
-      "location": "zoomies"
+      "location": "https://zoom.us"
     },
     {
       "thesis_id": "4",
@@ -1876,7 +1876,7 @@
       "thesis_id": "11",
       "date": "2024-12-05",
       "type_of_exam": "online",
-      "location": "zOOOm"
+      "location": "https://zoom.us"
     },
     {
       "thesis_id": "14",
@@ -1888,13 +1888,13 @@
       "thesis_id": "15",
       "date": "2024-10-01",
       "type_of_exam": "online",
-      "location": "Zoooooom"
+      "location": "https://zoom.us"
     },
     {
       "thesis_id": "19",
       "date": "2025-03-15",
       "type_of_exam": "online",
-      "location": "zoom"
+      "location": "https://zoom.us"
     }
   ],
   "announcements": [
