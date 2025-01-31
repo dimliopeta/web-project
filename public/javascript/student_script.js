@@ -167,7 +167,6 @@ function loadStudentThesis() {
                 }
 
             } else if (data.success && data.theses.length == 0) {
-                console.error('No thesis found for this student');
                 updateDataField('thesis_status', "Δεν έχει εκκινήσει");
                 const dashboardFooter = document.getElementById("dashboardFooter");
                 const dashboardBody = document.getElementById("dashboardBody");
@@ -256,8 +255,6 @@ function setupThesisManagement() {
                         alert('Ο σύνδεσμος Νημερτή δεν είναι ακόμα διαθέσιμος.')
                     });
                 }
-                console.log(thesis);
-                console.log(thesis.thesis_id);
                 setupEventListeners(thesis);
                 fetchAndDisplayAttachments(thesis);
                 fetchAndDisplayNimertisLink(thesis);
@@ -388,7 +385,6 @@ function loadSectionsBasedOnStatus() {
                 }
 
             } else if (data.success && data.theses.length == 0) {
-                console.error('No thesis found for this student');
                 const thesis = data.theses[0];
 
                 const infoSection = document.getElementById("infoSection");
@@ -914,7 +910,6 @@ function fetchAndDisplayExaminations(thesis) {
             if (data.success) {
                 if (data.data !== null) { // Avoid errors and alerts when status isn't "completed"/"to be reviewed"
                     const examData = data.examination;
-                    console.log(examData);
                     examData.type_of_exam =
                         examData.type_of_exam === "in-person"
                             ? "Δια ζώσης"
@@ -972,7 +967,6 @@ function loadExamReportData() {
             if (data.success) {
                 if (data.examReport.length > 0) {
                     const reportData = data.examReport[0];
-                    console.log(reportData);
 
                     const finalGradeSupervisor = (reportData.supervisor_grade1 * 0.6 + reportData.supervisor_grade2 * 0.15 + reportData.supervisor_grade3 * 0.15 + reportData.supervisor_grade4 * 0.1);
                     const finalGradeCommittee1 = (reportData.committee_member1_grade1 * 0.6 + reportData.committee_member1_grade2 * 0.15 + reportData.committee_member1_grade3 * 0.15 + reportData.committee_member1_grade4 * 0.1);
