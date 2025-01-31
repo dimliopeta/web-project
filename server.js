@@ -1678,7 +1678,7 @@ app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
             SELECT 
                 l.gen_assembly_session,
                 l.cancellation_reason,
-                DATE_FORMAT(l.date_of_change, '%Y-%m-%d') AS formatted_date_of_change
+                DATE_FORMAT(l.date_of_change, '%d-%m-%Y') AS date_of_change
             FROM Logs l
             WHERE l.thesis_id = ? AND l.new_state = 'cancelled'
             ORDER BY l.date_of_change DESC
