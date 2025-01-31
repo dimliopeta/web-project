@@ -195,12 +195,12 @@ function showInfoSection(thesis) {
                     </div>
                     <div class="card-footer text-muted">
                         <span data-field="dashboardStartDate">
-                            <span class="ps-5">Ημερομηνία έναρξης:</span>
+                            <span class="ps-4">Ημερομηνία έναρξης:</span>
                             <span class="pe-4" data-field="thesis_start_date">${thesis.start_date || 'err'}</span>
                         </span>
                         <span data-field="dashboardDuration">
-                            <span class="ps-5">Διάρκεια:</span>
-                            <span class="pe-4" data-field="thesis_duration">${duration || 'err'}</span>
+                            <span class="ps-4">Διάρκεια:</span>
+                            <span class="pe-3" data-field="thesis_duration">${duration || 'err'}</span>
                         </span>
                     </div>
                 </div>
@@ -487,7 +487,6 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('thesisCompletedData').innerText = `Η διπλωματική ολοκληρώθηκε!`;
-                    document.getElementById("completeThesisButton").style.display = "none";
                     loadAllTheses();
                 })
                 .catch(error => console.error('Error setting thesis as completed:', error));
