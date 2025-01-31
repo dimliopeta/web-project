@@ -849,6 +849,8 @@ function addStartThesisButton(thesisId, container) {
 
         const startNumberInput = document.createElement('input');
         startNumberInput.type = 'number';
+        startNumberInput.min = "1";
+        startNumberInput.step = '1';
         startNumberInput.id = 'start-number';
         startNumberInput.classList.add('form-control', 'mb-2');
         startNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
@@ -1025,6 +1027,8 @@ function addActiveSection(thesis, container) {
 
             const cancellationNumberInput = document.createElement('input');
             cancellationNumberInput.type = 'number';
+            cancellationNumberInput.min = '1';
+            cancellationNumberInput.step = '1';
             cancellationNumberInput.id = 'cancellation-number';
             cancellationNumberInput.classList.add('form-control', 'mb-2');
             cancellationNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
@@ -1118,7 +1122,9 @@ function addActiveSection(thesis, container) {
             aaLabel.classList.add('form-label');
 
             const aaInput = document.createElement('input');
-            aaInput.type = 'text';
+            aaInput.type = 'number';
+            aaInput.min = '1';
+            aaInput.step = '1';
             aaInput.classList.add('form-control', 'mb-2');
             aaInput.placeholder = 'A/A Γενικής Συνέλευσης';
 
