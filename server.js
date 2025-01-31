@@ -458,15 +458,18 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
                 CM2.name AS committee_member2_name,
                 CM2.surname AS committee_member2_surname,
                 CM2.email AS committee_member2_email,
-                G.professor_id AS grade_professor_id,
-                G.grade1,
-                G.grade2,
-                G.grade3,
-                G.grade4,
+
+                GROUP_CONCAT(G.professor_id) AS grade_professor_ids,
+                GROUP_CONCAT(G.grade1) AS grades1,
+                GROUP_CONCAT(G.grade2) AS grades2,
+                GROUP_CONCAT(G.grade3) AS grades3,
+                GROUP_CONCAT(G.grade4) AS grades4,
+
                 CASE 
                     WHEN COUNT(G.grade_id) = 3 AND SUM(G.finalized) = 3 THEN TRUE
                     ELSE FALSE
                 END AS all_grades_finalized
+
             FROM 
                 Theses T
             LEFT JOIN 
@@ -481,15 +484,16 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
                 Professors CM2 ON C.member2_id = CM2.id
             LEFT JOIN 
                 Grades G ON T.thesis_id = G.thesis_id
+
             WHERE 
                 T.status IN ('active', 'to-be-reviewed')
+
             GROUP BY  
                 T.thesis_id, T.title, T.summary, T.status, T.pdf_path, T.start_date, T.nimertis_link, 
                 S.id, S.name, S.surname, S.email, S.student_number, 
                 P.id, P.name, P.surname, P.email, 
                 C.member1_id, CM1.name, CM1.surname, CM1.email, 
-                C.member2_id, CM2.name, CM2.surname, CM2.email,
-                G.professor_id, G.grade1, G.grade2, G.grade3, G.grade4;
+                C.member2_id, CM2.name, CM2.surname, CM2.email;
 `;
 
     db.query(query, (err, results) => {

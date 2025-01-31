@@ -487,6 +487,7 @@ administratorThesesManagementSection.addEventListener('click', (event) => {
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('thesisCompletedData').innerText = `Η διπλωματική ολοκληρώθηκε!`;
+                    document.getElementById("completeThesisButton").style.display = "none";
                     loadAllTheses();
                 })
                 .catch(error => console.error('Error setting thesis as completed:', error));

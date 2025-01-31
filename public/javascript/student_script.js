@@ -294,6 +294,7 @@ function loadSectionsBasedOnStatus() {
                 const configurationDuration = document.querySelector('[data-field="configurationDuration"]');
                 const configurationStartDate = document.querySelector('[data-field="configurationStartDate"]');
                 const configurationExamDate = document.querySelector('[data-field="configurationExamDate"]');
+                const configurationEndDate = document.querySelector('[data-field="configurationEndDate"]');
 
                 // Show all sections as default
                 infoSection.style.display = "block";
@@ -311,14 +312,21 @@ function loadSectionsBasedOnStatus() {
                 if (thesis.start_date && thesis.status === "active") {
                     configurationDuration.style.display = 'inline';
                     configurationExamDate.style.display = 'none';
+                    configurationEndDate.style.display = 'none';
                     const duration = calculateDuration(thesis.start_date);
                     updateDataField('thesis_duration', duration);
-                } else if (thesis.start_date && (thesis.status === "to-be-reviewed" || thesis.status === "completed")) {
+                } else if (thesis.start_date && thesis.status === "to-be-reviewed") {
                     configurationDuration.style.display = 'none';
                     configurationExamDate.style.display = 'inline';
+                    configurationEndDate.style.display = 'none';
+                } else if (thesis.start_date && thesis.status === "completed") {
+                    configurationDuration.style.display = 'none';
+                    configurationExamDate.style.display = 'none';
+                    configurationEndDate.style.display = 'inline';
                 } else {
                     configurationDuration.style.display = 'none';
                     configurationExamDate.style.display = 'none';
+                    configurationEndDate.style.display = 'none';
                 }
 
                 switch (thesis.status) {
@@ -656,9 +664,18 @@ function setupEventListeners(thesis) {
 
     // Examination Data upload button event listener
     document.getElementById('configurationExamDataSubmitButton').addEventListener('click', function () {
-        const examDate = document.getElementById('configurationExamDateInputBox').value;
         const typeOfExam = document.getElementById('configurationTypeOfExamInputBox').value;
         const examLocation = document.getElementById('configurationExamLocationInputBox').value;
+        const examDateInput = document.getElementById('configurationExamDateInputBox');
+        const examDate = examDateInput.value;
+
+        const today = new Date().toISOString().split('T')[0];
+        if (examDate < today) {
+            alert('Η ημερομηνία εξέτασης πρέπει να είναι μελλοντική.');
+            examDateInput.value = "";
+            return;
+        }
+
         let typeOfExamProper = null;
         if (!examDate || !typeOfExam || !examLocation) {
             alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
