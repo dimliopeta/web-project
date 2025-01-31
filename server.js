@@ -26,7 +26,11 @@ db.query('SELECT 1', (err, results) => {
 });
 //-------------- Set Index file and the public folder --------------
 app.use(express.static('public', {
-    index: 'index.html'
+    index: 'index.html',
+    maxAge: '1d'
+}));
+app.use(express.static(path.join(__dirname, 'views'), {
+    maxAge: '1d', // Cache για 1 ημέρα
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
