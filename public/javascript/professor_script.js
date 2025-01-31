@@ -864,6 +864,9 @@ function addStartThesisButton(thesisId, container) {
         startDateInput.id = 'start-date';
         startDateInput.classList.add('form-control', 'mb-2');
         startDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
+        // Set max attribute to today
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.max = today;
         startThesisForm.appendChild(startDateInput);
 
         const confirmStartButton = createButton('confirm-start-button', 'Επιβεβαίωση Εκκίνησης', ['btn', 'btn-primary'], () => {
@@ -2021,7 +2024,7 @@ function loadLogs(thesis_id) {
 
                 logData.forEach((log) => {
                     const logEntry = document.createElement('div');
-                    logEntry.classList.add('card', 'mb-3', 'shadow-sm'); 
+                    logEntry.classList.add('card', 'mb-3', 'shadow-sm');
 
                     logEntry.innerHTML = `
                         <div class="card-body">
@@ -2226,7 +2229,7 @@ function handleInvitationAction(invitationId, action) {
 }
 
 //--------------------- Function for Loading the Charts of a professor -------------
-let chartInstance; 
+let chartInstance;
 
 let chartSupervisorGrades, chartCompletionTimes, chartSupervisedTheses;
 
@@ -2236,120 +2239,120 @@ function loadCharts() {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success) {
-            console.error('API returned an error:', data.message);
-            return;
-        }
-
-        const results = data.results;
-
-        const avgSupervisorGrades = results.map(prof => parseFloat(prof.avg_supervisor_grade));
-        const avgCommitteeMemberGrades = results.map(prof => parseFloat(prof.avg_committee_member_grade));
-        const avgSupervisorCompletionTimes = results.map(prof => parseFloat(prof.avg_supervisor_completion_time));
-        const avgCommitteeMemberCompletionTimes = results.map(prof => parseFloat(prof.avg_committee_member_completion_time));
-        const totalSupervisedTheses = results.map(prof => prof.total_supervised_theses);
-        const totalCommitteeTheses = results.map(prof => prof.total_committee_theses);
-        const labels = results.map(prof => `${prof.name} ${prof.surname}`);
-
-        const supervisorGradesChartElement = document.getElementById('chartSupervisorGrades');
-        if (supervisorGradesChartElement) {
-            if (chartSupervisorGrades) {
-                chartSupervisorGrades.destroy();
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('API returned an error:', data.message);
+                return;
             }
-            chartSupervisorGrades = new Chart(supervisorGradesChartElement, {
-                type: 'bar',
-                data: {
-                    labels: labels,  
-                    datasets: [
-                        {
-                            label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Επιβλέπωντας)',
-                            data: avgSupervisorGrades,
-                            backgroundColor: 'rgba(75, 192, 192, 0.5)'
-                        },
-                        {
-                            label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Μέλος Τριμελούς)',
-                            data: avgCommitteeMemberGrades,
-                            backgroundColor: 'rgba(255, 99, 132, 0.5)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    aspectRatio: 0.99,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
 
-        const completionTimesChartElement = document.getElementById('chartCompletionTimes');
-        if (completionTimesChartElement) {
-            if (chartCompletionTimes) {
-                chartCompletionTimes.destroy();
-            }
-            chartCompletionTimes = new Chart(completionTimesChartElement, {
-                type: 'bar',
-                data: {
-                    labels: labels,  
-                    datasets: [
-                        {
-                            label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Επιβλέπωντας)',
-                            data: avgSupervisorCompletionTimes,
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
-                        },
-                        {
-                            label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Μέλος Τριμελούς)',
-                            data: avgCommitteeMemberCompletionTimes,
-                            backgroundColor: 'rgba(153, 102, 255, 0.5)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    aspectRatio: 0.99, 
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
+            const results = data.results;
 
-        const supervisedThesesChartElement = document.getElementById('chartSupervisedTheses');
-        if (supervisedThesesChartElement) {
-            if (chartSupervisedTheses) {
-                chartSupervisedTheses.destroy();
-            }
-            chartSupervisedTheses = new Chart(supervisedThesesChartElement, {
-                type: 'bar',
-                data: {
-                    labels: labels,  
-                    datasets: [
-                        {
-                            label: 'Συνολικός Αριθμός Διπλωματικών (ως Επιβλέπωντας)',
-                            data: totalSupervisedTheses,
-                            backgroundColor: 'rgba(255, 159, 64, 0.5)'
-                        },
-                        {
-                            label: 'Συνολικός Αριθμός Διπλωματικών (ως Μέλος Τριμελούς)',
-                            data: totalCommitteeTheses,
-                            backgroundColor: 'rgba(255, 99, 71, 0.5)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    aspectRatio: 0.99,  
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+            const avgSupervisorGrades = results.map(prof => parseFloat(prof.avg_supervisor_grade));
+            const avgCommitteeMemberGrades = results.map(prof => parseFloat(prof.avg_committee_member_grade));
+            const avgSupervisorCompletionTimes = results.map(prof => parseFloat(prof.avg_supervisor_completion_time));
+            const avgCommitteeMemberCompletionTimes = results.map(prof => parseFloat(prof.avg_committee_member_completion_time));
+            const totalSupervisedTheses = results.map(prof => prof.total_supervised_theses);
+            const totalCommitteeTheses = results.map(prof => prof.total_committee_theses);
+            const labels = results.map(prof => `${prof.name} ${prof.surname}`);
+
+            const supervisorGradesChartElement = document.getElementById('chartSupervisorGrades');
+            if (supervisorGradesChartElement) {
+                if (chartSupervisorGrades) {
+                    chartSupervisorGrades.destroy();
                 }
-            });
-        }
-    })
-    .catch(error => console.error('Error in loadCharts:', error));
+                chartSupervisorGrades = new Chart(supervisorGradesChartElement, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Επιβλέπωντας)',
+                                data: avgSupervisorGrades,
+                                backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                            },
+                            {
+                                label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Μέλος Τριμελούς)',
+                                data: avgCommitteeMemberGrades,
+                                backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        aspectRatio: 0.99,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            const completionTimesChartElement = document.getElementById('chartCompletionTimes');
+            if (completionTimesChartElement) {
+                if (chartCompletionTimes) {
+                    chartCompletionTimes.destroy();
+                }
+                chartCompletionTimes = new Chart(completionTimesChartElement, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Επιβλέπωντας)',
+                                data: avgSupervisorCompletionTimes,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                            },
+                            {
+                                label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Μέλος Τριμελούς)',
+                                data: avgCommitteeMemberCompletionTimes,
+                                backgroundColor: 'rgba(153, 102, 255, 0.5)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        aspectRatio: 0.99,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            const supervisedThesesChartElement = document.getElementById('chartSupervisedTheses');
+            if (supervisedThesesChartElement) {
+                if (chartSupervisedTheses) {
+                    chartSupervisedTheses.destroy();
+                }
+                chartSupervisedTheses = new Chart(supervisedThesesChartElement, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Συνολικός Αριθμός Διπλωματικών (ως Επιβλέπωντας)',
+                                data: totalSupervisedTheses,
+                                backgroundColor: 'rgba(255, 159, 64, 0.5)'
+                            },
+                            {
+                                label: 'Συνολικός Αριθμός Διπλωματικών (ως Μέλος Τριμελούς)',
+                                data: totalCommitteeTheses,
+                                backgroundColor: 'rgba(255, 99, 71, 0.5)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        aspectRatio: 0.99,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => console.error('Error in loadCharts:', error));
 }
 
 
