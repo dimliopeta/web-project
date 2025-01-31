@@ -26,7 +26,7 @@ function loadData(filePath) {
 }
 
 //--------------- Function to load data into the DB ---------------
-function insertData(filePath = './provided_data/data.json') {
+function insertData(filePath = './provided_data/enriched_data.json') {
     const data = loadData(filePath); // Load data from the specified file
     if (data !== null) {
 
@@ -157,8 +157,8 @@ function insertData(filePath = './provided_data/data.json') {
                     }
                     if (results.length === 0) {
                         const insertQuery = `
-                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?);
+                    INSERT INTO theses (professor_id, student_id, title, summary, status, pdf_path, start_date, nimertis_link, grading_enabled, final_grade)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 `;
                         db.query(insertQuery, [
                             thesis.professor_id,
@@ -167,7 +167,10 @@ function insertData(filePath = './provided_data/data.json') {
                             thesis.summary,
                             thesis.status,
                             thesis.pdf_path || null,
-                            thesis.start_date
+                            thesis.start_date,
+                            thesis.nimertis_link,
+                            thesis.grading_enabled,
+                            thesis.final_grade
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting thesis:', insertErr);
@@ -225,10 +228,10 @@ function insertData(filePath = './provided_data/data.json') {
                     }
                     if (results.length === 0) {
                         const insertQuery = `
-                    INSERT INTO invitations (id, thesis_id, professor_id)
-                    VALUES (?, ?, ?);
+                    INSERT INTO invitations (thesis_id, professor_id, status, invitation_date, response_date)
+                    VALUES (?, ?, ?, ?, ?);
                 `;
-                        db.query(insertQuery, [invitation.id, invitation.thesis_id, invitation.professor_id], (insertErr) => {
+                        db.query(insertQuery, [invitation.thesis_id, invitation.professor_id, invitation.status, invitation.invitation_date, invitation.response_date], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting invitation:', insertErr);
                             } else {
@@ -241,7 +244,38 @@ function insertData(filePath = './provided_data/data.json') {
         } else {
             console.warn('No invitations data found in the file.');
         }
+        //------------- Insert Logs
+        if (data.logs) {
+            data.logs.forEach(log => {
+                const query = `SELECT * FROM LOGS WHERE id = ?`;
+                db.query(query, [log.id], (err, results) => {
+                    if (err) {
+                        console.error('Error checking for duplicate logs: ', err);
+                        return;
+                    }
+                    if (results.length === 0) {
+                        const insertQuery = `
+                    INSERT INTO LOGS ( thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
+                    VALUES ( ?, ?, ?, ?, ?, ?);`;
+                        db.query(insertQuery, [
+                            log.thesis_id,
+                            log.date_of_change,
+                            log.old_state,
+                            log.new_state,
+                            log.gen_assembly_session,
+                            log.cancellation_reason
+                        ], (insertErr) => {
+                            if (insertErr) {
+                                console.error('Error inserting log:', insertErr);
+                            } else {
+                                console.log(`Log ${log.id} added successfully.`);
+                            }
+                        });
+                    }
+                });
+            })
 
+        }
         //--------------- Insert Examinations
         if (data.examinations) {
             data.examinations.forEach(examination => {
@@ -253,15 +287,14 @@ function insertData(filePath = './provided_data/data.json') {
                     }
                     if (results.length === 0) {
                         const insertQuery = `
-                    INSERT INTO EXAMINATIONS (thesis_id, date, type_of_exam, location, exam_report)
-                    VALUES (?, ?, ?, ?, ?);
+                    INSERT INTO EXAMINATIONS (thesis_id, date, type_of_exam, location)
+                    VALUES (?, ?, ?, ?);
                 `;
                         db.query(insertQuery, [
                             examination.thesis_id,
                             examination.date,
                             examination.type_of_exam,
                             examination.location,
-                            examination.exam_report
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting examination:', insertErr);
@@ -275,39 +308,32 @@ function insertData(filePath = './provided_data/data.json') {
         } else {
             console.warn('No examinations data found in the file.');
         }
-
-        //--------------- Insert Logs
-        if (data.logs) {
-            data.logs.forEach(log => {
-                const query = `SELECT * FROM LOGS WHERE logs.id=?;`;
-                db.query(query, [log.id], (err, results) => {
+        if (data.announcements) {
+            data.announcements.forEach(announcement => {
+                const query = `SELECT * FROM ANNOUNCEMENTS WHERE thesis_id=?;`;
+                db.query(query, [announcement.thesis_id], (err, results) => {
                     if (err) {
-                        console.error('Error checking for duplicate logs: ', err);
+                        console.error('Error checking for duplicate examinations: ', err);
                         return;
                     }
                     if (results.length === 0) {
                         const insertQuery = `
-                        INSERT INTO LOGS (id, thesis_id, date_of_change, old_state, new_state)
-                        VALUES (?, ?, ?, ?, ?);
-                    `;
+                    INSERT INTO ANNOUNCEMENTS (thesis_id, announcement_date)
+                    VALUES (?, ?);
+                `;
                         db.query(insertQuery, [
-                            log.id,
-                            log.thesis_id,
-                            log.date_of_change,
-                            log.old_state,
-                            log.new_state
+                            announcement.thesis_id,
+                            announcement.announcement_date
                         ], (insertErr) => {
                             if (insertErr) {
-                                console.error('Error inserting logs:', insertErr);
+                                console.error('Error inserting announcement:', insertErr);
                             } else {
-                                console.log(`Log ${log.id} added successfully.`);
+                                console.log(`Announcement for thesis ${announcement.thesis_id} added successfully.`);
                             }
                         });
                     }
                 });
             });
-        } else {
-            console.warn('No logs data found in the file.');
         }
 
         //--------------- Insert Grades

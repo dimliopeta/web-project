@@ -1194,21 +1194,21 @@
     {
       "thesis_id": "2",
       "professor_id": "1",
-      "student_id": null,
+      "student_id": "5",
       "title": "The Role of Normal Software Behavior in Ensuring System Reliability and Security",
       "summary": "The Role of Normal Software Behavior in Ensuring System Reliability and Security is enormous so we have to study it.",
-      "status": "unassigned",
+      "status": "completed",
       "pdf_path": null,
       "start_date": null,
       "exam_date": null
     },
     {
       "thesis_id": "3",
-      "professor_id": "2",
-      "student_id": null,
+      "professor_id": "1",
+      "student_id": "4",
       "title": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design",
       "summary": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design is can be great so we have to do it.",
-      "status": "unassigned",
+      "status": "completed",
       "pdf_path": null,
       "start_date": null,
       "exam_date": null
@@ -1216,23 +1216,23 @@
     {
       "thesis_id": "4",
       "professor_id": "1",
-      "student_id": null,
+      "student_id": "15",
       "title": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms",
       "summary": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms can really help with computers so we have to understand it.",
-      "status": "unassigned",
+      "status": "to-be-reviewed",
       "pdf_path": null,
-      "start_date": null,
+      "start_date": "2025-1-01",
       "exam_date": null
     },
     {
       "thesis_id": "5",
       "professor_id": "1",
-      "student_id": null,
+      "student_id": "7",
       "title": "Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science",
       "summary": "Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science is a great idea, so it's time we investigated.",
-      "status": "unassigned",
+      "status": "active",
       "pdf_path": null,
-      "start_date": null,
+      "start_date": "2025-1-05",
       "exam_date": null
     },
     {
@@ -1249,10 +1249,10 @@
     {
       "thesis_id": "7",
       "professor_id": "1",
-      "student_id": null,
+      "student_id": "20",
       "title": "Advancing Natural Language Processing with Zero-Shot Learning",
       "summary": "Zero-shot learning enables machine learning models to perform tasks in domains where no labeled data is available. This thesis investigates state-of-the-art approaches to zero-shot learning in natural language processing (NLP), leveraging models like GPT and BERT. It examines their ability to generalize across languages and tasks, highlighting challenges in low-resource scenarios. A proposed framework improves accuracy by combining zero-shot learning with unsupervised domain adaptation, demonstrating effectiveness in real-world text classification tasks.",
-      "status": "unassigned",
+      "status": "assigned",
       "pdf_path": null,
       "start_date": null,
       "exam_date": null
@@ -1260,10 +1260,10 @@
     {
       "thesis_id": "8",
       "professor_id": "1",
-      "student_id": null,
+      "student_id": "25",
       "title": "Blockchain in Secure Voting Systems: A Practical Evaluation",
       "summary": "Blockchain technology offers promising solutions for secure and transparent voting systems. This thesis evaluates various blockchain platforms to assess their suitability for implementing secure e-voting protocols. By creating a prototype system, the research demonstrates how features like decentralized ledgers and cryptographic security can ensure voter anonymity and integrity. The study also addresses scalability and user accessibility, identifying key hurdles and proposing optimizations for wider adoption.",
-      "status": "unassigned",
+      "status": "cancelled",
       "pdf_path": null,
       "start_date": null,
       "exam_date": null
@@ -1271,12 +1271,12 @@
     {
       "thesis_id": "9",
       "professor_id": "1",
-      "student_id": null,
+      "student_id": "10",
       "title": "Quantum Computing Algorithms for Cryptographic Challenges",
       "summary": "This thesis delves into the implications of quantum computing on modern cryptographic systems. It reviews quantum algorithms like Shor’s algorithm for factoring integers and Grover’s algorithm for search, analyzing their potential to break widely used encryption protocols. Additionally, it explores quantum-resistant algorithms that ensure security in a post-quantum world. The study emphasizes the urgency of transitioning to quantum-safe encryption standards for critical applications.",
-      "status": "unassigned",
+      "status": "active",
       "pdf_path": null,
-      "start_date": null,
+      "start_date": "2020-01-01",
       "exam_date": null
     }
   ],

@@ -13,8 +13,6 @@ document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
         const targetSection = document.getElementById(targetId);
         if (targetSection) {
             targetSection.style.display = 'block';
-
-
         }
         document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
             link.classList.remove('active');
@@ -205,14 +203,14 @@ function calculateDuration(startDate) {
         totalMonths--; // Subtract one month
         const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
         days += previousMonthDays;
-    } 
+    }
     const monthText = totalMonths > 0
-    ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
-    : '0 μήνες';
+        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+        : '0 μήνες';
 
-const dayText = days > 0
-    ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
-    : '0 μέρες';
+    const dayText = days > 0
+        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+        : '0 μέρες';
 
     return [monthText, dayText].filter(Boolean).join(' και ');
 }
@@ -581,7 +579,6 @@ function loadThesisInvitations(thesis_id) {
                     container.appendChild(card);
                 });
             } else {
-                console.warn('No invitations found or API error.');
                 container.innerHTML = '<h5 class="text-center">Δεν υπάρχουν προσκλήσεις για τη συγκεκριμένη διπλωματική!</h5>';
             }
         })
@@ -642,7 +639,7 @@ function setupEventListeners(thesis) {
         const configurationUploadLinkInputBox = document.getElementById('configurationUploadLinkInputBox').value;
         if (configurationUploadLinkInputBox) {
             if (thesis) {
-                uploadLink(configurationUploadLinkInputBox, thesis); 
+                uploadLink(configurationUploadLinkInputBox, thesis);
             } else {
                 alert('Δεν είναι διαθέσιμες οι πληροφορίες γι αυτή τη διπλωματική.');
             }
@@ -857,7 +854,7 @@ function fetchAndDisplayAttachments(thesis) {
                     if (noLinksMessage) {
                         noLinksMessage.remove();
                     }
-                
+
                     links.forEach(linkObj => {
                         const li = document.createElement('li');
                         const link = document.createElement('a');
@@ -870,10 +867,10 @@ function fetchAndDisplayAttachments(thesis) {
                             // If link_path is relative, prepend 'https://'
                             link.href = `https://${linkObj.link_path}`;
                         }
-                        link.textContent = linkObj.link_path; 
+                        link.textContent = linkObj.link_path;
                         link.target = '_blank'; // Open the link in a new tab
                         link.rel = 'noopener noreferrer';
-                
+
                         li.appendChild(link);
                         configurationUploadedLinksList.appendChild(li);
                     });
@@ -920,8 +917,8 @@ function fetchAndDisplayExaminations(thesis) {
         .then(data => {
             if (data.success) {
                 if (data.data !== null) { // Avoid errors and alerts when status isn't "completed"/"to be reviewed"
-
                     const examData = data.examination;
+                    console.log(examData);
                     examData.type_of_exam =
                         examData.type_of_exam === "in-person"
                             ? "Δια ζώσης"
@@ -929,14 +926,7 @@ function fetchAndDisplayExaminations(thesis) {
                                 ? "Εξ αποστάσως"
                                 : 'Δεν έχει οριστεί.';
 
-                    // Format the date properly
-                    let formattedDate = 'Δεν έχει οριστεί.';
-                    if (examData.date) {
-                        const [year, month, day] = examData.date.split("-");
-                        formattedDate = `${day}-${month}-${year}`;
-                    }
-
-                    document.getElementById('configurationExamDateInfo').innerHTML = formattedDate;
+                    document.getElementById('configurationExamDateInfo').innerHTML = `${examData.exam_date || 'Δεν έχει οριστεί.'}`;
                     document.getElementById('configurationTypeOfExamInfo').innerHTML = `${examData.type_of_exam || 'Δεν έχει οριστεί.'}`;
                     document.getElementById('configurationExamLocationInfo').innerHTML = `${examData.location || 'Δεν έχει οριστεί.'}`;
                 }
@@ -986,6 +976,7 @@ function loadExamReportData() {
             if (data.success) {
                 if (data.examReport.length > 0) {
                     const reportData = data.examReport[0];
+                    console.log(reportData);
 
                     const finalGradeSupervisor = (reportData.supervisor_grade1 * 0.6 + reportData.supervisor_grade2 * 0.15 + reportData.supervisor_grade3 * 0.15 + reportData.supervisor_grade4 * 0.1);
                     const finalGradeCommittee1 = (reportData.committee_member1_grade1 * 0.6 + reportData.committee_member1_grade2 * 0.15 + reportData.committee_member1_grade3 * 0.15 + reportData.committee_member1_grade4 * 0.1);
@@ -1027,7 +1018,7 @@ function loadExamReportData() {
                     updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
                     updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
                     updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
-                    updateDataField('examReportAssemblyNo', reportData.gen_assembly_session);
+                    updateDataField('examReportAssemblyNo', reportData.gen_assembly_session_date);
                     updateDataField('examReportTitle', reportData.thesis_title);
                     updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
                     updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
@@ -1220,7 +1211,7 @@ document.querySelector('#student_profile').addEventListener('click', function (e
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ [fieldName]: newValue }) 
+                body: JSON.stringify({ [fieldName]: newValue })
             })
                 .then(response => {
                     if (!response.ok) {
@@ -1251,4 +1242,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadExamReportData();
     loadLogsData();
 });
+
+// Cache πραγματα
 

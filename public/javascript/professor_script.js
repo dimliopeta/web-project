@@ -25,6 +25,8 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
             } else if (targetId === 'invitations') {
                 loadInvitations();
                 loadInvitationHistory();
+            } else if (targetId === 'stats') {
+                loadCharts();
             }
         }
         const editSection = document.getElementById('edit-section');
@@ -428,6 +430,9 @@ function showInfoSection(thesis) {
         case 'active':
             status = 'Ενεργή';
             break;
+        case 'cancelled':
+            status = 'Ακυρωμένη';
+            break;
         default:
             status = 'Άγνωστη Κατάσταση';
     }
@@ -459,9 +464,7 @@ function showInfoSection(thesis) {
     infoSection.appendChild(statusChangeSection);
     infoSection.appendChild(Object.assign(document.createElement('hr'), { classList: 'mb-3 mt-2' }));
 
-    loadLogs(thesis.thesis_id);
-
-    if (thesis.status === 'active' || thesis.status === 'to-be-reviewed') {
+    if (thesis.status !== 'assigned') {
         const committeeSection = document.createElement('section');
         committeeSection.innerHTML = `
             <h4 class="text-center">Μέλη Τριμελούς Επιτροπής</h4>
@@ -473,6 +476,9 @@ function showInfoSection(thesis) {
         infoSection.appendChild(committeeSection);
     }
 
+    loadLogs(thesis.thesis_id);
+
+
     const statusSection = document.createElement('section');
     statusSection.innerHTML = `<h4 class="text-center">Διαχείριση Διπλωματικής</h4>`;
 
@@ -480,17 +486,18 @@ function showInfoSection(thesis) {
         case 'assigned':
             addAssignedSection(thesis, statusSection);
             break;
-
         case "active":
             addActiveSection(thesis, statusSection);
             break;
-
         case "to-be-reviewed":
             addToBeReviewedSection(thesis, statusSection);
             break;
         case "cancelled":
+            const configTitleElement = statusSection.querySelector('h4');
+            configTitleElement.remove();
             addCanceledSection(thesis, statusSection);
             break;
+
         case "completed":
             addCompletedSection(thesis, statusSection);
             break;
@@ -500,15 +507,63 @@ function showInfoSection(thesis) {
 
     const footer = document.createElement('section');
     footer.classList.add('text-center');
-    footer.innerHTML = `
-    <hr>
-        <h4>Ημερομηνίες</h4>
+    if (thesis.status === "active" || thesis.status === "to-be-reviewed") {
+        footer.innerHTML = `
+        <hr>
+        <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
         <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
-        <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || ''}</p>
+        <p>Διάρκεια: ${calculateDuration(thesis.start_date) || ''}</p>
         
     `;
+    } else if (thesis.status === "completed") {
+        footer.innerHTML = `
+        <hr>
+        <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
+        <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
+        <p>Ημερομηνία Περάτωσης: ${thesis.exam_date || ''}</p>`;
+    }
+    else if (thesis.status === "cancelled") {
+        footer.innerHTML = `
+        <hr>
+        <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
+        <p>Ημερομηνία Έναρξης: ${thesis.start_date || ''}</p>
+        <p>Ημερομηνία Περάτωσης: Ακυρωμένη</p>`;
+    }
+    else if (thesis.status === "assigned") {
+        footer.innerHTML = `
+        <hr>
+        <h4 class="mb-3 mt-3">Ημερομηνίες</h4>
+        <p>Ημερομηνία Έναρξης: Η διπλωματική αυτή δεν έχει εκκινήσει ακόμα.</p>`
+            ;
+    }
     infoSection.appendChild(footer);
 }
+
+//---------------Helper function to calculate the thesis duration in months and days
+function calculateDuration(startDate) {
+    const currentDate = new Date();
+    const start = new Date(startDate);
+
+    let totalMonths = (currentDate.getFullYear() - start.getFullYear()) * 12 + (currentDate.getMonth() - start.getMonth());
+    let days = currentDate.getDate() - start.getDate();
+
+    // Adjust for negative days (crossed into a new month)
+    if (days < 0) {
+        totalMonths--; // Subtract one month
+        const previousMonthDays = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate(); // Days in the previous month
+        days += previousMonthDays;
+    }
+    const monthText = totalMonths > 0
+        ? `${totalMonths} ${totalMonths === 1 ? 'μήνα' : 'μήνες'}`
+        : '0 μήνες';
+
+    const dayText = days > 0
+        ? `${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}`
+        : '0 μέρες';
+
+    return [monthText, dayText].filter(Boolean).join(' και ');
+}
+
 //-------------- Function for Reseting the Info Section in Theses List ------------- 
 function resetInfoSection() {
     const infoSection = document.getElementById('info-compartment');
@@ -603,6 +658,7 @@ function addCanceledSection(thesis, container) {
     const cancelledSection = document.createElement('section');
 
     const cancelledTitle = document.createElement('h4');
+    cancelledTitle.classList.add('text-center');
     cancelledTitle.textContent = 'Ακυρωμένη Διπλωματική';
     cancelledSection.appendChild(cancelledTitle);
 
@@ -638,9 +694,6 @@ function addCanceledSection(thesis, container) {
             console.error('Σφάλμα κατά την ανάκτηση των λεπτομερειών ακύρωσης:', error);
             detailsParagraph.innerHTML = '<p class="text-danger">Σφάλμα κατά τη φόρτωση λεπτομερειών.</p>';
         });
-
-    const cancelledHr = document.createElement('hr');
-    cancelledSection.appendChild(cancelledHr);
     container.appendChild(cancelledSection);
 }
 
@@ -684,10 +737,6 @@ function addAssignedSection(thesis, container) {
         });
         container.appendChild(buttonsContainer);
         container.appendChild(formContainer);
-
-        const hr = document.createElement('hr');
-        hr.classList.add('my-3');
-        container.appendChild(hr);
     }
     else {
         const committeeText = document.createElement('p');
@@ -862,11 +911,14 @@ function addCompletedSection(thesis, container) {
 
     const praktikoButton = createButton('configurationCompletedFilesExamReportButton', 'Πρακτικό Εξέτασης', ['btn', 'btn-outline-primary', 'btn-sm', 'float-start'], () => {
         const examReportSection = document.getElementById('examReportHTMLSection');
-        examReportSection.style.display = 'none';
 
-        loadExamReportData(thesis.thesis_id);
+        if (examReportSection.style.display === 'none') {
+            loadExamReportData(thesis.thesis_id);
+            examReportSection.style.display = 'block';
 
-        examReportSection.style.display = 'block';
+        } else {
+            examReportSection.style.display = 'none';
+        }
     });
 
     const nimertisLink = thesis.nimertis_link;
@@ -880,9 +932,7 @@ function addCompletedSection(thesis, container) {
     complButtonContainer.appendChild(praktikoButton);
     complButtonContainer.appendChild(nimertisButton);
     container.appendChild(complButtonContainer);
-    const hr = document.createElement('hr');
-    hr.classList.add('my-3');
-    container.appendChild(hr);
+
 
 }
 //-------------- Function for Managing an Active Thesis -------------
@@ -953,90 +1003,96 @@ function addActiveSection(thesis, container) {
     container.appendChild(notesSection);
 
     if (thesis.role === "Επιβλέπων") {
-        cancelThesisForm = document.createElement('div');
-        cancelThesisForm.classList.add('mt-3');
+        const startDate = new Date(thesis.start_date); // Convert the start date to a Date object
+        const currentDate = new Date(); // Get the current date
+        const twoYearsAgo = new Date(currentDate.setFullYear(currentDate.getFullYear() - 2)); // Calculate the date 2 years ago
 
-        const cancelTitle = document.createElement('h4');
-        cancelTitle.textContent = 'Ακύρωση Διπλωματικής';
-        cancelThesisForm.appendChild(cancelTitle);
+        if (startDate <= twoYearsAgo) {
+            cancelThesisForm = document.createElement('div');
+            cancelThesisForm.classList.add('mt-3');
 
-        const cancellationNumberLabel = document.createElement('label');
-        cancellationNumberLabel.textContent = 'Α/Α ΓΣΤ';
-        cancellationNumberLabel.classList.add('form-label');
-        cancelThesisForm.appendChild(cancellationNumberLabel);
+            const cancelTitle = document.createElement('h4');
+            cancelTitle.textContent = 'Ακύρωση Διπλωματικής';
+            cancelThesisForm.appendChild(cancelTitle);
 
-        const cancellationNumberInput = document.createElement('input');
-        cancellationNumberInput.type = 'number';
-        cancellationNumberInput.id = 'cancellation-number';
-        cancellationNumberInput.classList.add('form-control', 'mb-2');
-        cancellationNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
-        cancelThesisForm.appendChild(cancellationNumberInput);
+            const cancellationNumberLabel = document.createElement('label');
+            cancellationNumberLabel.textContent = 'Α/Α ΓΣΤ';
+            cancellationNumberLabel.classList.add('form-label');
+            cancelThesisForm.appendChild(cancellationNumberLabel);
 
-        const cancellationDateLabel = document.createElement('label');
-        cancellationDateLabel.textContent = 'Ημερομηνία ΓΣΤ';
-        cancellationDateLabel.classList.add('form-label');
-        cancelThesisForm.appendChild(cancellationDateLabel);
+            const cancellationNumberInput = document.createElement('input');
+            cancellationNumberInput.type = 'number';
+            cancellationNumberInput.id = 'cancellation-number';
+            cancellationNumberInput.classList.add('form-control', 'mb-2');
+            cancellationNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
+            cancelThesisForm.appendChild(cancellationNumberInput);
 
-        const cancellationDateInput = document.createElement('input');
-        cancellationDateInput.type = 'date';
-        cancellationDateInput.id = 'cancellation-year';
-        cancellationDateInput.classList.add('form-control', 'mb-2');
-        cancellationDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
-        cancelThesisForm.appendChild(cancellationDateInput);
+            const cancellationDateLabel = document.createElement('label');
+            cancellationDateLabel.textContent = 'Ημερομηνία ΓΣΤ';
+            cancellationDateLabel.classList.add('form-label');
+            cancelThesisForm.appendChild(cancellationDateLabel);
 
-        const cancellationReasonLabel = document.createElement('label');
-        cancellationReasonLabel.textContent = 'Λόγος ακύρωσης';
-        cancellationReasonLabel.classList.add('form-label');
-        cancelThesisForm.appendChild(cancellationReasonLabel);
+            const cancellationDateInput = document.createElement('input');
+            cancellationDateInput.type = 'date';
+            cancellationDateInput.id = 'cancellation-year';
+            cancellationDateInput.classList.add('form-control', 'mb-2');
+            cancellationDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
+            cancelThesisForm.appendChild(cancellationDateInput);
 
-        const cancellationReasonTextarea = document.createElement('textarea');
-        cancellationReasonTextarea.id = 'cancellation-reason';
-        cancellationReasonTextarea.classList.add('form-control', 'mb-2');
-        cancellationReasonTextarea.placeholder = 'Καταχωρήστε τον λόγο ακύρωσης';
-        cancellationReasonTextarea.maxLength = 300;
-        cancelThesisForm.appendChild(cancellationReasonTextarea);
+            const cancellationReasonLabel = document.createElement('label');
+            cancellationReasonLabel.textContent = 'Λόγος ακύρωσης';
+            cancellationReasonLabel.classList.add('form-label');
+            cancelThesisForm.appendChild(cancellationReasonLabel);
 
-        const cancelButton = createButton('cancel-thesis-button', 'Ακύρωση Διπλωματικής', ['btn', 'btn-danger', 'mb-3'], () => {
-            const cancellationNumber = cancellationNumberInput.value;
-            const cancellationDate = cancellationDateInput.value;
-            const cancellationReasonText = cancellationReasonTextarea.value;
+            const cancellationReasonTextarea = document.createElement('textarea');
+            cancellationReasonTextarea.id = 'cancellation-reason';
+            cancellationReasonTextarea.classList.add('form-control', 'mb-2');
+            cancellationReasonTextarea.placeholder = 'Καταχωρήστε τον λόγο ακύρωσης';
+            cancellationReasonTextarea.maxLength = 300;
+            cancellationReasonTextarea.value = 'Από Διδάσκοντα';
+            cancelThesisForm.appendChild(cancellationReasonTextarea);
 
-            if (!cancellationNumber || !cancellationDate || !cancellationReasonText) {
-                alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
-                return;
-            }
+            const cancelButton = createButton('cancel-thesis-button', 'Ακύρωση Διπλωματικής', ['btn', 'btn-danger', 'mb-3'], () => {
+                const cancellationNumber = cancellationNumberInput.value;
+                const cancellationDate = cancellationDateInput.value;
+                const cancellationReasonText = cancellationReasonTextarea.value;
 
-            fetch('/api/cancel-thesis', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ thesis_id: thesis.thesis_id, cancellationNumber, cancellationDate, cancellationReasonText })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Η διπλωματική ακυρώθηκε επιτυχώς!');
-                        loadTheses();
-                        resetInfoSection();
-                    } else {
-                        alert(`Σφάλμα: ${data.message}`);
-                    }
+                if (!cancellationNumber || !cancellationDate || !cancellationReasonText) {
+                    alert('Παρακαλώ συμπληρώστε όλα τα πεδία.');
+                    return;
+                }
+
+                fetch('/api/cancel-thesis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ thesis_id: thesis.thesis_id, cancellationNumber, cancellationDate, cancellationReasonText })
                 })
-                .catch(error => {
-                    console.error('Σφάλμα κατά την ακύρωση:', error);
-                    alert('Κάτι πήγε στραβά κατά την ακύρωση!');
-                });
-        });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Η διπλωματική ακυρώθηκε επιτυχώς!');
+                            loadTheses();
+                            resetInfoSection();
+                        } else {
+                            alert(`Σφάλμα: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Σφάλμα κατά την ακύρωση:', error);
+                        alert('Κάτι πήγε στραβά κατά την ακύρωση!');
+                    });
+            });
 
-        cancelThesisForm.appendChild(cancelButton);
+            cancelThesisForm.appendChild(cancelButton);
 
-        const cancelHr = document.createElement('hr');
-        cancelThesisForm.appendChild(cancelHr);
+            const cancelHr = document.createElement('hr');
+            cancelThesisForm.appendChild(cancelHr);
 
-        container.appendChild(cancelThesisForm);
-
+            container.appendChild(cancelThesisForm);
+        }
 
         const changeStatusSection = document.createElement('section');
         const changeStatusTitle = document.createElement('h4');
@@ -1180,7 +1236,7 @@ function loadExamReportData(thesisId) {
                 updateDataField('examReportSupervisorNameSurname', supervisorSurnameName);
                 updateDataField('examReportCommitteeMember1NameSurname', committeeMember1SurnameName);
                 updateDataField('examReportCommitteeMember2NameSurname', committeeMember2SurnameName);
-                updateDataField('examReportAssemblyNo', reportData.gen_assembly_session);
+                updateDataField('examReportAssemblyNo', reportData.gen_assembly_session_date);
                 updateDataField('examReportTitle', reportData.thesis_title);
                 updateDataField('examReportCommitteAlphabetical1', examReportCommitteAlphabetical1);
                 updateDataField('examReportCommitteAlphabetical2', examReportCommitteAlphabetical2);
@@ -1311,7 +1367,7 @@ function addToBeReviewedSection(thesis, container) {
     loadGradeSection(thesis.thesis_id, gradeContent);
 
     container.appendChild(gradeSection);
-    container.appendChild(Object.assign(document.createElement('hr'), { classList: 'mb-3 mt-4' }));
+
 }
 //-------------- Function for Announcement controls in Theses List -------------
 function announcementButtonController(thesisId, container) {
@@ -1380,6 +1436,7 @@ function fetchAnnouncementDetails(thesisId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                console.log(data);
                 showAnnouncementModal(data.data);
             } else {
                 alert('Πρόβλημα στην ανάκτηση της ανακοίνωσης');
@@ -1434,7 +1491,7 @@ function showAnnouncementModal(announcementDetails) {
                                 <li>${announcementDetails.committee_member1_name}</li>
                                 <li>${announcementDetails.committee_member2_name}</li>
                             </ul>        
-        <p><strong>Ημερομηνία Εξέτασης:</strong> ${announcementDetails.exam_date}</p>
+        <p><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcementDetails.exam_date).toLocaleDateString()}</p>
         <p><strong>Τύπος Εξέτασης:</strong> ${announcementDetails.type_of_exam === 'online' ? 'Ηλεκτρονική' : announcementDetails.type_of_exam === 'in-person' ? 'Δια ζώσης' : 'Άγνωστος τύπος'}</p>
         <p><strong>Τοποθεσία Εξέτασης:</strong> ${announcementDetails.examination_location}</p>
     `;
@@ -1480,13 +1537,9 @@ function addToAnnouncements(thesisId) {
             return response.json();
         })
         .then((data) => {
-            if (data.success && data.data) {
-                if (announcementButton) {
-                    announcementButton.remove();
-                }
-                showAnnouncementModal(data.data);
-            } else {
-                alert(data.message);
+            if (data.success) {
+                resetInfoSection();
+                fetchAnnouncementDetails(thesisId);
             }
         })
         .catch((error) => {
@@ -1905,6 +1958,9 @@ function applyFilter(filterType, filterValue) {
                             case 'active':
                                 status = 'Ενεργή';
                                 break;
+                            case 'cancelled':
+                                status = 'Ακυρωμένη';
+                                break;
                             default:
                                 status = 'Άγνωστη Κατάσταση';
                         }
@@ -2172,6 +2228,133 @@ function handleInvitationAction(invitationId, action) {
         });
 }
 
+//--------------------- Function for Loading the Charts of a professor --------
+let chartInstance; 
+
+let chartSupervisorGrades, chartCompletionTimes, chartSupervisedTheses;
+
+function loadCharts() {
+    fetch('/api/stats/professors', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('API returned an error:', data.message);
+            return;
+        }
+
+        const results = data.results;
+
+        const avgSupervisorGrades = results.map(prof => parseFloat(prof.avg_supervisor_grade));
+        const avgCommitteeMemberGrades = results.map(prof => parseFloat(prof.avg_committee_member_grade));
+        const avgSupervisorCompletionTimes = results.map(prof => parseFloat(prof.avg_supervisor_completion_time));
+        const avgCommitteeMemberCompletionTimes = results.map(prof => parseFloat(prof.avg_committee_member_completion_time));
+        const totalSupervisedTheses = results.map(prof => prof.total_supervised_theses);
+        const totalCommitteeTheses = results.map(prof => prof.total_committee_theses);
+        const labels = results.map(prof => `${prof.name} ${prof.surname}`);
+
+        const supervisorGradesChartElement = document.getElementById('chartSupervisorGrades');
+        if (supervisorGradesChartElement) {
+            if (chartSupervisorGrades) {
+                chartSupervisorGrades.destroy();
+            }
+            chartSupervisorGrades = new Chart(supervisorGradesChartElement, {
+                type: 'bar',
+                data: {
+                    labels: labels,  
+                    datasets: [
+                        {
+                            label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Επιβλέπωντας)',
+                            data: avgSupervisorGrades,
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                        },
+                        {
+                            label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Μέλος Τριμελούς)',
+                            data: avgCommitteeMemberGrades,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    aspectRatio: 0.99,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        const completionTimesChartElement = document.getElementById('chartCompletionTimes');
+        if (completionTimesChartElement) {
+            if (chartCompletionTimes) {
+                chartCompletionTimes.destroy();
+            }
+            chartCompletionTimes = new Chart(completionTimesChartElement, {
+                type: 'bar',
+                data: {
+                    labels: labels,  
+                    datasets: [
+                        {
+                            label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Επιβλέπωντας)',
+                            data: avgSupervisorCompletionTimes,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                        },
+                        {
+                            label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Μέλος Τριμελούς)',
+                            data: avgCommitteeMemberCompletionTimes,
+                            backgroundColor: 'rgba(153, 102, 255, 0.5)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    aspectRatio: 0.99, 
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        const supervisedThesesChartElement = document.getElementById('chartSupervisedTheses');
+        if (supervisedThesesChartElement) {
+            if (chartSupervisedTheses) {
+                chartSupervisedTheses.destroy();
+            }
+            chartSupervisedTheses = new Chart(supervisedThesesChartElement, {
+                type: 'bar',
+                data: {
+                    labels: labels,  
+                    datasets: [
+                        {
+                            label: 'Συνολικός Αριθμός Διπλωματικών (ως Επιβλέπωντας)',
+                            data: totalSupervisedTheses,
+                            backgroundColor: 'rgba(255, 159, 64, 0.5)'
+                        },
+                        {
+                            label: 'Συνολικός Αριθμός Διπλωματικών (ως Μέλος Τριμελούς)',
+                            data: totalCommitteeTheses,
+                            backgroundColor: 'rgba(255, 99, 71, 0.5)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    aspectRatio: 0.99,  
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+    })
+    .catch(error => console.error('Error in loadCharts:', error));
+}
+
 
 
 //--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
@@ -2182,4 +2365,5 @@ document.addEventListener('DOMContentLoaded', function () {
     loadInvitationHistory();
     loadUnassignedTheses();
     loadAssignedTheses();
+    loadCharts();
 });

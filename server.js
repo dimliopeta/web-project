@@ -3,6 +3,8 @@ const express = require('express');
 const { db, insertData } = require('./config');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+
 
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
@@ -13,7 +15,6 @@ const app = express();
 app.use('/files', express.static(path.join(__dirname, 'files')));
 const PORT = 3000;
 const SECRET_KEY = 'your-secret-key';
-
 //-------------- Check if the server is connected to the database --------------
 db.query('SELECT 1', (err, results) => {
     if (err) {
@@ -23,7 +24,6 @@ db.query('SELECT 1', (err, results) => {
         console.log('Database connected successfully!');
     }
 });
-
 //-------------- Set Index file and the public folder --------------
 app.use(express.static('public', {
     index: 'index.html'
@@ -54,7 +54,6 @@ const authenticateJWT = (req, res, next) => {
         next();
     });
 };
-
 const authorizeRole = (requiredRole) => {
     return (req, res, next) => {
         if (req.user.role !== requiredRole) {
@@ -63,7 +62,6 @@ const authorizeRole = (requiredRole) => {
         next();
     };
 };
-
 app.get('/api/check-auth', (req, res) => {
     const token = req.cookies?.token;
 
@@ -109,6 +107,7 @@ app.get('/login', (req, res) => {
 app.get('/announcements', (req, res) => {
     return res.sendFile(path.join(__dirname, 'views', 'announcements.html'));
 });
+
 //-------------- API for login --------------
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -158,7 +157,7 @@ app.post('/login', (req, res) => {
         }
     });
 });
-// Route user to protected view page pased on role
+// User Routing based on Role
 app.get('/professor', authenticateJWT, authorizeRole('professor'), (req, res) => {
     res.sendFile(path.join(__dirname, 'protected_views', 'professor.html'));
 });
@@ -266,7 +265,14 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
+        // Μετατροπή των αποτελεσμάτων σε string πριν υπολογιστεί το ETag
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, theses: results });
     });
 });
@@ -292,6 +298,14 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των ανατεθημένων διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
+        // Μετατροπή των αποτελεσμάτων σε string πριν υπολογιστεί το ETag
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, theses: results });
     });
 });
@@ -542,7 +556,8 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
         query = `
                 SELECT
                     Theses.*,
-                    COALESCE(DATE_FORMAT(Examinations.date, '%Y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date, 
+                    Theses.final_grade,
+                    COALESCE(DATE_FORMAT(Examinations.date, '%y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date, 
                     COALESCE(Examinations.type_of_exam, 'Δεν έχει οριστεί') AS type_of_exam,
                     COALESCE(Examinations.location, 'Δεν έχει οριστεί') AS exam_location,
                     DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
@@ -619,7 +634,15 @@ app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των δεδομένων των καταγραφών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server' });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, log: results });
+
     });
 });
 
@@ -682,7 +705,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    L.gen_assembly_session AS gen_assembly_session
+                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%d-%m-%Y')) AS gen_assembly_session_date                
                 FROM 
                     Theses T
                 JOIN 
@@ -707,7 +730,9 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     Grades AS GC2 ON T.thesis_id = GC2.thesis_id 
                     AND C.member2_id = GC2.professor_id
                 LEFT JOIN
-                    Logs AS L ON T.thesis_id = L.thesis_id
+                    Logs AS L ON T.thesis_id = L.thesis_id 
+                    AND L.old_state = 'assigned' 
+                    AND L.new_state = 'active'
                 WHERE 
                     T.thesis_id = ?;
         `;
@@ -729,6 +754,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     C2.surname AS committee_member2_surname,
                     T.title AS thesis_title, 
                     T.summary AS thesis_summary,
+                    T.final_grade AS final_grade,
                     GS.grade1 AS supervisor_grade1,
                     GS.grade2 AS supervisor_grade2,
                     GS.grade3 AS supervisor_grade3,
@@ -741,7 +767,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    L.gen_assembly_session AS gen_assembly_session
+                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%d-%m-%Y')) AS gen_assembly_session_date                
                 FROM 
                     Students S
                 JOIN 
@@ -767,6 +793,8 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                         AND C.member2_id = GC2.professor_id
                 LEFT JOIN
                     Logs AS L ON T.thesis_id = L.thesis_id
+                    AND L.old_state = 'assigned' 
+                    AND L.new_state = 'active' 
                 WHERE 
                     T.student_id = ?;
                         `;
@@ -795,11 +823,10 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
 
     const query = `
         SELECT 
-        DATE_FORMAT(examinations.date, '%Y-%m-%d') AS date,
-        examinations.type_of_exam, 
-        examinations.location,
-        examinations.exam_report 
-        FROM examinations 
+        COALESCE(DATE_FORMAT(Examinations.date, '%d-%m-%Y'), 'Δεν έχει οριστεί') AS exam_date,
+        Examinations.type_of_exam, 
+        Examinations.location
+        FROM Examinations 
         WHERE thesis_id = ?;
     `;
 
@@ -819,6 +846,13 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
                 message: 'No examination details found for the given thesis.'
             });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.json({ success: true, examination: results[0] });
     });
 });
@@ -990,6 +1024,13 @@ app.get('/api/fetch_all_attachments', authenticateJWT, (req, res) => {
             console.error('Error fetching attachments:', err);
             return res.status(500).json({ success: false, message: 'Server error' });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end();  // 304 Not Modified
+        }
+
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, attachments: results });
     });
 });
@@ -1008,7 +1049,17 @@ app.get('/api/student', authenticateJWT, (req, res) => {
         if (results.length === 0) {
             return res.status(404).json({ error: 'Student not found' });
         }
-        res.json(results[0]);
+        const student = results[0];
+        const etag = crypto.createHash('sha1').update(JSON.stringify(student)).digest('hex');
+
+        // Έλεγχος αν το ETag του client ταιριάζει με το τρέχον
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Ρύθμιση του ETag header και επιστροφή δεδομένων
+        res.setHeader('ETag', etag);
+        res.json(student);
     });
 });
 
@@ -1038,7 +1089,17 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την αναζήτηση φοιτητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
-        res.status(200).json({ success: true, students: results });
+
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
+        return res.status(200).json({ success: true, students: results });
     });
 });
 //----------------- API for Professor Search Bar for Administration -----------------
@@ -1057,6 +1118,15 @@ app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
     });
 });
@@ -1106,6 +1176,15 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
+        const etag = crypto.createHash('sha1').update(JSON.stringify({userId, results})).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
     });
 });
@@ -1170,7 +1249,7 @@ app.post('/api/theses/new', authenticateJWT, uploadPDFOnly.single('pdf'), (req, 
 
         console.log('Thesis created successfully!');
         if (file) {
-            console.log("PDF uploaded:", file); 
+            console.log("PDF uploaded:", file);
         } else {
             console.log("Theses created without pdf");
         }
@@ -1247,7 +1326,6 @@ app.put('/api/theses/update', authenticateJWT, uploadPDFOnly.single('pdf'), (req
 //----------------- API for Invitations associated with a specific professor-----------------
 app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
     const professorId = req.user.userId; // Get professor ID from the JWT
-    console.log('Professor ID:', professorId);
 
     if (!professorId) {
         return res.status(400).json({ success: false, message: 'Professor ID is missing.' });
@@ -1285,7 +1363,6 @@ app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
             console.error('Error fetching invitations:', err);
             return res.status(500).json({ success: false, message: 'Database error.' });
         }
-        console.log('Invitations from DB:', results);
         res.json({ success: true, invitations: results });
     });
 });
@@ -1321,7 +1398,6 @@ app.post('/api/invitation_cancel', authenticateJWT, (req, res) => {
                 return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
             }
             const thesis_id = thesisResults[0]?.thesis_id;
-            console.log('Cancelled Invitations from DB:', results);
             res.json({ success: true, cancelled_invitation: results, thesis_id: thesis_id });
         });
     });
@@ -1490,9 +1566,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
 
 //----------------- API for loading Past Invitations associated with a specific professor-----------------
 app.get('/api/invitation-history', authenticateJWT, (req, res) => {
-    console.log('API /api/invitation-history hit');
     const professorId = req.user.userId;
-    console.log('Professor ID from JWT:', req.user.userId);
 
     const query = ` 
             SELECT 
@@ -1561,7 +1635,7 @@ app.post('/api/invitations-for-thesis', authenticateJWT, (req, res) => {
 //-----------------API for loading all the notes of a professor associated with a specific thesis-------
 app.post('/api/get-notes', authenticateJWT, (req, res) => {
     const { thesis_id } = req.body;
-    const professor_id = req.user.userId; // Από το JWT payload
+    const professor_id = req.user.userId;
 
     if (!thesis_id || !professor_id) {
         return res.status(400).json({ success: false, message: 'Απαιτούνται τα thesis_id και professor_id.' });
@@ -1604,7 +1678,7 @@ app.post('/api/add-note', authenticateJWT, (req, res) => {
 
 //-----------------API for loading the info of a cancelled thesis-------
 app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
-    const { thesis_id } = req.body; // Λαμβάνουμε το thesis_id ως query parameter
+    const { thesis_id } = req.body;
 
     if (!thesis_id) {
         return res.status(400).json({ success: false, message: 'Απαιτείται το thesis_id.' });
@@ -1926,8 +2000,7 @@ app.post('/api/add-announcement', (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Announcement added successfully.',
-            data: announcementDetails,
+            message: 'Announcement added successfully.'
         });
     });
 });
@@ -1980,6 +2053,15 @@ app.get('/api/get-announcement-details/', (req, res) => {
             });
         }
 
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({
             success: true,
             data: results[0]
@@ -2027,8 +2109,15 @@ app.get('/api/get-all-announcements/', (req, res) => {
                 message: 'No announcements found.'
             });
         }
-        console.log("vag");
-        console.log(results);
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({
             success: true,
             data: results
@@ -2099,6 +2188,26 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
             finalGrade: final_grade,
             role
         });
+    });
+});
+
+app.get('api/thesis/check-completed', authenticateJWT, (req,res) =>{
+    const studentId = req.user.userId;
+    if(!studentId){
+        return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
+    }
+
+    const query = `SELECT * FROM THESES WHERE student_id =? and status='completed'; `;
+    db.query(query, [thesisId, professorId, ...grades, comments], (err, result) => {
+        if (err) {
+            console.error('Σφάλμα κατά την καταχώρηση των βαθμών:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα κατά την καταχώρηση των βαθμών.' });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({ success: true, message: 'Η διπλωματική δεν είναι περατωμένη' });
+        }
+        res.status(200).json({ success: true, message: 'Η καταχώρηση βαθμών ολοκληρώθηκε επιτυχώς!' });
     });
 });
 
@@ -2286,7 +2395,16 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
         if (results.length === 0) {
             return res.status(200).json({ success: true, grades: [] });
         }
-        res.status(200).json({ success: true, grades: results });  
+        const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
+        res.status(200).json({ success: true, grades: results });
     });
 
 });
@@ -2315,7 +2433,17 @@ app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
         if (results.length === 0) {
             return res.status(200).json({ success: true, grades: null });
         }
+        
         const grades = results[0];
+        const etag = crypto.createHash('sha1').update(JSON.stringify(grades)).digest('hex'); // Υπολογισμός ETag
+
+        // Έλεγχος ETag από τον client
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); // 304 Not Modified
+        }
+
+        // Αποστολή δεδομένων με ETag header
+        res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades });
     });
 });
@@ -2486,6 +2614,68 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
         });
     });
 });
+
+app.get('/api/stats/professors', authenticateJWT, (req, res) => {
+    const professorId = req.user.userId;
+
+    // Query για τα στατιστικά
+    const queryStats = `
+        SELECT distinct 
+            AVG(CASE WHEN c.member1_id = ? OR c.member2_id = ? THEN t.final_grade END) AS avg_committee_member_grade,
+            AVG(CASE WHEN t.professor_id = ? THEN t.final_grade END) AS avg_supervisor_grade,
+            COUNT( CASE WHEN t.professor_id = ? THEN t.thesis_id ELSE NULL END) AS total_supervised_theses,
+            COUNT( CASE WHEN c.member1_id = ? OR c.member2_id = ? THEN t.thesis_id ELSE NULL END) AS total_committee_theses,
+        	AVG( CASE WHEN t.professor_id = ? THEN DATEDIFF( (SELECT e.date FROM examinations e WHERE e.thesis_id = t.thesis_id), t.start_date ) ELSE NULL END) AS avg_supervisor_completion_time,
+            AVG( CASE WHEN c.member1_id = ? OR c.member2_id = ? THEN DATEDIFF( (SELECT e.date FROM examinations e WHERE e.thesis_id = t.thesis_id), t.start_date ) ELSE NULL END) AS avg_committee_member_completion_time
+        FROM Theses t
+        LEFT JOIN Committees c ON t.thesis_id = c.thesis_id
+        LEFT JOIN Professors p ON t.professor_id = p.id
+        WHERE t.status= 'completed';
+    `;
+
+    // Query για το όνομα και το επώνυμο του καθηγητή
+    const queryName = `SELECT p.name, p.surname FROM Professors p WHERE p.id = ?`;
+
+    db.query(queryStats, [
+        professorId, professorId, professorId,
+        professorId, professorId, professorId,
+        professorId, professorId, professorId
+    ], (err, statsResults) => {
+        if (err) {
+            console.error('Σφάλμα κατά την ανάκτηση των πληροφοριών για τα στατιστικά:', err);
+            return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+        }
+
+        // Ανάκτηση του ονόματος και του επωνύμου του καθηγητή
+        db.query(queryName, [professorId], (err, nameResults) => {
+            if (err) {
+                console.error('Σφάλμα κατά την ανάκτηση του ονόματος του καθηγητή:', err);
+                return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
+            }
+
+            // Προσθήκη του ονόματος και του επωνύμου στα αποτελέσματα
+            if (nameResults.length > 0) {
+                const professorName = nameResults[0];
+                statsResults[0].name = professorName.name;
+                statsResults[0].surname = professorName.surname;
+            }
+            
+            const etag = crypto.createHash('sha1').update(JSON.stringify(statsResults)).digest('hex');
+
+            // Έλεγχος ETag από τον client
+            if (req.headers['if-none-match'] === etag) {
+                return res.status(304).end(); // 304 Not Modified
+            }
+
+            // Αποστολή δεδομένων με ETag header
+            res.setHeader('ETag', etag);
+
+            res.status(200).json({ success: true, results: statsResults });
+        });
+    });
+});
+
+
 
 //-------------- API to Edit Student contact data via Button --------------
 app.post('/api/updateProfile', authenticateJWT, (req, res) => {

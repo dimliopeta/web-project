@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Democritus-Announcements</title>
+    <title>Democritus-Student</title>
     <!------------------ Bootstrap CSS ------------------>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!------------------ Bootstrap Bundle with Popper ------------------>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="icon" href="images/DemBrowserIcon.png" type="image/x-icon">
 
     <!------------------ CSS ------------------>
     <style>
         body {
-            padding-top: 70px;
+            padding-top: 60px;
         }
 
         section {
-            padding: 30px 0;
+            padding: 20px 0;
         }
 
         .card {
@@ -29,16 +29,16 @@
 
 <body>
 
-    <!--- navbar --->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
-        <a class="navbar-brand px-3 fs-4" href="index.html">
+    <!------------------ Navbar ------------------>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top nav-item dropdown">
+        <a class="navbar-brand px-3 fs-4" href="student">
             <img src="images/DemIcon.png" alt="Democritus" width="40" height="40"> Democritus
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav"
+        <button class="navbar-toggler mx-3" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav"
             aria-controls="mainnav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="mainnav">
+        <div class="collapse navbar-collapse mx-3" id="mainnav">
             <div class="navbar-nav fs-5">
                 <a class="nav-item nav-link" href="/announcements">Ανακοινώσεις</a>
                 <a class="nav-item nav-link" href="/login">Σύνδεση</a>
@@ -46,8 +46,8 @@
         </div>
     </nav>
 
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown"
+    <div class="dropdown justify">
+        <button class="btn btn-secondary dropdown-toggle mx-3 my-3" type="button" id="filterDropdown" data-bs-toggle="dropdown"
             aria-expanded="false">
             Φιλτράρισμα
         </button>
@@ -76,18 +76,29 @@
             </div>
         </div>
     </div>
-    
 
-
-
-
-    <section id="announcements-section" class="bg-white mt-5">
+    <section id="announcements-section" class="bg-white mt-2">
         <div class="container-lg">
             <div class="row g-4" id="announcements-container">
                 <!-- Οι ανακοινώσεις θα φορτωθούν εδώ -->
             </div>
         </div>
-    </section>
+    </section> 
+    
+    <div class="d-flex align-items-center mt-2">
+        <button id="load-more-button" class="btn btn-primary btn-sm my-3 ms-3" onclick="loadAnnouncements()">
+            Επόμενη Σελίδα
+        </button>
+
+        <button id="export-xml" class="btn btn-secondary btn-sm my-3 ms-3">
+        Εξαγωγή σε XML
+        </button>
+
+        <button id="export-json" class="btn btn-secondary btn-sm my-3 mx-1">
+            Εξαγωγή σε JSON
+        </button>
+    </div>
+
     <script src="/javascript/announcements_script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

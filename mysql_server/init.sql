@@ -54,7 +54,6 @@ CREATE TABLE `Theses`(
     `final_grade` DECIMAL(5,2) NULL,
     FOREIGN KEY (`professor_id`) REFERENCES `Professors`(`id`),
     FOREIGN KEY (`student_id`) REFERENCES `Students`(`id`)
-
 );
 
 CREATE TABLE `Invitations`(
@@ -107,7 +106,6 @@ CREATE TABLE `Examinations`(
     `date` DATE NULL,
     `type_of_exam` ENUM('online','in-person') DEFAULT 'in-person',
     `location` VARCHAR(200) NULL,
-    `exam_report` VARCHAR(200) NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );
 
@@ -117,8 +115,8 @@ CREATE TABLE `Logs`(
     `date_of_change` date,
     `old_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','cancelled') NULL,
     `new_state` ENUM('unassigned','assigned','active','to-be-reviewed','completed','cancelled') NULL,
-    `gen_assembly_session` INT NULL,
     `ap` INT NULL,
+    `gen_assembly_session` INT NULL,
     `cancellation_reason` TEXT NULL,
     FOREIGN KEY (`thesis_id`) REFERENCES `Theses`(`thesis_id`)
 );

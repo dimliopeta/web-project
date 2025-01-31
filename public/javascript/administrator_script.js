@@ -1,7 +1,7 @@
 
 //--------------------------------------------- STARTUP SETTINGS ---------------------------------------------
 //--------------------Nav Bar Event Listener-----------------------------
-document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
+document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
         document.querySelectorAll('.content-section').forEach(section => {
@@ -15,22 +15,33 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
         if (targetSection) {
             targetSection.style.display = 'block';
 
-            if (targetId === 'administratorDashboardSection') {
-                loadAllTheses();
-            } else if (targetId === 'administratorInsertDataSection') {
-                insertData();
-            }
         }
-        const infoSection = document.getElementById('administratorThesesInfoSection');
-        const managementSection = document.getElementById('administratorThesesManagementSection');
-        if (infoSection) infoSection.style.display = 'none';
-        if (managementSection) managementSection.style.display = 'none';
-
         document.querySelectorAll('.nav-link, .btn[data-target]').forEach(link => {
             link.classList.remove('active');
         });
         this.classList.add('active');
+
+        const correspondingTab = document.querySelector(`.nav-link[href='#${targetId}']`);
+        if (correspondingTab) {
+            correspondingTab.classList.add('active');
+        }
     });
+});
+//--------------- Logout Function ---------------
+document.getElementById('logout-btn').addEventListener('click', (event) => {
+    event.preventDefault();
+    fetch('/logout', {
+        method: 'POST',
+        credentials: 'include'
+    })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/';
+            } else {
+                alert('Η αποσύνδεση απέτυχε.');
+            }
+        })
+        .catch(err => console.error('Error:', err));
 });
 //-----------Load the Dashboard Tab as the Homepage-------------
 window.addEventListener('DOMContentLoaded', () => {
