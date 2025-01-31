@@ -276,6 +276,38 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             })
 
         }
+
+        if (data.notes) {
+            data.notes.forEach(note => {
+                const query = `SELECT * FROM NOTES WHERE id=?;`;
+                db.query(query, [note.id], (err, results) => {
+                    if (err) {
+                        console.error('Error checking for duplicate notes: ', err);
+                        return;
+                    }
+
+                    if (results.length === 0) {
+                        const insertQuery = `INSERT INTO NOTES(id, thesis_id, professor_id, date, content) 
+                        VALUES(?, ?, ?, ?, ?);`;
+
+                        db.query(insertQuery, [
+                            note.id,
+                            note.thesis_id,
+                            note.professor_id,
+                            note.date,
+                            note.content
+                        ], (insertErr) => {
+                            if (insertErr) {
+                                console.error('Error inserting examination:', insertErr);
+                            } else {
+                                console.log(`Note ${note.id} for thesis ${note.thesis_id} added successfully.`);
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
         //--------------- Insert Examinations ---------------
         if (data.examinations) {
             data.examinations.forEach(examination => {
@@ -294,7 +326,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
                             examination.thesis_id,
                             examination.date,
                             examination.type_of_exam,
-                            examination.location,
+                            examination.location
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting examination:', insertErr);

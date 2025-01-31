@@ -1037,7 +1037,8 @@
       "grading_enabled": false,
       "final_grade": null
     }
-  ], "grades": [
+  ],
+  "grades": [
     {
       "grade_id": "1",
       "thesis_id": "1",
@@ -1248,7 +1249,7 @@
       "finalized": true
     }
   ],
-  "invitations":[
+  "invitations": [
     {
       "id": "1",
       "thesis_id": "12",
@@ -1544,7 +1545,7 @@
       "thesis_id": "12",
       "date_of_change": "2025-01-03",
       "old_state": "unassigned",
-      "new_state":"assigned",
+      "new_state": "assigned",
       "ap": null,
       "gen_assembly_session": null,
       "cancellation_reason": null
@@ -1713,7 +1714,7 @@
       "id": "43",
       "thesis_id": "21",
       "date_of_change": "2022-08-05",
-      "old_state":"unassigned",
+      "old_state": "unassigned",
       "new_state": "assigned",
       "ap": null,
       "gen_assembly_session": null,
@@ -1723,9 +1724,9 @@
       "id": "44",
       "thesis_id": "21",
       "date_of_change": "2022-08-10",
-      "old_state":"assigned",
+      "old_state": "assigned",
       "new_state": "active",
-      "ap":"13",
+      "ap": "13",
       "gen_assembly_session": "4",
       "cancellation_reason": "2022-08-10"
     },
@@ -1733,7 +1734,7 @@
       "id": "45",
       "thesis_id": "21",
       "date_of_change": "2024-10-10",
-      "old_state":"active",
+      "old_state": "active",
       "new_state": "cancelled",
       "ap": null,
       "gen_assembly_session": "10",
@@ -1763,13 +1764,13 @@
       "id": "48",
       "thesis_id": "20",
       "date_of_change": "2024-11-15",
-      "old_state":"active",
+      "old_state": "active",
       "new_state": "cancelled",
       "ap": null,
       "gen_assembly_session": "12",
       "cancellation_reason": "Κατόπιν αίτησης φοιτητή"
     }
-  ],  
+  ],
   "committees": [
     {
       "thesis_id": "1",
@@ -1808,7 +1809,7 @@
     },
     {
       "thesis_id": "13",
-      "member1_id": "3",
+      "member1_id": "1",
       "member2_id": "4"
     },
     {
@@ -1845,6 +1846,78 @@
       "thesis_id": "20",
       "member1_id": "8",
       "member2_id": "4"
+    }
+  ],
+  "notes": [
+    {
+      "id": "1",
+      "thesis_id": "8",
+      "professor_id": "5",
+      "date": "2025-01-03 00:00:00",
+      "content": "I found a new research paper concerning the topic"
+    },
+    {
+      "id": "2",
+      "thesis_id": "8",
+      "professor_id": "5",
+      "date": "2025-01-15 00:00:00",
+      "content": "the schemas need more detail"
+    },
+    {
+      "id": "3",
+      "thesis_id": "8",
+      "professor_id": "9",
+      "date": "2025-01-20 00:00:00",
+      "content": "needs progress on ther research"
+    },
+    {
+      "id": "4",
+      "thesis_id": "9",
+      "professor_id": "3",
+      "date": "2024-08-20 00:00:00",
+      "content": "the explaination is really good but the code needs work"
+    },
+    {
+      "id": "5",
+      "thesis_id": "9",
+      "professor_id": "3",
+      "date": "2024-09-15 00:00:00",
+      "content": "should arrange new meeting next Friday to see the progress"
+    },
+    {
+      "id": "6",
+      "thesis_id": "9",
+      "professor_id": "6",
+      "date": "2024-09-20 00:00:00",
+      "content": "should arrange new meeting next Friday to see the progress"
+    },
+    {
+      "id": "7",
+      "thesis_id": "13",
+      "professor_id": "1",
+      "date": "2023-01-26 00:00:00",
+      "content": "neccessary configurations not implemented"
+    },
+    {
+      "id": "8",
+      "thesis_id": "13",
+      "professor_id": "1",
+      "date": "2023-09-15 00:00:00",
+      "content": "should ask about the progress of the application backend"
+    },
+    {
+      "id": "9",
+      "thesis_id": "13",
+      "professor_id": "3",
+      "date": "2023-12-20 00:00:00",
+      "content": "need more students for the experiment"
+    },
+    {
+      "id": "10",
+      "thesis_id": "13",
+      "professor_id": "3",
+      "date": "2024-01-20 00:00:00",
+      "content": "need to see the paperwork done"
     }
   ],
   "examinations": [
