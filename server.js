@@ -562,7 +562,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 SELECT
                     Theses.*,
                     Theses.final_grade,
-                    COALESCE(DATE_FORMAT(Examinations.date, '%y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date, 
+                    COALESCE(DATE_FORMAT(Examinations.date, '%Y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date, 
                     COALESCE(Examinations.type_of_exam, 'Δεν έχει οριστεί') AS type_of_exam,
                     COALESCE(Examinations.location, 'Δεν έχει οριστεί') AS exam_location,
                     DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
@@ -710,7 +710,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%d-%m-%Y')) AS gen_assembly_session_date                
+                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%Y-%m-%d')) AS gen_assembly_session_date                
                 FROM 
                     Theses T
                 JOIN 
@@ -772,7 +772,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%d-%m-%Y')) AS gen_assembly_session_date                
+                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%Y-%m-%d')) AS gen_assembly_session_date                
                 FROM 
                     Students S
                 JOIN 
@@ -828,7 +828,7 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
 
     const query = `
         SELECT 
-        COALESCE(DATE_FORMAT(Examinations.date, '%d-%m-%Y'), 'Δεν έχει οριστεί') AS exam_date,
+        COALESCE(DATE_FORMAT(Examinations.date, '%Y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date,
         Examinations.type_of_exam, 
         Examinations.location
         FROM Examinations 
@@ -1682,7 +1682,7 @@ app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
             SELECT 
                 l.gen_assembly_session,
                 l.cancellation_reason,
-                DATE_FORMAT(l.date_of_change, '%d-%m-%Y') AS date_of_change
+                DATE_FORMAT(l.date_of_change, '%Y-%m-%d') AS date_of_change
             FROM Logs l
             WHERE l.thesis_id = ? AND l.new_state = 'cancelled'
             ORDER BY l.date_of_change DESC
@@ -2020,9 +2020,9 @@ app.get('/api/get-announcement-details/', (req, res) => {
             c.member2_id AS committee_member2_id,
             CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
             e.type_of_exam,
-            e.date as exam_date,
+            DATE_FORMAT(e.date, '%Y-%m-%d') as exam_date,
             e.location AS examination_location,
-            a.announcement_date as an_date
+            DATE_FORMAT(a.announcement_date, '%Y-%m-%d') as an_date
         FROM Theses t
         LEFT JOIN Announcements a ON t.thesis_id = a.thesis_id
         LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
@@ -2075,9 +2075,9 @@ app.get('/api/get-all-announcements/', (req, res) => {
         c.member2_id AS committee_member2_id,
         CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
         e.type_of_exam,
-        e.date AS exam_date,
+        DATE_FORMAT(e.date, '%Y-%m-%d') as exam_date,
         e.location AS examination_location,
-        a.announcement_date AS an_date
+        DATE_FORMAT(a.announcement_date, '%Y-%m-%d') as an_date
     FROM Theses t
     INNER JOIN Announcements a ON t.thesis_id = a.thesis_id
     LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id

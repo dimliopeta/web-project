@@ -71,7 +71,7 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                                      <li>${announcement.committee_member1_name}</li>
                                      <li>${announcement.committee_member2_name}</li>
                                  </ul>
-                                 <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcement.exam_date).toLocaleDateString()}</p>
+                                 <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${announcement.exam_date}</p>
                                  <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online'
                                      ? 'Ηλεκτρονική'
                                      : announcement.type_of_exam === 'in-person'
@@ -80,7 +80,7 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                                  <p class="text-muted"><strong>Τοποθεσία Εξέτασης:</strong> ${announcement.examination_location}</p>
                              </div>
                              <div class="card-footer bg-light d-flex justify-content-end">
-                                 <p class="text-center">Ημερομηνία Δημοσίευσης Ανακοίνωσης: ${new Date(announcement.an_date).toLocaleDateString()}</p>
+                                 <p class="text-center">Ημερομηνία Δημοσίευσης Ανακοίνωσης: ${announcement.an_date}</p>
                              </div>
                          </div>
                      </div>
