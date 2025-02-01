@@ -1342,9 +1342,6 @@ function addToBeReviewedSection(thesis, container) {
     });
     downloadSection.appendChild(downloadButton);
 
-    const downloadHr = document.createElement('hr');
-    downloadSection.appendChild(downloadHr);
-
     container.appendChild(downloadSection);
 
     if (thesis.role === 'Επιβλέπων') {

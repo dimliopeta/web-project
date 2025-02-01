@@ -1970,6 +1970,64 @@
       "location": "https://zoom.us"
     }
   ],
+  "attachments":[
+    {
+      "id": "1",
+      "thesis_id": "1",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434023.pdf" 
+    },
+    {
+      "id": "2",
+      "thesis_id": "2",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434021.pdf"
+    },
+    {
+      "id": "3",
+      "thesis_id": "3",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434005.pdf"
+    },
+    {
+      "id": "4",
+      "thesis_id": "11",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434008.pdf" 
+    },
+    {
+      "id": "5",
+      "thesis_id": "15",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434007.pdf"
+    },
+    {
+      "id": "6",
+      "thesis_id": "4",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434012.pdf"
+    },
+    {
+      "id": "7",
+      "thesis_id": "19",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434027.pdf"
+    },
+    {
+      "id": "8",
+      "thesis_id": "14",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434000.pdf"
+    }
+  ],
   "announcements": [
     {
       "thesis_id": "1",
