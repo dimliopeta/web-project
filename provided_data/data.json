@@ -942,7 +942,7 @@
       "status": "to-be-reviewed",
       "pdf_path": "",
       "start_date": "2024-11-15",
-      "nimertis_link": "null",
+      "nimertis_link": null,
       "grading_enabled": true,
       "final_grade": null
     },
