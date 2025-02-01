@@ -26,7 +26,7 @@ function loadData(filePath) {
 }
 
 //--------------- Function to load data into the DB ---------------
-function insertData(filePath = './provided_data/enriched_data.json') {
+function insertData(filePath = './provided_data/data.json') {
     const data = loadData(filePath); // Load data from the specified file
     if (data !== null) {
 
