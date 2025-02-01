@@ -15,7 +15,7 @@
       "email": "104333999@students.upatras.gr"
     },
     {
-      "id": "5",
+      "id": "2",
       "name": "John",
       "surname": "Lennon",
       "student_number": "10434000",
@@ -29,35 +29,7 @@
       "email": "st10434000@upnet.gr"
     },
     {
-      "id": "6",
-      "name": "Petros",
-      "surname": "Verikokos",
-      "student_number": "10434001",
-      "street": "Adrianou",
-      "number": "20",
-      "city": "Thessaloniki",
-      "postcode": "54248",
-      "father_name": "Giannis",
-      "landline_telephone": "2610778899",
-      "mobile_telephone": "6970001112",
-      "email": "st10434001@upnet.gr"
-    },
-    {
-      "id": "7",
-      "name": "test",
-      "surname": "name",
-      "student_number": "10434002",
-      "street": "str",
-      "number": "1",
-      "city": "patra",
-      "postcode": "26222",
-      "father_name": "father",
-      "landline_telephone": "2610123456",
-      "mobile_telephone": "6912345678",
-      "email": "st10434002@upnet.gr"
-    },
-    {
-      "id": "8",
+      "id": "3",
       "name": "Robert",
       "surname": "Smith",
       "student_number": "10434003",
@@ -71,7 +43,7 @@
       "email": "st10434003@upnet.gr"
     },
     {
-      "id": "9",
+      "id": "4",
       "name": "Rex",
       "surname": "Tyrannosaurus",
       "student_number": "10434004",
@@ -85,7 +57,7 @@
       "email": "st10434004@upnet.gr"
     },
     {
-      "id": "10",
+      "id": "5",
       "name": "Paul",
       "surname": "Mescal ",
       "student_number": "10434005",
@@ -99,7 +71,7 @@
       "email": "st10434005@upnet.gr"
     },
     {
-      "id": "11",
+      "id": "6",
       "name": "Pedro",
       "surname": "Pascal",
       "student_number": "10434006",
@@ -113,7 +85,7 @@
       "email": "st10434006@upnet.gr"
     },
     {
-      "id": "12",
+      "id": "7",
       "name": "David",
       "surname": "Gilmour",
       "student_number": "10434007",
@@ -127,7 +99,7 @@
       "email": "st10434007@upnet.gr"
     },
     {
-      "id": "13",
+      "id": "8",
       "name": "Lana",
       "surname": "Del Rey ",
       "student_number": "10434008",
@@ -141,7 +113,7 @@
       "email": "st10434008@upnet.gr"
     },
     {
-      "id": "14",
+      "id": "9",
       "name": "Stevie",
       "surname": "Nicks",
       "student_number": "10434009",
@@ -155,7 +127,7 @@
       "email": "st10434009@upnet.gr"
     },
     {
-      "id": "15",
+      "id": "10",
       "name": "Margaret",
       "surname": "Qualley",
       "student_number": "10434010",
@@ -169,7 +141,7 @@
       "email": "st10434010@upnet.gr"
     },
     {
-      "id": "16",
+      "id": "11",
       "name": "Mia",
       "surname": "Goth",
       "student_number": "10434011",
@@ -183,7 +155,7 @@
       "email": "st10434011@upnet.gr"
     },
     {
-      "id": "17",
+      "id": "12",
       "name": "Florence ",
       "surname": "Pugh",
       "student_number": "10434012",
@@ -197,7 +169,7 @@
       "email": "st10434012@upnet.gr"
     },
     {
-      "id": "18",
+      "id": "13",
       "name": "PJ ",
       "surname": "Harvey",
       "student_number": "10434013",
@@ -211,7 +183,7 @@
       "email": "st10434013@upnet.gr"
     },
     {
-      "id": "19",
+      "id": "14",
       "name": "Penélope",
       "surname": "Cruz",
       "student_number": "10434014",
@@ -225,7 +197,7 @@
       "email": "st10434014@upnet.gr"
     },
     {
-      "id": "20",
+      "id": "15",
       "name": "Emma",
       "surname": "Stone",
       "student_number": "10434015",
@@ -239,7 +211,7 @@
       "email": "st10434015@upnet.gr"
     },
     {
-      "id": "21",
+      "id": "16",
       "name": "Jenny",
       "surname": "Vanou",
       "student_number": "10434016",
@@ -253,7 +225,7 @@
       "email": "st10434016@upnet.gr"
     },
     {
-      "id": "22",
+      "id": "17",
       "name": "Salma ",
       "surname": "Hayek",
       "student_number": "10434017",
@@ -267,7 +239,7 @@
       "email": "st10434017@upnet.gr"
     },
     {
-      "id": "23",
+      "id": "18",
       "name": "Julie ",
       "surname": "Delpy",
       "student_number": "10434018",
@@ -281,7 +253,7 @@
       "email": "st10434018@upnet.gr"
     },
     {
-      "id": "24",
+      "id": "19",
       "name": "Giannis",
       "surname": "Aggelakas",
       "student_number": "10434019",
@@ -295,7 +267,7 @@
       "email": "st10434019@upnet.gr"
     },
     {
-      "id": "25",
+      "id": "20",
       "name": "Eleutheria ",
       "surname": "Arvanitaki",
       "student_number": "10434020",
@@ -309,7 +281,7 @@
       "email": "st10434020@upnet.gr"
     },
     {
-      "id": "26",
+      "id": "21",
       "name": "Marina",
       "surname": "Spanou",
       "student_number": "10434021",
@@ -323,7 +295,7 @@
       "email": "st10434021@upnet.gr"
     },
     {
-      "id": "27",
+      "id": "22",
       "name": "Rena",
       "surname": "Koumioti",
       "student_number": "10434022",
@@ -337,7 +309,7 @@
       "email": "st10434022@upnet.gr"
     },
     {
-      "id": "28",
+      "id": "23",
       "name": "Charlotte",
       "surname": "Aitchison",
       "student_number": "10434023",
@@ -351,7 +323,7 @@
       "email": "st10434023@upnet.gr"
     },
     {
-      "id": "29",
+      "id": "24",
       "name": "Rhaenyra",
       "surname": "Targaryen",
       "student_number": "10434024",
@@ -365,7 +337,7 @@
       "email": "st10434024@upnet.gr"
     },
     {
-      "id": "30",
+      "id": "25",
       "name": "Ben",
       "surname": "Dover",
       "student_number": "10434025",
@@ -379,21 +351,7 @@
       "email": "st10434025@upnet.gr"
     },
     {
-      "id": "31",
-      "name": "Marios",
-      "surname": "Papadakis",
-      "student_number": "10434026",
-      "street": "Korinthou",
-      "number": "266",
-      "city": "Patras",
-      "postcode": "26223",
-      "father_name": "Ioannis",
-      "landline_telephone": "+302105562567",
-      "mobile_telephone": "+306975562567",
-      "email": "st10434026@upnet.gr"
-    },
-    {
-      "id": "32",
+      "id": "26",
       "name": "Nicholas ",
       "surname": "Hoult",
       "student_number": "10434027",
@@ -407,119 +365,7 @@
       "email": "st10434027@upnet.gr"
     },
     {
-      "id": "33",
-      "name": "Joo Hyuk",
-      "surname": "Nam",
-      "student_number": "10434028",
-      "street": "Kanakari",
-      "number": "135",
-      "city": "Patra",
-      "postcode": "26440",
-      "father_name": "Baek Yi Jin",
-      "landline_telephone": "2610443568",
-      "mobile_telephone": "6978756432",
-      "email": "st10434028@upnet.gr"
-    },
-    {
-      "id": "34",
-      "name": "Nikos",
-      "surname": "Peletie",
-      "student_number": "10434029",
-      "street": "Kolokotroni",
-      "number": "6",
-      "city": "Athens",
-      "postcode": "34754",
-      "father_name": "George",
-      "landline_telephone": "2104593844",
-      "mobile_telephone": "6987655433",
-      "email": "st10434029@upnet.gr"
-    },
-    {
-      "id": "35",
-      "name": "Nikos",
-      "surname": "Koukos",
-      "student_number": "10434030",
-      "street": "Triton",
-      "number": "12",
-      "city": "Salamina",
-      "postcode": "12216",
-      "father_name": "Giannis",
-      "landline_telephone": "210553985",
-      "mobile_telephone": "6946901012",
-      "email": "st10434030@upnet.gr"
-    },
-    {
-      "id": "36",
-      "name": "Maria",
-      "surname": "Fouseki",
-      "student_number": "10434031",
-      "street": "Jason ",
-      "number": "33",
-      "city": "London",
-      "postcode": "44391",
-      "father_name": "Tasos",
-      "landline_telephone": "2109993719",
-      "mobile_telephone": "6923144642",
-      "email": "st10434031@upnet.gr"
-    },
-    {
-      "id": "37",
-      "name": "Nikos ",
-      "surname": "Korobos",
-      "student_number": "10434032",
-      "street": "Masalias",
-      "number": "4",
-      "city": "Sparti",
-      "postcode": "32095",
-      "father_name": "Giannis",
-      "landline_telephone": "2279036758",
-      "mobile_telephone": "6948308576",
-      "email": "st10434032@upnet.gr"
-    },
-    {
-      "id": "38",
-      "name": "Maria",
-      "surname": "Togia",
-      "student_number": "10434033",
-      "street": "Athinon",
-      "number": "4",
-      "city": "Athens",
-      "postcode": "28482",
-      "father_name": "Petros",
-      "landline_telephone": "2100393022",
-      "mobile_telephone": "6953782102",
-      "email": "st10434033@upnet.gr"
-    },
-    {
-      "id": "39",
-      "name": "Giorgos",
-      "surname": "Menegakis",
-      "student_number": "10434034",
-      "street": "korinthou",
-      "number": "56",
-      "city": "patras",
-      "postcode": "56892",
-      "father_name": "nikos",
-      "landline_telephone": "2610485796",
-      "mobile_telephone": "6934527125",
-      "email": "st10434034@upnet.gr"
-    },
-    {
-      "id": "40",
-      "name": "Trakis",
-      "surname": "Giannakopoulos",
-      "student_number": "10434035",
-      "street": "Othonos kai Amalias ",
-      "number": "100",
-      "city": "Patras",
-      "postcode": "26500",
-      "father_name": "None",
-      "landline_telephone": "2610381393",
-      "mobile_telephone": "6028371830",
-      "email": "st10434035@upnet.gr"
-    },
-    {
-      "id": "41",
+      "id": "27",
       "name": "Chris",
       "surname": "Kouvadis",
       "student_number": "10434036",
@@ -533,7 +379,7 @@
       "email": "st10434036@upnet.gr"
     },
     {
-      "id": "42",
+      "id": "28",
       "name": "pafloutsou",
       "surname": "kaskarai",
       "student_number": "10434037",
@@ -547,7 +393,7 @@
       "email": "st10434037@upnet.gr"
     },
     {
-      "id": "44",
+      "id": "29",
       "name": "Billy",
       "surname": "Diesel",
       "student_number": "10434038",
@@ -561,77 +407,7 @@
       "email": "st10434038@upnet.gr"
     },
     {
-      "id": "46",
-      "name": "Tome",
-      "surname": "of Madness",
-      "student_number": "10434039",
-      "street": "Panepisthmiou",
-      "number": "69",
-      "city": "Patras",
-      "postcode": "26441",
-      "father_name": "Prafit",
-      "landline_telephone": "2610654321",
-      "mobile_telephone": "6969966996",
-      "email": "st10434039@upnet.gr"
-    },
-    {
-      "id": "47",
-      "name": "fort",
-      "surname": "nite",
-      "student_number": "10434040",
-      "street": "karaiskakis",
-      "number": "69",
-      "city": "tilted tower",
-      "postcode": "4747",
-      "father_name": "epic games",
-      "landline_telephone": "2610747474",
-      "mobile_telephone": "6988112233",
-      "email": "st10434040@upnet.gr"
-    },
-    {
-      "id": "48",
-      "name": "Zeus",
-      "surname": "Ikosaleptos",
-      "student_number": "10434041",
-      "street": "Novi",
-      "number": "25",
-      "city": "Athens",
-      "postcode": "20033",
-      "father_name": "Kleft",
-      "landline_telephone": "2109090901",
-      "mobile_telephone": "6900008005",
-      "email": "st10434041@upnet.gr"
-    },
-    {
-      "id": "49",
-      "name": "AG",
-      "surname": "Cook",
-      "student_number": "10434042",
-      "street": "Britpop",
-      "number": "7G",
-      "city": "London",
-      "postcode": "2021",
-      "father_name": "PC Music",
-      "landline_telephone": "2121212121",
-      "mobile_telephone": "1212121212",
-      "email": "st10434042@upnet.gr"
-    },
-    {
-      "id": "50",
-      "name": "Maria",
-      "surname": "Mahmood",
-      "student_number": "10434043",
-      "street": "Mouratidi",
-      "number": "4",
-      "city": "New York",
-      "postcode": "25486",
-      "father_name": "Paparizou",
-      "landline_telephone": "2108452666",
-      "mobile_telephone": "6980081351",
-      "email": "st10434043@upnet.gr"
-    },
-    {
-      "id": "51",
+      "id": "30",
       "name": "Kostas",
       "surname": "Poupis",
       "student_number": "10434044",
@@ -645,35 +421,7 @@
       "email": "st10434044@upnet.gr"
     },
     {
-      "id": "52",
-      "name": "Hugh",
-      "surname": "Jass",
-      "student_number": "10434045",
-      "street": "Wall Street",
-      "number": "69",
-      "city": "Jerusalem",
-      "postcode": "478",
-      "father_name": "Mike Oxlong",
-      "landline_telephone": "69696969",
-      "mobile_telephone": "696969420",
-      "email": "st10434045@upnet.gr"
-    },
-    {
-      "id": "53",
-      "name": "Xontro ",
-      "surname": "Pigouinaki",
-      "student_number": "10434046",
-      "street": "Krasopotirou",
-      "number": "69",
-      "city": "Colarato",
-      "postcode": "14121",
-      "father_name": "Adolf Heisenberg",
-      "landline_telephone": "6913124205",
-      "mobile_telephone": "4747859625",
-      "email": "st10434046@upnet.gr"
-    },
-    {
-      "id": "54",
+      "id": "31",
       "name": "Μaria",
       "surname": "Nikolaou",
       "student_number": "10434047",
@@ -687,7 +435,7 @@
       "email": "st10434047@upnet.gr"
     },
     {
-      "id": "55",
+      "id": "32",
       "name": "Eleni",
       "surname": "Fotiou",
       "student_number": "10434048",
@@ -701,7 +449,7 @@
       "email": "st10434048@upnet.gr"
     },
     {
-      "id": "56",
+      "id": "33",
       "name": "Xara",
       "surname": "Fanouriou",
       "student_number": "10434049",
@@ -715,7 +463,7 @@
       "email": "st10434049@upnet.gr"
     },
     {
-      "id": "57",
+      "id": "34",
       "name": "Nikos",
       "surname": "Panagiotou",
       "student_number": "10434050",
@@ -729,7 +477,7 @@
       "email": "st10434050@upnet.gr"
     },
     {
-      "id": "58",
+      "id": "35",
       "name": "Petros",
       "surname": "Daidalos",
       "student_number": "10434051",
@@ -743,7 +491,7 @@
       "email": "st10434051@upnet.gr"
     },
     {
-      "id": "59",
+      "id": "36",
       "name": "Giannis",
       "surname": "Ioannou",
       "student_number": "10434052",
@@ -757,91 +505,7 @@
       "email": "st10434052@upnet.gr"
     },
     {
-      "id": "60",
-      "name": "Tsili",
-      "surname": "Doghouse",
-      "student_number": "10434053",
-      "street": "novi lane",
-      "number": "33",
-      "city": "Patras",
-      "postcode": "26478",
-      "father_name": "Stoiximan",
-      "landline_telephone": "2610420420",
-      "mobile_telephone": "6999999999",
-      "email": "st10434053@upnet.gr"
-    },
-    {
-      "id": "61",
-      "name": "Marialena",
-      "surname": "Antoniou",
-      "student_number": "10434054",
-      "street": "Ermou",
-      "number": "24",
-      "city": "Athens",
-      "postcode": "10563",
-      "father_name": "Nikolaos",
-      "landline_telephone": "210-5678901",
-      "mobile_telephone": "693-5678901",
-      "email": "st10434054@upnet.gr"
-    },
-    {
-      "id": "62",
-      "name": "Ioannis",
-      "surname": "Panagiotou",
-      "student_number": "10434055",
-      "street": "Kyprou",
-      "number": "42",
-      "city": "Patra",
-      "postcode": "26441",
-      "father_name": "Kwstas",
-      "landline_telephone": "2610-123456",
-      "mobile_telephone": "698-1234567",
-      "email": "st10434055@upnet.gr"
-    },
-    {
-      "id": "63",
-      "name": "George",
-      "surname": "Karamalis",
-      "student_number": "10434056",
-      "street": "Kolokotroni",
-      "number": "10",
-      "city": "Larissa",
-      "postcode": "41222",
-      "father_name": "Petros",
-      "landline_telephone": "2410-456789",
-      "mobile_telephone": "697-4567890",
-      "email": "st10434056@upnet.gr"
-    },
-    {
-      "id": "64",
-      "name": "Kyriakos",
-      "surname": "Papapetrou",
-      "student_number": "10434057",
-      "street": "Zakunthou",
-      "number": "36",
-      "city": "Volos",
-      "postcode": "10654",
-      "father_name": "Apostolos",
-      "landline_telephone": "210-6789012",
-      "mobile_telephone": "695-6789012",
-      "email": "st10434057@upnet.gr"
-    },
-    {
-      "id": "65",
-      "name": "Maria",
-      "surname": "Kp",
-      "student_number": "10434058",
-      "street": "pelopidas ",
-      "number": "52",
-      "city": "patra",
-      "postcode": "28746",
-      "father_name": "george",
-      "landline_telephone": "2610555555",
-      "mobile_telephone": "6932323232",
-      "email": "st10434058@upnet.gr"
-    },
-    {
-      "id": "66",
+      "id": "37",
       "name": "Nikos",
       "surname": "papadopoulos",
       "student_number": "10434059",
@@ -853,20 +517,6 @@
       "landline_telephone": "2691045092",
       "mobile_telephone": "69090909",
       "email": "st10434059@upnet.gr"
-    },
-    {
-      "id": "67",
-      "name": "Giannis ",
-      "surname": "Molotof",
-      "student_number": "10434060",
-      "street": "Ermou",
-      "number": "34",
-      "city": "Patras",
-      "postcode": "29438",
-      "father_name": "Giorgos",
-      "landline_telephone": "2610254390",
-      "mobile_telephone": "6943126767",
-      "email": "st10434060@upnet.gr"
     }
   ],
   "professors": [
@@ -882,7 +532,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "7",
+      "id": "2",
       "name": "Vasilis",
       "surname": "Foukaras",
       "email": "vasfou@ceid.upatras.gr",
@@ -893,7 +543,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "8",
+      "id": "3",
       "name": "Basilis",
       "surname": "Karras",
       "email": "karras@nterti.com",
@@ -904,7 +554,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "9",
+      "id": "4",
       "name": "Eleni",
       "surname": "Voyiatzaki",
       "email": "eleni@ceid.gr",
@@ -915,7 +565,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "10",
+      "id": "5",
       "name": "Andrew",
       "surname": "Hozier Byrne",
       "email": "hozier@ceid.upatras.gr",
@@ -926,7 +576,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "11",
+      "id": "6",
       "name": "Nikos",
       "surname": "Korobos",
       "email": "nikos.korobos12@gmail.com",
@@ -937,7 +587,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "12",
+      "id": "7",
       "name": "Kostas",
       "surname": "Karanikolos",
       "email": "kostkaranik@gmail.com",
@@ -948,7 +598,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "13",
+      "id": "8",
       "name": "Mpampis",
       "surname": "Sougias",
       "email": "mpampis123@gmail.com",
@@ -959,7 +609,7 @@
       "university": "UOI"
     },
     {
-      "id": "14",
+      "id": "9",
       "name": "Daskalos",
       "surname": "Makaveli",
       "email": "makavelibet@gmail.com",
@@ -970,7 +620,7 @@
       "university": "UOA"
     },
     {
-      "id": "15",
+      "id": "10",
       "name": "Maria",
       "surname": "Palami",
       "email": "palam@upatras.gr",
@@ -981,7 +631,7 @@
       "university": "University of SKG"
     },
     {
-      "id": "16",
+      "id": "11",
       "name": "Meni",
       "surname": "Talaiporimeni",
       "email": "meniT@upatras.gr",
@@ -992,7 +642,7 @@
       "university": "UoP"
     },
     {
-      "id": "17",
+      "id": "12",
       "name": "Tzouli",
       "surname": "Alexandratou",
       "email": "tzouli.ax@upatras.gr",
@@ -1003,7 +653,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "18",
+      "id": "13",
       "name": "Karikhs",
       "surname": "Raftel",
       "email": "karikhs@yahoo.gr",
@@ -1014,7 +664,7 @@
       "university": "University of Streets"
     },
     {
-      "id": "19",
+      "id": "14",
       "name": "Vlasis",
       "surname": "Restas",
       "email": "toxrusoftiari@funerals.gr",
@@ -1025,18 +675,7 @@
       "university": "University Of Ohio"
     },
     {
-      "id": "20",
-      "name": "Fat ",
-      "surname": "Banker",
-      "email": "fatbanker@kapitalas.gr",
-      "topic": "kippah",
-      "landline": "6942014121",
-      "mobile": "6969784205",
-      "department": "Froutemporiki",
-      "university": "University of Israel"
-    },
-    {
-      "id": "21",
+      "id": "15",
       "name": "Hamze",
       "surname": "Mohamed",
       "email": "info@hamzat.gr",
@@ -1047,7 +686,7 @@
       "university": "University of UAE"
     },
     {
-      "id": "22",
+      "id": "16",
       "name": "Stefania",
       "surname": "Nikolaou",
       "email": "snikolaou@upatras.gr",
@@ -1058,7 +697,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "23",
+      "id": "16",
       "name": "Petros",
       "surname": "Danezis",
       "email": "pdanezis@upatras.gr",
@@ -1069,29 +708,7 @@
       "university": "University of Patras\t"
     },
     {
-      "id": "24",
-      "name": "Papadopoulos ",
-      "surname": "Eustathios",
-      "email": "eustratiospap@gmail.com",
-      "topic": "Physics",
-      "landline": "210-1234567",
-      "mobile": "690-1234567",
-      "department": "Physics",
-      "university": "National and Kapodistrian University of Athens"
-    },
-    {
-      "id": "25",
-      "name": "Konstantinou",
-      "surname": "Maria",
-      "email": "mariakon@gmail.com",
-      "topic": "Statistics and Probability",
-      "landline": "2310-7654321",
-      "mobile": "694-7654321",
-      "department": "Mathematics",
-      "university": "Aristotle University of Thessaloniki"
-    },
-    {
-      "id": "26",
+      "id": "17",
       "name": "Jim",
       "surname": "Nikolaou",
       "email": "jimnik@gmail.com",
@@ -1102,7 +719,7 @@
       "university": "University of Patras"
     },
     {
-      "id": "27",
+      "id": "18",
       "name": "Sophia",
       "surname": "Michailidi",
       "email": "sophiamich@gmail.com",
@@ -1113,7 +730,7 @@
       "university": "Athens University of Economics and Business"
     },
     {
-      "id": "28",
+      "id": "19",
       "name": "Michael ",
       "surname": "Papadreou",
       "email": "michaelpap@gmail.com",
@@ -1124,18 +741,7 @@
       "university": "University of Ioannina"
     },
     {
-      "id": "29",
-      "name": "Elon",
-      "surname": "Musk",
-      "email": "elonmusk@gmail.com",
-      "topic": "Electric Vehicles",
-      "landline": "1-888-518-3752",
-      "mobile": "Null",
-      "department": "Department of Physics",
-      "university": "University of Pennsylvania, Philadelphia"
-    },
-    {
-      "id": "30",
+      "id": "20",
       "name": "Kostas",
       "surname": "Kalantas",
       "email": "abcdef@example.com",
@@ -1146,7 +752,7 @@
       "university": "University"
     },
     {
-      "id": "32",
+      "id": "21",
       "name": "Giorgis",
       "surname": "Fousekis",
       "email": "abcdefg@example.com",
@@ -1155,129 +761,1305 @@
       "mobile": "mob",
       "department": "dep",
       "university": "university"
-    },
-    {
-      "id": "33",
-      "name": "Nikos",
-      "surname": "Koukos",
-      "email": "exxample@example.com",
-      "topic": "top",
-      "landline": "la",
-      "mobile": "mo",
-      "department": "de",
-      "university": "university"
-    },
-    {
-      "id": "34",
-      "name": "patrick",
-      "surname": "xrusopsaros",
-      "email": "patric@xrusopsaros.com",
-      "topic": "thalasioi ipopotamoi",
-      "landline": "2610567917",
-      "mobile": "6952852742",
-      "department": "Solomos",
-      "university": "Nemo"
     }
   ],
   "theses": [
     {
       "thesis_id": "1",
       "professor_id": "1",
-      "student_id": null,
+      "student_id": "23",
       "title": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks",
       "summary": "Exploring the Impact of Normal User Behavior on Cybersecurity in Computer Networks is very important so we have to do it.",
-      "status": "unassigned",
-      "pdf_path": null,
-      "start_date": null,
-      "exam_date": null
+      "status": "completed",
+      "pdf_path": "./files/theses_pdf/thesis_1.pdf",
+      "start_date": "2024-02-15",
+      "nimertis_link": "https://nemertes.library.upatras.gr/",
+      "grading_enabled": true,
+      "final_grade": "8.87"
     },
     {
       "thesis_id": "2",
       "professor_id": "1",
-      "student_id": "5",
+      "student_id": "21",
       "title": "The Role of Normal Software Behavior in Ensuring System Reliability and Security",
       "summary": "The Role of Normal Software Behavior in Ensuring System Reliability and Security is enormous so we have to study it.",
       "status": "completed",
-      "pdf_path": null,
-      "start_date": null,
-      "exam_date": null
+      "pdf_path": "./files/theses_pdf/thesis_2.pdf",
+      "start_date": "2024-08-10",
+      "nimertis_link": "https://nemertes.library.upatras.gr/",
+      "grading_enabled": true,
+      "final_grade": "9.8"
     },
     {
       "thesis_id": "3",
-      "professor_id": "1",
-      "student_id": "4",
+      "professor_id": "2",
+      "student_id": "5",
       "title": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design",
       "summary": "Analyzing Normal User Interaction Patterns to Improve Human-Computer Interaction Design is can be great so we have to do it.",
       "status": "completed",
-      "pdf_path": null,
-      "start_date": null,
-      "exam_date": null
+      "pdf_path": "./files/theses_pdf/thesis_3.pdf",
+      "start_date": "2023-11-10",
+      "nimertis_link": "https://nemertes.library.upatras.gr/",
+      "grading_enabled": true,
+      "final_grade": "8"
     },
     {
       "thesis_id": "4",
-      "professor_id": "1",
-      "student_id": "15",
+      "professor_id": "2",
+      "student_id": "12",
       "title": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms",
       "summary": "Understanding the Importance of Normal Data Processing in Machine Learning Algorithms can really help with computers so we have to understand it.",
-      "status": "to-be-reviewed",
+      "status": "completed",
       "pdf_path": null,
-      "start_date": "2025-1-01",
-      "exam_date": null
+      "start_date": "2023-11-10",
+      "nimertis_link": "https://nemertes.library.upatras.gr/",
+      "grading_enabled": true,
+      "final_grade": "6.53"
     },
     {
       "thesis_id": "5",
-      "professor_id": "1",
-      "student_id": "7",
+      "professor_id": "2",
+      "student_id": null,
       "title": "Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science",
       "summary": "Investigating the Influence of Normal System Performance on Predictive Maintenance in Computer Science is a great idea, so it's time we investigated.",
-      "status": "active",
-      "pdf_path": null,
-      "start_date": "2025-1-05",
-      "exam_date": null
+      "status": "unassigned",
+      "pdf_path": "./files/theses_pdf/thesis_5.pdf",
+      "start_date": null,
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
     },
     {
       "thesis_id": "6",
-      "professor_id": "1",
+      "professor_id": "4",
       "student_id": null,
       "title": "Optimizing Neural Network Architectures for Edge Devices",
       "summary": "The increasing prevalence of IoT and edge devices has created a demand for efficient neural networks capable of running on hardware with limited computational resources. This thesis explores methods to optimize deep learning models, such as pruning, quantization, and architecture search. The study benchmarks these techniques on common edge devices and analyzes trade-offs between accuracy, latency, and energy consumption. Results demonstrate that using lightweight architectures like MobileNet combined with advanced quantization can deliver a significant performance boost while maintaining acceptable accuracy.",
       "status": "unassigned",
       "pdf_path": null,
       "start_date": null,
-      "exam_date": null
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
     },
     {
       "thesis_id": "7",
-      "professor_id": "1",
-      "student_id": "20",
+      "professor_id": "3",
+      "student_id": null,
       "title": "Advancing Natural Language Processing with Zero-Shot Learning",
       "summary": "Zero-shot learning enables machine learning models to perform tasks in domains where no labeled data is available. This thesis investigates state-of-the-art approaches to zero-shot learning in natural language processing (NLP), leveraging models like GPT and BERT. It examines their ability to generalize across languages and tasks, highlighting challenges in low-resource scenarios. A proposed framework improves accuracy by combining zero-shot learning with unsupervised domain adaptation, demonstrating effectiveness in real-world text classification tasks.",
-      "status": "assigned",
-      "pdf_path": null,
+      "status": "unassigned",
+      "pdf_path": "./files/theses_pdf/thesis_7.pdf",
       "start_date": null,
-      "exam_date": null
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
     },
     {
       "thesis_id": "8",
-      "professor_id": "1",
-      "student_id": "25",
+      "professor_id": "5",
+      "student_id": "15",
       "title": "Blockchain in Secure Voting Systems: A Practical Evaluation",
       "summary": "Blockchain technology offers promising solutions for secure and transparent voting systems. This thesis evaluates various blockchain platforms to assess their suitability for implementing secure e-voting protocols. By creating a prototype system, the research demonstrates how features like decentralized ledgers and cryptographic security can ensure voter anonymity and integrity. The study also addresses scalability and user accessibility, identifying key hurdles and proposing optimizations for wider adoption.",
-      "status": "cancelled",
-      "pdf_path": null,
-      "start_date": null,
-      "exam_date": null
+      "status": "active",
+      "pdf_path": "./files/theses_pdf/thesis_8.pdf",
+      "start_date": "2024-12-15",
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
     },
     {
       "thesis_id": "9",
       "professor_id": "1",
-      "student_id": "10",
+      "student_id": "19",
       "title": "Quantum Computing Algorithms for Cryptographic Challenges",
       "summary": "This thesis delves into the implications of quantum computing on modern cryptographic systems. It reviews quantum algorithms like Shor’s algorithm for factoring integers and Grover’s algorithm for search, analyzing their potential to break widely used encryption protocols. Additionally, it explores quantum-resistant algorithms that ensure security in a post-quantum world. The study emphasizes the urgency of transitioning to quantum-safe encryption standards for critical applications.",
       "status": "active",
+      "pdf_path": "./files/theses_pdf/thesis_9.pdf",
+      "start_date": "2024-06-15",
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "10",
+      "professor_id": "1",
+      "student_id": null,
+      "title": "A Study on Machine Learning Algorithms",
+      "summary": "Exploring various machine learning techniques and their applications.",
+      "status": "unassigned",
       "pdf_path": null,
-      "start_date": "2020-01-01",
-      "exam_date": null
+      "start_date": null,
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "11",
+      "professor_id": "3",
+      "student_id": "8",
+      "title": "Big Data Analysis for Social Media Trends",
+      "summary": "Analyzing social media trends using big data tools and techniques.",
+      "status": "completed",
+      "pdf_path": null,
+      "start_date": "2024-06-15",
+      "nimertis_link": "https://nemertes.library.upatras.gr/",
+      "grading_enabled": true,
+      "final_grade": "7.3"
+    },
+    {
+      "thesis_id": "12",
+      "professor_id": "2",
+      "student_id": "20",
+      "title": "Developing a Mobile Application for E-commerce",
+      "summary": "Design and implementation of a user-friendly mobile app for online shopping.",
+      "status": "assigned",
+      "pdf_path": "",
+      "start_date": null,
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "13",
+      "professor_id": "3",
+      "student_id": "17",
+      "title": "Data Security in Cloud Computing",
+      "summary": "An analysis of security challenges in cloud computing and proposed solutions.",
+      "status": "active",
+      "pdf_path": "./files/theses_pdf/thesis_13.pdf",
+      "start_date": "2022-12-01",
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "14",
+      "professor_id": "4",
+      "student_id": "2",
+      "title": "Optimization Techniques in Graph Theory",
+      "summary": "Researching optimization problems in graph theory and their real-world applications.",
+      "status": "to-be-reviewed",
+      "pdf_path": "",
+      "start_date": "2024-11-15",
+      "nimertis_link": null,
+      "grading_enabled": true,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "15",
+      "professor_id": "3",
+      "student_id": "7",
+      "title": "Blockchain and Decentralized Finance",
+      "summary": "Investigating the role of blockchain in enabling decentralized finance systems.",
+      "status": "completed",
+      "pdf_path": "",
+      "start_date": "2024-05-01",
+      "nimertis_link": "https://nemertes.library.upatras.gr/",
+      "grading_enabled": true,
+      "final_grade": "8.52"
+    },
+    {
+      "thesis_id": "16",
+      "professor_id": "4",
+      "student_id": "18",
+      "title": "Augmented Reality in Education",
+      "summary": "Design and development of AR tools for interactive learning experiences.",
+      "status": "cancelled",
+      "pdf_path": "",
+      "start_date": "2024-03-01",
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "17",
+      "professor_id": "6",
+      "student_id": "16",
+      "title": "Artificial Intelligence in Healthcare",
+      "summary": "Using AI to enhance diagnostics and treatment in healthcare.",
+      "status": "assigned",
+      "pdf_path": "./files/theses_pdf/thesis_17.pdf",
+      "start_date": "2024-12-10",
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "18",
+      "professor_id": "3",
+      "student_id": null,
+      "title": "Robotics in Industrial Automation",
+      "summary": "Exploring the integration of robotics in automating industrial processes.",
+      "status": "unassigned",
+      "pdf_path": null,
+      "start_date": null,
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "19",
+      "professor_id": "3",
+      "student_id": "26",
+      "title": "Game Development with Unreal Engine",
+      "summary": "Developing a 3D game using Unreal Engine and exploring advanced features.",
+      "status": "to-be-reviewed",
+      "pdf_path": null,
+      "start_date": "2024-10-20",
+      "nimertis_link": "https://nemertes.library.upatras.gr/",
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "20",
+      "professor_id": "5",
+      "student_id": "30",
+      "title": "Artificial Intelligence in Healthcare",
+      "summary": "Exploring the use of AI for diagnosis and patient monitoring.",
+      "status": "cancelled",
+      "pdf_path": null,
+      "start_date": "2022-09-15",
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    },
+    {
+      "thesis_id": "21",
+      "professor_id": "7",
+      "student_id": "35",
+      "title": "Cybersecurity Threat Detection",
+      "summary": "Developing machine learning models to detect cyber threats in real-time.",
+      "status": "cancelled",
+      "pdf_path": null,
+      "start_date": "2022-08-10",
+      "nimertis_link": null,
+      "grading_enabled": false,
+      "final_grade": null
+    }
+  ],
+  "grades": [
+    {
+      "grade_id": "1",
+      "thesis_id": "1",
+      "professor_id": "1",
+      "grade1": "8",
+      "grade2": "9",
+      "grade3": "7",
+      "grade4": "10",
+      "comments": "well done",
+      "finalized": true
+    },
+    {
+      "grade_id": "2",
+      "thesis_id": "1",
+      "professor_id": "2",
+      "grade1": "9",
+      "grade2": "8",
+      "grade3": "10",
+      "grade4": "10",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "3",
+      "thesis_id": "1",
+      "professor_id": "4",
+      "grade1": "10",
+      "grade2": "8",
+      "grade3": "8",
+      "grade4": "9",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "4",
+      "thesis_id": "2",
+      "professor_id": "1",
+      "grade1": "10",
+      "grade2": "10",
+      "grade3": "9",
+      "grade4": "10",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "5",
+      "thesis_id": "2",
+      "professor_id": "3",
+      "grade1": "10",
+      "grade2": "8",
+      "grade3": "9",
+      "grade4": "10",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "6",
+      "thesis_id": "2",
+      "professor_id": "5",
+      "grade1": "10",
+      "grade2": "10",
+      "grade3": "10",
+      "grade4": "10",
+      "comments": "splendid!",
+      "finalized": true
+    },
+    {
+      "grade_id": "7",
+      "thesis_id": "3",
+      "professor_id": "2",
+      "grade1": "8",
+      "grade2": "7",
+      "grade3": "6",
+      "grade4": "9",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "8",
+      "thesis_id": "3",
+      "professor_id": "1",
+      "grade1": "9",
+      "grade2": "7",
+      "grade3": "8",
+      "grade4": "6",
+      "comments": "good job",
+      "finalized": true
+    },
+    {
+      "grade_id": "9",
+      "thesis_id": "3",
+      "professor_id": "5",
+      "grade1": "9",
+      "grade2": "6",
+      "grade3": "8",
+      "grade4": "8",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "10",
+      "thesis_id": "4",
+      "professor_id": "2",
+      "grade1": "6",
+      "grade2": "7",
+      "grade3": "5",
+      "grade4": "6",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "11",
+      "thesis_id": "4",
+      "professor_id": "3",
+      "grade1": "7",
+      "grade2": "6",
+      "grade3": "6",
+      "grade4": "6",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "12",
+      "thesis_id": "4",
+      "professor_id": "1",
+      "grade1": "7",
+      "grade2": "7",
+      "grade3": "7",
+      "grade4": "7",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "13",
+      "thesis_id": "11",
+      "professor_id": "3",
+      "grade1": "6",
+      "grade2": "7",
+      "grade3": "8",
+      "grade4": "6",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "14",
+      "thesis_id": "11",
+      "professor_id": "7",
+      "grade1": "5",
+      "grade2": "6",
+      "grade3": "9",
+      "grade4": "8",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "15",
+      "thesis_id": "11",
+      "professor_id": "4",
+      "grade1": "10",
+      "grade2": "10",
+      "grade3": "8",
+      "grade4": "7",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "16",
+      "thesis_id": "14",
+      "professor_id": "6",
+      "grade1": "10",
+      "grade2": "10",
+      "grade3": "8",
+      "grade4": "7",
+      "comments": "adequate job",
+      "finalized": true
+    },
+    {
+      "grade_id": "17",
+      "thesis_id": "15",
+      "professor_id": "3",
+      "grade1": "6",
+      "grade2": "10",
+      "grade3": "9",
+      "grade4": "9",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "18",
+      "thesis_id": "15",
+      "professor_id": "2",
+      "grade1": "10",
+      "grade2": "7",
+      "grade3": "9",
+      "grade4": "8",
+      "comments": "",
+      "finalized": true
+    },
+    {
+      "grade_id": "19",
+      "thesis_id": "15",
+      "professor_id": "1",
+      "grade1": "9",
+      "grade2": "9",
+      "grade3": "9",
+      "grade4": "9",
+      "comments": "",
+      "finalized": true
+    }
+  ],
+  "invitations": [
+    {
+      "id": "1",
+      "thesis_id": "12",
+      "professor_id": "9",
+      "status": "pending",
+      "invitation_date": "2024-12-08 00:00:00",
+      "response_date": null
+    },
+    {
+      "id": "2",
+      "thesis_id": "12",
+      "professor_id": "10",
+      "status": "rejected",
+      "invitation_date": "2024-12-04 00:00:00",
+      "response_date": "2024-12-25"
+    },
+    {
+      "id": "3",
+      "thesis_id": "12",
+      "professor_id": "16",
+      "status": "accepted",
+      "invitation_date": "2024-12-04 00:00:00",
+      "response_date": "2024-12-31"
+    },
+    {
+      "id": "4",
+      "thesis_id": "17",
+      "professor_id": "2",
+      "status": "pending",
+      "invitation_date": "2024-12-11 00:00:00",
+      "response_date": null
+    },
+    {
+      "id": "5",
+      "thesis_id": "17",
+      "professor_id": "1",
+      "status": "pending",
+      "invitation_date": "2024-12-17 00:00:00",
+      "response_date": "2024-12-25"
+    },
+    {
+      "id": "6",
+      "thesis_id": "17",
+      "professor_id": "9",
+      "status": "accepted",
+      "invitation_date": "2024-12-25 00:00:00",
+      "response_date": "2024-12-31"
+    }
+  ],
+  "logs": [
+    {
+      "id": "1",
+      "thesis_id": "1",
+      "date_of_change": "2024-02-10",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "2",
+      "thesis_id": "1",
+      "date_of_change": "2024-02-15",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "1",
+      "gen_assembly_session": "1",
+      "cancellation_reason": null
+    },
+    {
+      "id": "3",
+      "thesis_id": "1",
+      "date_of_change": "2024-03-15",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "ap": null,
+      "gen_assembly_session": "2",
+      "cancellation_reason": null
+    },
+    {
+      "id": "4",
+      "thesis_id": "1",
+      "date_of_change": "2024-04-10",
+      "old_state": "to-be-reviewed",
+      "new_state": "completed",
+      "ap": null,
+      "gen_assembly_session": "3",
+      "cancellation_reason": null
+    },
+    {
+      "id": "5",
+      "thesis_id": "2",
+      "date_of_change": "2024-08-05",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "6",
+      "thesis_id": "2",
+      "date_of_change": "2024-08-10",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "2",
+      "gen_assembly_session": "4",
+      "cancellation_reason": null
+    },
+    {
+      "id": "7",
+      "thesis_id": "2",
+      "date_of_change": "2024-11-15",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "ap": null,
+      "gen_assembly_session": "5",
+      "cancellation_reason": null
+    },
+    {
+      "id": "8",
+      "thesis_id": "2",
+      "date_of_change": "2024-12-05",
+      "old_state": "to-be-reviewed",
+      "new_state": "completed",
+      "ap": null,
+      "gen_assembly_session": "6",
+      "cancellation_reason": null
+    },
+    {
+      "id": "9",
+      "thesis_id": "3",
+      "date_of_change": "2023-11-03",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "10",
+      "thesis_id": "3",
+      "date_of_change": "2023-11-10",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "3",
+      "gen_assembly_session": "7",
+      "cancellation_reason": null
+    },
+    {
+      "id": "11",
+      "thesis_id": "3",
+      "date_of_change": "2024-05-10",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "ap": null,
+      "gen_assembly_session": "8",
+      "cancellation_reason": null
+    },
+    {
+      "id": "12",
+      "thesis_id": "3",
+      "date_of_change": "2024-06-05",
+      "old_state": "to-be-reviewed",
+      "new_state": "completed",
+      "ap": null,
+      "gen_assembly_session": "9",
+      "cancellation_reason": null
+    },
+    {
+      "id": "13",
+      "thesis_id": "4",
+      "date_of_change": "2023-10-28",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "14",
+      "thesis_id": "4",
+      "date_of_change": "2023-11-10",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "4",
+      "gen_assembly_session": "10",
+      "cancellation_reason": null
+    },
+    {
+      "id": "15",
+      "thesis_id": "4",
+      "date_of_change": "2024-02-20",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "ap": null,
+      "gen_assembly_session": "11",
+      "cancellation_reason": null
+    },
+    {
+      "id": "16",
+      "thesis_id": "4",
+      "date_of_change": "2024-03-05",
+      "old_state": "to-be-reviewed",
+      "new_state": "completed",
+      "ap": null,
+      "gen_assembly_session": "12",
+      "cancellation_reason": null
+    },
+    {
+      "id": "17",
+      "thesis_id": "8",
+      "date_of_change": "2024-12-03",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "18",
+      "thesis_id": "8",
+      "date_of_change": "2024-12-15",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "5",
+      "gen_assembly_session": "13",
+      "cancellation_reason": null
+    },
+    {
+      "id": "19",
+      "thesis_id": "9",
+      "date_of_change": "2024-05-25",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "20",
+      "thesis_id": "9",
+      "date_of_change": "2024-06-15",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "6",
+      "gen_assembly_session": "14",
+      "cancellation_reason": null
+    },
+    {
+      "id": "22",
+      "thesis_id": "11",
+      "date_of_change": "2024-05-20",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "23",
+      "thesis_id": "11",
+      "date_of_change": "2024-06-15",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "7",
+      "gen_assembly_session": "15",
+      "cancellation_reason": null
+    },
+    {
+      "id": "24",
+      "thesis_id": "11",
+      "date_of_change": "2024-11-12",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "ap": null,
+      "gen_assembly_session": "23",
+      "cancellation_reason": null
+    },
+    {
+      "id": "25",
+      "thesis_id": "11",
+      "date_of_change": "2024-12-08",
+      "old_state": "to-be-reviewed",
+      "new_state": "completed",
+      "ap": null,
+      "gen_assembly_session": "3",
+      "cancellation_reason": null
+    },
+    {
+      "id": "26",
+      "thesis_id": "12",
+      "date_of_change": "2025-01-03",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "27",
+      "thesis_id": "13",
+      "date_of_change": "2024-11-25",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "28",
+      "thesis_id": "13",
+      "date_of_change": "2024-12-01",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "8",
+      "gen_assembly_session": "12",
+      "cancellation_reason": null
+    },
+    {
+      "id": "29",
+      "thesis_id": "14",
+      "date_of_change": "2024-10-20",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "30",
+      "thesis_id": "14",
+      "date_of_change": "2024-11-15",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "9",
+      "gen_assembly_session": 15,
+      "cancellation_reason": null
+    },
+    {
+      "id": "31",
+      "thesis_id": "14",
+      "date_of_change": "2025-01-15",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "ap": null,
+      "gen_assembly_session": "23",
+      "cancellation_reason": null
+    },
+    {
+      "id": "32",
+      "thesis_id": "16",
+      "date_of_change": "2024-02-25",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "33",
+      "thesis_id": "16",
+      "date_of_change": "2024-03-01",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "10",
+      "gen_assembly_session": "12",
+      "cancellation_reason": null
+    },
+    {
+      "id": "34",
+      "thesis_id": "16",
+      "date_of_change": "2024-04-20",
+      "old_state": "active",
+      "new_state": "cancelled",
+      "ap": null,
+      "gen_assembly_session": "23",
+      "cancellation_reason": null
+    },
+    {
+      "id": "35",
+      "thesis_id": "15",
+      "date_of_change": "2024-04-20",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "36",
+      "thesis_id": "15",
+      "date_of_change": "2024-05-01",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "11",
+      "gen_assembly_session": "15",
+      "cancellation_reason": null
+    },
+    {
+      "id": "37",
+      "thesis_id": "15",
+      "date_of_change": "2024-09-12",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "ap": null,
+      "gen_assembly_session": "23",
+      "cancellation_reason": null
+    },
+    {
+      "id": "38",
+      "thesis_id": "15",
+      "date_of_change": "2024-10-08",
+      "old_state": "to-be-reviewed",
+      "new_state": "completed",
+      "ap": null,
+      "gen_assembly_session": "3",
+      "cancellation_reason": null
+    },
+    {
+      "id": "39",
+      "thesis_id": "17",
+      "date_of_change": "2024-12-01",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "40",
+      "thesis_id": "19",
+      "date_of_change": "2024-09-20",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "41",
+      "thesis_id": "19",
+      "date_of_change": "2024-10-20",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "12",
+      "gen_assembly_session": "15",
+      "cancellation_reason": null
+    },
+    {
+      "id": "42",
+      "thesis_id": "19",
+      "date_of_change": "2025-01-12",
+      "old_state": "active",
+      "new_state": "to-be-reviewed",
+      "ap": null,
+      "gen_assembly_session": "23",
+      "cancellation_reason": null
+    },
+    {
+      "id": "43",
+      "thesis_id": "21",
+      "date_of_change": "2022-08-05",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "44",
+      "thesis_id": "21",
+      "date_of_change": "2022-08-10",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "13",
+      "gen_assembly_session": "4",
+      "cancellation_reason": "2022-08-10"
+    },
+    {
+      "id": "45",
+      "thesis_id": "21",
+      "date_of_change": "2024-10-10",
+      "old_state": "active",
+      "new_state": "cancelled",
+      "ap": null,
+      "gen_assembly_session": "10",
+      "cancellation_reason": "από Διδάσκοντα"
+    },
+    {
+      "id": "46",
+      "thesis_id": "20",
+      "date_of_change": "2022-09-10",
+      "old_state": "unassigned",
+      "new_state": "assigned",
+      "ap": null,
+      "gen_assembly_session": null,
+      "cancellation_reason": null
+    },
+    {
+      "id": "47",
+      "thesis_id": "20",
+      "date_of_change": "2022-09-15",
+      "old_state": "assigned",
+      "new_state": "active",
+      "ap": "18",
+      "gen_assembly_session": "15",
+      "cancellation_reason": null
+    },
+    {
+      "id": "48",
+      "thesis_id": "20",
+      "date_of_change": "2024-11-15",
+      "old_state": "active",
+      "new_state": "cancelled",
+      "ap": null,
+      "gen_assembly_session": "12",
+      "cancellation_reason": "Κατόπιν αίτησης φοιτητή"
+    }
+  ],
+  "committees": [
+    {
+      "thesis_id": "1",
+      "member1_id": "2",
+      "member2_id": "4"
+    },
+    {
+      "thesis_id": "2",
+      "member1_id": "3",
+      "member2_id": "5"
+    },
+    {
+      "thesis_id": "3",
+      "member1_id": "1",
+      "member2_id": "5"
+    },
+    {
+      "thesis_id": "4",
+      "member1_id": "3",
+      "member2_id": "1"
+    },
+    {
+      "thesis_id": "8",
+      "member1_id": "9",
+      "member2_id": "8"
+    },
+    {
+      "thesis_id": "11",
+      "member1_id": "7",
+      "member2_id": "4"
+    },
+    {
+      "thesis_id": "12",
+      "member1_id": null,
+      "member2_id": null
+    },
+    {
+      "thesis_id": "13",
+      "member1_id": "1",
+      "member2_id": "4"
+    },
+    {
+      "thesis_id": "15",
+      "member1_id": "2",
+      "member2_id": "1"
+    },
+    {
+      "thesis_id": "14",
+      "member1_id": "6",
+      "member2_id": "10"
+    },
+    {
+      "thesis_id": "9",
+      "member1_id": "3",
+      "member2_id": "6"
+    },
+    {
+      "thesis_id": "17",
+      "member1_id": null,
+      "member2_id": null
+    },
+    {
+      "thesis_id": "19",
+      "member1_id": "11",
+      "member2_id": "7"
+    },
+    {
+      "thesis_id": "21",
+      "member1_id": "10",
+      "member2_id": "5"
+    },
+    {
+      "thesis_id": "20",
+      "member1_id": "8",
+      "member2_id": "4"
+    }
+  ],
+  "notes": [
+    {
+      "id": "1",
+      "thesis_id": "8",
+      "professor_id": "5",
+      "date": "2025-01-03 00:00:00",
+      "content": "I found a new research paper concerning the topic"
+    },
+    {
+      "id": "2",
+      "thesis_id": "8",
+      "professor_id": "5",
+      "date": "2025-01-15 00:00:00",
+      "content": "the schemas need more detail"
+    },
+    {
+      "id": "3",
+      "thesis_id": "8",
+      "professor_id": "9",
+      "date": "2025-01-20 00:00:00",
+      "content": "needs progress on ther research"
+    },
+    {
+      "id": "4",
+      "thesis_id": "9",
+      "professor_id": "3",
+      "date": "2024-08-20 00:00:00",
+      "content": "the explaination is really good but the code needs work"
+    },
+    {
+      "id": "5",
+      "thesis_id": "9",
+      "professor_id": "3",
+      "date": "2024-09-15 00:00:00",
+      "content": "should arrange new meeting next Friday to see the progress"
+    },
+    {
+      "id": "6",
+      "thesis_id": "9",
+      "professor_id": "6",
+      "date": "2024-09-20 00:00:00",
+      "content": "should arrange new meeting next Friday to see the progress"
+    },
+    {
+      "id": "7",
+      "thesis_id": "13",
+      "professor_id": "1",
+      "date": "2023-01-26 00:00:00",
+      "content": "neccessary configurations not implemented"
+    },
+    {
+      "id": "8",
+      "thesis_id": "13",
+      "professor_id": "1",
+      "date": "2023-09-15 00:00:00",
+      "content": "should ask about the progress of the application backend"
+    },
+    {
+      "id": "9",
+      "thesis_id": "13",
+      "professor_id": "3",
+      "date": "2023-12-20 00:00:00",
+      "content": "need more students for the experiment"
+    },
+    {
+      "id": "10",
+      "thesis_id": "13",
+      "professor_id": "3",
+      "date": "2024-01-20 00:00:00",
+      "content": "need to see the paperwork done"
+    }
+  ],
+  "examinations": [
+    {
+      "thesis_id": "1",
+      "date": "2024-04-15",
+      "type_of_exam": "online",
+      "location": "https://zoom.us"
+    },
+    {
+      "thesis_id": "2",
+      "date": "2024-12-10",
+      "type_of_exam": "in-person",
+      "location": "Δ2"
+    },
+    {
+      "thesis_id": "3",
+      "date": "2024-06-10",
+      "type_of_exam": "online",
+      "location": "https://zoom.us"
+    },
+    {
+      "thesis_id": "4",
+      "date": "2024-03-09",
+      "type_of_exam": "in-person",
+      "location": "ΒΑ"
+    },
+    {
+      "thesis_id": "11",
+      "date": "2024-12-05",
+      "type_of_exam": "online",
+      "location": "https://zoom.us"
+    },
+    {
+      "thesis_id": "14",
+      "date": "2025-02-10",
+      "type_of_exam": "in-person",
+      "location": "Δ5"
+    },
+    {
+      "thesis_id": "15",
+      "date": "2024-10-01",
+      "type_of_exam": "online",
+      "location": "https://zoom.us"
+    },
+    {
+      "thesis_id": "19",
+      "date": "2025-03-15",
+      "type_of_exam": "online",
+      "location": "https://zoom.us"
+    }
+  ],
+  "attachments":[
+    {
+      "id": "1",
+      "thesis_id": "1",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434023.pdf" 
+    },
+    {
+      "id": "2",
+      "thesis_id": "2",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434021.pdf"
+    },
+    {
+      "id": "3",
+      "thesis_id": "3",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434005.pdf"
+    },
+    {
+      "id": "4",
+      "thesis_id": "11",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434008.pdf" 
+    },
+    {
+      "id": "5",
+      "thesis_id": "15",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434007.pdf"
+    },
+    {
+      "id": "6",
+      "thesis_id": "4",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434012.pdf"
+    },
+    {
+      "id": "7",
+      "thesis_id": "19",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434027.pdf"
+    },
+    {
+      "id": "8",
+      "thesis_id": "14",
+      "type": "file",
+      "link_path": null,
+      "file_path": "./files/uploaded_files/st10434000.pdf"
+    }
+  ],
+  "announcements": [
+    {
+      "thesis_id": "1",
+      "announcement_date": "2024-04-08"
+    },
+    {
+      "thesis_id": "2",
+      "announcement_date": "2024-12-03"
+    },
+    {
+      "thesis_id": "3",
+      "announcement_date": "2024-06-03"
+    },
+    {
+      "thesis_id": "4",
+      "announcement_date": "2024-03-02"
+    },
+    {
+      "thesis_id": "11",
+      "announcement_date": "2024-11-30"
+    },
+    {
+      "thesis_id": "14",
+      "announcement_date": "2025-02-03"
+    },
+    {
+      "thesis_id": "15",
+      "announcement_date": "2024-09-26"
+    },
+    {
+      "thesis_id": "19",
+      "announcement_date": "2025-03-08"
     }
   ],
   "administrators": [
@@ -1288,5 +2070,4 @@
       "email": "iwanna@ceid.upatras.gr"
     }
   ]
-  
 }

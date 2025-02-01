@@ -49,14 +49,14 @@ document.querySelectorAll('.nav-link, .btn[data-target]').forEach(tab => {
 });
 //-------------- Log-Out Button Event Listener -------------
 document.getElementById('logout-btn').addEventListener('click', (event) => {
-    event.preventDefault(); // Αποφυγή της προεπιλεγμένης συμπεριφοράς του link
+    event.preventDefault();
     fetch('/logout', {
         method: 'POST',
-        credentials: 'include' // Περιλαμβάνει cookies
+        credentials: 'include'
     })
         .then(response => {
             if (response.ok) {
-                window.location.href = '/'; // Ανακατεύθυνση στο index
+                window.location.href = '/';
             } else {
                 alert('Η αποσύνδεση απέτυχε.');
             }
@@ -849,6 +849,8 @@ function addStartThesisButton(thesisId, container) {
 
         const startNumberInput = document.createElement('input');
         startNumberInput.type = 'number';
+        startNumberInput.min = "1";
+        startNumberInput.step = '1';
         startNumberInput.id = 'start-number';
         startNumberInput.classList.add('form-control', 'mb-2');
         startNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
@@ -864,6 +866,9 @@ function addStartThesisButton(thesisId, container) {
         startDateInput.id = 'start-date';
         startDateInput.classList.add('form-control', 'mb-2');
         startDateInput.placeholder = 'Ημερομηνία Γενικής Συνέλευσης';
+        // Set max attribute to today
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.max = today;
         startThesisForm.appendChild(startDateInput);
 
         const confirmStartButton = createButton('confirm-start-button', 'Επιβεβαίωση Εκκίνησης', ['btn', 'btn-primary'], () => {
@@ -1022,6 +1027,8 @@ function addActiveSection(thesis, container) {
 
             const cancellationNumberInput = document.createElement('input');
             cancellationNumberInput.type = 'number';
+            cancellationNumberInput.min = '1';
+            cancellationNumberInput.step = '1';
             cancellationNumberInput.id = 'cancellation-number';
             cancellationNumberInput.classList.add('form-control', 'mb-2');
             cancellationNumberInput.placeholder = 'Αριθμός Γενικής Συνέλευσης';
@@ -1115,7 +1122,9 @@ function addActiveSection(thesis, container) {
             aaLabel.classList.add('form-label');
 
             const aaInput = document.createElement('input');
-            aaInput.type = 'text';
+            aaInput.type = 'number';
+            aaInput.min = '1';
+            aaInput.step = '1';
             aaInput.classList.add('form-control', 'mb-2');
             aaInput.placeholder = 'A/A Γενικής Συνέλευσης';
 
@@ -1333,9 +1342,6 @@ function addToBeReviewedSection(thesis, container) {
     });
     downloadSection.appendChild(downloadButton);
 
-    const downloadHr = document.createElement('hr');
-    downloadSection.appendChild(downloadHr);
-
     container.appendChild(downloadSection);
 
     if (thesis.role === 'Επιβλέπων') {
@@ -1414,13 +1420,11 @@ function announcementButtonController(thesisId, container) {
                 });
                 container.appendChild(showAnnouncementButton);
             }
-
             const announcementHr = document.createElement('hr');
             container.appendChild(announcementHr);
         })
         .catch((error) => {
             console.error('Error:', error);
-            // Εμφάνιση μηνύματος σφάλματος στον χρήστη, αν χρειάζεται
         });
 }
 
@@ -1578,7 +1582,6 @@ function gradeEnableButton(thesisId, container) {
 }
 //-------------- Function for Loading the Grades if enabled in Theses List-------------
 function loadGradeSection(thesisId, container) {
-    // Δημιουργία wrapper για το περιεχόμενο βαθμολογίας
     const existingContent = document.getElementById('grade-content');
     if (existingContent && container.contains(existingContent)) {
         container.removeChild(existingContent);
@@ -1674,7 +1677,7 @@ function renderGradeSection(thesisId, container) {
                 const submitGradeButton = createButton(
                     'submit-grade-button',
                     grades.grade !== undefined ? 'Αλλαγή Βαθμού' : 'Καταχώρηση Βαθμού',
-                    ['btn', 'btn-success'], () => handleSubmitGradeButtonClick(thesisId, container)
+                    ['btn', 'btn-warning'], () => handleSubmitGradeButtonClick(thesisId, container)
                 );
 
                 buttonContainer.appendChild(submitGradeButton);
@@ -1682,7 +1685,7 @@ function renderGradeSection(thesisId, container) {
                 const finalizeButton = createButton(
                     'finalize-grade-button',
                     'Οριστική Υποβολή',
-                    ['btn', 'btn-danger'], () => handleFinalizeButtonClick(thesisId, container)
+                    ['btn', 'btn-success'], () => handleFinalizeButtonClick(thesisId, container)
                 );
 
                 buttonContainer.appendChild(finalizeButton);
@@ -1997,7 +2000,7 @@ function loadLogs(thesis_id) {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-            thesis_id: thesis_id, // Σωστή μεταβλητή
+            thesis_id: thesis_id,
         })
     })
         .then(response => response.json())
@@ -2024,7 +2027,7 @@ function loadLogs(thesis_id) {
 
                 logData.forEach((log) => {
                     const logEntry = document.createElement('div');
-                    logEntry.classList.add('card', 'mb-3', 'shadow-sm'); // Εξασφαλίζει στυλ card
+                    logEntry.classList.add('card', 'mb-3', 'shadow-sm');
 
                     logEntry.innerHTML = `
                         <div class="card-body">
@@ -2036,7 +2039,7 @@ function loadLogs(thesis_id) {
                 });
             } else if (data.success && data.log.length === 0) {
                 const noChangesCard = document.createElement('div');
-                noChangesCard.classList.add('card', 'mb-3', 'shadow-sm'); // Στυλ κάρτας
+                noChangesCard.classList.add('card', 'mb-3', 'shadow-sm');
 
                 noChangesCard.innerHTML = `
                     <div class="card-body">
@@ -2088,7 +2091,7 @@ function createButton(id, text, classes, onClick = null) {
 
 
 //--------------------------------------------- INVITATION TAB ---------------------------------------------
-//------------ Function for loading Invitations associated with a specific professor ----------
+//------------ Function for loading Invitations associated with a specific professor -------------
 function loadInvitations() {
     fetch('/api/invitations-for-professor', {
         headers: {
@@ -2228,8 +2231,8 @@ function handleInvitationAction(invitationId, action) {
         });
 }
 
-//--------------------- Function for Loading the Charts of a professor --------
-let chartInstance; 
+//--------------------- Function for Loading the Charts of a professor -------------
+let chartInstance;
 
 let chartSupervisorGrades, chartCompletionTimes, chartSupervisedTheses;
 
@@ -2239,120 +2242,120 @@ function loadCharts() {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success) {
-            console.error('API returned an error:', data.message);
-            return;
-        }
-
-        const results = data.results;
-
-        const avgSupervisorGrades = results.map(prof => parseFloat(prof.avg_supervisor_grade));
-        const avgCommitteeMemberGrades = results.map(prof => parseFloat(prof.avg_committee_member_grade));
-        const avgSupervisorCompletionTimes = results.map(prof => parseFloat(prof.avg_supervisor_completion_time));
-        const avgCommitteeMemberCompletionTimes = results.map(prof => parseFloat(prof.avg_committee_member_completion_time));
-        const totalSupervisedTheses = results.map(prof => prof.total_supervised_theses);
-        const totalCommitteeTheses = results.map(prof => prof.total_committee_theses);
-        const labels = results.map(prof => `${prof.name} ${prof.surname}`);
-
-        const supervisorGradesChartElement = document.getElementById('chartSupervisorGrades');
-        if (supervisorGradesChartElement) {
-            if (chartSupervisorGrades) {
-                chartSupervisorGrades.destroy();
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('API returned an error:', data.message);
+                return;
             }
-            chartSupervisorGrades = new Chart(supervisorGradesChartElement, {
-                type: 'bar',
-                data: {
-                    labels: labels,  
-                    datasets: [
-                        {
-                            label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Επιβλέπωντας)',
-                            data: avgSupervisorGrades,
-                            backgroundColor: 'rgba(75, 192, 192, 0.5)'
-                        },
-                        {
-                            label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Μέλος Τριμελούς)',
-                            data: avgCommitteeMemberGrades,
-                            backgroundColor: 'rgba(255, 99, 132, 0.5)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    aspectRatio: 0.99,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
 
-        const completionTimesChartElement = document.getElementById('chartCompletionTimes');
-        if (completionTimesChartElement) {
-            if (chartCompletionTimes) {
-                chartCompletionTimes.destroy();
-            }
-            chartCompletionTimes = new Chart(completionTimesChartElement, {
-                type: 'bar',
-                data: {
-                    labels: labels,  
-                    datasets: [
-                        {
-                            label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Επιβλέπωντας)',
-                            data: avgSupervisorCompletionTimes,
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
-                        },
-                        {
-                            label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Μέλος Τριμελούς)',
-                            data: avgCommitteeMemberCompletionTimes,
-                            backgroundColor: 'rgba(153, 102, 255, 0.5)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    aspectRatio: 0.99, 
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
+            const results = data.results;
 
-        const supervisedThesesChartElement = document.getElementById('chartSupervisedTheses');
-        if (supervisedThesesChartElement) {
-            if (chartSupervisedTheses) {
-                chartSupervisedTheses.destroy();
-            }
-            chartSupervisedTheses = new Chart(supervisedThesesChartElement, {
-                type: 'bar',
-                data: {
-                    labels: labels,  
-                    datasets: [
-                        {
-                            label: 'Συνολικός Αριθμός Διπλωματικών (ως Επιβλέπωντας)',
-                            data: totalSupervisedTheses,
-                            backgroundColor: 'rgba(255, 159, 64, 0.5)'
-                        },
-                        {
-                            label: 'Συνολικός Αριθμός Διπλωματικών (ως Μέλος Τριμελούς)',
-                            data: totalCommitteeTheses,
-                            backgroundColor: 'rgba(255, 99, 71, 0.5)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    aspectRatio: 0.99,  
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+            const avgSupervisorGrades = results.map(prof => parseFloat(prof.avg_supervisor_grade));
+            const avgCommitteeMemberGrades = results.map(prof => parseFloat(prof.avg_committee_member_grade));
+            const avgSupervisorCompletionTimes = results.map(prof => parseFloat(prof.avg_supervisor_completion_time));
+            const avgCommitteeMemberCompletionTimes = results.map(prof => parseFloat(prof.avg_committee_member_completion_time));
+            const totalSupervisedTheses = results.map(prof => prof.total_supervised_theses);
+            const totalCommitteeTheses = results.map(prof => prof.total_committee_theses);
+            const labels = results.map(prof => `${prof.name} ${prof.surname}`);
+
+            const supervisorGradesChartElement = document.getElementById('chartSupervisorGrades');
+            if (supervisorGradesChartElement) {
+                if (chartSupervisorGrades) {
+                    chartSupervisorGrades.destroy();
                 }
-            });
-        }
-    })
-    .catch(error => console.error('Error in loadCharts:', error));
+                chartSupervisorGrades = new Chart(supervisorGradesChartElement, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Επιβλέπωντας)',
+                                data: avgSupervisorGrades,
+                                backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                            },
+                            {
+                                label: 'Μέσος Τελικός Βαθμός Διπλωματικών (ως Μέλος Τριμελούς)',
+                                data: avgCommitteeMemberGrades,
+                                backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        aspectRatio: 0.99,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            const completionTimesChartElement = document.getElementById('chartCompletionTimes');
+            if (completionTimesChartElement) {
+                if (chartCompletionTimes) {
+                    chartCompletionTimes.destroy();
+                }
+                chartCompletionTimes = new Chart(completionTimesChartElement, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Επιβλέπωντας)',
+                                data: avgSupervisorCompletionTimes,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                            },
+                            {
+                                label: 'Μέση Διάρκεια Περάτωσης Διπλωματικών (ως Μέλος Τριμελούς)',
+                                data: avgCommitteeMemberCompletionTimes,
+                                backgroundColor: 'rgba(153, 102, 255, 0.5)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        aspectRatio: 0.99,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            const supervisedThesesChartElement = document.getElementById('chartSupervisedTheses');
+            if (supervisedThesesChartElement) {
+                if (chartSupervisedTheses) {
+                    chartSupervisedTheses.destroy();
+                }
+                chartSupervisedTheses = new Chart(supervisedThesesChartElement, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Συνολικός Αριθμός Διπλωματικών (ως Επιβλέπωντας)',
+                                data: totalSupervisedTheses,
+                                backgroundColor: 'rgba(255, 159, 64, 0.5)'
+                            },
+                            {
+                                label: 'Συνολικός Αριθμός Διπλωματικών (ως Μέλος Τριμελούς)',
+                                data: totalCommitteeTheses,
+                                backgroundColor: 'rgba(255, 99, 71, 0.5)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        aspectRatio: 0.99,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => console.error('Error in loadCharts:', error));
 }
 
 

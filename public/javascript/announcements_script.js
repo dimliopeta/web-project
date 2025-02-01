@@ -1,11 +1,12 @@
+//--------------------------------------------- STARTUP SETTINGS & GLOBAL VARIABLES ---------------------------------------------
 let currentPage = 1;
 const announcementsPerPage = 6;
 let hasMoreAnnouncements = true;
 
+//--------------------------------------------- FUNCTIONS TO LOAD AND HANDLE ANNOUNCEMENTS ---------------------------------------------
+//-------------- Function to Load Announcements -------------
 function loadAnnouncements(filters = {}, exportFormat = null) {
-    console.log("Φόρτωση ανακοινώσεων με φίλτρα:", filters);
 
-    // Επαναφορά της τρέχουσας σελίδας όταν αλλάζουν τα φίλτρα
     if (filters.anDateFrom || filters.anDateTo || filters.examDateFrom || filters.examDateTo) {
         currentPage = 1;
     }
@@ -45,23 +46,15 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                     return match;
                 });
             }
-
-            console.log('Φιλτραρισμένες ανακοινώσεις:', filteredAnnouncements);
-
             const startIndex = (currentPage - 1) * announcementsPerPage;
             const endIndex = startIndex + announcementsPerPage;
             const announcementsToLoad = filteredAnnouncements.slice(startIndex, endIndex);
-
-            console.log('Ανακοινώσεις προς φόρτωση:', announcementsToLoad);
-
             const container = document.getElementById('announcements-container');
 
             if (currentPage === 1) {
                 container.innerHTML = '';
             }
-
             if (exportFormat === null) {
-                console.log(exportFormat);
                 announcementsToLoad.forEach(announcement => {
                     const card = `
                      <div class="col-md-4">
@@ -78,7 +71,7 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                                      <li>${announcement.committee_member1_name}</li>
                                      <li>${announcement.committee_member2_name}</li>
                                  </ul>
-                                 <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${new Date(announcement.exam_date).toLocaleDateString()}</p>
+                                 <p class="text-muted"><strong>Ημερομηνία Εξέτασης:</strong> ${announcement.exam_date}</p>
                                  <p class="text-muted"><strong>Τύπος Εξέτασης:</strong> ${announcement.type_of_exam === 'online'
                                      ? 'Ηλεκτρονική'
                                      : announcement.type_of_exam === 'in-person'
@@ -87,7 +80,7 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                                  <p class="text-muted"><strong>Τοποθεσία Εξέτασης:</strong> ${announcement.examination_location}</p>
                              </div>
                              <div class="card-footer bg-light d-flex justify-content-end">
-                                 <p class="text-center">Ημερομηνία Δημοσίευσης Ανακοίνωσης: ${new Date(announcement.an_date).toLocaleDateString()}</p>
+                                 <p class="text-center">Ημερομηνία Δημοσίευσης Ανακοίνωσης: ${announcement.an_date}</p>
                              </div>
                          </div>
                      </div>
@@ -95,16 +88,13 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                     container.innerHTML += card;
                 });
             }
-
             if (exportFormat === 'xml') {
                 generateXmlFeed(filteredAnnouncements);
             }
-
             if (exportFormat === 'json') {
                 generateJsonFeed(filteredAnnouncements);
             }
 
-            // Ενημέρωση κατάστασης για περισσότερες σελίδες
             if (exportFormat === null) {
                 if (announcementsToLoad.length < announcementsPerPage) {
                     hasMoreAnnouncements = false;
@@ -114,20 +104,20 @@ function loadAnnouncements(filters = {}, exportFormat = null) {
                 }
             }
 
-            // Αν υπάρχουν περισσότερες σελίδες, προσθέτουμε το κουμπί "Επόμενη Σελίδα"
+            // If more pages exist add the "Load more" button
             if (hasMoreAnnouncements) {
                 const loadMoreButton = document.getElementById('load-more-button');
-                loadMoreButton.style.display = 'block'; // Εμφανίζουμε το κουμπί
+                loadMoreButton.style.display = 'block';
             } else {
                 const loadMoreButton = document.getElementById('load-more-button');
-                loadMoreButton.style.display = 'none'; // Κρύβουμε το κουμπί όταν δεν υπάρχουν περισσότερες σελίδες
+                loadMoreButton.style.display = 'none';
             }
         })
         .catch(error => {
             console.error('Σφάλμα κατά τη λήψη των ανακοινώσεων:', error);
         });
 }
-
+//-------------- Function for XML Feed  -------------
 function generateXmlFeed(filteredAnnouncements) {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<announcements>\n';
 
@@ -158,10 +148,8 @@ function generateXmlFeed(filteredAnnouncements) {
     a.download = 'announcements.xml';
     a.click();
     const filters = getFilterValues()
-
-    //loadAnnouncements(filters);
 }
-
+//-------------- Function for JSON Feed -------------
 function generateJsonFeed(filteredAnnouncements) {
     const jsonFeed = filteredAnnouncements.map(announcement => ({
         title: announcement.title,
@@ -185,11 +173,8 @@ function generateJsonFeed(filteredAnnouncements) {
     a.download = 'announcements.json';
     a.click();
     const filters = getFilterValues()
-
-    //loadAnnouncements(filters);
 }
-
-
+//-------------- Function to get Filters -------------
 function getFilterValues() {
     const anDateFrom = document.getElementById('filter-an-date-from').value;
     const anDateTo = document.getElementById('filter-an-date-to').value;
@@ -205,22 +190,21 @@ function getFilterValues() {
     return filters;
 }
 
+
+
+//--------------------------------------------- EVENT LISTENERS ---------------------------------------------
 document.getElementById('export-json').addEventListener('click', () => {
     const filters = getFilterValues();
     loadAnnouncements(filters, 'json');
 });
-
 document.getElementById('export-xml').addEventListener('click', () => {
     const filters = getFilterValues();
     loadAnnouncements(filters, 'xml');
 });
-
-
 document.getElementById('apply-filters').addEventListener('click', () => {
     const filters = getFilterValues();
     loadAnnouncements(filters);
 });
-
 document.getElementById('clear-filters').addEventListener('click', () => {
     document.getElementById('filter-an-date-from').value = '';
     document.getElementById('filter-an-date-to').value = '';
@@ -233,12 +217,12 @@ document.getElementById('clear-filters').addEventListener('click', () => {
         examDateFrom: null,
         examDateTo: null
     };
-    console.log(filters);
-    loadAnnouncements(filters); // Επαναφόρτωση χωρίς φίλτρα
+    loadAnnouncements(filters);
 });
 
 
 
-// Αρχική φόρτωση ανακοινώσεων
+//--------------------------------------------- RUN FUNCTIONS AFTER DOM ---------------------------------------------
+//------------------------------ Load functions after DOM is loaded ------------------------------
 loadAnnouncements();
 

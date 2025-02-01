@@ -26,7 +26,7 @@ function loadData(filePath) {
 }
 
 //--------------- Function to load data into the DB ---------------
-function insertData(filePath = './provided_data/enriched_data.json') {
+function insertData(filePath = './provided_data/data.json') {
     const data = loadData(filePath); // Load data from the specified file
     if (data !== null) {
 
@@ -70,7 +70,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             console.warn('No professors data found in the file.');
         }
 
-        //--------------- Insert Students
+        //--------------- Insert Students ---------------
         if (data.students) {
             data.students.forEach(student => {
                 const query = `SELECT * FROM STUDENTS WHERE email=?;`;
@@ -112,7 +112,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             console.warn('No students data found in the file.');
         }
 
-        //--------------- Insert Administrators
+        //--------------- Insert Administrators ---------------
         if (data.administrators) {
             data.administrators.forEach(administrator => {
                 const query = `SELECT * FROM ADMINISTRATORS WHERE email=?;`;
@@ -145,7 +145,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             console.warn('No administrators data found in the file.');
         }
 
-        //--------------- Insert Thesis
+        //--------------- Insert Thesis ---------------
         if (data.theses) {
             data.theses.forEach(thesis => {
 
@@ -185,7 +185,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             console.warn('No theses data found in the file.');
         }
 
-        //--------------- Insert Committees
+        //--------------- Insert Committees ---------------
         if (data.committees) {
             data.committees.forEach(committee => {
                 const query = `SELECT * FROM COMMITTEES WHERE thesis_id=?;`;
@@ -217,7 +217,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             console.warn('No committees data found in the file.');
         }
 
-        //--------------- Insert Invites
+        //--------------- Insert Invites ---------------
         if (data.invitations) {
             data.invitations.forEach(invitation => {
                 const query = `SELECT * FROM INVITATIONS WHERE id=?;`;
@@ -244,7 +244,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
         } else {
             console.warn('No invitations data found in the file.');
         }
-        //------------- Insert Logs
+        //------------- Insert Logs ---------------
         if (data.logs) {
             data.logs.forEach(log => {
                 const query = `SELECT * FROM LOGS WHERE id = ?`;
@@ -276,7 +276,40 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             })
 
         }
-        //--------------- Insert Examinations
+
+        //--------------- Insert Notes ---------------
+        if (data.notes) {
+            data.notes.forEach(note => {
+                const query = `SELECT * FROM NOTES WHERE id=?;`;
+                db.query(query, [note.id], (err, results) => {
+                    if (err) {
+                        console.error('Error checking for duplicate notes: ', err);
+                        return;
+                    }
+
+                    if (results.length === 0) {
+                        const insertQuery = `INSERT INTO NOTES(id, thesis_id, professor_id, date, content) 
+                        VALUES(?, ?, ?, ?, ?);`;
+
+                        db.query(insertQuery, [
+                            note.id,
+                            note.thesis_id,
+                            note.professor_id,
+                            note.date,
+                            note.content
+                        ], (insertErr) => {
+                            if (insertErr) {
+                                console.error('Error inserting examination:', insertErr);
+                            } else {
+                                console.log(`Note ${note.id} for thesis ${note.thesis_id} added successfully.`);
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        //--------------- Insert Examinations ---------------
         if (data.examinations) {
             data.examinations.forEach(examination => {
                 const query = `SELECT * FROM EXAMINATIONS WHERE thesis_id=?;`;
@@ -294,7 +327,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
                             examination.thesis_id,
                             examination.date,
                             examination.type_of_exam,
-                            examination.location,
+                            examination.location
                         ], (insertErr) => {
                             if (insertErr) {
                                 console.error('Error inserting examination:', insertErr);
@@ -308,6 +341,39 @@ function insertData(filePath = './provided_data/enriched_data.json') {
         } else {
             console.warn('No examinations data found in the file.');
         }
+        //--------------- Insert Attachments ---------------
+        if (data.attachments) {
+            data.attachments.forEach(attachment => {
+                const query = `SELECT * FROM ATTACHMENTS WHERE id =?;`
+                db.query(query, [attachment.id], (err, results) => {
+                    if (err) {
+                        console.error('Error checking for duplicate attachments: ', err);
+                        return;
+                    }
+                    if (results.length === 0) {
+                        const insertQuery = `
+                        INSERT INTO ATTACHMENTS ( id, thesis_id, type, link_path, file_path)
+                        VALUES (?, ?, ?, ?, ?);
+                        `;
+                        db.query(insertQuery, [
+                            attachment.id,
+                            attachment.thesis_id,
+                            attachment.type,
+                            attachment.link_path,
+                            attachment.file_path
+                        ],(insertErr) => {
+                            if (insertErr) {
+                                console.error('Error inserting attachment:', insertErr);
+                            } else {
+                                console.log(`Attachment ${attachment.id} for thesis ${attachment.thesis_id} added successfully.`);
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        //--------------- Insert Announcements ---------------
         if (data.announcements) {
             data.announcements.forEach(announcement => {
                 const query = `SELECT * FROM ANNOUNCEMENTS WHERE thesis_id=?;`;
@@ -336,7 +402,7 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             });
         }
 
-        //--------------- Insert Grades
+        //--------------- Insert Grades ---------------
         if (data.grades) {
             data.grades.forEach(grade => {
                 const query = `SELECT * FROM GRADES WHERE thesis_id=?;`;
@@ -374,7 +440,6 @@ function insertData(filePath = './provided_data/enriched_data.json') {
             console.warn('No grades data found in the file.');
         }
         console.log(`Database updated!`);
-
     } else {
         console.log("Skipping data insertion due to missing file.");
     }

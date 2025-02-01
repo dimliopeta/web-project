@@ -1,6 +1,6 @@
 
 //--------------------------------------------- STARTUP SETTINGS ---------------------------------------------
-//--------------------Nav Bar Event Listener-----------------------------
+//-------------------- Nav Bar Event Listener -----------------------------
 document.querySelectorAll('.nav-link, .btn[data-target').forEach(tab => {
     tab.addEventListener('click', function (e) {
         e.preventDefault();
@@ -43,7 +43,7 @@ document.getElementById('logout-btn').addEventListener('click', (event) => {
         })
         .catch(err => console.error('Error:', err));
 });
-//-----------Load the Dashboard Tab as the Homepage-------------
+//-----------Load the Dashboard Tab as the Homepage ---------------
 window.addEventListener('DOMContentLoaded', () => {
     const defaultTab = document.querySelector('a[href="#administratorDashboardSection"]');
     if (defaultTab) {
@@ -104,7 +104,6 @@ function loadAllTheses() {
                         default:
                             status = 'Άγνωστη';
                     }
-                    
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${thesis.thesis_id || 'Χωρίς ID'}</td>
@@ -196,12 +195,12 @@ function showInfoSection(thesis) {
                     </div>
                     <div class="card-footer text-muted">
                         <span data-field="dashboardStartDate">
-                            <span class="ps-5">Ημερομηνία έναρξης:</span>
+                            <span class="ps-4">Ημερομηνία έναρξης:</span>
                             <span class="pe-4" data-field="thesis_start_date">${thesis.start_date || 'err'}</span>
                         </span>
                         <span data-field="dashboardDuration">
-                            <span class="ps-5">Διάρκεια:</span>
-                            <span class="pe-4" data-field="thesis_duration">${duration || 'err'}</span>
+                            <span class="ps-4">Διάρκεια:</span>
+                            <span class="pe-3" data-field="thesis_duration">${duration || 'err'}</span>
                         </span>
                     </div>
                 </div>

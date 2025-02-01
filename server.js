@@ -19,14 +19,18 @@ const SECRET_KEY = 'your-secret-key';
 db.query('SELECT 1', (err, results) => {
     if (err) {
         console.error('Database connection failed:', err);
-        process.exit(1); // Τερματισμός του server αν η σύνδεση αποτύχει
+        process.exit(1);
     } else {
         console.log('Database connected successfully!');
     }
 });
 //-------------- Set Index file and the public folder --------------
 app.use(express.static('public', {
-    index: 'index.html'
+    index: 'index.html',
+    maxAge: '1d'
+}));
+app.use(express.static(path.join(__dirname, 'views'), {
+    maxAge: '1d', // Cache ttl 1 day
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,7 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 
 
 //----------------------------- TOKEN-COOKIES CONTROL AND LOGIN ROLE ROUTING -----------------------------
-
 //-------------- JWT token control --------------
 app.use(cookieParser());
 const authenticateJWT = (req, res, next) => {
@@ -265,11 +268,10 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
-        // Μετατροπή των αποτελεσμάτων σε string πριν υπολογιστεί το ETag
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();  
         }
 
         res.setHeader('ETag', etag);
@@ -298,11 +300,10 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την ανάκτηση των ανατεθημένων διπλωματικών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
-        // Μετατροπή των αποτελεσμάτων σε string πριν υπολογιστεί το ETag
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();  
         }
 
         res.setHeader('ETag', etag);
@@ -457,15 +458,18 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
                 CM2.name AS committee_member2_name,
                 CM2.surname AS committee_member2_surname,
                 CM2.email AS committee_member2_email,
-                G.professor_id AS grade_professor_id,
-                G.grade1,
-                G.grade2,
-                G.grade3,
-                G.grade4,
+
+                GROUP_CONCAT(G.professor_id) AS grade_professor_ids,
+                GROUP_CONCAT(G.grade1) AS grades1,
+                GROUP_CONCAT(G.grade2) AS grades2,
+                GROUP_CONCAT(G.grade3) AS grades3,
+                GROUP_CONCAT(G.grade4) AS grades4,
+
                 CASE 
                     WHEN COUNT(G.grade_id) = 3 AND SUM(G.finalized) = 3 THEN TRUE
                     ELSE FALSE
                 END AS all_grades_finalized
+
             FROM 
                 Theses T
             LEFT JOIN 
@@ -480,15 +484,16 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
                 Professors CM2 ON C.member2_id = CM2.id
             LEFT JOIN 
                 Grades G ON T.thesis_id = G.thesis_id
+
             WHERE 
                 T.status IN ('active', 'to-be-reviewed')
+
             GROUP BY  
                 T.thesis_id, T.title, T.summary, T.status, T.pdf_path, T.start_date, T.nimertis_link, 
                 S.id, S.name, S.surname, S.email, S.student_number, 
                 P.id, P.name, P.surname, P.email, 
                 C.member1_id, CM1.name, CM1.surname, CM1.email, 
-                C.member2_id, CM2.name, CM2.surname, CM2.email,
-                G.professor_id, G.grade1, G.grade2, G.grade3, G.grade4;
+                C.member2_id, CM2.name, CM2.surname, CM2.email;
 `;
 
     db.query(query, (err, results) => {
@@ -503,7 +508,7 @@ app.get('/api/thesesAdministrator', authenticateJWT, (req, res) => {
 
 //----------------- API to fetch Theses Data for both students and professors -----------------
 app.get('/api/theses', authenticateJWT, (req, res) => {
-    const userId = req.user.userId; // Get user Id and Role from the JWT
+    const userId = req.user.userId;
     const role = req.user.role;
 
     let query;
@@ -557,7 +562,7 @@ app.get('/api/theses', authenticateJWT, (req, res) => {
                 SELECT
                     Theses.*,
                     Theses.final_grade,
-                    COALESCE(DATE_FORMAT(Examinations.date, '%y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date, 
+                    COALESCE(DATE_FORMAT(Examinations.date, '%Y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date, 
                     COALESCE(Examinations.type_of_exam, 'Δεν έχει οριστεί') AS type_of_exam,
                     COALESCE(Examinations.location, 'Δεν έχει οριστεί') AS exam_location,
                     DATE_FORMAT(Theses.start_date, '%Y-%m-%d') AS start_date,
@@ -637,7 +642,7 @@ app.get('/api/logs_fetch', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();
         }
 
         res.setHeader('ETag', etag);
@@ -705,7 +710,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%d-%m-%Y')) AS gen_assembly_session_date                
+                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%Y-%m-%d')) AS gen_assembly_session_date                
                 FROM 
                     Theses T
                 JOIN 
@@ -767,7 +772,7 @@ app.get('/api/examReportDetails_fetch', authenticateJWT, (req, res) => {
                     GC2.grade2 AS committee_member2_grade2,
                     GC2.grade3 AS committee_member2_grade3,
                     GC2.grade4 AS committee_member2_grade4,
-                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%d-%m-%Y')) AS gen_assembly_session_date                
+                    CONCAT(L.gen_assembly_session, '/', DATE_FORMAT(L.date_of_change, '%Y-%m-%d')) AS gen_assembly_session_date                
                 FROM 
                     Students S
                 JOIN 
@@ -823,7 +828,7 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
 
     const query = `
         SELECT 
-        COALESCE(DATE_FORMAT(Examinations.date, '%d-%m-%Y'), 'Δεν έχει οριστεί') AS exam_date,
+        COALESCE(DATE_FORMAT(Examinations.date, '%Y-%m-%d'), 'Δεν έχει οριστεί') AS exam_date,
         Examinations.type_of_exam, 
         Examinations.location
         FROM Examinations 
@@ -849,7 +854,7 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();  
         }
 
         res.setHeader('ETag', etag);
@@ -1027,7 +1032,7 @@ app.get('/api/fetch_all_attachments', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  // 304 Not Modified
+            return res.status(304).end();  
         }
 
         res.setHeader('ETag', etag);
@@ -1037,7 +1042,7 @@ app.get('/api/fetch_all_attachments', authenticateJWT, (req, res) => {
 
 //----------------- API to fetch Student Data by Id -----------------
 app.get('/api/student', authenticateJWT, (req, res) => {
-    const userId = req.user.userId; // Get user ID from the JWT
+    const userId = req.user.userId;
 
     const query = `SELECT * FROM students WHERE id = ?`;
 
@@ -1052,12 +1057,10 @@ app.get('/api/student', authenticateJWT, (req, res) => {
         const student = results[0];
         const etag = crypto.createHash('sha1').update(JSON.stringify(student)).digest('hex');
 
-        // Έλεγχος αν το ETag του client ταιριάζει με το τρέχον
-        if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
-        }
 
-        // Ρύθμιση του ETag header και επιστροφή δεδομένων
+        if (req.headers['if-none-match'] === etag) {
+            return res.status(304).end(); 
+        }
         res.setHeader('ETag', etag);
         res.json(student);
     });
@@ -1092,12 +1095,9 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
 
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         return res.status(200).json({ success: true, students: results });
     });
@@ -1120,12 +1120,9 @@ app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
         }
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
     });
@@ -1178,12 +1175,9 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
         }
         const etag = crypto.createHash('sha1').update(JSON.stringify({userId, results})).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
     });
@@ -1325,7 +1319,7 @@ app.put('/api/theses/update', authenticateJWT, uploadPDFOnly.single('pdf'), (req
 
 //----------------- API for Invitations associated with a specific professor-----------------
 app.get('/api/invitations-for-professor', authenticateJWT, (req, res) => {
-    const professorId = req.user.userId; // Get professor ID from the JWT
+    const professorId = req.user.userId;
 
     if (!professorId) {
         return res.status(400).json({ success: false, message: 'Professor ID is missing.' });
@@ -1576,8 +1570,8 @@ app.get('/api/invitation-history', authenticateJWT, (req, res) => {
                 CONCAT(s.name, ' ', s.surname) AS student_name,
                 s.student_number AS student_number,
                 i.status AS response,
-                DATE(i.invitation_date) AS invitation_date,
-                DATE(i.response_date) AS response_date
+                DATE_FORMAT(i.invitation_date, '%Y-%m-%d') AS invitation_date,
+                DATE_FORMAT(i.response_date, '%Y-%m-%d') AS response_date
             FROM 
                 Invitations i
             LEFT JOIN 
@@ -1688,7 +1682,7 @@ app.post('/api/cancelled-thesis', authenticateJWT, (req, res) => {
             SELECT 
                 l.gen_assembly_session,
                 l.cancellation_reason,
-                DATE_FORMAT(l.date_of_change, '%Y-%m-%d') AS formatted_date_of_change
+                DATE_FORMAT(l.date_of_change, '%Y-%m-%d') AS date_of_change
             FROM Logs l
             WHERE l.thesis_id = ? AND l.new_state = 'cancelled'
             ORDER BY l.date_of_change DESC
@@ -2026,9 +2020,9 @@ app.get('/api/get-announcement-details/', (req, res) => {
             c.member2_id AS committee_member2_id,
             CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
             e.type_of_exam,
-            e.date as exam_date,
+            DATE_FORMAT(e.date, '%Y-%m-%d') as exam_date,
             e.location AS examination_location,
-            a.announcement_date as an_date
+            DATE_FORMAT(a.announcement_date, '%Y-%m-%d') as an_date
         FROM Theses t
         LEFT JOIN Announcements a ON t.thesis_id = a.thesis_id
         LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
@@ -2055,12 +2049,10 @@ app.get('/api/get-announcement-details/', (req, res) => {
 
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
 
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({
             success: true,
@@ -2083,9 +2075,9 @@ app.get('/api/get-all-announcements/', (req, res) => {
         c.member2_id AS committee_member2_id,
         CONCAT(c2.name, ' ', c2.surname) AS committee_member2_name,
         e.type_of_exam,
-        e.date AS exam_date,
+        DATE_FORMAT(e.date, '%Y-%m-%d') as exam_date,
         e.location AS examination_location,
-        a.announcement_date AS an_date
+        DATE_FORMAT(a.announcement_date, '%Y-%m-%d') as an_date
     FROM Theses t
     INNER JOIN Announcements a ON t.thesis_id = a.thesis_id
     LEFT JOIN Examinations e ON t.thesis_id = e.thesis_id
@@ -2111,12 +2103,9 @@ app.get('/api/get-all-announcements/', (req, res) => {
         }
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({
             success: true,
@@ -2151,7 +2140,7 @@ app.post('/api/enable-grading', authenticateJWT, (req, res) => {
 //-----------------API for checking if a thesis has grading enabled----
 app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     const { thesisId } = req.body;
-    const professorId = req.user.userId; // Από το JWT
+    const professorId = req.user.userId;
 
     if (!thesisId) {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
@@ -2397,12 +2386,9 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
         }
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades: results });
     });
@@ -2437,12 +2423,9 @@ app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
         const grades = results[0];
         const etag = crypto.createHash('sha1').update(JSON.stringify(grades)).digest('hex'); // Υπολογισμός ETag
 
-        // Έλεγχος ETag από τον client
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); // 304 Not Modified
+            return res.status(304).end(); 
         }
-
-        // Αποστολή δεδομένων με ETag header
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades });
     });
@@ -2526,7 +2509,7 @@ app.post('/api/theses/assign', authenticateJWT, (req, res) => {
     });
 });
 
-//----------------API for Unassigning a Thesis Theme -----------------
+//---------------- API for Unassigning a Thesis Theme -----------------
 app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     const thesisId = parseInt(req.body.thesisId, 10);
 
@@ -2615,10 +2598,10 @@ app.post('/api/theses/unassign', authenticateJWT, (req, res) => {
     });
 });
 
+//---------------- API for Loading Professor Statistics -----------------
 app.get('/api/stats/professors', authenticateJWT, (req, res) => {
     const professorId = req.user.userId;
 
-    // Query για τα στατιστικά
     const queryStats = `
         SELECT distinct 
             AVG(CASE WHEN c.member1_id = ? OR c.member2_id = ? THEN t.final_grade END) AS avg_committee_member_grade,
@@ -2633,7 +2616,6 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
         WHERE t.status= 'completed';
     `;
 
-    // Query για το όνομα και το επώνυμο του καθηγητή
     const queryName = `SELECT p.name, p.surname FROM Professors p WHERE p.id = ?`;
 
     db.query(queryStats, [
@@ -2646,14 +2628,12 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
 
-        // Ανάκτηση του ονόματος και του επωνύμου του καθηγητή
         db.query(queryName, [professorId], (err, nameResults) => {
             if (err) {
                 console.error('Σφάλμα κατά την ανάκτηση του ονόματος του καθηγητή:', err);
                 return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
             }
 
-            // Προσθήκη του ονόματος και του επωνύμου στα αποτελέσματα
             if (nameResults.length > 0) {
                 const professorName = nameResults[0];
                 statsResults[0].name = professorName.name;
@@ -2662,19 +2642,15 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
             
             const etag = crypto.createHash('sha1').update(JSON.stringify(statsResults)).digest('hex');
 
-            // Έλεγχος ETag από τον client
             if (req.headers['if-none-match'] === etag) {
-                return res.status(304).end(); // 304 Not Modified
+                return res.status(304).end(); 
             }
-
-            // Αποστολή δεδομένων με ETag header
             res.setHeader('ETag', etag);
 
             res.status(200).json({ success: true, results: statsResults });
         });
     });
 });
-
 
 
 //-------------- API to Edit Student contact data via Button --------------
