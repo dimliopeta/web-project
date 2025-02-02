@@ -255,9 +255,10 @@ function insertData(filePath = './provided_data/data.json') {
                     }
                     if (results.length === 0) {
                         const insertQuery = `
-                    INSERT INTO LOGS ( thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
-                    VALUES ( ?, ?, ?, ?, ?, ?);`;
+                    INSERT INTO LOGS ( id, thesis_id, date_of_change, old_state, new_state, gen_assembly_session, cancellation_reason)
+                    VALUES (?, ?, ?, ?, ?, ?, ?);`;
                         db.query(insertQuery, [
+                            log.id,
                             log.thesis_id,
                             log.date_of_change,
                             log.old_state,
