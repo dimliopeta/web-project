@@ -719,7 +719,7 @@ function addAssignedSection(thesis, container) {
         }
     });
     buttonsContainer.appendChild(showInvitationsButton);
-    if (thesis.role === "Επιβλέπων") {       
+    if (thesis.role === "Επιβλέπων") {
         const unassignThButton = createButton('unassign-thesis-button', 'Αναίρεση Ανάθεσης', ['btn', 'btn-danger', 'mt-2'], () => unassignThesis(thesis.thesis_id));
         buttonsContainer.appendChild(unassignThButton);
 
@@ -737,7 +737,7 @@ function addAssignedSection(thesis, container) {
         });
         container.appendChild(buttonsContainer);
         container.appendChild(formContainer);
-    }else {
+    } else {
         container.appendChild(buttonsContainer);
     }
 }
@@ -1304,19 +1304,21 @@ function loadNotes(thesisId) {
 //-------------- Function for Managing a To-be-reviewed Thesis -------------
 function addToBeReviewedSection(thesis, container) {
     const downloadSection = document.createElement('section');
-    const downloadButton = createButton('download-thesis-button', 'Λήψη Πρόχειρου Φοιτητή', ['btn', 'btn-primary', 'my-3'], () => {
-        const thesisId = thesis.thesis_id;
+    const thesisId = thesis.thesis_id;
+    fetch(`/api/fetch_all_attachments?thesis_id=${thesisId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const file = data.attachments.find(attachment => attachment.type === 'file');
+                const links = data.attachments.filter(attachment => attachment.type === 'link');
 
-        fetch(`/api/fetch_all_attachments?thesis_id=${thesisId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const file = data.attachments.find(attachment => attachment.type === 'file');
+
+                const downloadButton = createButton('download-thesis-button', 'Λήψη Πρόχειρου Φοιτητή', ['btn', 'btn-primary', 'my-3'], () => {
                     if (file) {
                         const downloadLink = document.createElement('a');
                         downloadLink.href = file.file_path.replace('./', '/');
@@ -1328,15 +1330,51 @@ function addToBeReviewedSection(thesis, container) {
                     } else {
                         alert('Δεν έχει αναρτηθεί πρόχειρο.');
                     }
-                } else {
-                    alert('Παρουσιάστηκε πρόβλημα στην ανεύρεση του αρχείου');
+                });
+                downloadSection.appendChild(downloadButton);
+
+
+                if (links.length > 0) {
+                    const linksListContainer = document.createElement('div');
+                    const linkHr = document.createElement('hr');
+                    linksListContainer.appendChild(linkHr);
+                    const heading = document.createElement('h5');
+                    heading.textContent = 'Αναρτηθέντες Σύνδεσμοι';
+                    heading.classList.add('text-center', 'text-muted');
+                    linksListContainer.appendChild(heading);
+
+                    const ul = document.createElement('ul');
+                    links.forEach(linkObj => {
+                        const li = document.createElement('li');
+                        const link = document.createElement('a');
+
+                        try {
+                            // If link_path is already a valid URL, this will work
+                            const url = new URL(linkObj.link_path);
+                            link.href = url.href;
+                        } catch (e) {
+                            // If link_path is relative, prepend 'https://'
+                            link.href = `https://${linkObj.link_path}`;
+                        }
+                        link.textContent = linkObj.link_path;
+                        link.target = '_blank'; // Open the link in a new tab
+                        link.rel = 'noopener noreferrer';
+
+                        li.appendChild(link);
+                        ul.appendChild(li);
+                    });
+                    linksListContainer.appendChild(ul);
+                    downloadSection.appendChild(linksListContainer);
+                    const Hr = document.createElement('hr');
+                    linksListContainer.appendChild(Hr);
+                    downloadSection.appendChild(Hr);
                 }
-            })
-            .catch(error => {
-                console.error('Download failed:', error);
-            });
-    });
-    downloadSection.appendChild(downloadButton);
+
+            }
+        })
+        .catch(error => {
+            console.error('Download failed:', error);
+        });
 
     container.appendChild(downloadSection);
 
@@ -1357,9 +1395,9 @@ function addToBeReviewedSection(thesis, container) {
 
 
     const gradeSection = document.createElement('section');
-    const gradeTitle = document.createElement('h4');
+    const gradeTitle = document.createElement('h5');
     gradeTitle.textContent = 'Καταχώρηση Βαθμού';
-    gradeTitle.classList.add('text-center');
+    gradeTitle.classList.add('text-center','text-muted');
     gradeSection.appendChild(gradeTitle);
 
     const gradeContent = document.createElement('div');
@@ -1390,13 +1428,11 @@ function announcementButtonController(thesisId, container) {
             }
 
             const { announced, examinationExists } = data.data;
-
+            const announcHeader = document.createElement('h5');
+            announcHeader.textContent = 'Διαχείριση Ανακοίνωσης';
+            announcHeader.classList.add('text-center','text-muted');
+            container.appendChild(announcHeader);
             if (!examinationExists) {
-                const unannouncedHeader = document.createElement('h4');
-                unannouncedHeader.textContent = 'Δημιουργία Ανακοίνωσης';
-                unannouncedHeader.classList.add('text-center');
-                container.appendChild(unannouncedHeader);
-
                 const unannouncedText = document.createElement('p');
                 unannouncedText.textContent =
                     'Δεν έχουν καταχωρηθεί οι λεπτομέρειες της εξέτασης από τον φοιτητή. Δεν μπορείτε να δημιουργήσετε ανακοίνωση!';
