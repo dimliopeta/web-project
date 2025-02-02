@@ -1217,7 +1217,6 @@ app.post('/api/invitation_create', authenticateJWT, (req, res) => {
                 return res.status(500).json({ success: false, message: 'Failed to retrieve thesis ID.' });
             }
             const thesis_id = thesisResults[0]?.thesis_id;
-            console.log('Invitation sent successfully:', results);
             res.json({ success: true, invitation: results, thesis_id: thesis_id });
         });
     });
