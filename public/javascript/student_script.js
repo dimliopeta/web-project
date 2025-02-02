@@ -259,7 +259,9 @@ function setupThesisManagement() {
                 fetchAndDisplayAttachments(thesis);
                 fetchAndDisplayNimertisLink(thesis);
                 fetchAndDisplayExaminations(thesis);
+                if(thesis.status === 'assigned'){
                 loadThesisInvitations(thesis.thesis_id);
+                }
             }
         })
 }
@@ -286,6 +288,7 @@ function loadSectionsBasedOnStatus() {
                 const configurationBody = document.getElementById("configurationBody");
                 const configurationFooter = document.getElementById("configurationFooter");
                 const professorsSection = document.getElementById("professorsSection");
+                const invitationCardSection = document.getElementById("invitationCardSection");
                 const gradesSection = document.getElementById("gradesSection");
                 const statusChangesSection = document.getElementById("statusChangesSection");
                 const completedFilesSection = document.getElementById("completedFilesSection");
@@ -306,6 +309,7 @@ function loadSectionsBasedOnStatus() {
                 completedFilesSection.style.display = "block";
                 managementSection.style.display = "block";
                 datesSection.style.display = "block";
+                
 
 
                 // Display thesis start date, duration, end date based on status
@@ -346,6 +350,7 @@ function loadSectionsBasedOnStatus() {
                         configurationBody.style.display = "block";
                         configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
+                        invitationCardSection.style.display = "none";
                         gradesSection.style.display = "none";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "none";
@@ -357,6 +362,7 @@ function loadSectionsBasedOnStatus() {
                         configurationBody.style.display = "block";
                         configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
+                        invitationCardSection.style.display = "none";
                         gradesSection.style.display = "none";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "none";
@@ -373,6 +379,7 @@ function loadSectionsBasedOnStatus() {
                         configurationBody.style.display = "block";
                         configurationFooter.style.display = "block";
                         professorsSection.style.display = "block";
+                        invitationCardSection.style.display = "none";
                         gradesSection.style.display = "block";
                         statusChangesSection.style.display = "block";
                         completedFilesSection.style.display = "block";
@@ -384,6 +391,7 @@ function loadSectionsBasedOnStatus() {
                         configurationBody.style.display = "none";
                         configurationFooter.style.display = "none";
                         professorsSection.style.display = "block";
+                        invitationCardSection.style.display = "none";
                         gradesSection.style.display = "none";
                         statusChangesSection.style.display = "none";
                         completedFilesSection.style.display = "none";
