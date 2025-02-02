@@ -271,7 +271,7 @@ app.get('/api/theses/unassigned', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  
+            return res.status(304).end();
         }
 
         res.setHeader('ETag', etag);
@@ -303,7 +303,7 @@ app.get('/api/theses/assigned', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  
+            return res.status(304).end();
         }
 
         res.setHeader('ETag', etag);
@@ -350,14 +350,40 @@ app.post('/api/thesis_complete', (req, res) => {
         SET status = 'completed' 
         WHERE thesis_id = ?
     `;
-
-    db.query(query, [thesis_id], (err, results) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).json({ success: false, message: 'Database error.' });
+    const logQuery = `INSERT INTO LOGS( thesis_id, date_of_change, old_state, new_state) 
+    VALUES (?, CURRENT_DATE() , 'active', 'completed');`;
+    
+    db.beginTransaction((transactionError) => {
+        if (transactionError) {
+            console.error('Error starting transaction:', transactionError);
+            return res.status(500).json({ error: 'Internal server error' });
         }
+        db.query(query, [thesis_id], (err, results) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ success: false, message: 'Database error.' });
+            }
 
-        res.json({ success: true, message: 'Thesis set as completed successfully.' });
+            db.query(logQuery, [thesis_id], (logError) => {
+                if (logError) {
+                    console.error('Error updating thesis status:', logError);
+                    return db.rollback(() => {
+                        res.status(500).json({ error: 'Internal server error' });
+                    });
+                }
+
+                db.commit((commitError) => {
+                    if (commitError) {
+                        console.error('Error committing transaction:', commitError);
+                        return db.rollback(() => {
+                            res.status(500).json({ error: 'Internal server error' });
+                        });
+                    }
+
+                    res.json({ success: true, message: 'Thesis set as completed successfully.' });
+                });
+            });
+        });
     });
 });
 //----------------- API to Upload JSON Data for Administrators -----------------
@@ -854,7 +880,7 @@ app.get('/api/fetch_examinations/:thesis_id', (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  
+            return res.status(304).end();
         }
 
         res.setHeader('ETag', etag);
@@ -1032,7 +1058,7 @@ app.get('/api/fetch_all_attachments', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end();  
+            return res.status(304).end();
         }
 
         res.setHeader('ETag', etag);
@@ -1059,7 +1085,7 @@ app.get('/api/student', authenticateJWT, (req, res) => {
 
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); 
+            return res.status(304).end();
         }
         res.setHeader('ETag', etag);
         res.json(student);
@@ -1096,7 +1122,7 @@ app.get('/api/student-search', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); 
+            return res.status(304).end();
         }
         res.setHeader('ETag', etag);
         return res.status(200).json({ success: true, students: results });
@@ -1121,7 +1147,7 @@ app.get('/api/professor_search_all', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); 
+            return res.status(304).end();
         }
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
@@ -1173,10 +1199,10 @@ app.get('/api/professor-search', authenticateJWT, (req, res) => {
             console.error('Σφάλμα κατά την αναζήτηση καθηγητών:', err);
             return res.status(500).json({ success: false, message: 'Σφάλμα στον server.' });
         }
-        const etag = crypto.createHash('sha1').update(JSON.stringify({userId, results})).digest('hex');
+        const etag = crypto.createHash('sha1').update(JSON.stringify({ userId, results })).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); 
+            return res.status(304).end();
         }
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, professors: results });
@@ -2050,7 +2076,7 @@ app.get('/api/get-announcement-details/', (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); 
+            return res.status(304).end();
         }
 
         res.setHeader('ETag', etag);
@@ -2104,7 +2130,7 @@ app.get('/api/get-all-announcements/', (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); 
+            return res.status(304).end();
         }
         res.setHeader('ETag', etag);
         res.status(200).json({
@@ -2180,9 +2206,9 @@ app.post(`/api/thesis-status/`, authenticateJWT, (req, res) => {
     });
 });
 
-app.get('api/thesis/check-completed', authenticateJWT, (req,res) =>{
+app.get('api/thesis/check-completed', authenticateJWT, (req, res) => {
     const studentId = req.user.userId;
-    if(!studentId){
+    if (!studentId) {
         return res.status(400).json({ success: false, message: 'Όλα τα πεδία είναι υποχρεωτικά.' });
     }
 
@@ -2387,7 +2413,7 @@ app.get('/api/get-grades-list/:thesisId', authenticateJWT, (req, res) => {
         const etag = crypto.createHash('sha1').update(JSON.stringify(results)).digest('hex');
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); 
+            return res.status(304).end();
         }
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades: results });
@@ -2419,12 +2445,12 @@ app.get('/api/get-professor-grades/:thesisId', authenticateJWT, (req, res) => {
         if (results.length === 0) {
             return res.status(200).json({ success: true, grades: null });
         }
-        
+
         const grades = results[0];
         const etag = crypto.createHash('sha1').update(JSON.stringify(grades)).digest('hex'); // Υπολογισμός ETag
 
         if (req.headers['if-none-match'] === etag) {
-            return res.status(304).end(); 
+            return res.status(304).end();
         }
         res.setHeader('ETag', etag);
         res.status(200).json({ success: true, grades });
@@ -2639,11 +2665,11 @@ app.get('/api/stats/professors', authenticateJWT, (req, res) => {
                 statsResults[0].name = professorName.name;
                 statsResults[0].surname = professorName.surname;
             }
-            
+
             const etag = crypto.createHash('sha1').update(JSON.stringify(statsResults)).digest('hex');
 
             if (req.headers['if-none-match'] === etag) {
-                return res.status(304).end(); 
+                return res.status(304).end();
             }
             res.setHeader('ETag', etag);
 
