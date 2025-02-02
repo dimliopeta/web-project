@@ -1672,7 +1672,7 @@ function renderGradeSection(thesisId, container) {
 
                 const submitGradeButton = createButton(
                     'submit-grade-button',
-                    grades.grade !== undefined ? 'Αλλαγή Βαθμού' : 'Καταχώρηση Βαθμού',
+                    grades.grade1 !== undefined ? 'Αλλαγή Βαθμού' : 'Προσωρινή Καταχώρηση',
                     ['btn', 'btn-warning'], () => handleSubmitGradeButtonClick(thesisId, container)
                 );
 
