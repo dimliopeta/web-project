@@ -699,7 +699,6 @@ function addCanceledSection(thesis, container) {
 
 //-------------- Function for Managing an Assigned Thesis -------------
 function addAssignedSection(thesis, container) {
-    if (thesis.role === "Επιβλέπων") {
         const buttonsContainer = document.createElement('div');
         buttonsContainer.classList.add('d-flex', 'gap-2', 'mt-3');
 
@@ -737,13 +736,7 @@ function addAssignedSection(thesis, container) {
         });
         container.appendChild(buttonsContainer);
         container.appendChild(formContainer);
-    }
-    else {
-        const committeeText = document.createElement('p');
-        committeeText.classList.add('text-center');
-        committeeText.innerText = "Δεν μπορείτε ακόμα να διαχειριστείτε αυτή την διπλωματική!";
-        container.append(committeeText);
-    }
+   
 }
 //-------------- Function to Display Invitations associated with a specific thesis in Theses List -------------
 function showThesisInvitations(thesis_id, container) {
