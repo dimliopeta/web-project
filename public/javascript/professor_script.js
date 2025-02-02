@@ -699,26 +699,27 @@ function addCanceledSection(thesis, container) {
 
 //-------------- Function for Managing an Assigned Thesis -------------
 function addAssignedSection(thesis, container) {
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.classList.add('d-flex', 'gap-2', 'mt-3');
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.classList.add('d-flex', 'gap-2', 'mt-3');
 
-        const showInvitationsButton = createButton('show-inv', 'Εμφάνιση Προσκλήσεων', ['btn', 'btn-info', 'mt-2'], () => {
-            const existingList = container.querySelector('.invitations-list');
+    const showInvitationsButton = createButton('show-inv', 'Εμφάνιση Προσκλήσεων', ['btn', 'btn-info', 'mt-2'], () => {
+        const existingList = container.querySelector('.invitations-list');
 
-            if (existingList) {
-                existingList.remove();
-                showInvitationsButton.textContent = 'Εμφάνιση Προσκλήσεων';
-                showInvitationsButton.classList.remove('btn-primary');
-                showInvitationsButton.classList.add('btn-info');
-            } else {
+        if (existingList) {
+            existingList.remove();
+            showInvitationsButton.textContent = 'Εμφάνιση Προσκλήσεων';
+            showInvitationsButton.classList.remove('btn-primary');
+            showInvitationsButton.classList.add('btn-info');
+        } else {
 
-                showThesisInvitations(thesis.thesis_id, container);
-                showInvitationsButton.textContent = 'Απόκρυψη Προσκλήσεων';
-                showInvitationsButton.classList.remove('btn-info');
-                showInvitationsButton.classList.add('btn-primary');
-            }
-        });
-        buttonsContainer.appendChild(showInvitationsButton);
+            showThesisInvitations(thesis.thesis_id, container);
+            showInvitationsButton.textContent = 'Απόκρυψη Προσκλήσεων';
+            showInvitationsButton.classList.remove('btn-info');
+            showInvitationsButton.classList.add('btn-primary');
+        }
+    });
+    buttonsContainer.appendChild(showInvitationsButton);
+    if (thesis.role === "Επιβλέπων") {       
         const unassignThButton = createButton('unassign-thesis-button', 'Αναίρεση Ανάθεσης', ['btn', 'btn-danger', 'mt-2'], () => unassignThesis(thesis.thesis_id));
         buttonsContainer.appendChild(unassignThButton);
 
@@ -736,7 +737,9 @@ function addAssignedSection(thesis, container) {
         });
         container.appendChild(buttonsContainer);
         container.appendChild(formContainer);
-   
+    }else {
+        container.appendChild(buttonsContainer);
+    }
 }
 //-------------- Function to Display Invitations associated with a specific thesis in Theses List -------------
 function showThesisInvitations(thesis_id, container) {
