@@ -1549,7 +1549,7 @@ app.post('/api/invitations/action', authenticateJWT, (req, res) => {
                                 res.status(500).json({ success: false, message: 'Transaction commit error.' });
                             });
                         }
-                        res.json({ success: true, message: 'Invitation rejected successfully.' });
+                        res.json({ success: true, message: 'Η πρόσκληση απορρίφθηκε.' });
                     });
                 });
             }
